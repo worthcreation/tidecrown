@@ -15,11 +15,21 @@ function onDock(x,y){return x>=DOCK.x0&&x<=DOCK.x1-10&&y>=DOCK.y0+6&&y<=DOCK.y1-
 function walkable(x,y){return onIsland(x,y)||onDock(x,y);}
 function clampLand(x,y){if(walkable(x,y))return[x,y];const a=Math.atan2(y,x);return polar(a,wetR(a)-18);}
 
+/* fishing spots roam: a spot fades in, lives a couple of minutes, fades out, and a new one bubbles up somewhere else. The glowing pool is a place and stays put. */
 const spots=[];
-function addSpot(a,type){const p=polar(a,iR(a)+60),ap=polar(a,iR(a)-24);spots.push({x:p[0],y:p[1],ax:ap[0],ay:ap[1],type,seed:spots.length*13+5});}
-addSpot(.85,'shallow');addSpot(2.35,'shallow');addSpot(-1.85,'deep');addSpot(-2.35,'deep');addSpot(Math.PI,'moon');
-spots.push({x:R0+112,y:74,ax:R0+112,ay:12,type:'shallow',seed:99});
+function spotHere(a,type){const p=polar(a,iR(a)+60),ap=polar(a,iR(a)-24);return {x:p[0],y:p[1],ax:ap[0],ay:ap[1],type,seed:Math.floor(Math.random()*900)+5,a,al:0,st:'in',life:70+Math.random()*70};}
+function spotAngle(type){for(let i=0;i<40;i++){let a;if(type==='deep')a=-2.7+Math.random()*1.2;else{a=Math.random()*6.2832;if(a>Math.PI)a-=6.2832;if(Math.abs(a)<.5||(a<-1.4&&a>-2.8)||Math.abs(Math.abs(a)-Math.PI)<.4)continue;}
+ if(spots.some(s=>Math.abs(angDiff(s.a,a))<.42))continue;return a;}return null;}
+function addSpot(a,type){spots.push(spotHere(a,type));}
+addSpot(.85,'shallow');addSpot(2.35,'shallow');addSpot(-1.85,'deep');addSpot(-2.35,'deep');
+spots.push({x:polar(Math.PI,iR(Math.PI)+60)[0],y:polar(Math.PI,iR(Math.PI)+60)[1],ax:polar(Math.PI,iR(Math.PI)-24)[0],ay:polar(Math.PI,iR(Math.PI)-24)[1],type:'moon',seed:57,a:Math.PI,al:1,st:'on',life:1e9});
+spots.push(spotHere(.42,'shallow'));
 const MOON=spots.find(s=>s.type==='moon');
+function spotsUpdate(dt){for(const sp of spots){if(sp.type==='moon')continue;
+ if(sp.st==='in'){sp.al=Math.min(1,sp.al+dt/2.5);if(sp.al>=1)sp.st='on';}
+ else if(sp.st==='on'){const busy=P.task&&P.task.sp===sp;if(!busy)sp.life-=dt;if(sp.life<=0&&!busy)sp.st='out';}
+ else{sp.al=Math.max(0,sp.al-dt/2.5);}}
+ for(let i=spots.length-1;i>=0;i--){const sp=spots[i];if(sp.st==='out'&&sp.al<=0){spots.splice(i,1);const a=spotAngle(sp.type);if(a!=null)spots.push(spotHere(a,sp.type));}}}
 const REQ={shallow:1,deep:10,moon:20};
 
 const G={x:R0+170,y:-2,talk:false};

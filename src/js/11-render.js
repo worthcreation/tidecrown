@@ -69,7 +69,7 @@ function drawChar(a,eq,x,y,f,mv,fishing){
  if(eq.hand==='gloves')blob(x+f*(rx-1),by+3,4.5,4,142,'#4f9a5a',2);
  else if(fishing)ln([[x-f*1,by-1],[x+f*10,by+1]],143,3,INK,.3);
  if(eq.trinket)dot(x-f*(rx*.4),by+ry*.5,2.4,'#ffcf3a');}
-function drawSpot(sp){let a=1;if(sp.type==='moon'){a=Math.min(1,(dark-.1)/.25);if(a<=.02)return;}ctx.save();ctx.globalAlpha=a;
+function drawSpot(sp){let a=sp.al;if(sp.type==='moon'){a=Math.min(1,(dark-.1)/.25);}if(a<=.02)return;ctx.save();ctx.globalAlpha=a;
  if(sp.type==='deep')sketch(ell(sp.x,sp.y,36,17,14),true,sp.seed,3,'#2f8ea2',null);
  if(sp.type==='moon'){const g=ctx.createRadialGradient(sp.x,sp.y,4,sp.x,sp.y,70);g.addColorStop(0,'rgba(225,238,255,.85)');g.addColorStop(1,'rgba(225,238,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(sp.x,sp.y,70,0,6.3);ctx.fill();
   const t=now*.7;dot(sp.x+Math.cos(t)*18,sp.y+Math.sin(t)*8,4,'rgba(255,255,255,.8)');}

@@ -1,9 +1,9 @@
 /* ---------- interactions ---------- */
 function routeTo(x,y,then){P.task=null;const path=[];const pd=onDock(P.x,P.y)&&!onIsland(P.x,P.y),td=onDock(x,y)&&!onIsland(x,y);
  if(pd!==td)path.push([R0-25,0]);path.push([x,y]);P.path=path;P.then=then||null;P.pathT=0;mark={x,y,t:0};}
-function goFish(sp){const L=lv('fishing');if(L<REQ[sp.type]){think(sp.type==='deep'?'This water is too wild for me yet. (Fishing '+REQ.deep+')':'The pale fish ignore my line. (Fishing '+REQ.moon+')');return;}
+function goFish(sp){if(sp.st==='out'){think('The water went still.');return;}const L=lv('fishing');if(L<REQ[sp.type]){think(sp.type==='deep'?'This water is too wild for me yet. (Fishing '+REQ.deep+')':'The pale fish ignore my line. (Fishing '+REQ.moon+')');return;}
  if(S.inv.length>=PACK){think('My satchel is stuffed. Gubbins on the dock might want these.');return;}
- routeTo(sp.ax,sp.ay,()=>startFish(sp));}
+ routeTo(sp.ax,sp.ay,()=>{if(sp.st==='out'||sp.al<=0){think('The water went still. Look for more bubbles.');return;}startFish(sp);});}
 function cast(T){T.phase='cast';T.t=0;T.baited=false;if(S.bait>0){S.bait--;T.baited=true;}}
 function startFish(sp){if(S.inv.length>=PACK){think('No room left in my satchel.');return;}P.task={sp,phase:'cast',t:0};P.face=sp.x>P.x?1:-1;cast(P.task);if(S.hint===1)advanceHint(2);}
 function rollFish(sp){if(sp.type==='shallow'&&S.bottles<BOTTLES.length&&Math.random()<.05)return'bottle';const L=lv('fishing');
@@ -58,7 +58,7 @@ function saluteCrab(){discover('crab');CRAB.hop=.5;S.salutes=(S.salutes||0)+1;
 
 let objT=-1,objC=null;
 function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;
- spots.forEach(sp=>{if(sp.type==='moon'&&dark<.15)return;o.push({x:sp.x,y:sp.y,r:42,name:{shallow:'Bubbling water',deep:'Wild water',moon:'Glowing pool'}[sp.type],act:'Fish',onAct:()=>goFish(sp),
+ spots.forEach(sp=>{if(sp.type==='moon'&&dark<.15)return;if(sp.al<.4||sp.st==='out')return;o.push({x:sp.x,y:sp.y,r:42,name:{shallow:'Bubbling water',deep:'Wild water',moon:'Glowing pool'}[sp.type],act:'Fish',onAct:()=>goFish(sp),
   onExamine:()=>think({shallow:'Little fish, busy with little fish business.',deep:'Something heavy is thrashing down there.',moon:'Pale shapes circling slowly. Waiting for something.'}[sp.type])});});
  o.push({x:G.x,y:G.y-20,r:30,name:'Gubbins',key:'gubbins',act:'Talk',onAct:()=>routeTo(G.x-36,6,talkG),onExamine:()=>think('A bucket with opinions.')});
  o.push({x:SIGN.x,y:SIGN.y-30,r:30,name:'Sign',key:'sign',act:'Read',onAct:()=>{discover('sign');say('Sign','DRIFTWOOD KEY. Population: one bucket. Two now, probably.');},onExamine:()=>think('A crooked sign. Someone wrote on it with a burnt stick.')});

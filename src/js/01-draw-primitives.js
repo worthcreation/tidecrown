@@ -17,6 +17,7 @@ function ln(pts,seed,lw,col,amp){const o=[];for(let i=0;i<pts.length-1;i++){cons
 function rrPts(x,y,w,h,r){const p=[];const c=[[x+w-r,y+r,-Math.PI/2],[x+w-r,y+h-r,0],[x+r,y+h-r,Math.PI/2],[x+r,y+r,Math.PI]];for(const [cx,cy,a0] of c){for(let i=0;i<=2;i++){const a=a0+i/2*Math.PI/2;p.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r]);}}return p;}
 function dot(x,y,r,col){ctx.fillStyle=col||INK;ctx.beginPath();ctx.arc(x,y,r,0,6.3);ctx.fill();}
 function otext(t,x,y,size,fill,stroke){ctx.font=size+"px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=Math.max(3,size/5);ctx.strokeStyle=stroke||INK;ctx.strokeText(t,x,y);ctx.fillStyle=fill||'#fff';ctx.fillText(t,x,y);}
+function angDiff(a,b){let d=a-b;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return d;}
 function star(x,y,r,col){ctx.beginPath();for(let i=0;i<10;i++){const a=i/10*6.2832-Math.PI/2,rr=i%2?r*.45:r;ctx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr);}ctx.closePath();ctx.fillStyle=col;ctx.fill();}
 function wrap(t,maxW){const words=t.split(' ');const lines=[];let cur='';for(const w of words){const tst=cur?cur+' '+w:w;if(ctx.measureText(tst).width>maxW&&cur){lines.push(cur);cur=w;}else cur=tst;}if(cur)lines.push(cur);return lines;}
 

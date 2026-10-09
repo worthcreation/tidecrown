@@ -32,6 +32,6 @@ function update(dt){
  if(mark&&(mark.t+=dt)>.6)mark=null;
  if(cele&&(cele.t+=dt)>3.2)cele=null;
  const k=Math.min(1,dt*5),tx=C?C.fr.x:P.x,ty=C?C.fr.y-50:P.y;cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;camZ+=((C?cookZoom():(P.task&&P.task.chop?1.25:1))-camZ)*Math.min(1,dt*4);Z=ZB*camZ;
- if(C)cookUpdate(dt);tideUpdate(dt);updOrbs(dt);guideT-=dt;if(guideT<=0){guideT=1;hearthGuide();}buffT-=dt;if(buffT<=0){buffT=.5;buffUI();kindleTick();if(S.ground&&S.ground.length){const T=Date.now(),n0=S.ground.length;S.ground=S.ground.filter(g=>g.exp>T);if(S.ground.length!==n0)save();}(S.fires||[]).slice().forEach(fr=>{if(!fireLit(fr)&&!(C&&C.fr===fr))burnOut(fr);});}
+ if(C)cookUpdate(dt);tideUpdate(dt);spotsUpdate(dt);updOrbs(dt);guideT-=dt;if(guideT<=0){guideT=1;hearthGuide();}buffT-=dt;if(buffT<=0){buffT=.5;buffUI();kindleTick();if(S.ground&&S.ground.length){const T=Date.now(),n0=S.ground.length;S.ground=S.ground.filter(g=>g.exp>T);if(S.ground.length!==n0)save();}(S.fires||[]).slice().forEach(fr=>{if(!fireLit(fr)&&!(C&&C.fr===fr))burnOut(fr);});}
 }
 
