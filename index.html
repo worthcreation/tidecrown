@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#3fa7b8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Tidecrown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2a2140;--paper:#fffaf0;--paper2:#f4e9cf;--sea:#3fa7b8;--coral:#ff6b6b;--sun:#ffcf3a;--muted:#6b5f86;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#f3ead8;--paper2:#e4d6b8;}}
+:root[data-theme="dark"]{--paper:#f3ead8;--paper2:#e4d6b8;}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--sea);overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+body{font-family:'Patrick Hand','Comic Sans MS','Chalkboard SE',cursive;color:var(--ink)}
+#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:block}
+button{font:inherit;color:inherit;cursor:pointer}
+.sk{background:var(--paper);border:3px solid var(--ink);border-radius:18px 7px 20px 9px/9px 20px 7px 18px;box-shadow:3px 4px 0 var(--ink)}
+#hint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);transform:translateX(-50%);font-size:22px;line-height:1.2;text-align:center;width:min(86vw,420px);color:#fff;
+  text-shadow:0 2px 0 var(--ink),2px 0 0 var(--ink),-2px 0 0 var(--ink),0 -2px 0 var(--ink),2px 2px 0 var(--ink),-2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px -2px 0 var(--ink);
+  pointer-events:none;opacity:0;transition:opacity .6s}
+#hint.on{opacity:1}
+#toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 62px);left:50%;transform:translate(-50%,-14px);opacity:0;visibility:hidden;padding:5px 16px;font-size:18px;transition:transform .45s cubic-bezier(.3,1.5,.5,1),opacity .3s,visibility .3s;pointer-events:none;white-space:nowrap;z-index:9}
+#toast.on{transform:translate(-50%,0);opacity:1;visibility:visible}
+#bag{position:fixed;right:calc(env(safe-area-inset-right,0px) + 14px);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:56px;height:56px;padding:0;border:none;background:none;opacity:.88;z-index:4}
+#bag svg{width:100%;height:100%;overflow:visible}
+#bag.pulse{animation:pulse .9s ease-in-out 4}
+@keyframes pulse{50%{transform:scale(1.2) rotate(-7deg)}}
+#ctx{position:fixed;display:none;flex-direction:column;padding:4px 4px 6px;min-width:150px;z-index:6}
+#ctx .t{font-size:15px;color:var(--muted);padding:4px 12px 0}
+#ctx button,.opt{font-size:21px;background:none;border:none;text-align:left;padding:7px 12px;border-radius:10px 5px 11px 6px}
+#ctx button:active,.opt:active,.opt:hover,#ctx button:hover{background:var(--paper2)}
+#dlg{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);max-width:520px;margin:0 auto;padding:10px 14px 8px;display:none;z-index:6}
+#dlg .who{font-size:17px;color:var(--muted)}
+#dlg .say{font-size:21px;line-height:1.3;margin:2px 0 4px}
+#dlg .opts{display:flex;flex-direction:column}
+.opt::before{content:'\203A  ';color:var(--coral)}
+#scrim{position:fixed;inset:0;background:rgba(42,33,64,.22);display:none;z-index:7}
+#bank{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 10px);bottom:calc(env(safe-area-inset-bottom,0px) + 10px);max-width:460px;margin:0 auto;z-index:8;display:none;flex-direction:column;padding:8px 12px 12px;overflow:hidden}
+#bank.on{display:flex}
+.bhead{display:flex;align-items:center;gap:8px;flex:none}
+.bhead b{font-weight:400;font-size:22px;flex:1}
+.bmode{display:flex;border:2px solid var(--ink);border-radius:11px 5px 10px 6px;overflow:hidden}
+.bmode button{font-size:16px;background:none;border:none;padding:2px 10px}
+.bmode button.on{background:var(--sun)}
+.bsub{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px;color:var(--muted);font-size:16px;flex:none}
+.bsub button{font-size:16px;background:var(--paper2);border:2px solid var(--ink);border-radius:11px 5px 10px 6px;padding:2px 10px;color:var(--ink)}
+.bgrid{display:grid;grid-template-columns:repeat(6,var(--bs,48px));gap:6px;justify-content:center;flex:none}
+.bgrid .slot{width:var(--bs,48px);height:var(--bs,48px);aspect-ratio:auto;position:relative}
+.bgrid .slot img{width:82%;pointer-events:none}
+.bgrid .cnt{position:absolute;bottom:1px;right:4px;font-style:normal;font-size:13px;line-height:1;text-shadow:0 0 2px #fffaf0,0 0 2px #fffaf0}
+.bnote{text-align:center;color:var(--muted);font-size:15px;margin-top:6px;min-height:18px;flex:none}
+#panel{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);bottom:calc(env(safe-area-inset-bottom,0px) + 10px);right:10px;width:min(360px,calc(100vw - 20px));transform:translateX(118%);transition:transform .35s cubic-bezier(.3,1.2,.5,1);z-index:8;display:flex;flex-direction:column;overflow:hidden}
+#panel.on{transform:none}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;align-items:center}
+.tab{flex:1;font-size:21px;background:none;border:none;color:var(--muted);padding:6px 0 4px;border-bottom:3px solid transparent;border-radius:0}
+.tab.on{color:var(--ink);border-bottom-color:var(--coral)}
+.x{background:none;border:none;font-size:26px;width:40px;line-height:1}
+#pbody{flex:1;overflow-y:auto;padding:12px 14px 18px;font-size:19px}
+.skill{display:flex;gap:12px;align-items:center;padding:6px 0 12px}
+.skill img{width:52px;height:52px}
+.skill .m{flex:1}
+.skill .top{display:flex;justify-content:space-between;font-size:21px}
+.bar{height:15px;border:2.5px solid var(--ink);border-radius:9px 4px 10px 5px;overflow:hidden;background:var(--paper2);margin:3px 0}
+.bar i{display:block;height:100%;background:var(--sea)}
+.skill small{font-size:16px;color:var(--muted)}
+.locked{opacity:.55}
+.locked .q{width:52px;height:52px;display:grid;place-items:center;font-size:30px;border:2.5px dashed var(--ink);border-radius:50% 45% 52% 48%}
+.purse{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.purse img{width:30px;height:30px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.slot{aspect-ratio:1;border:2.5px dashed rgba(42,33,64,.3);border-radius:13px 6px 12px 7px;display:grid;place-items:center;background:none;padding:0}
+.slot.f{border-style:solid;border-color:var(--ink);background:var(--paper2)}
+.slot.sel{background:var(--sun)}
+.slot img{width:84%;pointer-events:none}
+.info{margin-top:12px;min-height:90px}
+.info b{font-size:21px}
+.info p{margin:2px 0 6px;color:var(--muted);line-height:1.25}
+.ent{padding:8px 0;border-bottom:2px dashed rgba(42,33,64,.18)}
+.ent b{font-size:20px}
+.ent p{margin:2px 0 0;line-height:1.3;color:#4a3f63}
+.muted{color:var(--muted)}
+#cc{position:fixed;inset:0;z-index:20;display:none;background:linear-gradient(#bfe6ee,#3fa7b8);padding:calc(env(safe-area-inset-top,0px) + 8px) 8px calc(env(safe-area-inset-bottom,0px) + 8px);overflow:auto}
+#cc.on{display:flex;align-items:center;justify-content:center}
+#cc .card{width:100%;max-width:460px;display:flex;flex-direction:column;gap:7px;padding:10px 11px 12px}
+#cc h1{font-size:28px;font-weight:400;margin:0;text-align:center;line-height:1}
+.cctop{display:flex;gap:10px;align-items:center}
+#pv{position:static;inset:auto;width:112px;height:124px;flex:none;touch-action:auto}
+.ccid{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+.ccid .sub{color:var(--muted);font-size:16px;line-height:1.15}
+.namerow{display:flex;gap:6px;align-items:center}
+.namerow input{flex:1;font:inherit;font-size:21px;color:var(--ink);background:var(--paper2);border:2.5px solid var(--ink);border-radius:12px 5px 11px 6px;padding:3px 8px;min-width:0;height:40px}
+.dice{font-size:22px;min-width:42px;height:40px;background:var(--sun);border:2.5px solid var(--ink);border-radius:12px 6px 13px 7px;padding:0 10px}
+#ccrand{font-size:18px;height:36px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px}
+.pk{display:flex;align-items:center;border:2.5px solid var(--ink);border-radius:14px 6px 13px 7px;background:var(--paper2);height:44px;min-width:0}
+.pk button{width:30px;height:100%;background:none;border:none;font-size:26px;line-height:1;flex:none;padding:0}
+.pk button:active{background:var(--sun)}
+.pk .val{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;line-height:1.05}
+.pk .val small{font-size:13px;color:var(--muted)}
+.pk .val span{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:flex;align-items:center;gap:4px}
+.pk .val.lock span{color:var(--muted)}
+.sw{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);flex:none;display:inline-block}
+.lockhint{min-height:19px;text-align:center;color:var(--muted);font-size:16px;line-height:1.15}
+#ccgo{align-self:center;font-size:22px;padding:5px 24px;background:var(--coral);color:#fff}
+#ccgo:disabled{opacity:.45}
+.origins{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.org{text-align:left;padding:8px 10px;font-size:15px;line-height:1.2;display:flex;flex-direction:column;gap:4px}
+.org b{font-size:19px;font-weight:400;line-height:1.05}
+.org .keep{color:var(--muted)}
+.org.on{background:var(--sun)}
+.odetail{min-height:38px;text-align:center;font-size:16px;color:#4a3f63;line-height:1.2}
+#cc .back{background:none;border:none;color:var(--muted);font-size:17px;text-decoration:underline;align-self:center;padding:0}
+@media (max-height:600px){#pv{width:92px;height:100px}#cc h1{font-size:24px}.ccid .sub{display:none}.pk{height:40px}}
+.gear{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.gear .slot{position:relative}
+.gear .slot span{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:14px;color:var(--muted)}
+.gear+.purse{margin-top:22px}
+#pbody{overflow:hidden;display:flex;flex-direction:column;padding:10px 14px 12px}
+#pbody .grid{grid-template-columns:repeat(4,var(--s,64px));justify-content:center;gap:8px;flex:none}
+#pbody .grid+.grid{margin-top:14px}
+#pbody .slot{width:var(--s,64px);height:var(--s,64px);aspect-ratio:auto;position:relative}
+.slot .tag{position:absolute;top:3px;left:6px;font-size:12px;color:var(--muted);line-height:1}
+.gearE{border-style:dotted!important;border-color:rgba(42,33,64,.5)!important;background:rgba(255,207,58,.1)}
+#pbody .purse{height:34px;margin:0 0 6px;font-size:19px;flex-wrap:nowrap;gap:5px;flex:none}
+#pbody .purse img{width:26px;height:26px}
+#pbody .info{flex:1 1 auto;min-height:126px;margin-top:10px;overflow:hidden;padding-bottom:4px}
+#pbody .info b{font-size:20px}
+#pbody .slot .cnt{position:absolute;bottom:1px;right:5px;font-style:normal;font-size:15px;line-height:1;color:var(--ink);text-shadow:0 0 2px #fffaf0,0 0 2px #fffaf0}
+#pbody .info p{margin:0 0 8px;font-size:17px;line-height:1.3;padding-bottom:1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts button{font-size:17px;padding:3px 11px;background:var(--paper2);border:2px solid var(--ink);border-radius:12px 5px 11px 6px}
+.acts button:active{background:var(--sun)}
+.stats{display:flex;justify-content:space-between;color:var(--muted);font-size:17px;padding:2px 0 12px;border-bottom:2px dashed rgba(42,33,64,.18);margin-bottom:12px}
+.lockt{margin:0}
+.lockrow{display:flex;justify-content:space-between;gap:8px;margin:8px 0 10px}
+.lk{flex:1;aspect-ratio:1;max-width:56px;font-size:26px;background:none;border:2.5px dashed var(--ink);border-radius:50% 45% 52% 48%;color:var(--muted);padding:0}
+.lk.sel{background:var(--sun);color:var(--ink);border-style:solid}
+.clue{min-height:46px;text-align:center;font-size:18px;color:#4a3f63;line-height:1.2}
+.jhead{margin:0 0 2px;flex:none}
+.jlist{flex:1;min-height:0;overflow:hidden}
+.pager{display:flex;align-items:center;justify-content:space-between;padding-top:8px;flex:none}
+.pager button{width:46px;height:40px;font-size:26px;line-height:1;background:none;border:2.5px solid var(--ink);border-radius:50% 45% 52% 48%;padding:0}
+.pager button:disabled{opacity:.25}
+.pager span{color:var(--muted);font-size:17px}
+#dlg .say{font-size:20px;line-height:1.25}
+#dlg .opt{padding:5px 10px;font-size:19px}
+#cookbar{position:fixed;left:calc(env(safe-area-inset-left,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:none;justify-content:space-between;align-items:flex-end;z-index:5;pointer-events:none}
+#cookbar>*{pointer-events:auto}
+.fuel{position:relative;width:76px;height:76px;padding:0;display:grid;place-items:center;border-radius:50% 46% 52% 48%!important;transition:transform .12s}
+.fuel img{width:46px;height:46px;pointer-events:none}
+.fuel b{position:absolute;top:-6px;right:-6px;min-width:26px;font-weight:400;font-size:17px;background:var(--sun);border:2.5px solid var(--ink);border-radius:12px;padding:0 5px;line-height:1.25}
+.fuel.empty{opacity:.45}
+.fuel.pop{transform:scale(.88)}
+.fuel .kd{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);font-size:13px;background:#fffaf0;border:2px solid var(--ink);border-radius:9px;padding:0 6px;white-space:nowrap;display:none}
+.fuel.auto .kd{display:block}
+.cmid{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 10px 6px;font-size:16px;white-space:nowrap;margin-bottom:4px}
+.cmid button{font-size:18px;background:var(--coral);color:#fff;border:2.5px solid var(--ink);border-radius:12px 6px 13px 7px;padding:1px 12px}
+#buffb{position:fixed;right:calc(env(safe-area-inset-right,0px) + 80px);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);width:44px;height:44px;border-radius:50%;padding:4px;border:none;display:none;z-index:4;background:conic-gradient(#ffcf3a calc(var(--p,100)*1%),rgba(42,33,64,.18) 0)}
+#buffb span{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:var(--paper);border:2.5px solid var(--ink)}
+#buffb img{width:28px;height:28px;pointer-events:none}
+#buffb.low{animation:pulse 1.2s ease-in-out infinite}
+.sellg{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:7px;margin:4px 0 8px}
+.st{position:relative;height:44px;background:var(--paper2);border:2px solid var(--ink);border-radius:11px 5px 10px 6px;padding:0;display:grid;place-items:center}
+.st.on{background:var(--sun)}
+.st img{width:82%;pointer-events:none}
+.st b{position:absolute;bottom:-6px;right:-5px;font-size:12px;font-weight:400;background:#fffaf0;border:1.5px solid var(--ink);border-radius:8px;padding:0 4px;line-height:1.2}
+.sellrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sellrow button{font-size:18px;padding:3px 12px;background:var(--paper2);border:2px solid var(--ink);border-radius:12px 5px 11px 6px}
+.sellrow .go{background:var(--coral);color:#fff}
+.sellrow .go:disabled{opacity:.45}
+.skb{width:100%;text-align:left;background:none;border:none;padding:6px 0 10px;border-bottom:2px dashed rgba(42,33,64,.15);border-radius:0}
+.skb:active{background:var(--paper2)}
+.skb .chev{font-size:28px;color:var(--muted);padding-left:4px}
+.back2{background:none;border:none;font-size:18px;color:var(--muted);padding:0 0 2px;text-align:left;flex:none}
+#pbody .skill{padding:4px 0 6px;flex:none}
+.sdesc{margin:0 0 6px;font-size:17px;line-height:1.22;color:#4a3f63}
+.sh{font-size:15px;color:var(--muted);margin:2px 0 4px}
+.disc{display:flex;gap:5px;margin-bottom:6px;flex:none}
+.dx{padding:0;position:relative;width:40px;height:40px;background:var(--paper2);border:2px solid var(--ink);border-radius:11px 5px 10px 6px;display:grid;place-items:center;flex:none}
+.dx img{width:90%;pointer-events:none}
+.dx.sel{background:var(--sun)}
+.sdesc.dd{font-size:16px;line-height:1.25;color:var(--ink)}
+.sdesc{height:64px;overflow:hidden}
+.dx img.sil{filter:brightness(0);opacity:.18}
+.dx i{position:absolute;bottom:-3px;right:-4px;font-style:normal;font-size:12px;background:var(--sun);border:1.5px solid var(--ink);border-radius:8px;padding:0 3px;line-height:1.2}
+.ach div{display:flex;align-items:center;gap:7px;font-size:17px;line-height:1.35;white-space:nowrap;overflow:hidden}
+.ach .ck{width:17px;height:17px;border:2px solid var(--ink);border-radius:5px 3px 6px 3px;flex:none;display:grid;place-items:center;font-size:13px;line-height:1}
+.ach .ok .ck{background:var(--sun)}
+.ach b{font-weight:400;flex:none}
+.ach div:not(.ok) b{color:var(--muted)}
+.ach small{color:var(--muted);font-size:15px;overflow:hidden;text-overflow:ellipsis}
+.next{margin-top:8px;padding:6px 10px;background:var(--paper2);border:2px dashed rgba(42,33,64,.35);border-radius:12px 5px 11px 6px;font-size:17px;line-height:1.25;flex:none}
+@media (prefers-reduced-motion:reduce){#panel,#toast{transition:none}#bag.pulse{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Tidecrown game world"></canvas>
+<div id="hint" role="status"></div>
+<div id="toast" class="sk" role="status"></div>
+<button id="bag" aria-label="Open satchel">
+  <svg viewBox="0 0 60 60"><path d="M14 22 C13 15,20 9,30 9 C40 9,47 15,46 22" fill="none" stroke="#2a2140" stroke-width="4" stroke-linecap="round"/>
+  <path d="M8 24 C7 21,9 20,12 20 L49 21 C52 21,53 23,52 26 L49 49 C48 53,45 54,41 54 L19 53 C14 53,12 51,11 47 Z" fill="#c98f56" stroke="#2a2140" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M10 27 C20 33,40 33,51 27 L50 35 C40 39,20 39,11 34 Z" fill="#a8703f" stroke="#2a2140" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="30" cy="35" r="4" fill="#ffcf3a" stroke="#2a2140" stroke-width="2.5"/></svg>
+</button>
+<div id="cookbar"><button id="fwood" class="fuel sk" aria-label="Add driftwood"><img alt=""><b>0</b><span class="kd">Kindle</span></button><div class="cmid sk"><span id="cookinfo"></span><button id="cookx">Step away</button></div><button id="fkelp" class="fuel sk" aria-label="Add dry kelp"><img alt=""><b>0</b></button></div>
+<button id="buffb" aria-label="Status effect"><span><img alt=""></span></button>
+<div id="ctx" class="sk"></div>
+<div id="dlg" class="sk"><div class="who"></div><div class="say"></div><div class="opts"></div></div>
+<div id="scrim"></div>
+<div id="bank" class="sk" aria-label="The Gull Post"><div class="bhead"><b>The Gull Post</b><div class="bmode"><button data-m="1">Take 1</button><button data-m="all" class="on">Take all</button></div><button class="x" id="bankx" aria-label="Close">&times;</button></div><div class="bgrid" id="bgrid"></div><div class="bsub"><span>Your pack</span><button id="bdep">Deposit all</button></div><div class="bgrid" id="bpack"></div><div class="bnote" id="bnote"></div></div>
+<div id="panel" class="sk" aria-label="Satchel">
+  <div class="tabs"><button class="tab" data-t="skills">Skills</button><button class="tab" data-t="pack">Pack</button><button class="tab" data-t="journal">Journal</button><button class="x" aria-label="Close">&times;</button></div>
+  <div id="pbody"></div>
+</div>
+<div id="cc"><div class="card sk"><h1 id="cct">Who washed up?</h1><div id="ccbody"></div><button id="ccgo" class="sk"></button></div></div>
+<script>
+(()=>{
+const INK='#2a2140';
+const cv=document.getElementById('c');
+let ctx=cv.getContext('2d');
+const dk=document.createElement('canvas'),dctx=dk.getContext('2d');
+let W=0,H=0,DPR=1,Z=1,ZB=1,camZ=1;
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);dk.width=cv.width;dk.height=cv.height;ZB=Math.max(.85,Math.min(1.4,Math.min(W,H)/430));Z=ZB*camZ;}
+addEventListener('resize',resize);resize();
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- hand-drawn primitives ---------- */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let now=0,boil=0;
+function sketch(pts,closed,seed,amp,fill,stroke,lw){
+  const r=mulberry(seed*9973+boil*7919+1);
+  const q=pts.map(p=>[p[0]+(r()-.5)*amp,p[1]+(r()-.5)*amp]);
+  const n=q.length;ctx.beginPath();
+  if(closed){let a=q[n-1],b=q[0];ctx.moveTo((a[0]+b[0])/2,(a[1]+b[1])/2);
+    for(let i=0;i<n;i++){a=q[i];b=q[(i+1)%n];ctx.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2);}ctx.closePath();}
+  else{ctx.moveTo(q[0][0],q[0][1]);for(let i=1;i<n-1;i++){const a=q[i],b=q[i+1];ctx.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2);}ctx.lineTo(q[n-1][0],q[n-1][1]);}
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw||3;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();}
+}
+function ell(x,y,rx,ry,n){const a=[];n=n||14;for(let i=0;i<n;i++){const t=i/n*6.2832;a.push([x+Math.cos(t)*rx,y+Math.sin(t)*ry]);}return a;}
+function blob(x,y,rx,ry,seed,fill,lw,amp){sketch(ell(x,y,rx,ry,Math.max(8,Math.round((rx+ry)/3))),true,seed,amp==null?Math.min(3,(rx+ry)*.08):amp,fill,lw===0?null:INK,lw==null?3:lw);}
+function ln(pts,seed,lw,col,amp){const o=[];for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1];o.push(a,[a[0]+(b[0]-a[0])/3,a[1]+(b[1]-a[1])/3],[a[0]+(b[0]-a[0])*2/3,a[1]+(b[1]-a[1])*2/3]);}o.push(pts[pts.length-1]);sketch(o,false,seed,amp==null?1.6:amp,null,col||INK,lw||3);}
+function rrPts(x,y,w,h,r){const p=[];const c=[[x+w-r,y+r,-Math.PI/2],[x+w-r,y+h-r,0],[x+r,y+h-r,Math.PI/2],[x+r,y+r,Math.PI]];for(const [cx,cy,a0] of c){for(let i=0;i<=2;i++){const a=a0+i/2*Math.PI/2;p.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r]);}}return p;}
+function dot(x,y,r,col){ctx.fillStyle=col||INK;ctx.beginPath();ctx.arc(x,y,r,0,6.3);ctx.fill();}
+function otext(t,x,y,size,fill,stroke){ctx.font=size+"px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=Math.max(3,size/5);ctx.strokeStyle=stroke||INK;ctx.strokeText(t,x,y);ctx.fillStyle=fill||'#fff';ctx.fillText(t,x,y);}
+function star(x,y,r,col){ctx.beginPath();for(let i=0;i<10;i++){const a=i/10*6.2832-Math.PI/2,rr=i%2?r*.45:r;ctx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr);}ctx.closePath();ctx.fillStyle=col;ctx.fill();}
+function wrap(t,maxW){const words=t.split(' ');const lines=[];let cur='';for(const w of words){const tst=cur?cur+' '+w:w;if(ctx.measureText(tst).width>maxW&&cur){lines.push(cur);cur=w;}else cur=tst;}if(cur)lines.push(cur);return lines;}
+
+/* ---------- world ---------- */
+function iR(a){return 520+60*Math.sin(3*a+1)+35*Math.sin(5*a+2.3)+20*Math.sin(9*a+.7);}
+function gR(a){return iR(a)*.8+14*Math.sin(7*a+1.3)-10;}
+function polar(a,r){return [Math.cos(a)*r,Math.sin(a)*r];}
+const NP=150,sandPts=[],grassPts=[],shallowPts=[],foamPts=[];
+for(let i=0;i<NP;i++){const a=i/NP*6.2832,c=Math.cos(a),s=Math.sin(a);sandPts.push([c*iR(a),s*iR(a)]);grassPts.push([c*gR(a),s*gR(a)]);shallowPts.push([c*(iR(a)+60),s*(iR(a)+60)]);foamPts.push([c*(iR(a)+9),s*(iR(a)+9)]);}
+const R0=iR(0);
+const DOCK={x0:R0-40,x1:R0+192,y0:-24,y1:24};
+function onIsland(x,y){return Math.hypot(x,y)<=iR(Math.atan2(y,x))-10;}
+function onDock(x,y){return x>=DOCK.x0&&x<=DOCK.x1-10&&y>=DOCK.y0+6&&y<=DOCK.y1-6;}
+function walkable(x,y){return onIsland(x,y)||onDock(x,y);}
+function clampLand(x,y){if(walkable(x,y))return[x,y];const a=Math.atan2(y,x);return polar(a,iR(a)-18);}
+
+const spots=[];
+function addSpot(a,type){const p=polar(a,iR(a)+60),ap=polar(a,iR(a)-24);spots.push({x:p[0],y:p[1],ax:ap[0],ay:ap[1],type,seed:spots.length*13+5});}
+addSpot(.85,'shallow');addSpot(2.35,'shallow');addSpot(-1.85,'deep');addSpot(-2.35,'deep');addSpot(Math.PI,'moon');
+spots.push({x:R0+112,y:74,ax:R0+112,ay:12,type:'shallow',seed:99});
+const MOON=spots.find(s=>s.type==='moon');
+const REQ={shallow:1,deep:10,moon:20};
+
+const G={x:R0+170,y:-2,talk:false};
+const SIGN={x:R0-95,y:-58};
+const FIRE={x:R0-220,y:80};
+const HEAD=(()=>{const a=Math.PI-.45,p=polar(a,iR(a)-70);return{x:p[0],y:p[1]};})();
+const POOL=(()=>{const p=polar(2.05,250);return{x:p[0],y:p[1]};})();
+const GULL={x:R0-150,y:-34};
+const crabHome=polar(1.6,iR(1.6)-60);
+const CRAB={x:crabHome[0],y:crabHome[1],tx:crabHome[0],ty:crabHome[1],wait:1,hop:0};
+const rocks=[];
+[-1.85,-2.35].forEach((a,j)=>{[-.09,-.03,.05,.1].forEach((d,i)=>{const p=polar(a+d,iR(a+d)+(i%2?2:-8));rocks.push({x:p[0],y:p[1],rx:14+((i*7+j*3)%9),ry:10+((i*5)%6),seed:200+j*10+i});});});
+
+const trees=[];
+{const r=mulberry(7);let tries=0;const avoid=[[GULL.x,GULL.y],[POOL.x,POOL.y],[R0-80,24],[FIRE.x,FIRE.y],[SIGN.x,SIGN.y],[HEAD.x,HEAD.y],[R0-25,0],crabHome,...spots.map(s=>[s.ax,s.ay])];
+ while(trees.length<18&&tries<800){tries++;const a=r()*6.2832,d=Math.sqrt(r())*.74;const x=Math.cos(a)*gR(a)*d,y=Math.sin(a)*gR(a)*d;
+  if(avoid.some(p=>Math.hypot(p[0]-x,p[1]-y)<120))continue;if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<90))continue;
+  trees.push({x,y,s:.85+r()*.45,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}}
+const tufts=[];{const r=mulberry(11);for(let i=0;i<80;i++){const a=r()*6.2832,d=Math.sqrt(r())*.93;tufts.push({x:Math.cos(a)*gR(a)*d,y:Math.sin(a)*gR(a)*d,f:r()<.18,seed:i+500,c:r()});}}
+const waves=[];{const r=mulberry(23);for(let i=0;i<140;i++){const a=r()*6.2832,d=iR(a)+110+r()*1100;waves.push({x:Math.cos(a)*d,y:Math.sin(a)*d,s:r()*6,seed:i+900});}}
+
+/* ---------- game data ---------- */
+const FISH={
+ minnow:{name:'Minnowbit',lvl:1,xp:12,win:900,w:10,col:'#a9dbe9',val:2,spot:'shallow',desc:'Small, silver, and mildly offended to be here.'},
+ perch:{name:'Pebble Perch',lvl:5,xp:22,win:760,w:6,col:'#d4ab6f',val:4,spot:'shallow',desc:'Speckled like a beach. Tastes a bit like one, too.'},
+ grump:{name:'Grumpfish',lvl:10,xp:40,win:660,w:8,col:'#8f84c0',val:7,spot:'deep',desc:'Has never once been happy about anything. Respect.'},
+ eel:{name:'Jellybean Eel',lvl:15,xp:60,win:560,w:5,col:'#ff8fb1',val:10,spot:'deep',desc:'Wiggly, striped, and faintly sugary.'},
+ koi:{name:'Moonkoi',lvl:20,xp:120,win:520,w:1,col:'#eef3ff',val:25,spot:'moon',desc:'Glows softly. Looks at you like it knows something you don\u2019t.'}
+};
+const BOTTLES=[
+ 'If you\u2019re reading this, the Lantern Sea took you too. Don\u2019t be scared. It only takes people it has plans for. \u2014 C.',
+ 'Day forty. The stone head on the Key sings at night. I think it\u2019s singing directions.',
+ 'The Far Light is real. I saw it once from the crow\u2019s nest, and it blinked back. Keep going. \u2014 C.'
+];
+const JOURNAL={
+ washed:['Washed ashore','Woke up on warm sand with salt in my ears and no idea how I got here. There\u2019s a dock. There\u2019s a bucket on the dock. The bucket is looking at me.'],
+ gubbins:['Gubbins','A talking bucket who lives on the dock. Eats fish whole, pays in shells, claims he was once a very important bucket.'],
+ gubbinslore:['The Far Light','Past the last lighthouse of the Lantern Sea, they say, there\u2019s a light where dreams come true. Gubbins says folk say lots of things.'],
+ sign:['The sign','Population: one bucket. Two now, probably. I think I\u2019m the two.'],
+ fire:['The campfire','Somebody keeps this fire lit. It smells like it wants to cook something.'],
+ tree:['Wobble trees','The trees here sway even when there\u2019s no wind. One of them sighed at me.'],
+ rocks:['North rocks','The water past the barnacled rocks churns like something big lives down there.'],
+ crab:['Sir Thimble','A crab in a thimble helmet. We salute each other now. It\u2019s our thing.'],
+ head:['Stone head','Half buried in the west sand. Eyes closed, like it\u2019s trying to remember a song.'],
+ headnight:['The humming','At night the stone head hums. Something about the west shore, and the moon.'],
+ wick:['Old Wick','The campfire is alive. Old Wick was the galley stove of the Grinning Gull for forty years, and floated here in a teapot. He is always hungry.'],
+ hearth:['The Hearth','Wick taught me the Hearth. A fire is a promise: keep it fed and it keeps you.'],
+ driftwood:['Driftwood','Bleached and bone dry. The beach coughs up more every so often. Burns steady.'],
+ kelp:['Dry kelp','Brittle seaweed from the rocky shores. Burns hot and wild, and the smoke smells like the deep.'],
+ perfectcook:['Golden both sides','Flip at golden, pull at golden. Eat one and my hands get sharper for a while.'],
+ smoky:['Smoky fish','Cooked over a kelp flare, fish come out smoky. The smell gets on my hands and the fish come running.'],
+ firstfire:['A fire of my own','I lit a fire with my own hands. Wick says a fire is a promise. Starve it and all it leaves you is ash.'],
+ ash:['Ash','What a starved fire leaves behind. Soft, grey, faintly warm. Old Wick gets suspiciously excited about it.'],
+ stache:['The Ash Mustache','Wick braided ten scoops of ash into a mustache, exactly like the one the Gull’s head cook wore. It is ridiculous. It is magnificent. Gubbins pays extra to anyone wearing it.'],
+ flint:['Flint','A sharp shard wedged between the north rocks. It wants to be a tool.'],
+ hatchet:['A hatchet','Flint, driftwood and kelp twine. Ugly, but it bites. The wobble trees went very quiet when I made it.'],
+ wobblelog:['Wobblewood','The wobble trees give up a log if you chop in time with their sway. Burns long and bright.'],
+ bonfire:['Bonfire','Wobblewood and driftwood stacked high. Burns twice as long and lights half the island.'],
+ charcoal:['Charcoal','A black lump left in the ash of a driftwood fire. Hotter than anything I’ve burned.'],
+ seasalt:['Sea salt','White crystals left where kelp burned down. Wick would have opinions.'],
+ gullbank:['Mortimer Gull','A seagull in a banker’s visor runs the Gull Post. Gulls steal everything, so naturally they’re the only ones trusted to keep it safe.'],
+ sunstone:['Sunstone','A stone left behind by a long, white-hot fire. Warm all the way through. It remembers being part of the sun.'],
+ pearl:['Ember pearl','A warm bead that formed in the heart of a wobblewood fire. It hums when I hold it.'],
+ kindleseen:['The runaway log','A piece of driftwood on the beach blinked at me, then ran off on tiny legs. Logs are not supposed to do that.'],
+ kindle:['Kindle','A wild little log who moved into my woodpile after three nights of firelight and ash. When a fire is about to die he leaps in. He runs on ash, the weirdo.'],
+ gull:['The Grinning Gull','Wick’s old ship. Her captain wrote letters and tossed them overboard, signed only with a C.'],
+ pool:['The still pool','A pond so calm it shows who you could be. Looking in lets me change how I look, and new looks surface as I discover things.'],
+ horizon:['A tower to the northeast','Through the spyglass I saw a crooked tower far to the northeast, with a light blinking on top. A heading, if I ever get a boat.'],
+ moonpool:['Moonlit pool','When it\u2019s dark, the water off the west shore glows. Something pale circles underneath.'],
+ fish_minnow:['Minnowbit',FISH.minnow.desc],fish_perch:['Pebble Perch',FISH.perch.desc],fish_grump:['Grumpfish',FISH.grump.desc],fish_eel:['Jellybean Eel',FISH.eel.desc],fish_koi:['Moonkoi',FISH.koi.desc],
+ bottle0:['A letter in a bottle',BOTTLES[0]],bottle1:['A second letter',BOTTLES[1]],bottle2:['A third letter',BOTTLES[2]]
+};
+const UNLOCK={5:'Pebble Perch are biting now',10:'The wild water by the north rocks is yours',15:'Something sweet wriggles in the deep',20:'The moon is tugging at your line'};
+const XP=[0,0];{let p=0;for(let l=1;l<99;l++){p+=Math.floor(l+300*Math.pow(2,l/7));XP[l+1]=Math.floor(p/12);}}
+function lvl(x){let L=1;while(L<99&&x>=XP[L+1])L++;return L;}
+const PACK=20;
+const STACK={shells:1e9,bait:50,ash:20,kelp:10,wood:5,wobble:3,seasalt:10,charcoal:5,pearl:5,sunstone:3};
+const KIN={human:{name:'Human',tones:['#ffe0bd','#e8b48a','#b9825a','#7a4f33'],toneN:['Sand','Honey','Cocoa','Umber'],blurb:'Ordinary, which out here is the strangest thing of all.'},
+ moss:{name:'Mossling',tones:['#c6e29a','#a8d07e','#8dbb6a','#6f9e58'],toneN:['Sprout','Fern','Moss','Bog'],feat:'leaf',blurb:'A leaf grows from your head. It turns toward the sun on its own.'},
+ ember:{name:'Ember-kin',tones:['#ffc48a','#ffa36b','#f7c56b','#e8805a'],toneN:['Cinder','Flare','Gold','Kiln'],feat:'glow',blurb:'A small flame burns on top. You glow farther in the dark.'},
+ drift:{name:'Driftling',tones:['#bfe6ef','#a9dbe9','#8cc7d6','#7fb3c9'],toneN:['Foam','Shallows','Lagoon','Fathom'],feat:'fins',blurb:'Fins for ears. The sea took you, and gave you back changed.'}};
+const SHAPES={bean:[14,15,'Bean'],round:[16,13,'Round'],tall:[12,18,'Lanky'],wee:[12,12,'Wee']};
+const HAIRS={none:'Bare',mop:'Mop',knot:'Topknot',swoop:'Swoop',braid:'Stone braid'};
+const EYES={dots:'Dots',wide:'Wide',sleepy:'Sleepy',sly:'Sly'};
+const MARKS={none:'None',freckles:'Freckles',scar:'Scar',star:'Star',moon:'Moonscale'};
+const COLS=['#ff6b6b','#4f8fd6','#7bc96f','#b07ad6','#ffb347','#3fb0a0','#e8e2d0'],COLN=['Coral','Harbor blue','Kelp','Plum','Marigold','Lagoon','Bone'];
+const HAIRC=['#3a2d5c','#7a4f2c','#c98f56','#ffe08a','#d9533f','#e8e2d0','#6fd6ff','#5fae6a'],HAIRCN=['Ink','Chestnut','Toffee','Straw','Rust','Silver','Sky','Seaweed'];
+const ACCS=['#ffcf3a','#ff8fb1','#fffaf0','#3a2d5c','#6fd6ff','#ff7a3d'],ACCN=['Sunflower','Bubblegum','Chalk','Night','Sky','Ember'];
+const LOCKS={kin:{drift:['fish_koi','Locked. The sea has to claim you first.']},hair:{braid:['headnight','Locked. Something old hums this style after dark.']},mark:{moon:['fish_koi','Locked. Hold something that glows from beneath.']}};
+const DEFAULT_LOOK={name:'Wanderer',kin:'human',tone:0,shape:'bean',hair:'none',hc:0,eyes:'dots',mark:'none',col:0,acc:0};
+const NAME1=['Pip','Bram','Wex','Tully','Odo','Fen','Juno','Quill','Sable','Rook','Nell','Marlo','Kit','Ione','Gus','Wren'];
+const NAME2=['Tidewhistle','Saltbrook','Quickhook','Lanternfoot','Mudd','Barnaby','Driftley','Gullsworth','Hollowell','Brinebottom','Tuck'];
+const EQUIP={
+ stache:{name:'Ash Mustache',slot:'head',desc:'Braided from ash by Old Wick. Ridiculous. Magnificent. Gubbins pays an extra shell for everything you sell him.',eff:{}},
+ cap:{name:'Barnacle Cap',slot:'head',desc:'Crusty, damp, weirdly lucky. Perfect catches come easier.',eff:{perfect:.12}},
+ thimble:{name:'Thimble Helm',slot:'head',desc:'A gift from Sir Thimble. The fish seem to respect it. Bites come sooner.',eff:{wait:.6}},
+ coat:{name:'Oilskin Coat',slot:'body',desc:'Keeps the spray off. Your glow reaches farther at night.',eff:{light:70}},
+ gloves:{name:'Kelp Gloves',slot:'hand',desc:'Slick outside, grippy inside. Bites hang on longer.',eff:{win:120}},
+ spyglass:{name:'Brass Spyglass',slot:'trinket',desc:'Hold your finger on the sea to look far out with it.',eff:{}},
+ salttin:{name:'Salt Tin',slot:'trinket',desc:'Every fish you trade is worth one more shell.',eff:{}},
+ whisper:{name:'Whisper Shell',slot:'trinket',desc:'The sea mutters right before a bite. Watch for the shimmer.',eff:{}},
+ blankmap:{name:'Blank Map',slot:'trinket',desc:'Fills itself in. Things you haven’t discovered yet glimmer.',eff:{}}
+};
+const ORIGINS={
+ lighthouse:{name:'The Lighthouse Kid',line:'Raised at the top of a lonely tower. You know how to look far.',keep:'spyglass'},
+ cook:{name:'The Galley Runaway',line:'Fled a ship’s kitchen with the one thing worth stealing.',keep:'salttin'},
+ tide:{name:'The Tide-Touched',line:'Fell overboard as a baby. The sea still talks to you.',keep:'whisper'},
+ nobody:{name:'The Nobody',line:'No name you remember, no past you can prove. Only a map that draws itself.',keep:'blankmap'}
+};
+function eff(k){let t=0;for(const sl in S.eq){const id=S.eq[sl];if(id&&EQUIP[id]&&EQUIP[id].eff[k])t+=EQUIP[id].eff[k];}if(S.buff&&S.buff.until>Date.now()){const B=BUFF[S.buff.q];if(B&&B[k])t+=B[k];}return t;}
+
+/* ---------- state ---------- */
+const SAVE='driftwood_key_v1';
+let S={x:R0-80,y:24,xp:0,inv:[],shells:0,bait:0,journal:{},day:.27,hint:0,bottles:0,catches:0,metG:false,char:null,origin:null,eq:{head:null,body:null,hand:null,trinket:null},owned:{},salutes:0,hx:0,hearth:0,sx:0,shipwright:0,wobble:0,wood:0,kelp:0,fires:[],st:{},buff:null,metWick:0};
+try{const raw=localStorage.getItem(SAVE);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
+if(!walkable(S.x,S.y)){S.x=R0-80;S.y=24;}
+function cnt(id){return S.inv.reduce((a,i)=>a+(i.id===id?(i.n||1):0),0);}
+function canAdd(id,n){n=n||1;const cap=STACK[id];if(!cap)return S.inv.length+n<=PACK;let room=(PACK-S.inv.length)*cap;for(const i of S.inv)if(i.id===id)room+=cap-(i.n||1);return room>=n;}
+function addItem(id,n){n=n||1;const cap=STACK[id];let added=0;
+ if(!cap){while(added<n&&S.inv.length<PACK){S.inv.push({id});added++;}return added;}
+ for(const i of S.inv){if(added>=n)break;if(i.id===id&&(i.n||1)<cap){const k=Math.min(cap-(i.n||1),n-added);i.n=(i.n||1)+k;added+=k;}}
+ while(added<n&&S.inv.length<PACK){const k=Math.min(cap,n-added);S.inv.push({id,n:k});added+=k;}return added;}
+function takeItem(id,n){n=n||1;if(cnt(id)<n)return false;for(let j=S.inv.length-1;j>=0&&n>0;j--){const i=S.inv[j];if(i.id!==id)continue;const k=Math.min(i.n||1,n);i.n=(i.n||1)-k;n-=k;if(i.n<=0)S.inv.splice(j,1);}return true;}
+{const tot={};S.inv=S.inv.filter(i=>{if(STACK[i.id]){tot[i.id]=(tot[i.id]||0)+(i.n||1);return false;}return true;});for(const id in tot)addItem(id,tot[id]);}
+for(const k of ['shells','bait','wood','kelp','ash','wobble']){const v=S[k];delete S[k];if(typeof v==='number'&&v>0)addItem(k,v);
+ Object.defineProperty(S,k,{get(){return cnt(k);},set(v){const c=cnt(k);if(v>c)addItem(k,v-c);else if(v<c)takeItem(k,c-v);},enumerable:false,configurable:true});}
+function save(){S.x=P.x;S.y=P.y;try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){}}
+const P={x:S.x,y:S.y,path:[],then:null,face:-1,moving:false,task:null,pathT:0};
+const cam={x:P.x,y:P.y};
+(S.fires||[]).forEach(f=>{if(!f.until)f.until=Date.now()+8*60000;if(!f.fuel)f.fuel={wood:3};});
+setInterval(save,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
+
+let flies=[],pops=[],bub=null,cele=null,fly=null,mark=null,intro=null,dark=0;
+
+/* ---------- UI helpers ---------- */
+const $=id=>document.getElementById(id);
+const hintEl=$('hint'),toastEl=$('toast'),ctxEl=$('ctx'),dlg=$('dlg'),panel=$('panel'),scrim=$('scrim'),pbody=$('pbody'),bag=$('bag');
+let hintTimer,toastTimer;
+function hint(t,ms){hintEl.textContent=t;hintEl.classList.add('on');clearTimeout(hintTimer);if(ms)hintTimer=setTimeout(()=>hintEl.classList.remove('on'),ms);}
+const HINTS={0:'Tap anywhere to walk.',1:'See the bubbles in the water? Tap them to fish.',2:'When the bobber dips, tap fast!',3:'Hold your finger on anything to see more options.',4:'Your satchel, bottom right, holds your catch and skills.'};
+function showHint(){if(HINTS[S.hint])hint(HINTS[S.hint],S.hint>=3?7000:0);else hintEl.classList.remove('on');}
+function advanceHint(to){if(S.hint<to){S.hint=to;showHint();if(to===4){bag.classList.remove('pulse');void bag.offsetWidth;bag.classList.add('pulse');}}}
+function toast(t){toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('on'),2600);}
+function discover(k){if(S.journal[k])return;S.journal[k]=Date.now();toast('Journal: '+JOURNAL[k][0]);save();if(k==='fish_koi'||k==='headnight')setTimeout(()=>toast('A new look waits at the still pool'),2900);}
+function think(t){bub={txt:t,t:0};}
+function pop(t,x,y,col,size){pops.push({txt:t,x,y,t:0,col:col||'#fff',size:size||20});}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+
+let ctxOpen=false;
+function showCtx(sx,sy,title,items){ctxEl.innerHTML='';const t=document.createElement('div');t.className='t';t.textContent=title;ctxEl.appendChild(t);
+ items.forEach(it=>{const b=document.createElement('button');b.textContent=it.l;b.onclick=e=>{e.stopPropagation();closeCtx();it.f();};ctxEl.appendChild(b);});
+ ctxEl.style.display='flex';const r=ctxEl.getBoundingClientRect();
+ ctxEl.style.left=Math.max(8,Math.min(W-r.width-8,sx-r.width/2))+'px';ctxEl.style.top=Math.max(8,Math.min(H-r.height-8,sy-r.height-18))+'px';ctxOpen=true;}
+function closeCtx(){ctxEl.style.display='none';ctxOpen=false;}
+let dlgOn=false;
+function say(who,txt,opts){curWho=who;dlg.querySelector('.who').textContent=who;dlg.querySelector('.say').textContent=txt;const o=dlg.querySelector('.opts');o.innerHTML='';
+ (opts||[{l:'Okay',f:closeDlg}]).forEach(x=>{const b=document.createElement('button');b.className='opt';b.textContent=x.l;b.onclick=e=>{e.stopPropagation();x.f();};o.appendChild(b);});
+ dlg.style.display='block';dlgOn=true;}
+function closeDlg(){dlg.style.display='none';dlgOn=false;G.talk=false;}
+
+/* ---------- interactions ---------- */
+function routeTo(x,y,then){P.task=null;const path=[];const pd=onDock(P.x,P.y)&&!onIsland(P.x,P.y),td=onDock(x,y)&&!onIsland(x,y);
+ if(pd!==td)path.push([R0-25,0]);path.push([x,y]);P.path=path;P.then=then||null;P.pathT=0;mark={x,y,t:0};}
+function goFish(sp){const L=lvl(S.xp);if(L<REQ[sp.type]){think(sp.type==='deep'?'This water is too wild for me yet. (Fishing '+REQ.deep+')':'The pale fish ignore my line. (Fishing '+REQ.moon+')');return;}
+ if(S.inv.length>=PACK){think('My satchel is stuffed. Gubbins on the dock might want these.');return;}
+ routeTo(sp.ax,sp.ay,()=>startFish(sp));}
+function cast(T){T.phase='cast';T.t=0;T.baited=false;if(S.bait>0){S.bait--;T.baited=true;}}
+function startFish(sp){if(S.inv.length>=PACK){think('No room left in my satchel.');return;}P.task={sp,phase:'cast',t:0};P.face=sp.x>P.x?1:-1;cast(P.task);if(S.hint===1)advanceHint(2);}
+function rollFish(sp){if(sp.type==='shallow'&&S.bottles<BOTTLES.length&&Math.random()<.05)return'bottle';const L=lvl(S.xp);
+ const pool=Object.keys(FISH).filter(k=>FISH[k].spot===sp.type&&FISH[k].lvl<=L);let tot=pool.reduce((s,k)=>s+FISH[k].w,0),r=Math.random()*tot;for(const k of pool){r-=FISH[k].w;if(r<=0)return k;}return pool[0];}
+function gainXP(n,kind){addXP('fishing',n,kind||'normal',[P.x,P.y-30]);}
+function hook(){const T=P.task;const perfect=T.t*1000<T.win*(.35+eff('perfect'));const f=T.fish;
+ if(f==='bottle'){S.inv.push({id:'bottle',msg:S.bottles});S.bottles++;gainXP(5,'first');flies.push({id:'bottle',x0:T.sp.x,y0:T.sp.y,t:0});}
+ else{const F=FISH[f];S.inv.push({id:f});let xp=F.xp;if(perfect)xp=Math.round(xp*1.5);
+  gainXP(xp,perfect?'perfect':(!S.journal['fish_'+f]?'first':'normal'));if(perfect)S.st.perf=(S.st.perf||0)+1;S.st.fc=S.st.fc||{};S.st.fc[f]=(S.st.fc[f]||0)+1;if(perfect){S.st.fp=S.st.fp||{};S.st.fp[f]=(S.st.fp[f]||0)+1;}discover('fish_'+f);flies.push({id:f,x0:T.sp.x,y0:T.sp.y,t:0});}
+ rollGear(T.sp);S.catches++;T.phase='reel';T.t=0;
+ if(S.hint===2)advanceHint(3);if(S.catches>=4&&S.hint===3)advanceHint(4);
+ if(S.inv.length>=PACK){think('Satchel\u2019s full. Gubbins on the dock trades fish for shells.');}
+ save();}
+function tooEarly(){const T=P.task;T.phase='miss';T.t=0;pop('Too soon! They scattered.',P.x,P.y-70,'#fff',19);}
+
+function talkG(){discover('gubbins');G.talk=true;P.face=1;
+ if(!S.metG){S.metG=true;say('Gubbins','Oi! Mind the paint. Name\u2019s Gubbins. I\u2019m a bucket. A talking one, which is rarer. You washed up here, so you\u2019re a fisher now. Them bubbles off the shore? Fish. Go on.',gOpts());return;}
+ say('Gubbins',pick(['Back again. Smells like you brought snacks.','Bucket business is slow. Got fish?','The sea\u2019s been chatty today. Never says anything useful.','You\u2019ve got that look. The far-off look. Dangerous, that.']),gOpts());}
+function gOpts(){const o=[];const n=S.inv.filter(i=>FISH[i.id]||i.id==='cook').length;if(n)o.push({l:'Sell to Gubbins ('+n+')',f:sellPick});
+ o.push({l:'Glitter bait, 5 casts (20 shells)',f:buyBait});if(!S.owned.coat)o.push({l:'Oilskin coat (60 shells)',f:buyCoat});o.push({l:'What is this place?',f:lore});o.push({l:'See you',f:closeDlg});return o;}
+function tradeFish(){let v=0;S.inv=S.inv.filter(i=>{if(FISH[i.id]){v+=FISH[i.id].val+(S.eq.trinket==='salttin'?1:0);return false;}if(i.id==='cook'){v+=Math.ceil(FISH[i.f].val*QV[i.q])+(S.eq.trinket==='salttin'?1:0);return false;}return true;});S.shells+=v;save();G.talk=true;
+ say('Gubbins','*slurp* Lovely. That\u2019s '+v+' shells. Don\u2019t ask where I keep them.',gOpts());}
+function buyBait(){if(S.shells<20){say('Gubbins','That\u2019s 20 shells, friend. You\u2019ve got '+S.shells+'. Fish more, talk less.',gOpts());return;}
+ if(!canAdd('bait',5)){say('Gubbins','No room in that pack for bait, friend.',gOpts());return;}S.shells-=20;S.bait+=5;save();say('Gubbins','Glitter bait. Fish go silly for it. Bites come quicker and hang on longer.',gOpts());}
+function valOf(it){const st=(S.eq.trinket==='salttin'?1:0)+(S.eq.head==='stache'?1:0);return it.id==='cook'?Math.ceil(FISH[it.f].val*QV[it.q])+st:FISH[it.id]?FISH[it.id].val+st:0;}
+let sellSel=new Set();
+function sellPick(){sellSel=new Set();renderSell();}
+function renderSell(){const list=S.inv.map((it,i)=>[it,i]).filter(([it])=>valOf(it)>0);if(!list.length){say('Gubbins','Nothing I can eat. Fish, friend. Fish.',gOpts());return;}
+ const tot=[...sellSel].reduce((a,i)=>a+valOf(S.inv[i]),0);curWho='Gubbins';
+ dlg.querySelector('.who').textContent='Gubbins';dlg.querySelector('.say').textContent=sellSel.size?'Mm. '+sellSel.size+' for me, then?':(S.eq.head==='stache'?'That mustache... magnificent. Pick what I get to eat. I’ll pay extra.':'Pick what I get to eat.');
+ dlg.querySelector('.opts').innerHTML='<div class="sellg">'+list.map(([it,i])=>`<button class="st${sellSel.has(i)?' on':''}" data-si="${i}" aria-label="${itemName(it)}"><img src="${iconFor(it)}" alt=""><b>${valOf(it)}</b></button>`).join('')+
+  `</div><div class="sellrow"><button class="go" data-sa="sell"${sellSel.size?'':' disabled'}>Sell for ${tot} shells</button><button data-sa="all">${sellSel.size===list.length?'None':'All'}</button><button data-sa="back">Back</button></div>`;
+ dlg.style.display='block';dlgOn=true;G.talk=true;}
+dlg.querySelector('.opts').addEventListener('click',e=>{const t=e.target.closest('[data-si]');if(t){const i=+t.dataset.si;sellSel.has(i)?sellSel.delete(i):sellSel.add(i);renderSell();e.stopPropagation();return;}
+ const a=e.target.closest('[data-sa]');if(!a)return;e.stopPropagation();const act=a.dataset.sa;
+ if(act==='back'){say('Gubbins','Changed your mind? Buckets understand.',gOpts());return;}
+ if(act==='all'){const list=S.inv.map((it,i)=>[it,i]).filter(([it])=>valOf(it)>0);sellSel=sellSel.size===list.length?new Set():new Set(list.map(x=>x[1]));renderSell();return;}
+ if(act==='sell'&&sellSel.size){let v=0;[...sellSel].sort((a,b)=>b-a).forEach(i=>{v+=valOf(S.inv[i]);S.inv.splice(i,1);});S.shells+=v;sellSel=new Set();save();
+  say('Gubbins',pick(['*slurp* Lovely. That’s '+v+' shells. Don’t ask where I keep them.','*crunch* Ooh, that one had character. '+v+' shells for you.','*gulp* Bucket’s happy. Here’s '+v+' shells.']),gOpts());}});
+function buyCoat(){if(S.shells<60){say('Gubbins','Sixty shells for the coat. It was my uncle’s. He was a mop.',gOpts());return;}
+ if(S.inv.length>=PACK){say('Gubbins','Your pack’s full. Make some room first.',gOpts());return;}
+ S.shells-=60;S.owned.coat=1;S.inv.push({id:'coat'});save();say('Gubbins','There. Keeps the spray off and the dark back. Put it on from your satchel.',gOpts());}
+function spyglass(){discover('horizon');think(dark<.2?'Through the spyglass: a crooked tower, far to the northeast. Something on top blinks.':'Too dark for detail. Just one tiny light blinking, far to the northeast.');}
+function rollGear(sp){const L=lvl(S.xp);let g=null;
+ if(sp.type==='shallow'&&L>=3&&!S.owned.cap&&Math.random()<.03)g='cap';else if(sp.type==='deep'&&!S.owned.gloves&&Math.random()<.04)g='gloves';
+ if(!g)return;if(S.inv.length>=PACK){think('Something was tangled on the hook, but my satchel is full. It slipped away.');return;}
+ S.inv.push({id:g});S.owned[g]=1;toast('Found: '+EQUIP[g].name);pop('Something tangled on the line!',P.x,P.y-120,'#ffcf3a',18);}
+function lore(){discover('gubbinslore');say('Gubbins','Driftwood Key. Smallest island in the Lantern Sea. Folk say past the last lighthouse there\u2019s the Far Light, where dreams go to come true. Folk say lots of things. Mostly to buckets.',gOpts());}
+function examineHead(){discover('head');think(dark>.25?'A stone head, half buried. Its eyes are glowing faintly. Its mouth is open.':'A stone head, half buried in the sand. Eyes shut, mouth shut, very old.');}
+function listenHead(){if(dark>.25){discover('headnight');think('It’s humming. Something about the west shore, and the moon.');}else think(pick(['Nothing. Just wind whistling through a stone ear.','I press my ear to it. Silence. It feels like it’s waiting for dark.']));}
+function saluteCrab(){discover('crab');CRAB.hop=.5;S.salutes=(S.salutes||0)+1;
+ if(S.salutes>=3&&!S.owned.thimble){if(S.inv.length>=PACK){think('Sir Thimble wants to give me something. My satchel is too full.');return;}
+  S.owned.thimble=1;S.inv.push({id:'thimble'});save();toast('Found: Thimble Helm');think('Sir Thimble takes off his helmet and offers it to me. He has a spare.');return;}
+ think(S.salutes>1?pick(['Sir Thimble salutes again. Crisper this time.','We salute. He clicks approvingly.','He salutes with both claws. Showing off.']):'A crab wearing a thimble for a helmet. He salutes. I salute back. Friends now.');}
+
+function objects(){const o=[];
+ spots.forEach(sp=>{if(sp.type==='moon'&&dark<.15)return;o.push({x:sp.x,y:sp.y,r:42,name:{shallow:'Bubbling water',deep:'Wild water',moon:'Glowing pool'}[sp.type],act:'Fish',onAct:()=>goFish(sp),
+  onExamine:()=>think({shallow:'Little fish, busy with little fish business.',deep:'Something heavy is thrashing down there.',moon:'Pale shapes circling slowly. Waiting for something.'}[sp.type])});});
+ o.push({x:G.x,y:G.y-20,r:30,name:'Gubbins',act:'Talk',onAct:()=>routeTo(G.x-36,6,talkG),onExamine:()=>think('A bucket with opinions.')});
+ o.push({x:SIGN.x,y:SIGN.y-30,r:30,name:'Sign',act:'Read',onAct:()=>{discover('sign');say('Sign','DRIFTWOOD KEY. Population: one bucket. Two now, probably.');},onExamine:()=>think('A crooked sign. Someone wrote on it with a burnt stick.')});
+ o.push({x:FIRE.x,y:FIRE.y-14,r:30,name:S.metWick?'Old Wick':'Campfire',act:S.metWick?(S.hearth&&rawCount()?'Cook':'Talk'):'Poke',onAct:()=>tapFire(MAINFIRE),more:S.metWick&&S.hearth&&rawCount()?[{l:'Talk',f:()=>routeTo(FIRE.x-34,FIRE.y+26,talkWick)}]:null,onExamine:()=>{discover('fire');think(S.metWick?'Old Wick, crackling to himself.':'A little campfire. Wait. Did it just snore?');}});
+ (S.fires||[]).forEach(fr=>{if(!fireLit(fr))return;const more=[{l:'Add driftwood',f:()=>feedFire(fr,'wood')}];if((S.wobble||0)>0)more.push({l:'Add wobblewood',f:()=>feedFire(fr,'wobble')});if(cnt('charcoal')>0)more.push({l:'Add charcoal',f:()=>feedFire(fr,'charcoal')});
+  o.push({x:fr.x,y:fr.y-14,r:fr.big?36:28,name:fr.big?'Your bonfire':'Your fire',act:'Cook',onAct:()=>tapFire(fr),more,onExamine:()=>{const m=Math.max(1,Math.ceil((fr.until-Date.now())/60000));const h=lifeHeat(fr);think((fr.big?'My bonfire is ':'My fire is ')+(h>1?'roaring white-hot':h>.7?'burning strong':h>.45?'burning steady':'getting low')+'. About '+m+' minute'+(m>1?'s':'')+' left.');}});});
+ if(KW.active){const k=S.kindle,here=KW.mode==='fire'&&Math.hypot(KW.x-KW.tx,KW.y-KW.ty)<8;
+  o.push({x:KW.x,y:KW.y-7,r:22,name:k.seen?'Kindle':'Driftwood',act:KW.mode==='fire'?(here?'Offer ash':null):'Pick up',onAct:()=>KW.mode==='fire'?offerAsh():spookKindle(),
+   onExamine:()=>think(KW.mode==='fire'?'The little log is warming himself by my fire, eyes half shut. He keeps glancing at the ash.':(k.seen?'The runaway log. He’s pretending to be ordinary driftwood. Badly.':'Driftwood. With eyes. That just blinked.'))});}
+ o.push({x:GULL.x,y:GULL.y-30,r:30,name:'Mortimer Gull',act:'Bank',onAct:()=>routeTo(GULL.x+30,GULL.y+18,openBank),more:[{l:'Talk',f:()=>routeTo(GULL.x+30,GULL.y+18,talkGull)}],onExamine:()=>{discover('gullbank');think('A seagull in a tiny green visor, standing on a post marked BANK. He’s counting something with great seriousness.');}});
+ (S.ground||[]).forEach(g=>o.push({x:g.x,y:g.y-6,r:18,name:itemName(g.it),act:'Pick up',onAct:()=>{const c=clampLand(g.x-14,g.y+6);routeTo(c[0],c[1],()=>pickGround(g));},onExamine:()=>think(itemDesc(g.it))}));
+ (S.ashp||[]).forEach(a=>o.push({x:a.x,y:a.y-4,r:22,name:'Ash',act:'Scoop',onAct:()=>{const c=clampLand(a.x-18,a.y+6);routeTo(c[0],c[1],()=>scoopAsh(a));},onExamine:()=>think('Soft grey ash, still faintly warm. Smells like a story ending.')}));
+ for(const p of PICK)if(p.until<=now)o.push({x:p.x,y:p.y-4,r:20,name:p.type==='wood'?'Driftwood':'Dry kelp',act:'Pick up',onAct:()=>{const c=clampLand(p.x,p.y);routeTo(c[0],c[1],()=>pickUp(p));},onExamine:()=>think(p.type==='wood'?'Bleached driftwood, dry as a bone. Something would love to eat this.':'Brittle dry kelp. Smells like the deep end of the sea.')});
+ o.push({x:HEAD.x,y:HEAD.y-16,r:34,name:'Stone head',act:'Listen',onAct:listenHead,onExamine:examineHead});
+ o.push({x:CRAB.x,y:CRAB.y-6,r:22,name:'Thimble crab',act:'Salute',onAct:saluteCrab,onExamine:()=>{discover('crab');think(S.salutes?'Sir Thimble. My crab friend. His helmet is spotless.':'A crab wearing a thimble for a helmet. He’s staring at me like he expects something.');}});
+ trees.forEach(t=>o.push({x:t.x+t.lean*t.s,y:t.y-50*t.s,r:34*t.s,name:'Wobble tree',act:'Chop',onAct:()=>chopTree(t),onExamine:()=>{discover('tree');think('It sways with no wind. I think it just sighed.');}}));
+ rocks.forEach(k=>o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',act:'Search',onAct:()=>searchRocks(k),onExamine:()=>{discover('rocks');think('Barnacled rocks. The water past them churns like it’s hiding something big.');}}));
+ o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
+ const KEYS={Gubbins:'gubbins',Sign:'sign',Campfire:'fire','Stone head':'head','Thimble crab':'crab','Wobble tree':'tree',Rocks:'rocks','Still pool':'pool','Old Wick':'wick',Driftwood:'driftwood','Dry kelp':'kelp',Ash:'ash','Mortimer Gull':'gullbank'};
+ o.forEach(x=>x.key=KEYS[x.name]);
+ return o;}
+function objAt(wx,wy){let best=null,bd=1e9;for(const o of objects()){const d=Math.hypot(o.x-wx,o.y-wy);if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
+function s2w(sx,sy){return[(sx-W/2)/Z+cam.x,(sy-H/2)/Z+cam.y];}
+function w2s(x,y){return[(x-cam.x)*Z+W/2,(y-cam.y)*Z+H/2];}
+
+function tap(sx,sy){
+ if(ctxOpen){closeCtx();return;}
+ if(dlgOn){closeDlg();return;}
+ if(intro!=null&&intro<2.2)intro=2.2;
+ if(C){cookTap(sx,sy);return;}
+ const T=P.task;
+ if(T&&T.chop){const [px,py]=w2s(P.x,P.y-20);if(Math.hypot(sx-px,sy-py)<160*Z){strike();return;}}
+ if(T&&!T.chop){if(T.phase==='bite'){hook();return;}
+  const [px,py]=w2s(P.x,P.y-20);const near=Math.hypot(sx-px,sy-py)<110*Z;
+  if(near){if(T.phase==='wait')tooEarly();return;}}
+ const [wx,wy]=s2w(sx,sy);const o=objAt(wx,wy);
+ if(o){(o.onAct||o.onExamine)();return;}
+ const c=clampLand(wx,wy);routeTo(c[0],c[1]);}
+function longPress(sx,sy){if(C)return;const [wx,wy]=s2w(sx,sy);const o=objAt(wx,wy);const items=[];let title;
+ if(navigator.vibrate)try{navigator.vibrate(12);}catch(e){}
+ if(o){title=o.name;if(o.act)items.push({l:o.act,f:o.onAct});if(o.more)o.more.forEach(m=>items.push(m));items.push({l:'Examine',f:o.onExamine});}
+ else if(walkable(wx,wy)){title='Ground';items.push({l:'Walk here',f:()=>routeTo(wx,wy)});if(S.hearth&&hl()>=3){items.push({l:'Build a campfire (3 driftwood)',f:()=>buildFire(wx,wy,false)});if((S.wobble||0)>=2)items.push({l:'Build a bonfire (2 wobblewood, 2 driftwood)',f:()=>buildFire(wx,wy,true)});}items.push({l:'Examine',f:()=>think(pick(['Sand. Warm. Slightly judgmental.','Tiny footprints here. Not mine. Not the crab\u2019s either.','The grass is softer than it has any right to be.']))});}
+ else{title='The sea';if(S.eq.trinket==='spyglass')items.push({l:'Look through spyglass',f:spyglass});items.push({l:'Walk to shore',f:()=>{const c=clampLand(wx,wy);routeTo(c[0],c[1]);}});items.push({l:'Examine',f:()=>think(pick(['The Lantern Sea. Somewhere out there is the Far Light.','Big. Wet. Full of fish and secrets.','I can\u2019t swim that far. Yet.']))});}
+ showCtx(sx,sy,title,items);if(S.hint===3)advanceHint(4);}
+
+/* ---------- input ---------- */
+let pd=null;
+cv.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;
+ const cur={x:e.clientX,y:e.clientY,id:e.pointerId,moved:false,lp:false,edge:e.clientX>W-30?'r':(e.clientX<30?'l':null)};pd=cur;
+ cur.timer=setTimeout(()=>{if(pd===cur&&!cur.moved){cur.lp=true;longPress(cur.x,cur.y);}},430);});
+cv.addEventListener('pointermove',e=>{if(!pd||e.pointerId!==pd.id)return;const dx=e.clientX-pd.x,dy=e.clientY-pd.y;
+ if(Math.hypot(dx,dy)>14){pd.moved=true;clearTimeout(pd.timer);}
+ if(pd.edge==='r'&&dx<-45){clearTimeout(pd.timer);pd=null;openPanel('pack');}else if(pd&&pd.edge==='l'&&dx>45){clearTimeout(pd.timer);pd=null;openPanel('journal');}});
+cv.addEventListener('pointerup',e=>{if(!pd||e.pointerId!==pd.id)return;clearTimeout(pd.timer);const p=pd;pd=null;if(!p.moved&&!p.lp)tap(p.x,p.y);});
+cv.addEventListener('pointercancel',()=>{if(pd){clearTimeout(pd.timer);pd=null;}});
+cv.addEventListener('contextmenu',e=>{e.preventDefault();if(pd){clearTimeout(pd.timer);pd=null;}longPress(e.clientX,e.clientY);});
+dlg.addEventListener('click',e=>{if(e.target===dlg||e.target.classList.contains('say')){if(dlg.querySelectorAll('.opt').length===1)closeDlg();}});
+
+/* ---------- panel ---------- */
+let tab='pack',sel=-1,selG=null;
+function openPanel(t){tab=t||tab;sel=-1;selG=null;jPage=0;skView=null;ddSel=null;renderPanel();panel.classList.add('on');scrim.style.display='block';closeCtx();bag.classList.remove('pulse');if(S.hint===4)advanceHint(5);}
+function closePanel(){panel.classList.remove('on');scrim.style.display='none';}
+const BANKSLOTS=30,bankEl=$('bank');let bankOpen=false,bankMode='all';
+function bkey(it){return it.id==='cook'?'cook:'+it.f+':'+it.q:it.id==='bottle'?'bottle:'+it.msg:it.id;}
+function openBank(){discover('gullbank');S.bank=S.bank||[];bankOpen=true;closeCtx();closePanel();bankEl.classList.add('on');scrim.style.display='block';renderBank();}
+function closeBank(){bankOpen=false;bankEl.classList.remove('on');scrim.style.display='none';}
+function renderBank(note){const st=getComputedStyle(bankEl),W2=bankEl.clientWidth-24,H2=bankEl.clientHeight-20-44-40-24;const bs=Math.max(34,Math.floor(Math.min((W2-30)/6,(H2-8*6)/9)));bankEl.style.setProperty('--bs',bs+'px');
+ const b=S.bank;let h='';for(let i=0;i<BANKSLOTS;i++){const e=b[i];h+=e?`<button class="slot f" data-b="${i}" aria-label="${itemName(e.it)}"><img src="${iconImg(iconKey(e.it)).src}" alt=""><i class="cnt">${e.n>999?Math.floor(e.n/1000)+'k':e.n}</i></button>`:'<div class="slot"></div>';}
+ $('bgrid').innerHTML=h;h='';for(let i=0;i<PACK;i++){const it=S.inv[i];h+=it?`<button class="slot f" data-p="${i}" aria-label="${itemName(it)}"><img src="${iconFor(it)}" alt="">${(it.n||1)>1?'<i class="cnt">'+it.n+'</i>':''}</button>`:'<div class="slot"></div>';}
+ $('bpack').innerHTML=h;$('bnote').textContent=note||(b.length+' of '+BANKSLOTS+' bank slots used');bankEl.querySelectorAll('.bmode button').forEach(x=>x.classList.toggle('on',x.dataset.m===bankMode));}
+function deposit(i){const it=S.inv[i];if(!it)return false;const k=bkey(it);let e=S.bank.find(q=>q.k===k);if(!e){if(S.bank.length>=BANKSLOTS){renderBank('The bank is full.');return false;}const proto=Object.assign({},it);delete proto.n;e={k,it:proto,n:0};S.bank.push(e);}e.n+=it.n||1;S.inv.splice(i,1);return true;}
+function withdraw(j){const e=S.bank[j];if(!e)return;const want=bankMode==='1'?1:e.n;let got=0;
+ if(STACK[e.it.id])got=addItem(e.it.id,want);else{while(got<want&&S.inv.length<PACK){S.inv.push(Object.assign({},e.it));got++;}}
+ if(!got){renderBank('Your pack is full.');return;}e.n-=got;if(e.n<=0)S.bank.splice(j,1);save();renderBank();}
+$('bgrid').addEventListener('click',e=>{const t=e.target.closest('[data-b]');if(t)withdraw(+t.dataset.b);});
+$('bpack').addEventListener('click',e=>{const t=e.target.closest('[data-p]');if(t){deposit(+t.dataset.p);save();renderBank();}});
+$('bdep').onclick=()=>{for(let i=S.inv.length-1;i>=0;i--){if(S.inv[i].id==='hatchet')continue;deposit(i);}save();renderBank();};
+bankEl.querySelectorAll('.bmode button').forEach(x=>x.onclick=()=>{bankMode=x.dataset.m;renderBank();});
+$('bankx').onclick=closeBank;addEventListener('resize',()=>{if(bankOpen)renderBank();});
+bag.onclick=()=>openPanel('pack');scrim.onclick=()=>{if(bankOpen)closeBank();else closePanel();};panel.querySelector('.x').onclick=closePanel;
+panel.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{tab=b.dataset.t;sel=-1;renderPanel();});
+const MISC={
+ flint:{name:'Flint shard',desc:'Sharp as a grudge. Lashed to a stick with something stringy, it would make a fine hatchet.'},
+ hatchet:{name:'Stone hatchet',desc:'Flint, driftwood and kelp twine. Wobble trees eye it nervously.'},
+ wobble:{name:'Wobblewood',desc:'A springy log from a wobble tree. Burns long and bright.'},
+ charcoal:{name:'Charcoal',desc:'A black lump from the ashes. Burns hotter than anything. Someone will want this.'},
+ seasalt:{name:'Sea salt',desc:'Crystals left where kelp burned. Wick’s eyes would light up. Well, more.'},
+ pearl:{name:'Ember pearl',desc:'A warm, glowing bead from the heart of a wobblewood fire. It hums when you hold it.'},
+ sunstone:{name:'Sunstone',desc:'Smooth, and warm all the way through. It remembers being part of the sun. Nobody knows what it does yet.'},
+ shells:{name:'Shells',desc:'Gubbins’ currency. Stacks forever. Don’t ask where he keeps his.'},
+ bait:{name:'Glitter bait',desc:'Fish go silly for it. Used up one per cast while you have it.'},
+ wood:{name:'Driftwood',desc:'Bleached and bone dry. Burns steady. Stacks five to a slot.'},
+ kelp:{name:'Dry kelp',desc:'Brittle and smoky. Burns hot and fast. Stacks ten to a slot.'},
+ ash:{name:'Ash',desc:'What a fire leaves behind. Wick and Kindle both get oddly excited about it.'}};
+function hasHatchet(){return S.inv.some(i=>i.id==='hatchet');}
+function iconFor(it){return it.id==='shells'?icon('shell'):it.id==='cook'?icon('ck_'+it.f+'_'+it.q):icon(it.id);}
+function itemName(it){return MISC[it.id]?MISC[it.id].name:it.id==='cook'?QN[it.q]+' '+FISH[it.f].name:it.id==='bottle'?'Message in a bottle':EQUIP[it.id]?EQUIP[it.id].name:FISH[it.id].name;}
+function itemDesc(it){return MISC[it.id]?MISC[it.id].desc:it.id==='cook'?QD[it.q]:it.id==='bottle'?'Cork still in. Something rolled up inside.':EQUIP[it.id]?EQUIP[it.id].desc:FISH[it.id].desc;}
+let skSel=-1,jPage=0,jPages=[];
+const HIDDEN_SK=['Someone on this island knows this one.','It starts with a spark.','Ask the wobble trees.','Something is buried under your feet.','Past the last lighthouse.'];
+function gearHTML(){return ['head','body','hand','trinket'].map(sl=>{const id=S.eq[sl],lab={head:'Head',body:'Body',hand:'Hands',trinket:'Charm'}[sl];
+ return id?`<button class="slot f${selG===sl?' sel':''}" data-g="${sl}" aria-label="${lab}: ${EQUIP[id].name}"><img src="${icon(id)}" alt=""><span class="tag">${lab}</span></button>`:`<div class="slot gearE"><span class="tag">${lab}</span></div>`;}).join('');}
+function infoHTML(){
+ if(sel>=0&&S.inv[sel]){const it=S.inv[sel];let a='';if(it.id==='bottle')a+='<button data-a="read">Read it</button>';if(it.id==='flint')a+='<button data-a="craft">Make a hatchet</button>';if(EQUIP[it.id])a+='<button data-a="wear">Wear it</button>';if(it.id==='cook')a+='<button data-a="eat">Eat it</button>';
+  if(it.id!=='hatchet')a+='<button data-a="drop">Drop '+((it.n||1)>1?'one':'it')+'</button>';if((FISH[it.id]&&S.inv.filter(x=>x.id===it.id).length>1)||(it.n||1)>1)a+='<button data-a="dropall">Drop all</button>';
+  return `<b>${itemName(it)}${(it.n||1)>1?' ×'+it.n:''}</b><p>${itemDesc(it)}</p><div class="acts">${a}</div>`;}
+ if(selG&&S.eq[selG]){const id=S.eq[selG];return `<b>${EQUIP[id].name}</b><p>${EQUIP[id].desc}</p><div class="acts"><button data-a="off">Take it off</button></div>`;}
+ return `<p class="muted">${S.inv.length?'Tap something to look at it.':'Empty. The sea is full of things that would love to be in here.'}</p>`;}
+function sizePack(){const cs=getComputedStyle(pbody),W=pbody.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),H=pbody.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+ const s=Math.max(38,Math.floor(Math.min((W-24)/4,(H-14-40-138)/6)));pbody.style.setProperty('--s',s+'px');}
+function renderPanel(){panel.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));let h='';
+ if(tab==='skills'){if(skView&&hasSkill(skView)){pbody.innerHTML=skillPage(skView);return;}
+  const tot=Object.keys(JOURNAL).length,disc=Object.keys(S.journal).filter(k=>JOURNAL[k]).length;
+  if(S.char)h+=`<p class="muted" style="margin:0 0 2px">${esc(S.char.name)}${S.origin?', '+ORIGINS[S.origin].name.replace(/^The /,'the '):''}</p>`;
+  Object.keys(SKILLS).forEach(k=>{if(hasSkill(k))h+=skillCard(k);});
+  h+=`<div class="stats" style="padding-top:8px"><span>${S.catches||0} catches</span><span>${disc} of ${tot} discoveries</span></div>`;
+  const hid=HIDDEN.filter(([k])=>!hasSkill(k));
+  h+=`<p class="muted lockt">${['No','One','Two','Three','Four','Five'][hid.length]} skill${hid.length===1?' is':'s are'} still hidden.</p><div class="lockrow">`+hid.map((c,i)=>`<button class="lk${skSel===i?' sel':''}" data-sk="${i}" aria-label="Hidden skill ${i+1}">?</button>`).join('')+`</div><div class="clue">${skSel>=0&&hid[skSel]?hid[skSel][1]:'Tap one for a clue.'}</div>`;
+  pbody.innerHTML=h;return;}
+ if(tab==='pack'){
+  h+=`<div class="grid">${gearHTML()}</div><div class="grid">`;
+  for(let i=0;i<PACK;i++){const it=S.inv[i];h+=it?`<button class="slot f${sel===i?' sel':''}" data-i="${i}" aria-label="${itemName(it)}"><img src="${iconFor(it)}" alt="">${(it.n||1)>1||STACK[it.id]?'<i class="cnt">'+(it.n||1)+'</i>':''}</button>`:'<div class="slot"></div>';}
+  h+=`</div><div class="info">${infoHTML()}</div>`;pbody.innerHTML=h;sizePack();return;}
+ renderJournal();}
+function entEl(k){const d=document.createElement('div');d.className='ent';d.innerHTML=`<b>${JOURNAL[k][0]}</b><p>${JOURNAL[k][1]}</p>`;return d;}
+function renderJournal(){const keys=Object.keys(S.journal).filter(k=>JOURNAL[k]).sort((a,b)=>S.journal[b]-S.journal[a]),tot=Object.keys(JOURNAL).length;
+ pbody.innerHTML=`<p class="muted jhead">${keys.length} of ${tot} discovered on Driftwood Key</p><div class="jlist" id="jlist"></div><div class="pager" id="jpager"><button data-p="-1" aria-label="Previous page">‹</button><span id="jpn"></span><button data-p="1" aria-label="Next page">›</button></div>`;
+ const list=$('jlist');jPages=[];let cur=[];
+ for(const k of keys){const el=entEl(k);list.appendChild(el);if(list.scrollHeight>list.clientHeight+1&&cur.length){jPages.push(cur);cur=[];list.innerHTML='';list.appendChild(el);}cur.push(k);}
+ if(cur.length)jPages.push(cur);showJPage();}
+function showJPage(){jPage=Math.max(0,Math.min(jPages.length-1,jPage));const list=$('jlist');list.innerHTML='';(jPages[jPage]||[]).forEach(k=>list.appendChild(entEl(k)));
+ const pg=$('jpager'),b=pg.querySelectorAll('button');$('jpn').textContent=`Page ${jPage+1} of ${jPages.length}`;b[0].disabled=jPage===0;b[1].disabled=jPage>=jPages.length-1;pg.style.visibility=jPages.length>1?'visible':'hidden';}
+let jsx=null;pbody.addEventListener('pointerdown',e=>{jsx=tab==='journal'?e.clientX:null;});
+pbody.addEventListener('pointerup',e=>{if(jsx==null)return;const dx=e.clientX-jsx;jsx=null;if(Math.abs(dx)>50){jPage+=dx<0?1:-1;showJPage();}});
+addEventListener('resize',()=>{if(panel.classList.contains('on'))renderPanel();});
+pbody.addEventListener('click',e=>{const sp_=e.target.closest('[data-skp]');if(sp_){skView=sp_.dataset.skp;ddSel=null;renderPanel();return;}const dd_=e.target.closest('[data-dd]');if(dd_){ddSel=ddSel===dd_.dataset.dd?null:dd_.dataset.dd;renderPanel();return;}if(e.target.closest('[data-skb]')){skView=null;ddSel=null;renderPanel();return;}const pq=e.target.closest('[data-p]');if(pq){jPage+=+pq.dataset.p;showJPage();return;}const sk=e.target.closest('[data-sk]');if(sk){skSel=+sk.dataset.sk;renderPanel();return;}const s=e.target.closest('[data-i]');if(s){sel=+s.dataset.i;selG=null;renderPanel();return;}const g=e.target.closest('[data-g]');if(g){selG=g.dataset.g;sel=-1;renderPanel();return;}
+ const a=e.target.closest('[data-a]');if(!a)return;
+ if(a.dataset.a==='off'){if(S.inv.length>=PACK){toast('No room in your pack');return;}S.inv.push({id:S.eq[selG]});S.eq[selG]=null;selG=null;save();renderPanel();return;}
+ const it=S.inv[sel];if(!it)return;
+ if(a.dataset.a==='craft'){if(!((S.wood||0)>0&&(S.kelp||0)>0)){toast('Needs 1 driftwood and 1 dry kelp');return;}S.wood--;S.kelp--;S.inv.splice(sel,1);S.inv.push({id:'hatchet'});S.shipwright=1;S.owned.hatchet=1;sel=-1;discover('hatchet');toast('New skill: Shipwright');addXP('shipwright',30,'first',[P.x,P.y-30]);save();renderPanel();return;}
+ if(a.dataset.a==='eat'){S.inv.splice(sel,1);const B=BUFF[it.q];if(B){S.buff={q:it.q,until:Date.now()+B.dur*1000,dur:B.dur};toast('Well fed: '+B.txt);}else think(it.q==='charred'?'Crunchy. Regrettable.':'My stomach has filed a complaint.');sel=-1;save();renderPanel();return;}
+ if(a.dataset.a==='wear'){const E=EQUIP[it.id],old=S.eq[E.slot];S.inv.splice(sel,1);S.eq[E.slot]=it.id;if(old)S.inv.push({id:old});sel=-1;save();renderPanel();toast('Wearing: '+E.name);return;}
+ if(a.dataset.a==='read'){discover('bottle'+it.msg);closePanel();say('Message in a bottle',BOTTLES[it.msg],[{l:'Keep it',f:closeDlg}]);return;}
+ if(a.dataset.a==='drop'){if((it.n||1)>1){it.n--;dropGround(Object.assign({},it,{n:1}));}else{S.inv.splice(sel,1);dropGround(it);}}else if(a.dataset.a==='dropall'){if(STACK[it.id]){S.inv.splice(sel,1);dropGround(it);}else{const id=it.id;S.inv.filter(x=>x.id===id).forEach(x=>dropGround(x));S.inv=S.inv.filter(x=>x.id!==id);}}
+ sel=-1;save();renderPanel();});
+
+/* ---------- icons ---------- */
+const icache={};
+function drawFish(id,x,y,s,dir,cOv){const F=FISH[id];dir=dir||1;const FC=cOv||F.col;const seed=id.length*17;let rx=14,ry=8;if(id==='eel'){rx=19;ry=5;}if(id==='grump'){rx=13;ry=10;}
+ sketch([[x-rx*.7*s*dir,y],[x-(rx+9)*s*dir,y-8*s],[x-(rx+6)*s*dir,y],[x-(rx+9)*s*dir,y+8*s]],true,seed+1,.8,FC,INK,2.2);
+ blob(x,y,rx*s,ry*s,seed,FC,2.4,.8);
+ if(id==='eel'){for(let i=-1;i<=1;i++)ln([[x+i*8*s,y-4*s],[x+i*8*s+2*s,y+4*s]],seed+5+i,2.2,'#fff',.4);}
+ if(id==='perch'){dot(x-4*s,y+2*s,1.6*s,'#8a6a3d');dot(x+2*s,y+4*s,1.4*s,'#8a6a3d');dot(x-1*s,y-3*s,1.2*s,'#8a6a3d');}
+ if(id==='koi'){dot(x-3*s,y-2*s,2.5*s,'#ff9a6b');}
+ dot(x+rx*.5*s*dir,y-2*s,1.9*s);
+ if(id==='grump')ln([[x+rx*.25*s*dir,y-7*s],[x+rx*.75*s*dir,y-4*s]],seed+9,2,INK,.3);}
+function drawGearIcon(id){
+ if(id==='stache'){drawStache(32,26,2.7,0);}
+ else if(id==='cap'){blob(32,36,20,12,401,'#9d97b0',2.6);ln([[12,40],[52,40]],402,2.5,INK,.5);dot(24,32,2.5,'#fff');dot(34,28,2,'#fff');dot(42,34,2.2,'#fff');}
+ else if(id==='thimble'){sketch([[14,46],[16,26],[32,14],[48,26],[50,46]],true,403,.8,'#d6d0e2',INK,2.6);for(let i=0;i<6;i++)dot(22+(i%3)*10,28+Math.floor(i/3)*10,1.6);}
+ else if(id==='coat'){sketch([[20,12],[44,12],[54,52],[10,52]],true,404,1,'#f2c230',INK,2.6);ln([[32,14],[32,50]],405,2,INK,.4);dot(36,26,2);dot(36,38,2);}
+ else if(id==='gloves'){blob(23,37,11,13,406,'#4f9a5a',2.6);blob(42,31,11,13,407,'#5fae6a',2.6);}
+ else if(id==='spyglass'){ctx.save();ctx.translate(32,32);ctx.rotate(-.6);sketch(rrPts(-22,-6,40,12,4),true,408,.8,'#d9a54a',INK,2.6);sketch(rrPts(12,-9,12,18,3),true,409,.6,'#b9853a',INK,2.4);ctx.restore();}
+ else if(id==='salttin'){sketch(rrPts(14,18,36,32,8),true,410,1,'#c9c3d6',INK,2.6);sketch(rrPts(14,13,36,9,3),true,411,.6,'#9d97b0',INK,2.4);sketch(rrPts(20,28,24,12,3),true,412,.5,'#fffaf0',INK,2);}
+ else if(id==='whisper'){blob(32,34,18,14,413,'#ffc2d1',2.6);ln([[32,34],[38,30],[40,36],[32,40],[26,32],[34,24]],414,2,INK,.4);}
+ else if(id==='blankmap'){sketch(rrPts(10,14,44,36,4),true,415,1,'#fff3d6',INK,2.6);ctx.setLineDash([4,4]);ln([[16,40],[28,30],[40,36]],416,2,INK,.4);ctx.setLineDash([]);ln([[42,21],[48,28]],417,2.5,'#ff6b6b',.2);ln([[48,21],[42,28]],418,2.5,'#ff6b6b',.2);}}
+function drawStache(cx,cy,s,w){for(const sd of[-1,1]){sketch([[cx,cy-1*s],[cx+sd*5*s,cy-2.6*s],[cx+sd*9.5*s,cy-.8*s+w],[cx+sd*8*s,cy+1.6*s],[cx+sd*3*s,cy+1.4*s]],true,960+sd,.3*s,'#9a94a8',INK,1.6*Math.sqrt(s));
+  const br=[[cx+sd*8.5*s,cy],[cx+sd*10*s,cy+5*s],[cx+sd*9*s,cy+10*s+w]];ln(br,962+sd,4.2*Math.sqrt(s),INK,.2);ln(br,962+sd,2.4*Math.sqrt(s),'#9a94a8',.2);dot(cx+sd*9*s,cy+10.5*s+w,1.5*Math.sqrt(s),'#5a5266');}}
+const imgCache={};function iconImg(id){if(!imgCache[id]){const im=new Image();im.src=icon(id);imgCache[id]=im;}return imgCache[id];}
+function icon(id){if(icache[id])return icache[id];const c=document.createElement('canvas');c.width=c.height=96;const keep=ctx,kb=boil;ctx=c.getContext('2d');boil=0;ctx.scale(1.5,1.5);
+ if(FISH[id])drawFish(id,36,32,1.25);
+ else if(id.startsWith('ck_')){const [,f,q]=id.split('_');drawFish(f,34,36,1.2,1,QCOL[q]);if(q!=='charred'&&q!=='under')for(let i=0;i<3;i++)ln([[24+i*9,22],[21+i*9,14],[25+i*9,6]],450+i,2,'rgba(42,33,64,.45)',.3);
+  if(q==='perfect')star(52,14,7,'#ffcf3a');if(q==='smoky'){ctx.globalAlpha=.7;dot(48,18,5,'#8a8494');dot(54,11,4,'#8a8494');ctx.globalAlpha=1;}if(q==='charred'){ctx.globalAlpha=.6;dot(40,18,4,'#5a5266');dot(46,11,3,'#5a5266');ctx.globalAlpha=1;}}
+ else if(id==='flame'){blob(32,36,14,20,460,'#ff8a3d',2.8,1);blob(33,43,7,10,461,'#ffd23f',0,.6);}
+ else if(id==='wood'){ln([[12,40],[52,26]],462,12,INK,1);ln([[12,40],[52,26]],462,7,'#d9cdb5',1);}
+ else if(id==='kelp'){for(let i=-1;i<=1;i++)ln([[32+i*10,52],[38+i*10,34],[30+i*10,14]],465+i,4.5,'#5f6b3a',.8);}
+ else if(id==='bottle'){ctx.save();ctx.translate(32,32);ctx.rotate(-.6);sketch(rrPts(-10,-14,20,32,8),true,4,1,'#9fd8b4',INK,2.6);sketch(rrPts(-5,-24,10,11,3),true,5,.6,'#c98f56',INK,2.4);ln([[-4,-2],[4,-2]],6,2,'#fffaf0',.3);ln([[-4,4],[3,4]],7,2,'#fffaf0',.3);ctx.restore();}
+ else if(id==='shell'){sketch([[32,46],[14,30],[18,20],[32,15],[46,20],[50,30]],true,8,1,'#ffb3a7',INK,2.6);for(let i=-2;i<=2;i++)ln([[32,44],[32+i*7,20]],10+i,2,INK,.4);}
+ else if(id==='bait'){sketch(rrPts(18,22,28,28,7),true,12,1,'#d8c8ff',INK,2.6);sketch(rrPts(16,15,32,9,3),true,13,.6,'#ffcf3a',INK,2.4);[[26,32],[36,38],[30,43],[38,28]].forEach(p=>dot(p[0],p[1],2.2,'#ff6bb5'));}
+ else if(EQUIP[id])drawGearIcon(id);
+ else if(id==='wobble'){ln([[12,42],[52,26]],472,13,INK,1);ln([[12,42],[52,26]],472,8.5,'#b9d88f',1);blob(52,26,6,6.5,473,'#e8dcb0',2,.4);ln([[50,25],[53,27]],474,1.4,INK,.2);}
+ else if(id==='flint'){sketch([[16,46],[30,14],[48,22],[44,48]],true,475,1,'#8a8494',INK,2.6);ln([[30,18],[40,44]],476,1.6,'rgba(255,255,255,.5)',.3);}
+ else if(id==='hatchet'){ln([[16,52],[40,16]],477,7,INK,.6);ln([[16,52],[40,16]],477,4,'#d9cdb5',.6);sketch([[34,10],[52,14],[48,30],[38,22]],true,478,.6,'#8a8494',INK,2.4);ln([[34,24],[42,26]],479,2.4,'#5f6b3a',.3);}
+ else if(id==='charcoal'){blob(32,36,17,13,480,'#3a3340',2.6,1.2);dot(26,32,2,'#5a5266');dot(36,38,1.6,'#5a5266');}
+ else if(id==='seasalt'){for(const q of[[24,40],[36,34],[42,44],[30,28]])sketch([[q[0],q[1]-8],[q[0]+6,q[1]],[q[0],q[1]+6],[q[0]-6,q[1]]],true,481+q[0],.4,'#f4f6ff',INK,2);}
+ else if(id==='sunstone'){for(let i=0;i<8;i++){const a=i/8*6.28;ln([[32+Math.cos(a)*16,32+Math.sin(a)*16],[32+Math.cos(a)*24,32+Math.sin(a)*24]],490+i,2.4,'#ffcf3a',.3);}blob(32,32,13,12,489,'#ffb347',2.6,.6);blob(29,29,5,4,488,'#fff1b0',0,.3);}
+ else if(id==='pearl'){const g=ctx.createRadialGradient(32,32,2,32,32,24);g.addColorStop(0,'rgba(255,200,120,.9)');g.addColorStop(1,'rgba(255,200,120,0)');ctx.fillStyle=g;ctx.fillRect(0,0,64,64);blob(32,32,11,11,485,'#ffb347',2.6,.4);dot(28,28,3,'#fff6d0');}
+ else if(id==='ash'){blob(32,40,22,12,470,'#b8b2c4',2.6,1);blob(30,34,12,7,471,'#cdc8d6',0,.6);[[24,40],[38,42],[31,45],[42,37]].forEach(q=>dot(q[0],q[1],1.6,'#5a5266'));}
+ else if(id==='rod'){ln([[14,52],[34,30],[50,10]],20,4.5,'#a8703f',1);ln([[50,10],[54,30],[52,44]],21,1.6,INK,.6);blob(52,46,4,4,22,'#ff6b6b',2,.4);}
+ icache[id]=c.toDataURL();ctx=keep;boil=kb;return icache[id];}
+
+/* ---------- update ---------- */
+function update(dt){
+ {const nd=S.day+dt/300;if(nd>=1)S.dayN=(S.dayN||0)+1;S.day=nd%1;}const light=.5-.5*Math.cos(S.day*6.2832);dark=Math.min(1,Math.max(0,(.42-light)/.3))*.62;
+ if(intro!=null){intro+=dt;if(intro>3.2)intro=null;}
+ if(P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),sp=175*dt;
+  if(Math.abs(dx)>1)P.face=dx>0?1:-1;
+  if(d<=sp){P.x=tx;P.y=ty;P.path.shift();}
+  else{const nx=P.x+dx/d*sp,ny=P.y+dy/d*sp;
+   if(walkable(nx,ny)){P.x=nx;P.y=ny;}else if(walkable(nx,P.y))P.x=nx;else if(walkable(P.x,ny))P.y=ny;
+   else{const c=Math.hypot(P.x,P.y)||1,mx=P.x-P.x/c*sp,my=P.y-P.y/c*sp;if(walkable(mx,my)){P.x=mx;P.y=my;}}}
+  if(P.pathT>14)P.path=[];
+  P.moving=true;
+  if(!P.path.length){P.moving=false;const f=P.then;P.then=null;if(f)f();if(S.hint===0)advanceHint(1);}
+ }else P.moving=false;
+ const T=P.task&&!P.task.chop?P.task:null;
+ if(T){T.t+=dt;
+  if(T.sp.type==='moon'&&dark<.12){P.task=null;think('The glow faded. The moonkoi slipped away.');}
+  else if(T.phase==='cast'&&T.t>.55){T.phase='wait';T.t=0;T.wait=Math.max(.8,1.6+Math.random()*3.2-(T.baited?.7:0)-eff('wait'));}
+  else if(T.phase==='wait'&&T.t>T.wait){T.phase='bite';T.t=0;T.fish=rollFish(T.sp);T.win=(T.fish==='bottle'?800:FISH[T.fish].win)+(T.baited?220:0)+Math.min(150,lvl(S.xp)*5)+eff('win');if(navigator.vibrate)try{navigator.vibrate(35);}catch(e){}}
+  else if(T.phase==='bite'&&T.t*1000>T.win){T.phase='miss';T.t=0;pop('It got away...',P.x,P.y-70,'#fff',19);}
+  else if((T.phase==='miss'&&T.t>.8)||(T.phase==='reel'&&T.t>.7)){if(S.inv.length>=PACK)P.task=null;else cast(T);}}
+ // crab
+ kindleMove(dt);
+ CRAB.wait-=dt;if(CRAB.hop>0)CRAB.hop-=dt;
+ if(CRAB.wait<=0){const dx=CRAB.tx-CRAB.x,dy=CRAB.ty-CRAB.y,d=Math.hypot(dx,dy);
+  if(d<2){CRAB.wait=1+Math.random()*3;const a=Math.random()*6.28,r=Math.random()*90;const nx=crabHome[0]+Math.cos(a)*r,ny=crabHome[1]+Math.sin(a)*r;if(onIsland(nx,ny)){CRAB.tx=nx;CRAB.ty=ny;}}
+  else{const s=Math.min(d,40*dt);CRAB.x+=dx/d*s;CRAB.y+=dy/d*s;}}
+ if(dark>.3&&!S.journal.moonpool&&Math.hypot(P.x-MOON.x,P.y-MOON.y)<340){discover('moonpool');think('The water to the west is glowing...');}
+ pops=pops.filter(p=>(p.t+=dt)<1.5);
+ if(bub&&(bub.t+=dt)>4.4)bub=null;
+ flies=flies.filter(f=>(f.t+=dt)<.75);
+ if(mark&&(mark.t+=dt)>.6)mark=null;
+ if(cele&&(cele.t+=dt)>3.2)cele=null;
+ const k=Math.min(1,dt*5),tx=C?C.fr.x:P.x,ty=C?C.fr.y-50:P.y;cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;camZ+=((C?cookZoom():(P.task&&P.task.chop?1.25:1))-camZ)*Math.min(1,dt*4);Z=ZB*camZ;
+ if(C)cookUpdate(dt);updOrbs(dt);guideT-=dt;if(guideT<=0){guideT=1;hearthGuide();}buffT-=dt;if(buffT<=0){buffT=.5;buffUI();kindleTick();if(S.ground&&S.ground.length){const T=Date.now(),n0=S.ground.length;S.ground=S.ground.filter(g=>g.exp>T);if(S.ground.length!==n0)save();}(S.fires||[]).slice().forEach(fr=>{if(!fireLit(fr)&&!(C&&C.fr===fr))burnOut(fr);});}
+}
+
+/* ---------- draw ---------- */
+function shadow(x,y,rx,ry){ctx.fillStyle='rgba(42,33,64,.16)';ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,6.3);ctx.fill();}
+function drawTree(t){const x=t.x,y=t.y,s=t.s;shadow(x,y+2,24*s,8*s);const tx=x+t.lean*s,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
+ ln(pts,t.seed,11*s,INK,1.2);ln(pts,t.seed,6*s,'#b07a4a',1.2);const g=['#4fa14a','#5fb35a','#3f9356'][Math.floor(t.hue*3)];
+ const ch=P.task&&P.task.chop&&P.task.tree===t,sw=ch?Math.cos(Math.PI*(now-P.task.t0)/chopPer())*7*s:Math.sin(now*1.3+t.seed)*2*((t.rest||0)>now?.3:1);blob(tx-16*s+sw,ty+4*s,20*s,17*s,t.seed+1,g);blob(tx+16*s+sw,ty+2*s,20*s,17*s,t.seed+2,g);blob(tx+sw*1.4,ty-12*s,24*s,20*s,t.seed+3,g);
+ ln([[tx-8*s+sw,ty-18*s],[tx-2*s+sw,ty-22*s]],t.seed+4,3,'rgba(255,255,255,.45)',.5);}
+function drawRock(k){blob(k.x,k.y,k.rx,k.ry,k.seed,'#a39db6');ln([[k.x-k.rx*.4,k.y-k.ry*.3],[k.x,k.y-k.ry*.55]],k.seed+1,2.5,'rgba(255,255,255,.5)',.4);}
+function drawPool(){const {x,y}=POOL;blob(x,y,44,22,170,'#8fd3dc',3);const ph=(now*.4)%1;ctx.globalAlpha=.6*(1-ph);sketch(ell(x,y,8+ph*30,(8+ph*30)*.45,12),true,171,1,null,'#fff',2);ctx.globalAlpha=1;
+ ln([[x-16,y-7],[x-4,y-10]],172,2.5,'rgba(255,255,255,.85)',.5);for(const [ox,h] of [[-46,26],[-40,19],[43,24]])ln([[x+ox,y+4],[x+ox+2,y+4-h]],173+ox,2.5,'#3f7f3a',.6);}
+function drawSign(){const {x,y}=SIGN;shadow(x,y+2,14,5);ln([[x,y],[x+1,y-30]],61,5,INK,.8);ln([[x,y],[x+1,y-30]],61,2.5,'#b07a4a',.8);sketch(rrPts(x-24,y-52,48,26,6),true,62,1.5,'#d9a066',INK,2.8);ln([[x-15,y-44],[x+12,y-45]],63,2,INK,1);ln([[x-15,y-36],[x+6,y-36]],64,2,INK,1);}
+function drawFire(){const {x,y}=FIRE;shadow(x,y+3,22,6);ln([[x-18,y+2],[x+16,y-6]],70,8,INK,1);ln([[x-18,y+2],[x+16,y-6]],70,4.5,'#9a6236',1);ln([[x-16,y-6],[x+18,y+2]],71,8,INK,1);ln([[x-16,y-6],[x+18,y+2]],71,4.5,'#a8703f',1);
+ const f=Math.sin(now*13)*2.5;blob(x,y-14,11,17+f,72,'#ff8a3d',2.5);blob(x+1,y-9,5.5,9+f*.6,73,'#ffd23f',0);
+ const sp=(now*.9)%1;dot(x+Math.sin(now*3)*6,y-30-sp*26,2*(1-sp),'#ffcf3a');}
+function drawHead(){const {x,y}=HEAD;blob(x,y-16,27,24,80,'#b9b3c9');ln([[x-2,y-34],[x+3,y-30]],81,2,'rgba(42,33,64,.4)',.5);
+ if(dark>.25){blob(x-9,y-19,3.5,3.5,82,'#ffe58a',1.5,.3);blob(x+9,y-19,3.5,3.5,83,'#ffe58a',1.5,.3);blob(x,y-8,3,4,84,INK,0);
+  const ph=(now*.5)%1;ctx.globalAlpha=1-ph;otext('\u266A',x+18+ph*14,y-40-ph*30,18,'#ffe58a');ctx.globalAlpha=1;}
+ else{ln([[x-13,y-19],[x-5,y-18]],85,2.5,INK,.4);ln([[x+5,y-18],[x+13,y-19]],86,2.5,INK,.4);ln([[x-4,y-8],[x+4,y-8]],87,2.5,INK,.4);}
+ blob(x,y+2,38,11,88,'#ecd28b',2.5);}
+function drawCrab(){const {x}=CRAB,y=CRAB.y-(CRAB.hop>0?Math.sin(CRAB.hop/.5*Math.PI)*10:0);shadow(CRAB.x,CRAB.y+2,12,4);const w=Math.sin(now*14)*(CRAB.wait>0?0:1.5);
+ for(const sd of[-1,1])for(let i=0;i<3;i++)ln([[x+sd*6,y-3+i*2],[x+sd*(13+w),y+1+i*3]],90+i+(sd>0?5:0),2,INK,.3);
+ blob(x,y-4,11,7,95,'#ff6b6b',2.4,.6);blob(x,y-11,7,5,96,'#cfc8dc',2.2,.5);dot(x-3,y-12,.9,'#2a2140');dot(x+2,y-13,.9,'#2a2140');
+ ln([[x-4,y-6],[x-5,y-15]],97,1.8,INK,.2);ln([[x+4,y-6],[x+5,y-15]],98,1.8,INK,.2);dot(x-5,y-16,2.2);dot(x+5,y-16,2.2);}
+function drawGubbins(){const {x,y}=G;shadow(x,y+2,17,5);const sq=G.talk?Math.sin(now*16)*1.5:0;
+ ln([[x-16,y-34],[x-10,y-52],[x+10,y-52],[x+16,y-34]],100,2.6,INK,1);
+ sketch([[x-17,y-34-sq],[x+17,y-34-sq],[x+13,y],[x-13,y]],true,101,1.5,'#7fa8c9',INK,3);
+ blob(x,y-34-sq,17,5,102,'#5d86a8',2.6,.6);
+ ln([[x-13,y-12],[x+13,y-12]],103,2,'rgba(42,33,64,.35)',.6);
+ const lx=Math.max(-2,Math.min(2,(P.x-x)/40));blob(x-6,y-22-sq,5,5.5,104,'#fff',2,.4);blob(x+6,y-22-sq,5,5.5,105,'#fff',2,.4);dot(x-6+lx,y-21-sq,2);dot(x+6+lx,y-21-sq,2);
+ if(G.talk)blob(x,y-12,4,2+Math.abs(Math.sin(now*12))*3,106,INK,0);else ln([[x-4,y-12],[x+4,y-13]],107,2,INK,.3);}
+function drawPlayer(){drawChar(S.char||DEFAULT_LOOK,S.eq,P.x,P.y,P.face,P.moving,!!P.task&&!P.task.chop);if(P.task&&P.task.chop){const f=P.face,a=-1.1+(P.task.swing>0?(1-P.task.swing/.22)*2.2:0),hx=P.x+f*8,hy=P.y-20;ctx.save();ctx.translate(hx,hy);ctx.scale(f,1);ctx.rotate(a);ln([[0,0],[0,-20]],950,5,INK,.3);ln([[0,0],[0,-20]],950,2.6,'#d9cdb5',.3);sketch([[-2,-24],[8,-22],[6,-14],[0,-17]],true,951,.3,'#8a8494',INK,1.8);ctx.restore();}if(buffOn()){const ph=(now*.5)%1;ctx.globalAlpha=(1-ph)*.7;ln([[P.x+4,P.y-62-ph*24],[P.x+9,P.y-70-ph*24],[P.x+4,P.y-78-ph*24]],890,2.2,'#fff',.4);ctx.globalAlpha=1;}}
+function drawPlayerOld(){const {x,y}=P,f=P.face,mv=P.moving,b=mv?Math.abs(Math.sin(now*12))*3:Math.sin(now*2)*1;shadow(x,y+2,14,5);
+ if(mv){const s=Math.sin(now*12)*5;ln([[x-5,y-6],[x-5+s,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+5-s,y]],111,3.5,INK,.3);}else{ln([[x-5,y-6],[x-6,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+6,y]],111,3.5,INK,.3);}
+ blob(x,y-18-b,14,15,112,'#ff6b6b');
+ ln([[x-11*f,y-30-b],[x-19*f,y-27-b+Math.sin(now*6)*2]],113,4,'#ffcf3a',.6);
+ blob(x+f*3,y-27-b,10,9.5,114,'#ffd9b0',2.6);
+ ln([[x+f*3-10,y-31-b],[x+f*3,y-37-b],[x+f*3+10,y-31-b]],115,5,'#ffcf3a',.6);
+ dot(x+f*1,y-27-b,1.9);dot(x+f*7,y-27-b,1.9);
+ if(P.task)ln([[x-f*1,y-20-b],[x+f*10,y-18-b]],116,3,INK,.3);}
+function drawChar(a,eq,x,y,f,mv,fishing){
+ const K=KIN[a.kin]||KIN.human,skin=K.tones[a.tone]||K.tones[0],sh=SHAPES[a.shape]||SHAPES.bean,rx=sh[0],ry=sh[1],acc=ACCS[a.acc]||ACCS[0],hc=HAIRC[a.hc]||HAIRC[0];
+ const b=mv?Math.abs(Math.sin(now*12))*3:Math.sin(now*2);shadow(x,y+2,rx,5);
+ if(mv){const s=Math.sin(now*12)*5;ln([[x-5,y-6],[x-5+s,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+5-s,y]],111,3.5,INK,.3);}else{ln([[x-5,y-6],[x-6,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+6,y]],111,3.5,INK,.3);}
+ const by=y-ry-3-b,ny=by-ry+3,hx=x+f*2,hy=ny-9,coat=eq.body==='coat';
+ const sp=mv?10:4,w=Math.sin(now*sp)*(mv?2.5:1.2),w2=Math.sin(now*sp+1.3)*(mv?3.2:1.6),kx=x-f*rx*.55,ky=ny+1;
+ sketch([[kx,ky-2],[kx-f*9,ky+w],[kx-f*17,ky-2+w2],[kx-f*13,ky+3+w],[kx-f*19,ky+8+w2],[kx-f*8,ky+7+w],[kx,ky+4]],true,113,.4,acc,INK,2.2);
+ blob(x,by,rx,ry,112,coat?'#f2c230':(COLS[a.col]||COLS[0]));
+ if(coat){ln([[x+f*1,ny+3],[x+f*2,by+ry-3]],119,2,INK,.5);dot(x+f*5,by,1.6);dot(x+f*5,by+7,1.6);}
+ if(K.feat==='fins'){for(const sd of[-1,1])sketch([[hx+sd*8,hy-2],[hx+sd*17,hy-8],[hx+sd*14,hy+3]],true,120+sd,.6,skin,INK,2.2);}
+ blob(hx,hy,10,9.5,114,skin,2.6);
+ if(a.hair==='mop'){blob(hx-f*8,hy-2,4.5,5.5,121,hc,2.2,.4);blob(hx-f*2,hy-7,8,5.5,122,hc,2.3,.5);blob(hx+f*5,hy-7,6.5,5,123,hc,2.3,.5);ln([[hx+f*2,hy-4],[hx+f*4,hy-1]],124,2,INK,.2);}
+ else if(a.hair==='knot'){ln([[hx-9,hy-5],[hx,hy-9.5],[hx+9,hy-5]],125,4,hc,.4);blob(hx-f,hy-14,4.5,4,126,hc,2.2);}
+ else if(a.hair==='swoop')sketch([[-10,-3],[-8,-10],[2,-11],[11,-5],[4,-6]].map(p=>[hx+p[0]*f,hy+p[1]]),true,127,.6,hc,INK,2.4);
+ else if(a.hair==='braid'){blob(hx,hy-6,10.5,5,128,hc,2.4);ln([[hx-f*9,hy-2],[hx-f*14,hy+6],[hx-f*13,hy+14]],129,4,hc,.5);dot(hx-f*13,hy+15,2.2,'#b9b3c9');}
+ if(K.feat==='leaf'&&(eq.head==null||eq.head==='stache')){ln([[hx,hy-9],[hx+f*2,hy-15]],130,2.2,'#3f7f3a',.3);sketch([[hx+f*2,hy-15],[hx+f*10,hy-20],[hx+f*6,hy-13]],true,131,.5,'#6fbf4a',INK,2);}
+ if(K.feat==='glow'&&(eq.head==null||eq.head==='stache')){const fl=Math.sin(now*11)*1.5;blob(hx,hy-15,4,6+fl,132,'#ffb347',2,.5);dot(hx,hy-13,1.8,'#fff6a8');}
+ const e1=hx-2*f,e2=hx+4*f,ey=hy-.5;
+ if(a.eyes==='wide'){blob(e1,ey,3.2,3.4,133,'#fff',1.6,.2);blob(e2,ey,3.2,3.4,134,'#fff',1.6,.2);dot(e1+f*.8,ey,1.5);dot(e2+f*.8,ey,1.5);}
+ else if(a.eyes==='sleepy'){ln([[e1-2,ey],[e1+2,ey+.5]],135,2,INK,.2);ln([[e2-2,ey],[e2+2,ey+.5]],136,2,INK,.2);}
+ else if(a.eyes==='sly'){dot(e1,ey+.5,1.8);dot(e2,ey+.5,1.8);ln([[e1-2.5,ey-2.5],[e1+2.5,ey-1.5]],137,1.6,INK,.2);ln([[e2-2.5,ey-1.5],[e2+2.5,ey-2.5]],138,1.6,INK,.2);}
+ else{dot(e1,ey,1.9);dot(e2,ey,1.9);}
+ const mx=hx+f*6,my=hy+3.5;
+ if(a.mark==='freckles'){dot(mx-1,my,1,'#a0603a');dot(mx+1.5,my+1,1,'#a0603a');dot(hx-f*4,my,1,'#a0603a');}
+ else if(a.mark==='scar')ln([[hx-f*6,hy-5],[hx-f*2,hy+3]],139,1.6,'#c0504d',.2);
+ else if(a.mark==='star')star(mx,my-1,2.8,'#ffcf3a');
+ else if(a.mark==='moon'){ctx.globalAlpha=.7+.3*Math.sin(now*2);dot(mx,my,1.6,'#dff4ff');dot(mx-2,my+2,1.3,'#dff4ff');dot(hx-f*5,my,1.3,'#dff4ff');ctx.globalAlpha=1;}
+ sketch(rrPts(x-rx*.8,ny-3.5,rx*1.6,7.5,3.5),true,115,.5,acc,INK,2.4);
+ blob(kx,ky+.5,3.4,3.2,116,acc,2.2,.3);
+ if(eq.head==='stache')drawStache(hx+f*1.5,hy+3.8,1.1,Math.sin(now*3)*.6);
+ if(eq.head==='cap'){blob(hx,hy-7,11.5,6,140,'#9d97b0',2.4);dot(hx-4,hy-9,1.5,'#fff');dot(hx+3,hy-10,1.3,'#fff');dot(hx+6,hy-7,1.2,'#fff');}
+ else if(eq.head==='thimble'){sketch([[hx-10,hy-4],[hx-9,hy-12],[hx,hy-16],[hx+9,hy-12],[hx+10,hy-4]],true,141,.5,'#d6d0e2',INK,2.4);dot(hx-3,hy-10,1);dot(hx+2,hy-11,1);dot(hx+5,hy-8,1);dot(hx-6,hy-7,1);}
+ if(eq.hand==='gloves')blob(x+f*(rx-1),by+3,4.5,4,142,'#4f9a5a',2);
+ else if(fishing)ln([[x-f*1,by-1],[x+f*10,by+1]],143,3,INK,.3);
+ if(eq.trinket)dot(x-f*(rx*.4),by+ry*.5,2.4,'#ffcf3a');}
+function drawSpot(sp){let a=1;if(sp.type==='moon'){a=Math.min(1,(dark-.1)/.25);if(a<=.02)return;}ctx.save();ctx.globalAlpha=a;
+ if(sp.type==='deep')sketch(ell(sp.x,sp.y,36,17,14),true,sp.seed,3,'#2f8ea2',null);
+ if(sp.type==='moon'){const g=ctx.createRadialGradient(sp.x,sp.y,4,sp.x,sp.y,70);g.addColorStop(0,'rgba(225,238,255,.85)');g.addColorStop(1,'rgba(225,238,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(sp.x,sp.y,70,0,6.3);ctx.fill();
+  const t=now*.7;dot(sp.x+Math.cos(t)*18,sp.y+Math.sin(t)*8,4,'rgba(255,255,255,.8)');}
+ for(let k=0;k<3;k++){const ph=(now*.55+k/3+sp.seed*.1)%1,r=6+ph*28;ctx.globalAlpha=a*(1-ph)*.9;sketch(ell(sp.x,sp.y,r,r*.45,12),true,sp.seed+k,1.5,null,sp.type==='moon'?'#eaf2ff':'#fff',2.5);}
+ ctx.globalAlpha=a;for(let i=0;i<3;i++){const ph=(now*.8+i*.33+sp.seed)%1;dot(sp.x+Math.sin(i*2+sp.seed)*12,sp.y-ph*12,2.6*(1-ph)+.5,'#fff');}ctx.restore();}
+function drawDock(){for(const px of[DOCK.x0+60,DOCK.x0+130,DOCK.x1-6])for(const py of[DOCK.y0-2,DOCK.y1+2])blob(px,py+4,5,5,px+py,'#7a4f2c',2.4,.6);
+ sketch(rrPts(DOCK.x0,DOCK.y0,DOCK.x1-DOCK.x0,DOCK.y1-DOCK.y0,5),true,120,2,'#c98f56',INK,3);
+ for(let px=DOCK.x0+24;px<DOCK.x1-8;px+=24)ln([[px,DOCK.y0+3],[px+1,DOCK.y1-3]],121+px,2,'rgba(42,33,64,.55)',.8);}
+function drawLine(){const T=P.task;if(!T||T.chop)return;const f=P.face,tip=[P.x+f*30,P.y-54];const sp=T.sp;let bx=sp.x+(P.x-sp.x)*.18,by=sp.y+(P.y-sp.y)*.18;
+ ln([[P.x+f*8,P.y-18],[P.x+f*20,P.y-36],tip],130,4,'#a8703f',.8);
+ if(T.phase==='cast'){const k=Math.min(1,T.t/.5);bx=tip[0]+(bx-tip[0])*k;by=tip[1]+(by-tip[1])*k-Math.sin(k*Math.PI)*50;}
+ const bite=T.phase==='bite';if(bite)by+=5+Math.sin(now*40)*2;else if(T.phase!=='cast')by+=Math.sin(now*3)*1.5;
+ ctx.strokeStyle='rgba(42,33,64,.8)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(tip[0],tip[1]);ctx.quadraticCurveTo((tip[0]+bx)/2,Math.max(tip[1],by)+20,bx,by);ctx.stroke();
+ if(T.phase!=='reel'){blob(bx,by-3,4.5,4.5,131,'#fff',2,.3);ctx.save();ctx.beginPath();ctx.rect(bx-8,by-10,16,8);ctx.clip();blob(bx,by-3,4.5,4.5,131,'#ff6b6b',2,.3);ctx.restore();}
+ if(T.phase==='wait'&&S.eq.trinket==='whisper'&&T.t>T.wait-.5){const ph=(now*4)%1;for(let i=0;i<4;i++){const a=i*1.57+now*3;dot(bx+Math.cos(a)*(10+ph*6),by-3+Math.sin(a)*(5+ph*3),2,'#ffe58a');}}
+ if(bite){const ph=(T.t*3)%1;ctx.globalAlpha=1-ph;sketch(ell(bx,by,8+ph*22,(8+ph*22)*.45,10),true,132,1.2,null,'#fff',2.5);ctx.globalAlpha=1;}}
+function drawFly(){for(const f of flies){const k=Math.min(1,f.t/.6),x=f.x0+(P.x-f.x0)*k,y=f.y0+(P.y-34-f.y0)*k-Math.sin(k*Math.PI)*80,sc=k<1?1:1-(f.t-.6)/.15;if(sc<=0)continue;
+ ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(k<1?Math.sin(now*22)*.35:0);
+ if(f.id==='misc'){ctx.drawImage(iconImg(f.img),-14,-14,28,28);}else if(f.id==='bottle')sketch(rrPts(-6,-9,12,18,5),true,4,.6,'#9fd8b4',INK,2.2);else drawFish(f.id,0,0,1.05,P.x>f.x0?1:-1,f.col);ctx.restore();}}
+
+function render(){
+ ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#3fa7b8';ctx.fillRect(0,0,W,H);
+ ctx.save();ctx.translate(W/2,H/2);ctx.scale(Z,Z);ctx.translate(-cam.x,-cam.y);
+ const vw=W/Z/2+80,vh=H/Z/2+80;
+ ctx.globalAlpha=.5;for(const w of waves){const x=w.x+Math.sin(now*.6+w.s)*12,y=w.y;if(Math.abs(x-cam.x)>vw||Math.abs(y-cam.y)>vh)continue;ln([[x-10,y],[x,y-4],[x+10,y]],w.seed,2.5,'#fff',1);}ctx.globalAlpha=1;
+ sketch(shallowPts,true,3,6,'#5fbecb',null);
+ spots.forEach(drawSpot);
+ ctx.setLineDash([16,12]);ctx.lineDashOffset=-now*8;ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=3;ctx.beginPath();foamPts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.stroke();ctx.setLineDash([]);
+ sketch(sandPts,true,1,4,'#f3d27a',INK,3.5);
+ drawDock();
+ sketch(grassPts,true,2,4,'#86c25e',INK,3);
+ for(const t of tufts){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;if(t.f){dot(t.x,t.y,3.2,t.c>.5?'#ff8fb1':'#fff6a8');dot(t.x,t.y,1.2,'#ffcf3a');}else ln([[t.x-5,t.y-6],[t.x,t.y],[t.x+5,t.y-7]],t.seed,2,'#5a9a3f',.6);}
+ drawPickups();
+ if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
+ const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t)]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k)]));
+ d.push([POOL.y-40,drawPool],[GULL.y,drawGull],[SIGN.y,drawSign],[HEAD.y,drawHead],[CRAB.y,drawCrab],[G.y,drawGubbins],[P.y,drawPlayer]);allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr)]));if(KW.active)d.push([KW.y,drawKindle]);
+ d.sort((a,b)=>a[0]-b[0]).forEach(x=>{if(x[1]===drawPlayer){drawPlayer();drawLine();}else x[1]();});
+ drawFly();drawChopFX();if(C)drawCook();
+ if(S.eq.trinket==='blankmap'){ctx.strokeStyle='#fffbe0';ctx.lineWidth=2.2;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const tw=(Math.sin(now*3+o.x*.05)+1)/2,sx=o.x+o.r*.6,sy=o.y-o.r*.6,r=3+tw*3.5;
+  ctx.globalAlpha=.35+tw*.65;ctx.beginPath();ctx.moveTo(sx-r,sy);ctx.lineTo(sx+r,sy);ctx.moveTo(sx,sy-r);ctx.lineTo(sx,sy+r);ctx.stroke();}ctx.globalAlpha=1;}
+ ctx.restore();
+ if(dark>.01){dctx.setTransform(1,0,0,1,0,0);dctx.globalCompositeOperation='source-over';dctx.clearRect(0,0,dk.width,dk.height);dctx.fillStyle='rgba(22,17,62,'+dark+')';dctx.fillRect(0,0,dk.width,dk.height);
+  dctx.globalCompositeOperation='destination-out';const L=[[P.x,P.y-20,120+eff('light')+(S.char&&S.char.kin==='ember'?45:0)],[FIRE.x,FIRE.y-10,180+Math.sin(now*9)*8]];(S.fires||[]).forEach(f=>{if(fireLit(f))L.push([f.x,f.y-10,(f.big?250:160)+Math.sin(now*9+f.x)*6]);});if(dark>.15)L.push([MOON.x,MOON.y,140]);if(dark>.25)L.push([HEAD.x,HEAD.y-18,55]);
+  for(const [x,y,r] of L){const [sx,sy]=w2s(x,y),R=r*Z*DPR;const g=dctx.createRadialGradient(sx*DPR,sy*DPR,0,sx*DPR,sy*DPR,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.5,'rgba(0,0,0,.7)');g.addColorStop(1,'rgba(0,0,0,0)');dctx.fillStyle=g;dctx.beginPath();dctx.arc(sx*DPR,sy*DPR,R,0,6.3);dctx.fill();}
+  ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(dk,0,0);ctx.setTransform(DPR,0,0,DPR,0,0);}
+ ctx.save();ctx.translate(W/2,H/2);ctx.scale(Z,Z);ctx.translate(-cam.x,-cam.y);
+ if(P.task&&P.task.phase==='bite'){const s=1+Math.sin(now*20)*.12;ctx.save();ctx.translate(P.x,P.y-82);ctx.scale(s,s);otext('!',0,0,40,'#ffcf3a');ctx.restore();}
+ for(const p of pops){ctx.globalAlpha=p.t>1?1-(p.t-1)/.5:1;otext(p.txt,p.x,p.y-p.t*30,p.size,p.col);}ctx.globalAlpha=1;
+ if(bub){ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";const lines=wrap(bub.txt,210),lh=21,w=Math.max(...lines.map(l=>ctx.measureText(l).width))+26,h=lines.length*lh+16,bx=P.x-w/2,by=P.y-78-h;
+  ctx.globalAlpha=bub.t>3.9?1-(bub.t-3.9)/.5:Math.min(1,bub.t*6);blob(P.x+8,P.y-58,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,P.y-68,6,5,151,'#fffaf0',2,.3);
+  sketch(rrPts(bx,by,w,h,12),true,152,2,'#fffaf0',INK,2.6);ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,P.x,by+9+i*lh));ctx.globalAlpha=1;}
+ ctx.restore();
+ drawOrbsHUD();
+ if(cele){const k=cele.t,sc=k<.25?k/.25*1.1:k<.4?1.1-(k-.25)/.15*.1:1,a=k>2.7?1-(k-2.7)/.5:1;ctx.save();ctx.globalAlpha=Math.max(0,a);ctx.translate(W/2,Math.max(120,H*.24));ctx.scale(sc,sc);
+  const pts=[];for(let i=0;i<22;i++){const r=i%2?60:86,t=i/22*6.2832+k*.35;pts.push([Math.cos(t)*r*1.45,Math.sin(t)*r*.72]);}sketch(pts,true,77,5,'#ffcf3a',INK,4);
+  otext((cele.name||'Fishing')+' '+cele.l,0,-6,40,'#fff');otext(cele.msg,0,74,19,'#fff');ctx.restore();}
+ if(intro!=null){const k=intro,a=k<.5?k/.5:k>2.4?1-(k-2.4)/.8:1;ctx.globalAlpha=Math.max(0,a);otext('Tidecrown',W/2,H*.3,50,'#fff');otext('Driftwood Key, somewhere in the Lantern Sea',W/2,H*.3+42,19,'#fff');ctx.globalAlpha=1;}
+}
+
+/* ---------- skills, xp orbs, hearth ---------- */
+let buffT=0,buffQ=null;const buffb=$('buffb');
+function buffUI(){const B=buffOn();if(!B||C||ccOn){buffb.style.display='none';return;}const D=BUFF[B.q],left=(B.until-Date.now())/1000,p=Math.max(0,Math.min(100,left/(B.dur||D.dur)*100));
+ buffb.style.display='block';buffb.style.setProperty('--p',p.toFixed(1));buffb.classList.toggle('low',left<30);if(buffQ!==B.q){buffQ=B.q;buffb.querySelector('img').src=icon('ck_minnow_'+B.q);}}
+buffb.onclick=()=>{const B=buffOn();if(!B)return;const left=Math.ceil((B.until-Date.now())/1000);toast('Well fed: '+BUFF[B.q].txt+'. '+Math.floor(left/60)+'m '+String(left%60).padStart(2,'0')+'s left');};
+let ddSel=null,skView=null,curWho='',guideT=2;
+function hearthGuide(){if(!S.hearth||(S.st.cooked||0)>0||C||ccOn||dlgOn||S.hint<3)return;if(hintEl.classList.contains('on')&&hintEl.textContent===HINTS[S.hint])return;
+ const t=rawCount()?'Tap Old Wick to cook your catch.':'Catch a fish, then bring it to Old Wick.';if(hintEl.textContent!==t||!hintEl.classList.contains('on'))hint(t);}
+const HUNLOCK={3:'You can build your own fires',5:'A second pan by the fire',6:'Something on the beach starts blinking at night',10:'A third pan by the fire',15:'Kelp flares burn longer',20:'Your golden window widens'};
+const SUNLOCK={3:'Wobblewood burns longer in your fires',8:'Wobble trees sway slower for you',12:'Wick has a project in mind for your wood'};
+const SKILLS={
+ fishing:{name:'Fishing',icon:'rod',col:'#6fd6ff',desc:'Patience and a quick hand. The Lantern Sea feeds those who wait, and every catch pulls you a little further out.',xp:()=>S.xp,unl:UNLOCK},
+ shipwright:{name:'Shipwright',icon:'hatchet',col:'#a8d07e',desc:'It starts with a hatchet and a tree that sighs. Wood becomes fire, then tools, then a hull. Every voyage begins with a log.',xp:()=>S.sx||0,unl:SUNLOCK},
+ hearth:{name:'Hearth',icon:'flame',col:'#ffb347',desc:'Keep a fire, keep a crew. Juggle the heat, flip at golden, and a catch becomes strength for everything else.',xp:()=>S.hx||0,unl:HUNLOCK}};
+const HIDDEN=[['hearth','It starts with a spark. Someone on this island is very hungry.'],['shipwright','Ask the wobble trees.'],['delving','Something is buried under your feet.'],['grit','Not everything out there is friendly. Yet.'],['sailing','Past the last lighthouse.']];
+function hasSkill(k){return k==='fishing'||(k==='hearth'&&!!S.hearth)||(k==='shipwright'&&!!S.shipwright);}
+const ACH={
+ shipwright:[['Sharp idea','Lash together a hatchet',()=>!!S.shipwright],['First log','Earn a log from a wobble tree',()=>!!S.journal.wobblelog],['In the groove','Land 10 clean chops in a row',()=>!!S.st.groove],['Bonfire','Build a bonfire',()=>!!S.journal.bonfire],['Ember pearl','Find an ember pearl in the ashes',()=>!!S.journal.pearl]],
+ fishing:[['First bite','Catch your first fish',()=>S.catches>=1],['Steady hand','Land 10 perfect catches',()=>(S.st.perf||0)>=10],['Wild water','Catch a Grumpfish',()=>!!S.journal.fish_grump],['Letters from C.','Find a message in a bottle',()=>S.bottles>=1],['Moonlit','Catch a Moonkoi',()=>!!S.journal.fish_koi]],
+ hearth:[['Kindled','Feed Old Wick',()=>!!S.hearth],['Golden','Cook a fish golden on both sides',()=>(S.st.perfC||0)>=1],['Smoke signals','Discover smoky fish',()=>!!S.journal.smoky],['Three pans','Keep three pans going at once',()=>!!S.st.pans3],['Keeper of flames','Build three fires of your own',()=>(S.fires||[]).length>=3]]};
+const QN={under:'Underdone',good:'Cooked',perfect:'Golden',smoky:'Smoky',charred:'Charred'};
+const QCOL={under:'#efd2b0',good:'#e0a245',perfect:'#f5bf45',smoky:'#b9773d',charred:'#4a3a3a'};
+const QV={under:1,good:2,perfect:3,smoky:3,charred:.5};
+const QD={under:'Still a bit see-through. Your stomach has opinions.',good:'Flaky and warm. Eat it to steady your hands: bites hang on longer.',perfect:'Golden on both sides. Eat it and your timing gets sharper for a good while.',smoky:'Kissed by kelp smoke. The smell on your hands makes fish bite sooner.',charred:'Crunchy. Regrettable. Gubbins might still eat it.'};
+const BUFF={good:{win:100,dur:180,txt:'bites hang on longer'},perfect:{win:160,perfect:.06,dur:300,txt:'sharper timing, longer bites'},smoky:{wait:.8,dur:240,txt:'fish bite sooner'}};
+const CXP={minnow:15,perch:25,grump:45,eel:65,koi:140},CK={minnow:1.2,perch:1,grump:.85,eel:.8,koi:.7};
+function xpOf(k){return k==='fishing'?S.xp:k==='hearth'?(S.hx||0):(S.sx||0);}
+function sl(){return lvl(S.sx||0);}
+function hl(){return lvl(S.hx||0);}
+function rawCount(){return S.inv.filter(i=>FISH[i.id]).length;}
+function buffOn(){return S.buff&&S.buff.until>Date.now()?S.buff:null;}
+
+/* skill pages */
+function skBar(k){const D=SKILLS[k],x=D.xp(),L=lvl(x),c=XP[L],n=XP[L+1]||c,pct=L>=99?100:(x-c)/(n-c)*100;
+ return `<img src="${icon(D.icon)}" alt=""><div class="m"><div class="top"><b>${D.name}</b><span>Level ${L}</span></div><div class="bar"><i style="width:${pct.toFixed(1)}%;background:${D.col}"></i></div><small>${L>=99?'Mastered':Math.ceil(n-x)+' xp to level '+(L+1)}</small></div>`;}
+function skillCard(k){return `<button class="skill skb" data-skp="${k}">${skBar(k)}<span class="chev">›</span></button>`;}
+function dxb(key,img,ok,badge){return `<button class="dx${ddSel===key?' sel':''}" data-dd="${key}" aria-label="Details"><img class="${ok?'':'sil'}" src="${img}" alt="">${badge||''}</button>`;}
+function discHTML(k){
+ if(k==='shipwright')return ['hatchet','wobble','charcoal','seasalt','pearl','sunstone'].map(id=>dxb('x:'+id,icon(id),id==='hatchet'?S.shipwright:id==='wobble'?S.journal.wobblelog:S.journal[id])).join('');
+ if(k==='fishing')return Object.keys(FISH).map(id=>dxb('f:'+id,icon(id),S.journal['fish_'+id])).join('')+dxb('bottle',icon('bottle'),S.bottles,`<i>${S.bottles||0}/3</i>`);
+ const ck=(S.st&&S.st.ck)||{};
+ return Object.keys(FISH).map(id=>dxb('c:'+id,icon('ck_'+id+'_good'),ck[id])).join('')+dxb('gold',icon('ck_minnow_perfect'),S.journal.perfectcook)+dxb('smoky',icon('ck_minnow_smoky'),S.journal.smoky);}
+const WHERE={shallow:'bubbling water',deep:'the wild water by the north rocks',moon:'the glowing pool, only after dark'};
+function ddText(key){const st=S.st||{},fc=st.fc||{},fp=st.fp||{},cc=st.cc||{};
+ if(key.startsWith('x:')){const id=key.slice(2),M=MISC[id],got=id==='hatchet'?S.shipwright:id==='wobble'?S.journal.wobblelog:S.journal[id];
+  if(!got)return {hatchet:'<b>???</b><br>Something sharp, something to hold, something to tie them.',wobble:'<b>???</b><br>The wobble trees are holding onto something.',charcoal:'<b>???</b><br>Some fires leave more than ash.',seasalt:'<b>???</b><br>Some fires leave more than ash.',sunstone:'<b>???</b><br>Only the longest, hottest fires leave this behind.',pearl:'<b>???</b><br>Some fires leave more than ash. Rarely.'}[id];
+  const extra=id==='wobble'?` Chopped ${st.logs||0}. You carry ${S.wobble||0}.`:id==='hatchet'?' Keep it in your pack to chop.':` Found ${(st.found||{})[id]||0}.`;return `<b>${M.name}</b><br>${M.desc}${extra}`;}
+ if(key==='bottle')return `<b>Letters from C.</b><br>${S.bottles||0} of 3 found. They tangle on your line in the shallows. Read them from your pack.`;
+ if(key==='gold'){const n=st.perfC||0;return S.journal.perfectcook?`<b>Golden</b><br>Gold band on both sides. Eat one for sharper timing and longer bites, 5 min. Made ${n}.`:`<b>Golden</b><br>Flip and plate while the marker sits in the gold band. Not made yet.`;}
+ if(key==='smoky'){const n=Object.values(cc).reduce((a,c)=>a+(c.s||0),0);return S.journal.smoky?`<b>Smoky</b><br>Cooked mostly over a kelp flare. Eat one and fish bite sooner, 4 min. Made ${n}.`:`<b>Something smoky</b><br>Wick keeps muttering about kelp and smoke.`;}
+ const [t,id]=key.split(':'),F=FISH[id];
+ if(t==='f'){if(!S.journal['fish_'+id])return `<b>Unknown fish</b><br>Bites in ${WHERE[F.spot]}${F.lvl>1?' once you reach Fishing '+F.lvl:''}.`;
+  return `<b>${F.name}</b><br>Caught ${fc[id]||0}${fp[id]?', '+fp[id]+' perfect':''}. Found in ${WHERE[F.spot]}. Gubbins pays ${F.val} shell${F.val>1?'s':''}.`;}
+ const c=cc[id];if(!c||!(st.ck||{})[id])return `<b>Not cooked yet</b><br>${S.journal['fish_'+id]?'Bring a '+F.name+' to a fire.':'Catch it first. The sea is hiding this one.'}`;
+ const parts=[c.g?c.g+' golden':'',c.s?c.s+' smoky':'',c.c?c.c+' charred':''].filter(Boolean).join(', ');
+ return `<b>Cooked ${F.name}</b><br>Cooked ${c.n}${parts?': '+parts:''}. Eat for longer bites, 3 min. Sells for ${Math.ceil(F.val*2)}+ shells.`;}
+function skillPage(k){const D=SKILLS[k],L=lvl(D.xp()),B=buffOn();
+ let h=`<button class="back2" data-skb="1">‹ All skills</button><div class="skill">${skBar(k)}</div><p class="sdesc${ddSel?' dd':''}">${ddSel?ddText(ddSel):D.desc}</p><div class="sh">Discoveries</div><div class="disc">${discHTML(k)}</div><div class="sh">Achievements</div><div class="ach">`;
+ h+=ACH[k].map(([n,d,f])=>{const ok=f();return `<div class="${ok?'ok':''}"><span class="ck">${ok?'✓':''}</span><b>${n}</b><small>${d}</small></div>`;}).join('')+'</div>';
+ const nl=Object.keys(D.unl).map(Number).sort((a,b)=>a-b).find(l=>l>L);
+ h+=`<div class="next">${nl?`At level ${nl}: ${D.unl[nl].charAt(0).toLowerCase()+D.unl[nl].slice(1)}.`:'Every secret this skill holds, you’ve heard. For now.'}`+
+  (k==='fishing'&&B&&BUFF[B.q]?`<br><span class="muted">Well fed: ${BUFF[B.q].txt}, ${Math.ceil((B.until-Date.now())/60000)}m left</span>`:'')+
+  (k==='hearth'?`<br><span class="muted">Fires lit: ${(S.fires||[]).length}. Fish cooked: ${S.st.cooked||0}.</span>`:'')+'</div>';
+ return h;}
+
+/* xp orbs + level bar */
+const probe=document.createElement('div');probe.style.cssText='position:fixed;top:0;left:0;padding-top:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none';document.body.appendChild(probe);
+let satC=null;function SAT(){if(satC==null)satC=parseFloat(getComputedStyle(probe).paddingTop)||0;return satC;}
+addEventListener('resize',()=>{satC=null;});
+const HUD={sk:null,a:0,disp:0,hold:0,glint:-1,plus:0,plusT:0,bump:0};let orbs=[];
+function barGeo(){const w=Math.min(230,W*.56);return{x:(W-w)/2+14,y:SAT()+16,w,h:15};}
+function fracOf(x){const L=lvl(x),c=XP[L],n=XP[L+1]||c;return L>=99?1:(x-c)/(n-c);}
+function barTarget(){const g=barGeo();return[g.x+g.w*Math.max(.03,fracOf(HUD.disp)),g.y+g.h/2];}
+function pendingSum(k){return orbs.filter(o=>o.sk===k).reduce((s,o)=>s+o.v,0);}
+function nearestSecret(){let best=null,bd=900;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const d=Math.hypot(o.x-P.x,o.y-P.y);if(d<bd&&d>70){bd=d;best=o;}}
+ if(dark>.3&&!S.journal.moonpool){const d=Math.hypot(MOON.x-P.x,MOON.y-P.y);if(d<bd)best=MOON;}return best;}
+function addXP(k,n,kind,src){const before=xpOf(k);if(k==='fishing')S.xp+=n;else if(k==='hearth')S.hx=(S.hx||0)+n;else S.sx=(S.sx||0)+n;
+ if(HUD.sk!==k){HUD.sk=k;HUD.disp=before-pendingSum(k);HUD.plus=0;}
+ const s0=w2s(src[0],src[1]),m=Math.max(2,Math.min(5,Math.round(n/14)+1)),bag=[W-42,H-42];
+ let wh=-1,wt=null;if((kind==='normal'||kind==='perfect')&&Math.random()<.35){const t=nearestSecret();if(t){wh=Math.floor(Math.random()*m);wt=w2s(t.x,t.y);wt=[Math.max(30,Math.min(W-30,wt[0])),Math.max(80,Math.min(H-80,wt[1]))];}}
+ for(let i=0;i<m;i++){const r=Math.random,sx=s0[0]+(r()-.5)*16,sy=s0[1]+(r()-.5)*10;let kd=kind,pts,dur=1+r()*.35;
+  if(i===wh){kd='whisper';pts=[[sx,sy],[(sx+wt[0])/2,Math.min(sy,wt[1])-40],wt,[wt[0]+12,wt[1]-8],[wt[0]-6,wt[1]+6],wt,[(wt[0]+W/2)/2,wt[1]/2]];dur=3.2;}
+  else if(kd==='perfect'){const a0=r()*6.28,R=30;pts=[[sx,sy]];for(let j=1;j<=5;j++){const a=a0+j*1.57;pts.push([sx+Math.cos(a)*R,sy-16+Math.sin(a)*R*.75]);}pts.push([sx+(r()-.5)*40,sy-100]);dur=1.7;}
+  else if(kd==='first'){pts=[[sx,sy],[(sx+bag[0])/2+(r()-.5)*40,Math.max(sy,bag[1])-30],bag,[bag[0]-50-r()*30,bag[1]-150]];dur=1.9;}
+  else if(kd==='burnt'){pts=[[sx,sy],[sx+(r()-.5)*70,sy-50]];dur=2.1;}
+  else pts=[[sx,sy],[sx+(r()-.5)*130,sy-60-r()*90]];
+  orbs.push({sk:k,v:n/m,kind:kd,pts,t:-i*.07,dur,trail:[],x:sx,y:sy});}}
+function cr(a,b,c,d,t){const t2=t*t,t3=t2*t;return[0,1].map(j=>.5*(2*b[j]+(-a[j]+c[j])*t+(2*a[j]-5*b[j]+4*c[j]-d[j])*t2+(-a[j]+3*b[j]-3*c[j]+d[j])*t3));}
+function pathAt(Q,u){const n=Q.length-1,f=Math.min(n-1e-6,Math.max(0,u)*n),i=Math.floor(f),t=f-i;return cr(Q[Math.max(0,i-1)],Q[i],Q[i+1],Q[Math.min(n,i+2)],t);}
+function updOrbs(dt){for(const o of orbs){o.t+=dt;if(o.t<0)continue;const k=Math.min(1,o.t/o.dur),u=(o.kind==='normal'||o.kind==='smoky')?Math.pow(k,1.5):k*k*(3-2*k);
+  const p=pathAt(o.pts.concat([barTarget()]),u);if(o.kind==='burnt')p[0]+=Math.sin(o.t*18)*8*(1-k);
+  o.trail.unshift([o.x,o.y]);if(o.trail.length>(o.kind==='smoky'?5:2))o.trail.pop();o.x=p[0];o.y=p[1];if(k>=1){o.hit=true;orbHit(o);}}
+ orbs=orbs.filter(o=>!o.hit);
+ if(HUD.sk&&!orbs.some(o=>o.sk===HUD.sk))HUD.disp=xpOf(HUD.sk);
+ HUD.hold-=dt;HUD.plusT-=dt;if(HUD.plusT<=0)HUD.plus=0;if(HUD.glint>=0){HUD.glint+=dt*2.6;if(HUD.glint>1)HUD.glint=-1;}HUD.bump=Math.max(0,HUD.bump-dt*4);
+ const show=HUD.sk&&(orbs.length||HUD.hold>0);HUD.a+=((show?1:0)-HUD.a)*Math.min(1,dt*7);}
+function orbHit(o){if(HUD.sk!==o.sk)return;const L0=lvl(HUD.disp+.001);HUD.disp+=o.v;HUD.glint=0;HUD.plus+=o.v;HUD.plusT=1.4;HUD.hold=2.2;HUD.bump=1;
+ const L1=lvl(HUD.disp+.001);if(L1>L0){const D=SKILLS[o.sk];cele={t:0,l:L1,name:D.name,msg:D.unl[L1]||'You feel a little steadier'};}}
+function drawOrbsHUD(){
+ for(const o of orbs){if(o.t<0)continue;const col=o.kind==='perfect'?'#ffeab0':o.kind==='burnt'?'#8a8494':o.kind==='whisper'?'#eaf2ff':o.kind==='smoky'?'#e2c9a8':(o.sk==='hearth'?'#ffd2a1':'#bfeaf6');
+  o.trail.forEach((q,i)=>{ctx.globalAlpha=(o.kind==='smoky'?.25:.3)*(1-i/o.trail.length);dot(q[0],q[1],o.kind==='smoky'?5-i*.4:Math.max(.6,3-i*.6),o.kind==='smoky'?'#b8aa9a':col);});
+  ctx.globalAlpha=o.kind==='whisper'?.3+.5*Math.abs(Math.sin(o.t*9)):.8;
+  const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,8);g.addColorStop(0,col);g.addColorStop(1,'rgba(255,255,255,0)');ctx.globalAlpha*=.6;ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,8,0,6.3);ctx.fill();ctx.globalAlpha/=.6;
+  star(o.x,o.y,3.6,col);dot(o.x,o.y,1.1,'#fff');ctx.globalAlpha=1;}
+ if(HUD.a<.02||!HUD.sk)return;const g=barGeo(),D=SKILLS[HUD.sk],y=g.y-(1-HUD.a)*70,L=lvl(HUD.disp+.001),fr=fracOf(HUD.disp+.001),bp=HUD.bump;
+ ctx.save();ctx.globalAlpha=Math.min(1,HUD.a*1.4);
+ sketch(rrPts(g.x-3,y-3,g.w+6,g.h+6,8),true,601,1.5,'#fffaf0',INK,3);
+ ctx.save();ctx.beginPath();ctx.rect(g.x,y,g.w*fr,g.h);ctx.clip();ctx.fillStyle=D.col;ctx.fillRect(g.x,y,g.w,g.h);
+ if(bp>0){ctx.fillStyle=`rgba(255,255,255,${bp*.35})`;ctx.fillRect(g.x,y,g.w,g.h);}
+ if(HUD.glint>=0){const gx=g.x+g.w*fr*HUD.glint;ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.moveTo(gx-8,y+g.h);ctx.lineTo(gx+2,y);ctx.lineTo(gx+10,y);ctx.lineTo(gx,y+g.h);ctx.fill();}
+ ctx.restore();
+ if(fr>.06)ln([[g.x+4,y+4],[g.x+g.w*fr-4,y+4]],602,2,'rgba(255,255,255,.55)',.3);
+ const ix=g.x-22,iy=y+g.h/2;blob(ix,iy,15+bp*2,15+bp*2,603,D.col,3,1);
+ if(HUD.sk==='hearth'){blob(ix,iy-1,5.5,8.5,604,'#ff8a3d',2,.4);dot(ix,iy+2,2,'#fff6a8');}
+ else if(HUD.sk==='shipwright'){ln([[ix-5,iy+7],[ix+4,iy-6]],608,2.6,'#a8703f',.3);sketch([[ix+1,iy-8],[ix+8,iy-5],[ix+5,iy+1]],true,609,.3,'#c9c3d6',INK,1.6);}
+ else{ln([[ix-6,iy+7],[ix+5,iy-7]],605,2.5,'#7a4f2c',.3);ln([[ix+5,iy-7],[ix+6,iy+3]],607,1.2,INK,.2);blob(ix+6,iy+5,3.2,3.2,606,'#ff6b6b',1.8,.2);}
+ otext(String(L),g.x+g.w+18,iy,22,'#fff');
+ if(HUD.plus>0){ctx.globalAlpha=Math.min(1,HUD.plusT)*HUD.a;otext('+'+Math.round(HUD.plus)+' '+D.name,g.x+g.w/2,y+g.h+18,17,'#fff');}
+ ctx.restore();}
+
+/* hearth: fires, fuel, Old Wick */
+const MAINFIRE={x:FIRE.x,y:FIRE.y,main:true,seed:0};
+function allFires(){return [MAINFIRE].concat((S.fires||[]).map((f,i)=>{if(!f.seed)f.seed=10+i;return f;}));}
+const PICK=[];{const r=mulberry(77);let i=0;
+ while(PICK.length<10&&i<400){i++;const a=r()*6.2832,p=polar(a,iR(a)-24-r()*16);if(Math.hypot(p[0]-(R0-25),p[1])<90||Math.hypot(p[0]-MOON.ax,p[1]-MOON.ay)<40)continue;if(PICK.some(q=>Math.hypot(q.x-p[0],q.y-p[1])<130))continue;PICK.push({x:p[0],y:p[1],type:'wood',seed:600+i,rot:r()*3,until:0});}
+ [-2.05,-1.65,-2.6,-2.2,Math.PI+.28,Math.PI-.32].forEach((a,j)=>{const p=polar(a,iR(a)-20);PICK.push({x:p[0],y:p[1],type:'kelp',seed:700+j,rot:0,until:0});});}
+function pickUp(p){if(p.until>now)return;const k=p.type;if(!canAdd(k)){think('No room in my pack for more '+(k==='wood'?'driftwood.':'kelp.'));return;}
+ S[k]=(S[k]||0)+1;p.until=now+90+Math.random()*60;pop('+1 '+(k==='wood'?'driftwood':'dry kelp'),p.x,p.y-30,'#fff',17);discover(k==='wood'?'driftwood':'kelp');save();}
+function drawAsh(){for(const a of (S.ashp||[])){if(Math.abs(a.x-cam.x)>W/Z/2+60||Math.abs(a.y-cam.y)>H/Z/2+60)continue;const r=10+a.n*2;
+ blob(a.x,a.y,r,r*.5,980+a.n,'#b8b2c4',2.4,.8);blob(a.x-2,a.y-2,r*.55,r*.25,981,'#cdc8d6',0,.5);for(let i=0;i<a.n+2;i++)dot(a.x-r*.6+((i*37)%(r*1.2)),a.y-1+((i*13)%5)-2,1.3,'#5a5266');
+ (a.items||[]).forEach((id,j)=>{const gx=a.x-5+j*7,gy=a.y-4,tw=.5+.5*Math.sin(now*4+j);if(id==='sunstone'){ctx.globalAlpha=.6+.4*tw;dot(gx,gy,6,'rgba(255,207,58,.45)');dot(gx,gy,3,'#ffcf3a');ctx.globalAlpha=1;}else if(id==='charcoal')dot(gx,gy,3,'#2a2430');else if(id==='seasalt'){ctx.globalAlpha=.6+.4*tw;star(gx,gy,3.4,'#ffffff');ctx.globalAlpha=1;}else{ctx.globalAlpha=.6+.4*tw;dot(gx,gy,4.5,'rgba(255,180,90,.5)');dot(gx,gy,2.6,'#ffb347');ctx.globalAlpha=1;}});}}
+const DESPAWN=180000;
+function dropGround(it){S.ground=S.ground||[];const k=S.ground.filter(g=>Math.hypot(g.x-P.x,g.y-P.y)<30).length,a=k*1.3;S.ground.push({x:P.x+Math.cos(a)*14*(k?1:0)+P.face*10,y:P.y+6+Math.sin(a)*8*(k?1:0),it:Object.assign({},it),exp:Date.now()+DESPAWN});save();}
+function pickGround(g){const i=(S.ground||[]).indexOf(g);if(i<0)return;const it=g.it,n=it.n||1;
+ if(STACK[it.id]){const got=addItem(it.id,n);if(!got){think('No room in my pack.');return;}if(got<n){it.n=n-got;think('My pack only fit some of it.');}else S.ground.splice(i,1);}
+ else{if(S.inv.length>=PACK){think('No room in my pack.');return;}const c=Object.assign({},it);delete c.n;S.inv.push(c);S.ground.splice(i,1);}
+ flies.push({id:'misc',img:iconKey(it),x0:g.x,y0:g.y,t:0});save();}
+function iconKey(it){return it.id==='shells'?'shell':it.id==='cook'?'ck_'+it.f+'_'+it.q:it.id;}
+function drawGround(){const T=Date.now();for(const g of (S.ground||[])){if(Math.abs(g.x-cam.x)>W/Z/2+60||Math.abs(g.y-cam.y)>H/Z/2+60)continue;const left=g.exp-T;if(left<20000&&Math.floor(now*5)%2)continue;
+ shadow(g.x,g.y+2,10,3.5);ctx.drawImage(iconImg(iconKey(g.it)),g.x-12,g.y-20+Math.sin(now*2+g.x)*1.2,24,24);if((g.it.n||1)>1)otext(String(g.it.n),g.x+11,g.y-2,12,'#fff');}}
+function drawGull(){const {x,y}=GULL,b=Math.sin(now*2.2)*1.2,talk=(dlgOn&&curWho==='Mortimer Gull')||bankOpen;
+ shadow(x,y+3,14,4);ln([[x,y],[x,y-26]],1001,8,INK,.6);ln([[x,y],[x,y-26]],1001,4.5,'#a8703f',.6);sketch(rrPts(x-17,y-22,34,13,3),true,1002,1,'#e8d6b0',INK,2.4);ln([[x-10,y-16],[x+9,y-16]],1003,1.8,INK,.8);
+ const gy=y-38+b;ln([[x-3,y-27],[x-3,gy+8]],1004,1.8,'#e8a23a',.2);ln([[x+3,y-27],[x+3,gy+8]],1005,1.8,'#e8a23a',.2);
+ blob(x,gy,13,10,1006,'#fbfbff',2.6,.8);sketch([[x-11,gy-3],[x-1,gy-2],[x-6,gy+6]],true,1007,.4,'#c9c3d6',INK,2);
+ blob(x+8,gy-11,7,6.5,1008,'#fbfbff',2.4,.4);dot(x+10,gy-12,1.5);sketch([[x+13,gy-11],[x+21,gy-9+(talk?Math.abs(Math.sin(now*14))*2:0)],[x+13,gy-8]],true,1009,.2,'#ffcf3a',INK,1.8);
+ sketch([[x+2,gy-15],[x+15,gy-15],[x+17,gy-12],[x+4,gy-13]],true,1010,.3,'#5fae6a',INK,1.8);}
+function talkGull(){discover('gullbank');say('Mortimer Gull',S.metGull?pick(['SQUAWK. Ahem. Still here. Still counting.','Your things are safe. We already stole them once, no need to do it twice.','The Gull Post never closes. We tried closing once. Someone stole the door.']):'SQUAWK. Ahem. Mortimer Gull, the Gull Post. Leave anything with us and it’s safe. Gulls steal everything, so nobody steals from gulls. Very secure.',
+ [{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'Can you come to me?',f:()=>say('Mortimer Gull','Gulls don’t make house calls. Unless there’s something crunchy in it for us. Find me something truly crunchy and we’ll talk.',[{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'See you',f:closeDlg}])},{l:'See you',f:closeDlg}]);S.metGull=1;}
+function drawPickups(){drawGround();drawAsh();for(const p of PICK){if(p.until>now)continue;if(Math.abs(p.x-cam.x)>W/Z/2+60||Math.abs(p.y-cam.y)>H/Z/2+60)continue;
+ if(p.type==='wood'){const c=Math.cos(p.rot),s=Math.sin(p.rot)*.4,a=[p.x-c*16,p.y-s*16],b=[p.x+c*16,p.y+s*16];shadow(p.x,p.y+3,16,4);ln([a,b],p.seed,9,INK,1);ln([a,b],p.seed,5.5,'#d9cdb5',1);ln([[p.x-c*3,p.y-s*3-1],[p.x+c*6,p.y+s*6-6]],p.seed+1,2.4,INK,.4);}
+ else{for(let i=-1;i<=1;i++)ln([[p.x+i*7,p.y+4],[p.x+i*7+4,p.y-4],[p.x+i*7-2,p.y-10]],p.seed+i,3.2,'#5f6b3a',.8);}}}
+function drawFireAt(fr){if(fr.big){ctx.save();ctx.translate(fr.x,fr.y);ctx.scale(1.45,1.45);ctx.translate(-fr.x,-fr.y);drawFireBody(fr);ctx.restore();}else drawFireBody(fr);}
+function drawFireBody(fr){const {x,y}=fr,sd=(fr.seed||0)*7,hot=C&&C.fr===fr?C.heat:lifeHeat(fr);shadow(x,y+3,22,6);
+ if(!fr.main&&!fireLit(fr))return;
+ if(C&&C.fr===fr&&C.out){blob(x,y,22,9,985,'#b8b2c4',2.4,.8);for(let i=0;i<4;i++)dot(x-12+i*8,y-1+(i%2)*2,1.3,'#5a5266');const ph=(now*.6)%1;ctx.globalAlpha=.8;blob(x,y-30-Math.sin(now*2)*3,10,13,986,'#e4e0ea',2,.9);dot(x-3.5,y-32-Math.sin(now*2)*3,1.7);dot(x+3.5,y-32-Math.sin(now*2)*3,1.7);ctx.globalAlpha=(1-ph)*.5;ln([[x,y-44-ph*20],[x+5,y-52-ph*20],[x-2,y-60-ph*20]],987,2.4,'#cfc8dc',.4);ctx.globalAlpha=1;return;}
+ ln([[x-18,y+2],[x+16,y-6]],70+sd,8,INK,1);ln([[x-18,y+2],[x+16,y-6]],70+sd,4.5,'#9a6236',1);ln([[x-16,y-6],[x+18,y+2]],71+sd,8,INK,1);ln([[x-16,y-6],[x+18,y+2]],71+sd,4.5,'#a8703f',1);
+ const ck=C&&C.fr===fr,f=Math.sin(now*13+sd)*2.5*(.5+hot),fh=ck?16+hot*30:6+hot*19,fw=ck?8+hot*6:6+hot*7,fy=y-4-fh*.55-(ck?14:0);
+ blob(x,fy,fw+3,fh+f,72+sd,hot<.4?'#d9553a':'#ff8a3d',2.5);blob(x+1,fy+fh*.3,fw*.55,fh*.55+f*.6,73+sd,hot>1?'#fff6d0':'#ffd23f',0);
+ const sp=(now*.9+sd)%1;dot(x+Math.sin(now*3+sd)*6,fy-fh-sp*26,2*(1-sp),'#ffcf3a');
+ if(hot>1&&Math.random()<.4)sparks.push({x:x+(Math.random()-.5)*12,y:fy-fh*.6,vx:(Math.random()-.5)*50,vy:-70-Math.random()*60,t:0});
+ if(fr.main){const ey=ck?fy-fh*.35:fy+1;
+  if(!S.metWick){ln([[x-7,ey],[x-3,ey+1]],74,2,INK,.2);ln([[x+3,ey+1],[x+7,ey]],75,2,INK,.2);const zp=(now*.5)%1;ctx.globalAlpha=1-zp;otext('z',x+12+zp*10,fy-fh-zp*20,14,'#fff');ctx.globalAlpha=1;}
+  else{dot(x-4,ey,2);dot(x+4,ey,2);const talking=(C&&C.fr===fr&&C.sayT>0)||(dlgOn&&curWho==='Old Wick');
+   if(talking)blob(x,ey+6,2.6,1.4+Math.abs(Math.sin(now*14))*2.2,76,INK,0);else ln([[x-3,ey+6],[x+3,ey+5.5]],77,1.8,INK,.2);}}}
+function talkWick(){const first=!S.metWick;S.metWick=1;discover('wick');
+ if(!S.hearth){say('Old Wick',first?'Hm? Oh! Company. Name’s Old Wick. Forty years I was the galley stove of the Grinning Gull, till she went down and I floated here in a teapot. Long story. Look, I’m starving. Bring me driftwood from the beach and I’ll teach you the Hearth.':
+  ((S.wood||0)>0?'Is that driftwood I smell? Don’t tease a stove.':'Still starving. Driftwood. Please. Flames don’t usually beg.'),wickOpts());return;}
+ if(!rawCount()){say('Old Wick',pick(['Nothing to cook? The sea’s full of fish. Catch one and bring it here.','Empty hands, empty pans. Go fish, then tap me.']),wickOpts());return;}
+ say('Old Wick',pick(['Back! Bring me something to sizzle?','Crackle crackle. That’s hello, in stove.','The Gull’s cook used to sing to me. You don’t have to. Please don’t.']),wickOpts());}
+const WTIPS=['Smoke does strange things to fish. Throw on some kelp and let the flare ride.','Two pans is a dance. Three is a brawl. Both are fun. Want a third sooner? Build bigger.','Every fire dies if you starve it. What’s left is ash, and ash is never nothing. Ask me about it.','Our captain wrote letters and tossed them overboard. Signed them just C. Never did learn the rest.','Golden on both sides. That’s the whole secret. That, and not wandering off.'];
+function wickOpts(){const o=[];
+ if(!S.hearth){if((S.wood||0)>0)o.push({l:'Feed him driftwood',f:feedWick});else o.push({l:'Where’s driftwood?',f:()=>say('Old Wick','On the beach, all round the island. Bleached grey, looks like old bones. Tastes like heaven.',wickOpts())});o.push({l:'See you',f:closeDlg});return o;}
+ const n=rawCount();if(n)o.push({l:'Cook ('+n+' raw fish)',f:()=>{closeDlg();goCook(MAINFIRE);}});
+ if((S.ash||0)>0)o.push({l:'About this ash...',f:ashTalk});
+ if(S.kindle&&S.kindle.seen&&!S.kindle.joined)o.push({l:'A log ran away from me',f:()=>say('Old Wick','A runaway log? That’s a Kindle! Wild ones spook easy, but they can’t resist a fire at night. Light one of your own, keep it fed past dark, and bring something tasty. Kindles eat ash, the weirdos. Takes a few nights before they trust you.',wickOpts())});
+ o.push({l:'Any tips?',f:()=>{const i=Math.floor(Math.random()*WTIPS.length);if(i===3)discover('gull');say('Old Wick',WTIPS[i],wickOpts());}});o.push({l:'See you',f:closeDlg});return o;}
+function feedWick(){S.wood--;S.hearth=1;discover('hearth');save();addXP('hearth',20,'first',[FIRE.x,FIRE.y-24]);toast('New skill: Hearth');
+ say('Old Wick','Ahhh. That’s the stuff. Lesson one: a fire is a promise. Keep it fed and it keeps you. Put a fish on, flip it when it goes golden, pull it when the other side matches. Driftwood burns steady, kelp burns wild. I’ll holler if you’re doing it wrong. '+(rawCount()?'You’ve got fish on you. Let’s cook!':'Now go catch me a fish and come back. A Minnowbit will do.'),wickOpts());}
+function ashTalk(){const a=S.ash||0;
+ if(S.owned.stache){say('Old Wick','Ash keeps. Hang onto it. I’ve got more tricks, once there’s more fire in you.',wickOpts());return;}
+ if(a<10){say('Old Wick','Ash! Wonderful stuff. The Gull’s head cook could do things with ash that’d make a grown bucket weep. Bring me ten scoops. You’ve got '+a+'.',wickOpts());return;}
+ if(S.inv.length>=PACK){say('Old Wick','Ten scoops! Make some room in that satchel first, this is going to be glorious.',wickOpts());return;}
+ S.ash-=10;S.owned.stache=1;S.inv.push({id:'stache'});discover('stache');toast('Found: Ash Mustache');save();
+ say('Old Wick','Hold still. A pinch here. A braid there. Little curl... THERE. The head cook’s own mustache, braided proper. Wear it with pride. Gubbins is going to lose his mind.',wickOpts());}
+const KW={active:false,x:0,y:0,tx:0,ty:0,mode:'beach',flee:false,f:null};
+function beachSpot(){const a=Math.random()*6.2832;return polar(a,iR(a)-30);}
+function kindleTick(){const k=S.kindle||(S.kindle={trust:0,lastNight:-1,joined:0,hops:0,seen:0});
+ if(k.joined||!S.hearth||hl()<6||dark<.3||C){KW.active=false;return;}
+ const lit=(S.fires||[]).filter(fireLit);
+ if(lit.length){const f=lit.reduce((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)<=Math.hypot(b.x-P.x,b.y-P.y)?a:b);
+  if(!KW.active){const sp=beachSpot();KW.x=sp[0];KW.y=sp[1];}if(KW.f!==f||KW.mode!=='fire'){KW.f=f;KW.mode='fire';const c=clampLand(f.x+40,f.y+18);KW.tx=c[0];KW.ty=c[1];KW.flee=false;}}
+ else if(!KW.active||KW.mode!=='beach'){const sp=beachSpot();KW.x=KW.tx=sp[0];KW.y=KW.ty=sp[1];KW.mode='beach';KW.f=null;}
+ KW.active=true;}
+function kindleMove(dt){if(!KW.active)return;const dx=KW.tx-KW.x,dy=KW.ty-KW.y,d=Math.hypot(dx,dy);if(d<1){KW.flee=false;return;}const sp=Math.min(d,(KW.flee?170:45)*dt);KW.x+=dx/d*sp;KW.y+=dy/d*sp;}
+function spookKindle(){const c=clampLand(KW.x-22,KW.y+6);routeTo(c[0],c[1],()=>{if(!KW.active||KW.mode!=='beach')return;const k=S.kindle;
+ pop('!',KW.x,KW.y-30,'#ffcf3a',26);let sp;for(let i=0;i<12;i++){sp=beachSpot();if(Math.hypot(sp[0]-KW.x,sp[1]-KW.y)>260)break;}KW.tx=sp[0];KW.ty=sp[1];KW.flee=true;
+ think(k.seen?'He bolts again. Wick said something about fire and nighttime.':'The driftwood blinked. Then it ran away on tiny legs.');k.seen=1;discover('kindleseen');save();});}
+function offerAsh(){const c=clampLand(KW.x-26,KW.y+6);routeTo(c[0],c[1],()=>{const k=S.kindle;k.seen=1;discover('kindleseen');
+ if(k.lastNight===(S.dayN||0)){think('He’s had his ash tonight. Snoring like a tiny kettle.');return;}
+ if(!((S.ash||0)>0)){think('He keeps eyeing the ash at the edge of my fire. Maybe he eats it?');return;}
+ S.ash--;k.trust++;k.lastNight=S.dayN||0;pop('♥',KW.x,KW.y-30,'#ff8fb1',22);
+ if(k.trust>=3){k.joined=1;k.hops=4;KW.active=false;discover('kindle');toast('Kindle joined your woodpile');think('Kindle hops into my woodpile like he owns it. I think he does now.');addXP('hearth',60,'first',[KW.x,KW.y]);}
+ else think(k.trust===1?'Crunch. He eats the ash and scoots a little closer to the fire. Same time tomorrow night?':'He eats it and leans against my boot. One more night, I think.');save();});}
+function drawKindle(){const {x,y}=KW,mv=Math.hypot(KW.tx-x,KW.ty-y)>3,b=mv?Math.abs(Math.sin(now*16))*3:0,f=KW.mode==='fire'&&!mv?(KW.f&&KW.f.x<x?-1:1):(KW.tx<x?-1:1);shadow(x,y+2,16,4);
+ if(mv){const s2=Math.sin(now*16)*4;ln([[x-6,y-4],[x-6+s2,y]],990,2,INK,.2);ln([[x+6,y-4],[x+6-s2,y]],991,2,INK,.2);}
+ const yy=y-7-b;ln([[x-15,yy],[x+15,yy-2]],992,10,INK,.8);ln([[x-15,yy],[x+15,yy-2]],992,6.5,'#d9cdb5',.8);
+ const blink=(now%3.2)<.15,ex=x+f*6;if(blink){ln([[ex-3,yy-2],[ex-1,yy-2]],994,1.6,INK,.1);ln([[ex+2,yy-2],[ex+4,yy-2]],995,1.6,INK,.1);}else{dot(ex-2,yy-2,1.6);dot(ex+3,yy-2.3,1.6);}
+ if(S.kindle&&S.kindle.lastNight===(S.dayN||0)&&!mv&&KW.mode==='fire'){const zp=(now*.5)%1;ctx.globalAlpha=1-zp;otext('z',x+10+zp*8,yy-12-zp*16,12,'#fff');ctx.globalAlpha=1;}}
+let chips=[];
+function chopPer(){return sl()>=8?1.25:1.05;}
+function chopTree(t){if(!hasHatchet()){discover('tree');think('I’d need a hatchet. Something sharp, something to hold, something to tie them together.');return;}
+ if((t.rest||0)>now){think('This one needs a breather. It’s sighing at me.');return;}
+ const side=P.x<t.x?-1:1,c=clampLand(t.x+side*26,t.y+6);routeTo(c[0],c[1],()=>startChop(t));}
+function startChop(t){if((t.rest||0)>now)return;if(!canAdd('wobble')){think('My pack is full. Nowhere to put a log.');return;}P.task={chop:1,tree:t,t0:now,prog:0,combo:0,miss:0,swing:0};P.face=t.x>P.x?1:-1;
+ if(!S.chopHint){S.chopHint=1;hint('Tap as the ring closes on the trunk. Keep the rhythm.',7000);}}
+function beatPh(T){return((now-T.t0)/chopPer())%1;}
+function strike(){const T=P.task;T.swing=.22;const ph=beatPh(T),e=Math.min(ph,1-ph)*chopPer(),win=.11+Math.min(.06,sl()*.003),t=T.tree,cx=t.x+t.lean*.4*t.s,cy=t.y-24*t.s;
+ const chip=n=>{for(let i=0;i<n;i++)chips.push({x:cx,y:cy,vx:(Math.random()-.5)*120,vy:-60-Math.random()*90,t:0});};
+ if(e<win){T.combo++;T.prog+=1+Math.min(T.combo,6)*.15;chip(8);if(T.combo>=10)S.st.groove=1;}
+ else if(e<win*2.2){T.prog+=.5;chip(4);}
+ else{T.combo=0;T.miss++;T.prog+=.15;pop('thunk',cx,cy-20,'#fff',15);}
+ if(T.prog>=6)finishChop();}
+function finishChop(){const T=P.task,t=T.tree;if(!canAdd('wobble')){P.task=null;think('My pack filled up. The tree keeps its log.');return;}S.wobble+=1;S.st.logs=(S.st.logs||0)+1;const first=!S.journal.wobblelog;
+ addXP('shipwright',T.miss?18:24,first?'first':(T.miss?'normal':'perfect'),[t.x,t.y-30]);flies.push({id:'misc',img:'wobble',x0:t.x,y0:t.y-30,t:0});discover('wobblelog');
+ t.rest=now+45;P.task=null;think(pick(['The tree sighs and lets a log drop. Thanks, tree.','A log falls loose. The tree seems relieved, honestly.','It shudders, then drops a log at my feet.']));save();}
+function drawChopFX(){const T=P.task;if(T&&T.chop){const t=T.tree,cx=t.x+t.lean*.4*t.s+Math.cos(Math.PI*(now-T.t0)/chopPer())*5*t.s,cy=t.y-24*t.s,ph=beatPh(T),r=12+(1-ph)*30;
+  ctx.globalAlpha=.25+ph*.6;sketch(ell(cx,cy,r,r*.8,16),true,940,1,null,'#fffaf0',3);ctx.globalAlpha=1;
+  if(T.combo>1){otext('x'+T.combo,cx+26,cy-30,15,'#fff');}
+  T.swing=Math.max(0,T.swing-1/60);}
+ chips=chips.filter(c=>(c.t+=1/60)<.7);for(const c of chips){c.x+=c.vx/60;c.y+=c.vy/60;c.vy+=6;ctx.globalAlpha=1-c.t/.7;dot(c.x,c.y,2,'#d9cdb5');}ctx.globalAlpha=1;}
+function fireLit(fr){return fr.main||(fr.until||0)>Date.now();}
+function addAsh(x,y,n,items){S.ashp=S.ashp||[];const a=S.ashp.find(q=>Math.hypot(q.x-x,q.y-y)<30);if(a){a.n=Math.min(9,a.n+n);a.items=(a.items||[]).concat(items||[]);}else S.ashp.push({x,y,n,items:items||[]});save();}
+function scoopAsh(a){const i=(S.ashp||[]).indexOf(a);if(i<0)return;if(a.n>0&&!canAdd('ash',a.n)){think('No room in my pack for the ash.');return;}S.ash=(S.ash||0)+a.n;pop('+'+a.n+' ash',a.x,a.y-26,'#fff',17);discover('ash');
+ const left=[];(a.items||[]).forEach(id=>{if(canAdd(id)){addItem(id);S.st.found=S.st.found||{};S.st.found[id]=(S.st.found[id]||0)+1;flies.push({id:'misc',img:id,x0:a.x,y0:a.y,t:0});discover(id);}else left.push(id);});
+ if(left.length){a.n=0;a.items=left;think('Something else is in the ash, but my satchel is full.');}else S.ashp.splice(i,1);save();
+ if(!S.ashHint&&S.metWick){S.ashHint=1;setTimeout(()=>think('Old Wick got weirdly excited about ash once. Maybe ask him.'),900);}}
+function feedFire(fr,kind){const c=clampLand(fr.x+34,fr.y+16);routeTo(c[0],c[1],()=>{const nm={wood:'driftwood',wobble:'wobblewood',charcoal:'charcoal'}[kind];if(!(cnt(kind)>0)){think('No '+nm+' on me.');return;}takeItem(kind);fr.fuel=fr.fuel||{};fr.fuel[kind]=(fr.fuel[kind]||0)+1;
+ const mins=kind==='wood'?4:kind==='charcoal'?3:(sl()>=3?10:8),add=mins*60000,cap=(fr.big?45:30)*60000;fr.mins=(fr.mins||8)+mins;fr.until=Math.min(Date.now()+cap,Math.max(fr.until,Date.now())+add);pop('+ '+nm,fr.x,fr.y-40,'#fff',16);save();});}
+function lifeHeat(fr){if(fr.main)return .6;const rem=(fr.until-Date.now())/60000,f=fr.fuel||{};let v=Math.min(1,.22+rem/7)+(f.charcoal?.15:0)+(f.wobble?.08:0)+(fr.big?.1:0);if(rem<1)v=.18+.22*Math.abs(Math.sin(now*6+fr.seed)*Math.sin(now*2.3));return v;}
+function burnOut(fr){const i=(S.fires||[]).indexOf(fr);if(i<0)return;S.fires.splice(i,1);const f=fr.fuel||{wood:3},items=[],mins=fr.mins||(fr.big?20:8);
+ const heatF=1+.25*(f.wobble||0)+.5*(f.charcoal||0)+.1*(f.kelp||0)+(fr.big?.5:0)+(fr.hot||0)/120,score=mins*heatF,R=Math.random;
+ if(R()<Math.min(.6,score/60))items.push('charcoal');if((f.kelp||0)>0&&R()<Math.min(.7,.15*f.kelp+score/200))items.push('seasalt');
+ if((f.wobble||0)>0&&R()<Math.min(.4,score/150))items.push('pearl');if(score>80&&R()<Math.min(.25,(score-80)/300))items.push('sunstone');
+ addAsh(fr.x,fr.y,Math.min(9,1+Math.floor(mins/6)),items);save();}
+function searchRocks(k){const c=clampLand(k.x,k.y);routeTo(c[0],c[1],()=>{discover('rocks');if(!S.owned.flint&&!S.owned.hatchet){if(S.inv.length>=PACK){think('Something sharp is wedged in here, but my satchel is full.');return;}S.owned.flint=1;S.inv.push({id:'flint'});flies.push({id:'misc',img:'flint',x0:k.x,y0:k.y,t:0});discover('flint');think('One of these has a wicked edge. Flint!');save();}
+ else think(pick(['Barnacles, and a crab-shaped dent. Nothing else.','Just wet rock. The flint was a one-off.']));});}
+
+function tapFire(fr){if(!fr.main&&!fireLit(fr))return;if(fr.main&&(!S.hearth||!rawCount())){routeTo(fr.x-34,fr.y+26,talkWick);return;}
+ if(!S.hearth){think('A fire. Strange, it seems to know me.');return;}
+ if(!rawCount()){think('Nothing raw to cook. The sea has plenty.');return;}goCook(fr);}
+function goCook(fr){const c=clampLand(fr.x+88,fr.y-34);routeTo(c[0],c[1],()=>enterCook(fr));}
+function buildFire(x,y,big){if(!onIsland(x,y)){think('Not here.');return;}if(allFires().some(f=>Math.hypot(f.x-x,f.y-y)<(big?140:110))){think('Too close to another fire.');return;}
+ const needW=big?2:3,needB=big?2:0;if((S.wood||0)<needW||(S.wobble||0)<needB){think(big?'A bonfire needs 2 wobblewood and 2 driftwood.':'I need 3 driftwood to build a fire.');return;}if((S.fires||[]).length>=5){think('Five fires is plenty. Wick says so.');return;}
+ const c=clampLand(x+(big?44:34),y+16);routeTo(c[0],c[1],()=>{if((S.wood||0)<needW||(S.wobble||0)<needB)return;S.wood-=needW;S.wobble-=needB;S.fires=S.fires||[];
+  S.fires.push({x,y,seed:10+S.fires.length,big:!!big,until:Date.now()+(big?20:8)*60000,mins:big?20:8,fuel:big?{wood:2,wobble:2}:{wood:3}});addXP('hearth',big?40:25,S.journal.firstfire?'normal':'first',[x,y-10]);discover('firstfire');if(big)discover('bonfire');save();});}
+
+/* cooking */
+let C=null,sparks=[];const cookbar=$('cookbar'),cookinfo=$('cookinfo');
+function pz(){return .82-Math.min(20,hl())*.004;}function bT(){return 1.12+Math.min(30,hl())*.006;}
+function endCookBurn(){const fr=C.fr;exitCook();burnOut(fr);hint('The fire burned out. Only ash is left.',5000);}
+function enterCook(fr){if(!S.hearth)return;const L=hl(),n=Math.min(3,1+(L>=5?1:0)+(L>=10?1:0)+(fr.big?1:0));
+ C={fr,base:.55,flare:0,feed:0,heat:.55,pans:Array.from({length:n},()=>({f:null})),say:'',sayT:0,zone:'sweet'};
+ P.face=-1;P.path=[];P.task=null;cookbar.style.display='flex';bag.style.display='none';buffb.style.display='none';fwood.querySelector('img').src=icon('wood');fkelp.querySelector('img').src=icon('kelp');fuelUI();hintEl.classList.remove('on');closeCtx();
+ if(!S.cookHint){S.cookHint=1;hint('Tap a pan to add a fish. Tap it again to flip, once more to plate. Tap the woodpile to feed the fire.',9000);}}
+function exitCook(){if(!C)return;C.pans.forEach(p=>{if(p.f)finishPan(p);});C=null;cookbar.style.display='none';bag.style.display='';save();}
+$('cookx').onclick=exitCook;
+function panPos(i,n){return [[[0,-2]],[[-32,0],[32,0]],[[-58,4],[0,-4],[58,4]]][n-1][i];}
+function sideQ(d){return d<.6?'under':d>bT()?'burnt':(d>=pz()&&d<=1)?'perfect':'good';}
+function mixC(a,b,t){t=Math.max(0,Math.min(1,t));const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),m=sh=>Math.round(((A>>sh)&255)+(((B>>sh)&255)-((A>>sh)&255))*t);return'#'+((1<<24)+(m(16)<<16)+(m(8)<<8)+m(0)).toString(16).slice(1);}
+function doneCol(f,d){if(d<.8)return mixC(FISH[f].col,'#e8b04a',d/.8);if(d<=1)return'#f0b444';const b=bT();if(d<b)return mixC('#f0b444','#9a5a2a',(d-1)/(b-1));return mixC('#9a5a2a','#2e2626',(d-b)/.25);}
+function cookUpdate(dt){const L=hl();C.flare=Math.max(0,C.flare-dt*(L>=15?.09:.12));C.base=Math.max(.12,C.base-dt*(C.fr.big?.018:.028));
+ if(!C.fr.main){C.fr.until-=dt*1500;if(C.heat>.95)C.fr.hot=(C.fr.hot||0)+dt;if(!fireLit(C.fr)){endCookBurn();return;}}
+ if(C.feed>0){const a=Math.min(C.feed,dt*.2);C.base+=a;C.feed-=a;}C.base=Math.min(1.15,C.base);C.heat=C.out?0:Math.min(1.4,C.base+C.flare);
+ if(!C.out&&C.heat<.03&&C.feed<=0){C.outT=(C.outT||0)+dt;if(C.outT>1.2){C.outT=0;if(!C.fr.main){endCookBurn();return;}C.out=true;C.base=0;C.flare=0;addAsh(C.fr.x-34,C.fr.y+16,1);
+  C.say='...I’m out. Driftwood. Please.';C.sayT=3;hint('Wick went out. Add driftwood to relight him.',5000);}}else if(!C.out)C.outT=0;
+ let warn=false;for(const p of C.pans){if(p.flipT>0)p.flipT-=dt;if(!p.f)continue;p.d[p.side]+=.15*Math.pow(C.heat,1.2)*CK[p.f]*dt;p.tot+=dt;if(C.flare>.15)p.fl+=dt;const d=p.d[p.side];if(d>1&&d<bT())warn=true;}
+ C.sayT-=dt;const z=C.heat<.4?'cold':C.heat>.95?'hot':'sweet';
+ if(C.fr.main&&C.sayT<=0){let t=null;if(warn)t=pick(['Flip it! Flip it!','That one’s ready!','Golden! Move!']);
+  else if(z!==C.zone)t=z==='cold'?pick(['Feed me!','I’m fading here.','Wood! Wood!']):z==='hot'?pick(['Too hot, too hot!','Whoa, easy!','I’m scorching everything!']):pick(['Lovely.','Now that’s cooking.','Mm, just right.']);
+  if(t){C.say=t;C.sayT=2.4;}}C.zone=z;
+ const n=rawCount(),txt=n+' raw fish';if(cookinfo.textContent!==txt)cookinfo.textContent=txt;
+ const kd=S.kindle;if(kd&&kd.joined&&!C.kh&&(S.wood||0)>0){C.kcd=(C.kcd||0)-dt;if(C.kcd<=0&&(C.out||C.base+C.feed<.18)){if(!(kd.hops>0)&&(S.ash||0)>0){S.ash--;kd.hops=2;pop('Kindle munches some ash',C.fr.x-56,C.fr.y+24,'#fff',14);}if(kd.hops>0){kd.hops--;C.kcd=6;C.kh={t:0};}}}
+ if(C.kh){C.kh.t+=dt;if(C.kh.t>=.6){C.kh=null;fuel('wood',true);}}
+ fuelUI();}
+const fwood=$('fwood'),fkelp=$('fkelp');
+function cookZoom(){return Math.max(1.4,Math.min(2.3,(W/2/96)/ZB,(H/2/108)/ZB));}
+function fuelUI(){for(const [b,k] of [[fwood,'wood'],[fkelp,'kelp']]){const n=S[k]||0,t=String(n),bb=b.querySelector('b');if(bb.textContent!==t)bb.textContent=t;b.classList.toggle('empty',!n);}{const kd=S.kindle,on=!!(kd&&kd.joined);fwood.classList.toggle('auto',on);if(on){const t=kd.hops>0?'Kindle '+kd.hops:((S.ash||0)>0?'Kindle':'Kindle zzz'),e=fwood.querySelector('.kd');if(e.textContent!==t)e.textContent=t;}}}
+function fuel(k,auto){if(!C)return;if(!((S[k]||0)>0)){if(!auto)pop(k==='wood'?'No driftwood left':'No dry kelp left',C.fr.x,C.fr.y-60,'#fff',15);return;}
+ if(C.out&&k==='kelp'){pop('Kelp won’t catch on cold coals',C.fr.x,C.fr.y-60,'#fff',15);return;}
+ S[k]--;if(C.out&&k==='wood'){C.out=false;C.base=.22;if(C.fr.main){C.say='Ahh. Back from the dead.';C.sayT=2.4;}}
+ if(!C.fr.main){C.fr.fuel=C.fr.fuel||{};C.fr.fuel[k]=(C.fr.fuel[k]||0)+1;C.fr.mins=(C.fr.mins||8)+(k==='wood'?4:1);}if(k==='wood'){C.feed+=.32;if(!C.fr.main)C.fr.until=Math.min(Date.now()+20*60000,Math.max(C.fr.until||0,Date.now())+4*60000);}else C.flare+=.5;if(auto)discover('kindle');
+ for(let i=0;i<7;i++)sparks.push({x:C.fr.x+(Math.random()-.5)*14,y:C.fr.y-16,vx:(Math.random()-.5)*60,vy:-60-Math.random()*80,t:0});
+ const b=k==='wood'?fwood:fkelp;b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),120);fuelUI();}
+fwood.onclick=()=>fuel('wood');fkelp.onclick=()=>fuel('kelp');
+function panTap(i){const p=C.pans[i];
+ if(!p.f){const idx=S.inv.findIndex(it=>FISH[it.id]);if(idx<0){pop('No raw fish',C.fr.x,C.fr.y+30,'#fff',17);return;}
+  const it=S.inv.splice(idx,1)[0];Object.assign(p,{f:it.id,side:0,d:[0,0],tot:0,fl:0,flipT:0});if(C.pans.filter(q=>q.f).length>=3)S.st.pans3=1;return;}
+ if(p.side===0){p.side=1;p.flipT=.35;return;}finishPan(p);}
+function finishPan(p){const a=sideQ(p.d[0]),b=sideQ(p.d[1]);let q=(a==='burnt'||b==='burnt')?'charred':(a==='under'||b==='under')?'under':(a==='perfect'&&b==='perfect')?'perfect':'good';
+ const gold=q==='perfect',smoky=(q==='good'||gold)&&p.tot>0&&p.fl/p.tot>.4;if(smoky)q='smoky';
+ S.st.cc=S.st.cc||{};const cs=S.st.cc[p.f]=S.st.cc[p.f]||{n:0,g:0,s:0,c:0};cs.n++;if(gold)cs.g++;if(smoky)cs.s++;if(q==='charred')cs.c++;
+ S.st.ck=S.st.ck||{};const okCook=q!=='charred'&&q!=='under',first=okCook&&!S.st.ck[p.f];if(okCook)S.st.ck[p.f]=1;
+ let xp=CXP[p.f];if(q==='under')xp*=.3;if(q==='charred')xp=2;if(gold)xp*=1.5;if(smoky)xp*=1.25;xp=Math.max(1,Math.round(xp));
+ S.inv.push({id:'cook',f:p.f,q});S.st.cooked=(S.st.cooked||0)+1;if(gold)S.st.perfC=(S.st.perfC||0)+1;
+ const i=C.pans.indexOf(p),pp=panPos(i,C.pans.length),wx=C.fr.x+pp[0],wy=C.fr.y+pp[1];
+ addXP('hearth',xp,q==='charred'?'burnt':smoky?'smoky':gold?'perfect':first?'first':'normal',[wx,wy]);
+ flies.push({id:p.f,x0:wx,y0:wy-4,t:0,col:QCOL[q]});
+ if(gold)discover('perfectcook');if(smoky)discover('smoky');p.f=null;save();}
+function cookTap(sx,sy){const [wx,wy]=s2w(sx,sy),{x,y}=C.fr,n=C.pans.length;
+ for(let i=0;i<n;i++){const [dx,dy]=panPos(i,n);if(Math.hypot(wx-x-dx,(wy-y-dy)*1.3)<30){panTap(i);return;}}
+  if(Math.hypot(wx-x,wy-y+44)<26)fuel((S.wood||0)>0?'wood':'kelp');}
+function drawCook(){const {x,y}=C.fr,n=C.pans.length,h=C.heat;
+ if(C.kh){const k=C.kh.t/.6,kx=x-80+(74*k),ky=y+40-(52*k)-Math.sin(k*Math.PI)*46;ctx.save();ctx.translate(kx,ky);ctx.rotate(k*5);
+  ln([[-9,0],[9,0]],960,10,INK,.6);ln([[-9,0],[9,0]],960,6.5,'#d9cdb5',.6);dot(-2,-1,1.3);dot(3,-1,1.3);ln([[-4,4],[-6,9]],961,1.8,INK,.2);ln([[4,4],[6,9]],962,1.8,INK,.2);ctx.restore();}
+ const gx=x,gy=y-112,R=24,A=v=>Math.PI+Math.min(1.4,Math.max(0,v))/1.4*Math.PI;
+ ctx.lineCap='round';ctx.strokeStyle=INK;ctx.lineWidth=11;ctx.beginPath();ctx.arc(gx,gy,R,Math.PI,2*Math.PI);ctx.stroke();
+ for(const [a,b,c] of [[0,.4,'#9fc4d8'],[.4,.95,'#ffcf3a'],[.95,1.4,'#ff6b4a']]){ctx.strokeStyle=c;ctx.lineWidth=6;ctx.beginPath();ctx.arc(gx,gy,R,A(a)+.03,A(b)-.03);ctx.stroke();}
+ const na=A(h);ln([[gx,gy],[gx+Math.cos(na)*(R+3),gy+Math.sin(na)*(R+3)]],820,3,INK,.3);dot(gx,gy,3.5);
+ C.pans.forEach((p,i)=>{const [dx,dy]=panPos(i,n),px=x+dx,py=y+dy;
+  if(dx!==0){ln([[px-18,py+12],[px+18,py+6]],880+i,7,INK,.8);ln([[px-18,py+12],[px+18,py+6]],880+i,3.8,'#9a6236',.8);}
+  const fl=Math.sin(now*13+i*2)*2*(.5+h);
+  if(!C.out)for(const [ox,sc] of [[-20,.85],[20,.85],[-8,1],[8,1]]){const fh2=(8+h*15)*sc;blob(px+ox,py-2-fh2*.45,(5+h*3)*sc,fh2+fl,890+i*4+ox,h<.4?'#d9553a':'#ff8a3d',2.2,.6);if(h>.4)blob(px+ox,py-fh2*.3,(2.5+h*1.5)*sc,fh2*.5,895+i*4+ox,'#ffd23f',0,.4);}
+  blob(px,py+3,22,13,840+i,'#4a4458',3,.8);blob(px,py+2,16,8,850+i,'#5d5670',0,.6);
+  if(!C.out)for(const ox of[-14,0,14]){const th=4+h*7+Math.sin(now*15+ox+i)*1.5;blob(px+ox,py+14-th*.5,3+h*1.5,th,900+i*3+ox,h<.4?'#d9553a':'#ff9a4a',1.8,.4);}
+  ln([[px,py+13],[px+(dx>=0?4:-4),py+28]],830+i,4.5,INK,.4);
+  const rx=27,ry=17,a0=-Math.PI/2,ang=d=>a0+Math.min(1.3,Math.max(0,d))/1.3*2*Math.PI;
+  const arc=(a,b,c,w)=>{ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.ellipse(px,py+2,rx,ry,0,ang(a),ang(b));ctx.stroke();};
+  ctx.lineCap='butt';arc(0,1.3,'rgba(42,33,64,.22)',4);
+  if(p.f){arc(.6,pz(),'#a6d07e',4);arc(pz(),1,'#ffcf3a',6);arc(1,bT(),'#e0a245',4);arc(bT(),1.3,'#e05a4a',4);
+   const d=p.d[p.side],a=ang(d);dot(px+Math.cos(a)*rx,py+2+Math.sin(a)*ry,5);dot(px+Math.cos(a)*rx,py+2+Math.sin(a)*ry,2.4,'#fff');
+   for(let s2=0;s2<2;s2++)blob(px-11+s2*22,py+26,3,3,860+s2,s2<p.side?'#ffcf3a':'#fffaf0',1.5,.2);
+   const fp=p.flipT>0?Math.cos((1-p.flipT/.35)*Math.PI):1;ctx.save();ctx.translate(px,py);ctx.scale(1,Math.max(.12,Math.abs(fp)));drawFish(p.f,0,0,.9,(p.side?-1:1)*(fp<0?-1:1),doneCol(p.f,d));ctx.restore();
+   if(h>.35&&Math.random()<h*.25)sparks.push({x:px+(Math.random()-.5)*20,y:py-6,vx:(Math.random()-.5)*10,vy:-26,t:0,steam:1});
+   if(d>bT()&&Math.random()<.3)sparks.push({x:px+(Math.random()-.5)*14,y:py-8,vx:(Math.random()-.5)*8,vy:-20,t:0,smoke:1});}
+  else{ctx.globalAlpha=.55+.3*Math.sin(now*3);otext(rawCount()?'+':'-',px,py+1,22,'#fffaf0');ctx.globalAlpha=1;}});
+ ctx.lineCap='round';
+ sparks=sparks.filter(s=>(s.t+=1/60)<(s.smoke?1.4:s.steam?.9:.8));
+ for(const s of sparks){s.x+=s.vx/60;s.y+=s.vy/60;const life=s.smoke?1.4:s.steam?.9:.8;ctx.globalAlpha=(1-s.t/life)*(s.steam?.6:1);dot(s.x,s.y,s.smoke?3+s.t*5:s.steam?2+s.t*3:1.8,s.smoke?'#5a5266':s.steam?'#fff':'#ffcf3a');}ctx.globalAlpha=1;
+ if(C.fr.main&&C.sayT>0){ctx.font="16px 'Patrick Hand','Comic Sans MS',cursive";const w=ctx.measureText(C.say).width+22,bx=x-w/2,by=y-176;ctx.globalAlpha=Math.min(1,C.sayT*3);
+  sketch(rrPts(bx,by,w,27,10),true,870,1.5,'#fffaf0',INK,2.4);ln([[x-5,by+26],[x,by+34],[x+6,by+26]],871,2.2,INK,.3);ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(C.say,bx+w/2,by+14);ctx.globalAlpha=1;}}
+/* ---------- character creation ---------- */
+let ccOn=false,ccMode='new',ccStep=1,draft=null,ccOrigin=null,view={};
+const ccEl=$('cc'),ccBody=$('ccbody'),ccGo=$('ccgo'),ccT=$('cct'),ccS=$('ccs');
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+const PICKS=[
+ ['kin','Kin',()=>Object.keys(KIN),v=>KIN[v].name],
+ ['tone','Tone',()=>[0,1,2,3],v=>(KIN[draft.kin]||KIN.human).toneN[v],v=>(KIN[draft.kin]||KIN.human).tones[v]],
+ ['shape','Shape',()=>Object.keys(SHAPES),v=>SHAPES[v][2]],
+ ['eyes','Eyes',()=>Object.keys(EYES),v=>EYES[v]],
+ ['hair','Hair',()=>Object.keys(HAIRS),v=>HAIRS[v]],
+ ['hc','Hair color',()=>HAIRC.map((c,i)=>i),v=>HAIRCN[v],v=>HAIRC[v]],
+ ['mark','Mark',()=>Object.keys(MARKS),v=>MARKS[v]],
+ ['col','Outfit',()=>COLS.map((c,i)=>i),v=>COLN[v],v=>COLS[v]],
+ ['acc','Scarf',()=>ACCS.map((c,i)=>i),v=>ACCN[v],v=>ACCS[v]]];
+function isLocked(k,v){const L=LOCKS[k]&&LOCKS[k][v];return L&&!S.journal[L[0]]?L[1]:null;}
+function rName(){return pick(NAME1)+' '+pick(NAME2);}
+function randomLook(){const o={name:rName()};PICKS.forEach(([k,,opts])=>{o[k]=pick(opts().filter(x=>!isLocked(k,x)));});return o;}
+function rowsHTML(){return PICKS.map(([k,l,,name,sw])=>{const cur=view[k]!=null?view[k]:draft[k],lk=isLocked(k,cur);
+ const inner=lk?'???':(sw?`<i class="sw" style="background:${sw(cur)}"></i>`:'')+name(cur);
+ return `<div class="pk"><button data-k="${k}" data-d="-1" aria-label="Previous ${l}">‹</button><span class="val${lk?' lock':''}"><small>${l}</small><span>${inner}</span></span><button data-k="${k}" data-d="1" aria-label="Next ${l}">›</button></div>`;}).join('');}
+function renderCC(){ccEl.classList.add('on');const m=ccMode==='mirror';
+ if(ccStep===1){ccT.textContent=m?'The still pool':'Who washed up?';
+  ccBody.innerHTML=`<div class="cctop"><canvas id="pv" aria-label="Your character"></canvas><div class="ccid"><div class="sub">${m?'New looks surface here as you discover things.':'Some of this can change later, if you find the right place.'}</div>`+
+   (m?'':`<div class="namerow"><input id="ccname" maxlength="18" autocomplete="off" value="${esc(draft.name)}" aria-label="Name"><button class="dice" id="ccdice" aria-label="Random name">⚄</button></div>`)+
+   `<button class="dice" id="ccrand">Surprise me</button></div></div><div id="ccrows" class="pgrid">${rowsHTML()}</div><div class="lockhint" id="cclock">${KIN[draft.kin].blurb}</div>`;
+  ccGo.textContent=m?'Step back':'Next: how you got here';ccGo.disabled=false;}
+ else{ccT.textContent='How did you get here?';const sel=ccOrigin?EQUIP[ORIGINS[ccOrigin].keep]:null;
+  ccBody.innerHTML='<div class="origins">'+Object.keys(ORIGINS).map(k=>{const O=ORIGINS[k];return `<button class="org sk${ccOrigin===k?' on':''}" data-o="${k}"><b>${O.name}</b><span>${O.line}</span><span class="keep">Keepsake: ${EQUIP[O.keep].name}</span></button>`;}).join('')+
+   `</div><div class="odetail">${sel?sel.name+'. '+sel.desc:'Pick a past. Each comes with a keepsake.'}</div><button class="back" id="ccback">Back to looks</button>`;
+  ccGo.textContent='Wash ashore';ccGo.disabled=!ccOrigin;}}
+ccBody.addEventListener('click',e=>{const b=e.target.closest('[data-k]');
+ if(b){const k=b.dataset.k,d=+b.dataset.d,vals=PICKS.find(p=>p[0]===k)[2]();const cur=view[k]!=null?view[k]:draft[k];let i=vals.indexOf(cur);i=(i+d+vals.length)%vals.length;
+  const nv=vals[i];view[k]=nv;const lk=isLocked(k,nv);if(!lk)draft[k]=nv;$('ccrows').innerHTML=rowsHTML();$('cclock').textContent=lk||(k==='kin'?KIN[nv].blurb:'');return;}
+ if(e.target.id==='ccdice'){draft.name=rName();$('ccname').value=draft.name;return;}
+ if(e.target.id==='ccrand'){const n=draft.name;draft=randomLook();draft.name=n;view={};$('ccrows').innerHTML=rowsHTML();$('cclock').textContent=KIN[draft.kin].blurb;return;}
+ if(e.target.id==='ccback'){ccStep=1;renderCC();return;}
+ const o=e.target.closest('[data-o]');if(o){ccOrigin=o.dataset.o;renderCC();}});
+ccBody.addEventListener('input',e=>{if(e.target.id==='ccname')draft.name=e.target.value;});
+ccGo.onclick=()=>{
+ if(ccMode==='mirror'){S.char=draft;save();closeCC();return;}
+ if(ccStep===1){if(!draft.name.trim())draft.name=rName();ccStep=2;renderCC();return;}
+ if(!ccOrigin)return;draft.name=draft.name.trim().slice(0,18);S.char=draft;S.origin=ccOrigin;
+ const k=ORIGINS[ccOrigin].keep;if(!S.eq.trinket)S.eq.trinket=k;else S.inv.push({id:k});S.owned[k]=1;save();closeCC();begin();};
+function openCreator(mode){ccMode=mode;ccStep=1;view={};draft=Object.assign({},S.char||randomLook());if(draft.hc==null)draft.hc=0;ccOrigin=S.origin||null;ccOn=true;closeCtx();closeDlg();closePanel();renderCC();}
+function closeCC(){ccOn=false;ccEl.classList.remove('on');}
+function renderPreview(){const c=$('pv');if(!c)return;const d=Math.min(2,devicePixelRatio||1),w=c.clientWidth||112,h=c.clientHeight||124;
+ if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}
+ const keep=ctx;ctx=c.getContext('2d');ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
+ const g=ctx.createRadialGradient(w/2,h*.55,6,w/2,h*.55,w*.55);g.addColorStop(0,'rgba(255,255,255,.75)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+ const sc=(h-16)/60;blob(w/2,h-12,w*.4,8,300,'#f3d27a',2.5);ctx.save();ctx.translate(w/2,h-13);ctx.scale(sc,sc);
+ drawChar(draft,ccMode==='mirror'?S.eq:{},0,0,1,false,false);ctx.restore();ctx=keep;}
+function begin(){intro=RM?null:0;setTimeout(showHint,RM?300:2600);if(!S.journal.washed)setTimeout(()=>discover('washed'),3400);}
+
+const BUILD=1;
+let last=performance.now();
+function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+if(S.char)begin();else openCreator('new');
+if(location.hash==='#dev')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,get C(){return C;}};
+})();
+</script>
+</body>
+</html>

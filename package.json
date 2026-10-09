@@ -1,0 +1,10 @@
+{
+  "name": "tidecrown",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tidecrown: Isles Unclaimed. A hand-drawn, mobile-first skilling RPG.",
+  "scripts": {
+    "build": "node tools/build.js",
+    "dev": "node tools/build.js --watch --serve"
+  }
+}
