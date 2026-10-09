@@ -7,7 +7,7 @@ Influences, always checked against all three: Runescape (skills, gathering and p
 Full design rules and the story so far: docs/design-rules.md. Read it before any change the player will see or read.
 
 ## Repo and workflow (same as Quest)
-- Repo worthcreation/tidecrown (public, personal account). GitHub Pages serves index.html from the root of main: https://worthcreation.github.io/tidecrown/. Ross's clones: ~\tidecrown (Windows) and ~/tidecrown (Mac).
+- Repo worthcreation/tidecrown (public, personal account). GitHub Pages serves index.html from the root of main at https://tidecrown.worthcreation.com (custom domain: CNAME file in the repo root and a Bluehost CNAME record; never delete the CNAME file). Ross's clones: ~\tidecrown (Windows) and ~/tidecrown (Mac).
 - Start of every chat: git clone https://github.com/worthcreation/tidecrown.git into /home/claude, node tools/build.js, check const BUILD in src/js/99-main-loop.js against main, read HANDOFF.md's Next task.
 - Edit src/ (css and js files with numeric prefixes, one shared closure), never index.html. Everything is drawn in code; no image assets. Save key stays driftwood_key_v1; new fields get defaults and migrations.
 - Test headlessly at 375x548 and 390x760, playing it like a person. #dev in the URL exposes window.DK.

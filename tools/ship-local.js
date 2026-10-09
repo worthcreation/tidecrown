@@ -24,4 +24,4 @@ if (deleted.length) console.log(`\nRoss deletes by hand in ~\\tidecrown: ${delet
 const m = msg.replace(/"/g, "'");
 console.log(`\nPowerShell:\ncd ~\\tidecrown -ErrorAction Stop; git fetch origin; git reset --hard origin/main; Expand-Archive -Force ~\\Downloads\\tidecrown-b${nn}.zip .; Remove-Item ~\\Downloads\\tidecrown-b${nn}.zip; git add -A; git commit -m "${m}"; git push`);
 console.log(`\nzsh:\ncd ~/tidecrown && git fetch origin && git reset --hard origin/main && unzip -o ~/Downloads/tidecrown-b${nn}.zip -d . && rm ~/Downloads/tidecrown-b${nn}.zip && git add -A && git commit -m "${m}" && git push`);
-console.log('\nPlay: https://worthcreation.github.io/tidecrown/');
+console.log('\nPlay: https://tidecrown.worthcreation.com');

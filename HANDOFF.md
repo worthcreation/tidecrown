@@ -1,4 +1,4 @@
-# Tidecrown: handoff (build 1, 9 Oct 2026)
+# Tidecrown: handoff (build 2, 9 Oct 2026)
 Current state only. Build by build changes are in docs/HISTORY.md. Design rules and story are in docs/design-rules.md.
 
 ## Where the work happens
@@ -9,7 +9,7 @@ Current state only. Build by build changes are in docs/HISTORY.md. Design rules 
 ## Layout
 - src/index.html shell; src/css/*.css and src/js/*.js concatenated in filename order (numeric prefixes) into one closure.
 - tools/build.js builds index.html (--watch --serve for local dev; npm run dev). tools/ship-local.js packs builds.
-- Pages serves index.html from the root of main.
+- Pages serves index.html from the root of main at https://tidecrown.worthcreation.com. The CNAME file in the root keeps the custom domain; never delete it.
 
 ## Current game
 Skills: Fishing, Hearth, Shipwright (woodcutting). Hidden: Delving, Grit, Sailing.

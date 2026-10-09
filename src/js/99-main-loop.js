@@ -1,4 +1,4 @@
-const BUILD=1;
+const BUILD=2;
 let last=performance.now();
 function frame(t){const dt=Math.min(.05,(t-last)/1000);last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
