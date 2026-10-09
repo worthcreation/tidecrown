@@ -1,4 +1,4 @@
-# Tidecrown: handoff (build 10, 9 Oct 2026)
+# Tidecrown: handoff (build 11, 9 Oct 2026)
 Current state only. Build by build changes are in docs/HISTORY.md. Design rules and story are in docs/design-rules.md.
 
 ## Where the work happens
