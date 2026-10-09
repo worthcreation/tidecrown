@@ -49,11 +49,9 @@ const JOURNAL={
  fish_minnow:['Minnowbit',FISH.minnow.desc],fish_perch:['Pebble Perch',FISH.perch.desc],fish_grump:['Grumpfish',FISH.grump.desc],fish_eel:['Jellybean Eel',FISH.eel.desc],fish_koi:['Moonkoi',FISH.koi.desc],
  bottle0:['A letter in a bottle',BOTTLES[0]],bottle1:['A second letter',BOTTLES[1]],bottle2:['A third letter',BOTTLES[2]]
 };
-const UNLOCK={5:'Pebble Perch are biting now',10:'The wild water by the north rocks is yours',15:'Something sweet wriggles in the deep',20:'The moon is tugging at your line'};
 const XP=[0,0];{let p=0;for(let l=1;l<99;l++){p+=Math.floor(l+300*Math.pow(2,l/7));XP[l+1]=Math.floor(p/12);}}
 function lvl(x){let L=1;while(L<99&&x>=XP[L+1])L++;return L;}
 const PACK=20;
-const STACK={shells:1e9,bait:50,ash:20,kelp:10,wood:5,wobble:3,seasalt:10,charcoal:5,pearl:5,sunstone:3};
 const KIN={human:{name:'Human',tones:['#ffe0bd','#e8b48a','#b9825a','#7a4f33'],toneN:['Sand','Honey','Cocoa','Umber'],blurb:'Ordinary, which out here is the strangest thing of all.'},
  moss:{name:'Mossling',tones:['#c6e29a','#a8d07e','#8dbb6a','#6f9e58'],toneN:['Sprout','Fern','Moss','Bog'],feat:'leaf',blurb:'A leaf grows from your head. It turns toward the sun on its own.'},
  ember:{name:'Ember-kin',tones:['#ffc48a','#ffa36b','#f7c56b','#e8805a'],toneN:['Cinder','Flare','Gold','Kiln'],feat:'glow',blurb:'A small flame burns on top. You glow farther in the dark.'},
@@ -86,5 +84,30 @@ const ORIGINS={
  tide:{name:'The Tide-Touched',line:'Fell overboard as a baby. The sea still talks to you.',keep:'whisper'},
  nobody:{name:'The Nobody',line:'No name you remember, no past you can prove. Only a map that draws itself.',keep:'blankmap'}
 };
+/* items: one registry. Plain fields, or functions of the item for cooked fish and bottles. */
+const ITEMS={
+ shells:{name:'Shells',desc:'Gubbins’ currency. Stacks forever. Don’t ask where he keeps his.',stack:1e9},
+ bait:{name:'Glitter bait',desc:'Fish go silly for it. Used up one per cast while you have it.',stack:50},
+ wood:{name:'Driftwood',desc:'Bleached and bone dry. Burns steady. Stacks five to a slot.',stack:5},
+ kelp:{name:'Dry kelp',desc:'Brittle and smoky. Burns hot and fast. Stacks ten to a slot.',stack:10},
+ ash:{name:'Ash',desc:'What a fire leaves behind. Wick and Kindle both get oddly excited about it.',stack:20},
+ wobble:{name:'Wobblewood',desc:'A springy log from a wobble tree. Burns long and bright.',stack:3},
+ charcoal:{name:'Charcoal',desc:'A black lump from the ashes. Burns hotter than anything. Someone will want this.',stack:5},
+ seasalt:{name:'Sea salt',desc:'Crystals left where kelp burned. Wick’s eyes would light up. Well, more.',stack:10},
+ pearl:{name:'Ember pearl',desc:'A warm, glowing bead from the heart of a wobblewood fire. It hums when you hold it.',stack:5},
+ sunstone:{name:'Sunstone',desc:'Smooth, and warm all the way through. It remembers being part of the sun. Nobody knows what it does yet.',stack:3},
+ flint:{name:'Flint shard',desc:'Sharp as a grudge. Lashed to a stick with something stringy, it would make a fine hatchet.'},
+ hatchet:{name:'Stone hatchet',desc:'Flint, driftwood and kelp twine. Wobble trees eye it nervously.'},
+ bottle:{name:'Message in a bottle',desc:'Cork still in. Something rolled up inside.',key:it=>'bottle:'+it.msg},
+ cook:{name:it=>QN[it.q]+' '+FISH[it.f].name,desc:it=>QD[it.q],icon:it=>'ck_'+it.f+'_'+it.q,val:it=>Math.ceil(FISH[it.f].val*QV[it.q]),key:it=>'cook:'+it.f+':'+it.q}};
+for(const k in FISH)ITEMS[k]={name:FISH[k].name,desc:FISH[k].desc,val:FISH[k].val};
+for(const k in EQUIP)ITEMS[k]={name:EQUIP[k].name,desc:EQUIP[k].desc};
+function iget(it,f,d){const D=ITEMS[it.id],v=D&&D[f];return typeof v==='function'?v(it):v==null?d:v;}
+function itemName(it){return iget(it,'name',it.id);}
+function itemDesc(it){return iget(it,'desc','');}
+function itemIcon(it){return iget(it,'icon',it.id);}
+function itemVal(it){return iget(it,'val',0);}
+function itemKey(it){return iget(it,'key',it.id);}
+function stackOf(id){return (ITEMS[id]&&ITEMS[id].stack)||0;}
 function eff(k){let t=0;for(const sl in S.eq){const id=S.eq[sl];if(id&&EQUIP[id]&&EQUIP[id].eff[k])t+=EQUIP[id].eff[k];}if(S.buff&&S.buff.until>Date.now()){const B=BUFF[S.buff.q];if(B&&B[k])t+=B[k];}return t;}
 

@@ -14,6 +14,5 @@
 #ctx button:active,.opt:active,.opt:hover,#ctx button:hover{background:var(--paper2)}
 #dlg{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);max-width:520px;margin:0 auto;padding:10px 14px 8px;display:none;z-index:6}
 #dlg .who{font-size:17px;color:var(--muted)}
-#dlg .say{font-size:21px;line-height:1.3;margin:2px 0 4px}
 #dlg .opts{display:flex;flex-direction:column}
 .opt::before{content:'\203A  ';color:var(--coral)}

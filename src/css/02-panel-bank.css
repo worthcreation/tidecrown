@@ -19,7 +19,6 @@
 .tab{flex:1;font-size:21px;background:none;border:none;color:var(--muted);padding:6px 0 4px;border-bottom:3px solid transparent;border-radius:0}
 .tab.on{color:var(--ink);border-bottom-color:var(--coral)}
 .x{background:none;border:none;font-size:26px;width:40px;line-height:1}
-#pbody{flex:1;overflow-y:auto;padding:12px 14px 18px;font-size:19px}
 .skill{display:flex;gap:12px;align-items:center;padding:6px 0 12px}
 .skill img{width:52px;height:52px}
 .skill .m{flex:1}
@@ -27,18 +26,11 @@
 .bar{height:15px;border:2.5px solid var(--ink);border-radius:9px 4px 10px 5px;overflow:hidden;background:var(--paper2);margin:3px 0}
 .bar i{display:block;height:100%;background:var(--sea)}
 .skill small{font-size:16px;color:var(--muted)}
-.locked{opacity:.55}
-.locked .q{width:52px;height:52px;display:grid;place-items:center;font-size:30px;border:2.5px dashed var(--ink);border-radius:50% 45% 52% 48%}
-.purse{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.purse img{width:30px;height:30px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .slot{aspect-ratio:1;border:2.5px dashed rgba(42,33,64,.3);border-radius:13px 6px 12px 7px;display:grid;place-items:center;background:none;padding:0}
 .slot.f{border-style:solid;border-color:var(--ink);background:var(--paper2)}
 .slot.sel{background:var(--sun)}
 .slot img{width:84%;pointer-events:none}
-.info{margin-top:12px;min-height:90px}
-.info b{font-size:21px}
-.info p{margin:2px 0 6px;color:var(--muted);line-height:1.25}
 .ent{padding:8px 0;border-bottom:2px dashed rgba(42,33,64,.18)}
 .ent b{font-size:20px}
 .ent p{margin:2px 0 0;line-height:1.3;color:#4a3f63}

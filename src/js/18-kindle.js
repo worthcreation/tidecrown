@@ -1,7 +1,7 @@
 const KW={active:false,x:0,y:0,tx:0,ty:0,mode:'beach',flee:false,f:null};
 function beachSpot(){const a=Math.random()*6.2832;return polar(a,iR(a)-30);}
 function kindleTick(){const k=S.kindle||(S.kindle={trust:0,lastNight:-1,joined:0,hops:0,seen:0});
- if(k.joined||!S.hearth||hl()<6||dark<.3||C){KW.active=false;return;}
+ if(k.joined||!hasSkill('hearth')||lv('hearth')<6||dark<.3||C){KW.active=false;return;}
  const lit=(S.fires||[]).filter(fireLit);
  if(lit.length){const f=lit.reduce((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)<=Math.hypot(b.x-P.x,b.y-P.y)?a:b);
   if(!KW.active){const sp=beachSpot();KW.x=sp[0];KW.y=sp[1];}if(KW.f!==f||KW.mode!=='fire'){KW.f=f;KW.mode='fire';const c=clampLand(f.x+40,f.y+18);KW.tx=c[0];KW.ty=c[1];KW.flee=false;}}

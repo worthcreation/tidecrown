@@ -29,7 +29,7 @@ function icon(id){if(icache[id])return icache[id];const c=document.createElement
  else if(id==='wood'){ln([[12,40],[52,26]],462,12,INK,1);ln([[12,40],[52,26]],462,7,'#d9cdb5',1);}
  else if(id==='kelp'){for(let i=-1;i<=1;i++)ln([[32+i*10,52],[38+i*10,34],[30+i*10,14]],465+i,4.5,'#5f6b3a',.8);}
  else if(id==='bottle'){ctx.save();ctx.translate(32,32);ctx.rotate(-.6);sketch(rrPts(-10,-14,20,32,8),true,4,1,'#9fd8b4',INK,2.6);sketch(rrPts(-5,-24,10,11,3),true,5,.6,'#c98f56',INK,2.4);ln([[-4,-2],[4,-2]],6,2,'#fffaf0',.3);ln([[-4,4],[3,4]],7,2,'#fffaf0',.3);ctx.restore();}
- else if(id==='shell'){sketch([[32,46],[14,30],[18,20],[32,15],[46,20],[50,30]],true,8,1,'#ffb3a7',INK,2.6);for(let i=-2;i<=2;i++)ln([[32,44],[32+i*7,20]],10+i,2,INK,.4);}
+ else if(id==='shells'){sketch([[32,46],[14,30],[18,20],[32,15],[46,20],[50,30]],true,8,1,'#ffb3a7',INK,2.6);for(let i=-2;i<=2;i++)ln([[32,44],[32+i*7,20]],10+i,2,INK,.4);}
  else if(id==='bait'){sketch(rrPts(18,22,28,28,7),true,12,1,'#d8c8ff',INK,2.6);sketch(rrPts(16,15,32,9,3),true,13,.6,'#ffcf3a',INK,2.4);[[26,32],[36,38],[30,43],[38,28]].forEach(p=>dot(p[0],p[1],2.2,'#ff6bb5'));}
  else if(EQUIP[id])drawGearIcon(id);
  else if(id==='wobble'){ln([[12,42],[52,26]],472,13,INK,1);ln([[12,42],[52,26]],472,8.5,'#b9d88f',1);blob(52,26,6,6.5,473,'#e8dcb0',2,.4);ln([[50,25],[53,27]],474,1.4,INK,.2);}

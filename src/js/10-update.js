@@ -16,7 +16,7 @@ function update(dt){
  if(T){T.t+=dt;
   if(T.sp.type==='moon'&&dark<.12){P.task=null;think('The glow faded. The moonkoi slipped away.');}
   else if(T.phase==='cast'&&T.t>.55){T.phase='wait';T.t=0;T.wait=Math.max(.8,1.6+Math.random()*3.2-(T.baited?.7:0)-eff('wait'));}
-  else if(T.phase==='wait'&&T.t>T.wait){T.phase='bite';T.t=0;T.fish=rollFish(T.sp);T.win=(T.fish==='bottle'?800:FISH[T.fish].win)+(T.baited?220:0)+Math.min(150,lvl(S.xp)*5)+eff('win');if(navigator.vibrate)try{navigator.vibrate(35);}catch(e){}}
+  else if(T.phase==='wait'&&T.t>T.wait){T.phase='bite';T.t=0;T.fish=rollFish(T.sp);T.win=(T.fish==='bottle'?800:FISH[T.fish].win)+(T.baited?220:0)+Math.min(150,lv('fishing')*5)+eff('win');if(navigator.vibrate)try{navigator.vibrate(35);}catch(e){}}
   else if(T.phase==='bite'&&T.t*1000>T.win){T.phase='miss';T.t=0;pop('It got away...',P.x,P.y-70,'#fff',19);}
   else if((T.phase==='miss'&&T.t>.8)||(T.phase==='reel'&&T.t>.7)){if(S.inv.length>=PACK)P.task=null;else cast(T);}}
  // crab

@@ -1,8 +1,14 @@
-/* cooking */
+/* cooking: quality data, then the cooking scene */
+const QN={under:'Underdone',good:'Cooked',perfect:'Golden',smoky:'Smoky',charred:'Charred'};
+const QCOL={under:'#efd2b0',good:'#e0a245',perfect:'#f5bf45',smoky:'#b9773d',charred:'#4a3a3a'};
+const QV={under:1,good:2,perfect:3,smoky:3,charred:.5};
+const QD={under:'Still a bit see-through. Your stomach has opinions.',good:'Flaky and warm. Eat it to steady your hands: bites hang on longer.',perfect:'Golden on both sides. Eat it and your timing gets sharper for a good while.',smoky:'Kissed by kelp smoke. The smell on your hands makes fish bite sooner.',charred:'Crunchy. Regrettable. Gubbins might still eat it.'};
+const BUFF={good:{win:100,dur:180,txt:'bites hang on longer'},perfect:{win:160,perfect:.06,dur:300,txt:'sharper timing, longer bites'},smoky:{wait:.8,dur:240,txt:'fish bite sooner'}};
+const CXP={minnow:15,perch:25,grump:45,eel:65,koi:140},CK={minnow:1.2,perch:1,grump:.85,eel:.8,koi:.7};
 let C=null,sparks=[];const cookbar=$('cookbar'),cookinfo=$('cookinfo');
-function pz(){return .82-Math.min(20,hl())*.004;}function bT(){return 1.12+Math.min(30,hl())*.006;}
+function pz(){return lv('hearth')>=20?.72:.8;}function bT(){return 1.12+Math.min(30,lv('hearth'))*.006;}
 function endCookBurn(){const fr=C.fr;exitCook();burnOut(fr);hint('The fire burned out. Only ash is left.',5000);}
-function enterCook(fr){if(!S.hearth)return;const L=hl(),n=Math.min(3,1+(L>=5?1:0)+(L>=10?1:0)+(fr.big?1:0));
+function enterCook(fr){if(!hasSkill('hearth'))return;const L=lv('hearth'),n=Math.min(3,1+(L>=5?1:0)+(L>=10?1:0)+(fr.big?1:0));
  C={fr,base:.55,flare:0,feed:0,heat:.55,pans:Array.from({length:n},()=>({f:null})),say:'',sayT:0,zone:'sweet'};
  P.face=-1;P.path=[];P.task=null;cookbar.style.display='flex';bag.style.display='none';buffb.style.display='none';fwood.querySelector('img').src=icon('wood');fkelp.querySelector('img').src=icon('kelp');fuelUI();hintEl.classList.remove('on');closeCtx();
  if(!S.cookHint){S.cookHint=1;hint('Tap a pan to add a fish. Tap it again to flip, once more to plate. Tap the woodpile to feed the fire.',9000);}}
@@ -12,7 +18,7 @@ function panPos(i,n){return [[[0,-2]],[[-32,0],[32,0]],[[-58,4],[0,-4],[58,4]]][
 function sideQ(d){return d<.6?'under':d>bT()?'burnt':(d>=pz()&&d<=1)?'perfect':'good';}
 function mixC(a,b,t){t=Math.max(0,Math.min(1,t));const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),m=sh=>Math.round(((A>>sh)&255)+(((B>>sh)&255)-((A>>sh)&255))*t);return'#'+((1<<24)+(m(16)<<16)+(m(8)<<8)+m(0)).toString(16).slice(1);}
 function doneCol(f,d){if(d<.8)return mixC(FISH[f].col,'#e8b04a',d/.8);if(d<=1)return'#f0b444';const b=bT();if(d<b)return mixC('#f0b444','#9a5a2a',(d-1)/(b-1));return mixC('#9a5a2a','#2e2626',(d-b)/.25);}
-function cookUpdate(dt){const L=hl();C.flare=Math.max(0,C.flare-dt*(L>=15?.09:.12));C.base=Math.max(.12,C.base-dt*(C.fr.big?.018:.028));
+function cookUpdate(dt){const L=lv('hearth');C.flare=Math.max(0,C.flare-dt*(L>=15?.09:.12));C.base=Math.max(.12,C.base-dt*(C.fr.big?.018:.028));
  if(!C.fr.main){C.fr.until-=dt*1500;if(C.heat>.95)C.fr.hot=(C.fr.hot||0)+dt;if(!fireLit(C.fr)){endCookBurn();return;}}
  if(C.feed>0){const a=Math.min(C.feed,dt*.2);C.base+=a;C.feed-=a;}C.base=Math.min(1.15,C.base);C.heat=C.out?0:Math.min(1.4,C.base+C.flare);
  if(!C.out&&C.heat<.03&&C.feed<=0){C.outT=(C.outT||0)+dt;if(C.outT>1.2){C.outT=0;if(!C.fr.main){endCookBurn();return;}C.out=true;C.base=0;C.flare=0;addAsh(C.fr.x-34,C.fr.y+16,1);
@@ -32,7 +38,7 @@ function fuelUI(){for(const [b,k] of [[fwood,'wood'],[fkelp,'kelp']]){const n=S[
 function fuel(k,auto){if(!C)return;if(!((S[k]||0)>0)){if(!auto)pop(k==='wood'?'No driftwood left':'No dry kelp left',C.fr.x,C.fr.y-60,'#fff',15);return;}
  if(C.out&&k==='kelp'){pop('Kelp won’t catch on cold coals',C.fr.x,C.fr.y-60,'#fff',15);return;}
  S[k]--;if(C.out&&k==='wood'){C.out=false;C.base=.22;if(C.fr.main){C.say='Ahh. Back from the dead.';C.sayT=2.4;}}
- if(!C.fr.main){C.fr.fuel=C.fr.fuel||{};C.fr.fuel[k]=(C.fr.fuel[k]||0)+1;C.fr.mins=(C.fr.mins||8)+(k==='wood'?4:1);}if(k==='wood'){C.feed+=.32;if(!C.fr.main)C.fr.until=Math.min(Date.now()+20*60000,Math.max(C.fr.until||0,Date.now())+4*60000);}else C.flare+=.5;if(auto)discover('kindle');
+ stoke(C.fr,k);if(k==='wood')C.feed+=.32;else C.flare+=.5;if(auto)discover('kindle');
  for(let i=0;i<7;i++)sparks.push({x:C.fr.x+(Math.random()-.5)*14,y:C.fr.y-16,vx:(Math.random()-.5)*60,vy:-60-Math.random()*80,t:0});
  const b=k==='wood'?fwood:fkelp;b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),120);fuelUI();}
 fwood.onclick=()=>fuel('wood');fkelp.onclick=()=>fuel('kelp');
@@ -74,11 +80,11 @@ function drawCook(){const {x,y}=C.fr,n=C.pans.length,h=C.heat;
    const d=p.d[p.side],a=ang(d);dot(px+Math.cos(a)*rx,py+2+Math.sin(a)*ry,5);dot(px+Math.cos(a)*rx,py+2+Math.sin(a)*ry,2.4,'#fff');
    for(let s2=0;s2<2;s2++)blob(px-11+s2*22,py+26,3,3,860+s2,s2<p.side?'#ffcf3a':'#fffaf0',1.5,.2);
    const fp=p.flipT>0?Math.cos((1-p.flipT/.35)*Math.PI):1;ctx.save();ctx.translate(px,py);ctx.scale(1,Math.max(.12,Math.abs(fp)));drawFish(p.f,0,0,.9,(p.side?-1:1)*(fp<0?-1:1),doneCol(p.f,d));ctx.restore();
-   if(h>.35&&Math.random()<h*.25)sparks.push({x:px+(Math.random()-.5)*20,y:py-6,vx:(Math.random()-.5)*10,vy:-26,t:0,steam:1});
-   if(d>bT()&&Math.random()<.3)sparks.push({x:px+(Math.random()-.5)*14,y:py-8,vx:(Math.random()-.5)*8,vy:-20,t:0,smoke:1});}
+   if(h>.35&&Math.random()<h*15*fdt)sparks.push({x:px+(Math.random()-.5)*20,y:py-6,vx:(Math.random()-.5)*10,vy:-26,t:0,steam:1});
+   if(d>bT()&&Math.random()<18*fdt)sparks.push({x:px+(Math.random()-.5)*14,y:py-8,vx:(Math.random()-.5)*8,vy:-20,t:0,smoke:1});}
   else{ctx.globalAlpha=.55+.3*Math.sin(now*3);otext(rawCount()?'+':'-',px,py+1,22,'#fffaf0');ctx.globalAlpha=1;}});
  ctx.lineCap='round';
- sparks=sparks.filter(s=>(s.t+=1/60)<(s.smoke?1.4:s.steam?.9:.8));
- for(const s of sparks){s.x+=s.vx/60;s.y+=s.vy/60;const life=s.smoke?1.4:s.steam?.9:.8;ctx.globalAlpha=(1-s.t/life)*(s.steam?.6:1);dot(s.x,s.y,s.smoke?3+s.t*5:s.steam?2+s.t*3:1.8,s.smoke?'#5a5266':s.steam?'#fff':'#ffcf3a');}ctx.globalAlpha=1;
+ sparks=sparks.filter(s=>(s.t+=fdt)<(s.smoke?1.4:s.steam?.9:.8));
+ for(const s of sparks){s.x+=s.vx*fdt;s.y+=s.vy*fdt;const life=s.smoke?1.4:s.steam?.9:.8;ctx.globalAlpha=(1-s.t/life)*(s.steam?.6:1);dot(s.x,s.y,s.smoke?3+s.t*5:s.steam?2+s.t*3:1.8,s.smoke?'#5a5266':s.steam?'#fff':'#ffcf3a');}ctx.globalAlpha=1;
  if(C.fr.main&&C.sayT>0){ctx.font="16px 'Patrick Hand','Comic Sans MS',cursive";const w=ctx.measureText(C.say).width+22,bx=x-w/2,by=y-176;ctx.globalAlpha=Math.min(1,C.sayT*3);
   sketch(rrPts(bx,by,w,27,10),true,870,1.5,'#fffaf0',INK,2.4);ln([[x-5,by+26],[x,by+34],[x+6,by+26]],871,2.2,INK,.3);ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(C.say,bx+w/2,by+14);ctx.globalAlpha=1;}}

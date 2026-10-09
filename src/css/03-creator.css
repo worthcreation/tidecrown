@@ -30,7 +30,3 @@
 .odetail{min-height:38px;text-align:center;font-size:16px;color:#4a3f63;line-height:1.2}
 #cc .back{background:none;border:none;color:var(--muted);font-size:17px;text-decoration:underline;align-self:center;padding:0}
 @media (max-height:600px){#pv{width:92px;height:100px}#cc h1{font-size:24px}.ccid .sub{display:none}.pk{height:40px}}
-.gear{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.gear .slot{position:relative}
-.gear .slot span{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:14px;color:var(--muted)}
-.gear+.purse{margin-top:22px}

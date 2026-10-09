@@ -8,9 +8,6 @@ function drawRock(k){blob(k.x,k.y,k.rx,k.ry,k.seed,'#a39db6');ln([[k.x-k.rx*.4,k
 function drawPool(){const {x,y}=POOL;blob(x,y,44,22,170,'#8fd3dc',3);const ph=(now*.4)%1;ctx.globalAlpha=.6*(1-ph);sketch(ell(x,y,8+ph*30,(8+ph*30)*.45,12),true,171,1,null,'#fff',2);ctx.globalAlpha=1;
  ln([[x-16,y-7],[x-4,y-10]],172,2.5,'rgba(255,255,255,.85)',.5);for(const [ox,h] of [[-46,26],[-40,19],[43,24]])ln([[x+ox,y+4],[x+ox+2,y+4-h]],173+ox,2.5,'#3f7f3a',.6);}
 function drawSign(){const {x,y}=SIGN;shadow(x,y+2,14,5);ln([[x,y],[x+1,y-30]],61,5,INK,.8);ln([[x,y],[x+1,y-30]],61,2.5,'#b07a4a',.8);sketch(rrPts(x-24,y-52,48,26,6),true,62,1.5,'#d9a066',INK,2.8);ln([[x-15,y-44],[x+12,y-45]],63,2,INK,1);ln([[x-15,y-36],[x+6,y-36]],64,2,INK,1);}
-function drawFire(){const {x,y}=FIRE;shadow(x,y+3,22,6);ln([[x-18,y+2],[x+16,y-6]],70,8,INK,1);ln([[x-18,y+2],[x+16,y-6]],70,4.5,'#9a6236',1);ln([[x-16,y-6],[x+18,y+2]],71,8,INK,1);ln([[x-16,y-6],[x+18,y+2]],71,4.5,'#a8703f',1);
- const f=Math.sin(now*13)*2.5;blob(x,y-14,11,17+f,72,'#ff8a3d',2.5);blob(x+1,y-9,5.5,9+f*.6,73,'#ffd23f',0);
- const sp=(now*.9)%1;dot(x+Math.sin(now*3)*6,y-30-sp*26,2*(1-sp),'#ffcf3a');}
 function drawHead(){const {x,y}=HEAD;blob(x,y-16,27,24,80,'#b9b3c9');ln([[x-2,y-34],[x+3,y-30]],81,2,'rgba(42,33,64,.4)',.5);
  if(dark>.25){blob(x-9,y-19,3.5,3.5,82,'#ffe58a',1.5,.3);blob(x+9,y-19,3.5,3.5,83,'#ffe58a',1.5,.3);blob(x,y-8,3,4,84,INK,0);
   const ph=(now*.5)%1;ctx.globalAlpha=1-ph;otext('\u266A',x+18+ph*14,y-40-ph*30,18,'#ffe58a');ctx.globalAlpha=1;}
@@ -28,14 +25,6 @@ function drawGubbins(){const {x,y}=G;shadow(x,y+2,17,5);const sq=G.talk?Math.sin
  const lx=Math.max(-2,Math.min(2,(P.x-x)/40));blob(x-6,y-22-sq,5,5.5,104,'#fff',2,.4);blob(x+6,y-22-sq,5,5.5,105,'#fff',2,.4);dot(x-6+lx,y-21-sq,2);dot(x+6+lx,y-21-sq,2);
  if(G.talk)blob(x,y-12,4,2+Math.abs(Math.sin(now*12))*3,106,INK,0);else ln([[x-4,y-12],[x+4,y-13]],107,2,INK,.3);}
 function drawPlayer(){drawChar(S.char||DEFAULT_LOOK,S.eq,P.x,P.y,P.face,P.moving,!!P.task&&!P.task.chop);if(P.task&&P.task.chop){const f=P.face,a=-1.1+(P.task.swing>0?(1-P.task.swing/.22)*2.2:0),hx=P.x+f*8,hy=P.y-20;ctx.save();ctx.translate(hx,hy);ctx.scale(f,1);ctx.rotate(a);ln([[0,0],[0,-20]],950,5,INK,.3);ln([[0,0],[0,-20]],950,2.6,'#d9cdb5',.3);sketch([[-2,-24],[8,-22],[6,-14],[0,-17]],true,951,.3,'#8a8494',INK,1.8);ctx.restore();}if(buffOn()){const ph=(now*.5)%1;ctx.globalAlpha=(1-ph)*.7;ln([[P.x+4,P.y-62-ph*24],[P.x+9,P.y-70-ph*24],[P.x+4,P.y-78-ph*24]],890,2.2,'#fff',.4);ctx.globalAlpha=1;}}
-function drawPlayerOld(){const {x,y}=P,f=P.face,mv=P.moving,b=mv?Math.abs(Math.sin(now*12))*3:Math.sin(now*2)*1;shadow(x,y+2,14,5);
- if(mv){const s=Math.sin(now*12)*5;ln([[x-5,y-6],[x-5+s,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+5-s,y]],111,3.5,INK,.3);}else{ln([[x-5,y-6],[x-6,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+6,y]],111,3.5,INK,.3);}
- blob(x,y-18-b,14,15,112,'#ff6b6b');
- ln([[x-11*f,y-30-b],[x-19*f,y-27-b+Math.sin(now*6)*2]],113,4,'#ffcf3a',.6);
- blob(x+f*3,y-27-b,10,9.5,114,'#ffd9b0',2.6);
- ln([[x+f*3-10,y-31-b],[x+f*3,y-37-b],[x+f*3+10,y-31-b]],115,5,'#ffcf3a',.6);
- dot(x+f*1,y-27-b,1.9);dot(x+f*7,y-27-b,1.9);
- if(P.task)ln([[x-f*1,y-20-b],[x+f*10,y-18-b]],116,3,INK,.3);}
 function drawChar(a,eq,x,y,f,mv,fishing){
  const K=KIN[a.kin]||KIN.human,skin=K.tones[a.tone]||K.tones[0],sh=SHAPES[a.shape]||SHAPES.bean,rx=sh[0],ry=sh[1],acc=ACCS[a.acc]||ACCS[0],hc=HAIRC[a.hc]||HAIRC[0];
  const b=mv?Math.abs(Math.sin(now*12))*3:Math.sin(now*2);shadow(x,y+2,rx,5);
