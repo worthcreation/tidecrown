@@ -5,11 +5,15 @@ function polar(a,r){return [Math.cos(a)*r,Math.sin(a)*r];}
 const NP=150,sandPts=[],grassPts=[],shallowPts=[],foamPts=[];
 for(let i=0;i<NP;i++){const a=i/NP*6.2832,c=Math.cos(a),s=Math.sin(a);sandPts.push([c*iR(a),s*iR(a)]);grassPts.push([c*gR(a),s*gR(a)]);shallowPts.push([c*(iR(a)+60),s*(iR(a)+60)]);foamPts.push([c*(iR(a)+9),s*(iR(a)+9)]);}
 const R0=iR(0);
+/* tide: 1 is high water, 0 is low. Low water exposes a wet band of TIDE_REACH outside the dry sand. */
+const TIDE_PERIOD=24*60000,TIDE_REACH=46;let tideF=null;
+function tideLevel(){if(tideF!=null)return tideF;return .5+.5*Math.cos(Date.now()/TIDE_PERIOD*6.2832);}
+function wetR(a){return iR(a)+(1-tideLevel())*TIDE_REACH;}
 const DOCK={x0:R0-40,x1:R0+192,y0:-24,y1:24};
-function onIsland(x,y){return Math.hypot(x,y)<=iR(Math.atan2(y,x))-10;}
+function onIsland(x,y){return Math.hypot(x,y)<=wetR(Math.atan2(y,x))-10;}
 function onDock(x,y){return x>=DOCK.x0&&x<=DOCK.x1-10&&y>=DOCK.y0+6&&y<=DOCK.y1-6;}
 function walkable(x,y){return onIsland(x,y)||onDock(x,y);}
-function clampLand(x,y){if(walkable(x,y))return[x,y];const a=Math.atan2(y,x);return polar(a,iR(a)-18);}
+function clampLand(x,y){if(walkable(x,y))return[x,y];const a=Math.atan2(y,x);return polar(a,wetR(a)-18);}
 
 const spots=[];
 function addSpot(a,type){const p=polar(a,iR(a)+60),ap=polar(a,iR(a)-24);spots.push({x:p[0],y:p[1],ax:ap[0],ay:ap[1],type,seed:spots.length*13+5});}

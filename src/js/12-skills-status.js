@@ -20,7 +20,8 @@ const SUBS={
   unl:{5:'Pebble Perch are biting now',10:'The wild water by the north rocks is yours',15:'Something sweet wriggles in the deep',20:'The moon is tugging at your line'}},
  woodcutting:{p:'gathering',name:'Woodcutting',icon:'hatchet',col:'#a8d07e',clue:'Ask the wobble trees.',desc:'A hatchet, a tree that sighs, and a beat to keep. Every voyage begins with a log.',
   unl:{8:'Wobble trees sway slower for you'}},
- foraging:{p:'gathering',name:'Foraging',clue:'The tide gives, and the tide takes back.'},
+ foraging:{p:'gathering',name:'Foraging',icon:'basket',col:'#f3d27a',clue:'The tide gives, and the tide takes back.',desc:'Read the waves. Grab what they drop before they take it back, and scrape the salt they leave behind.',
+  unl:{5:'Wash-ups linger a little longer',10:'The salt flats open to you at low tide',15:'Rarer things ride the waves'}},
  growing:{p:'gathering',name:'Growing',clue:'Plant something. Leave. Come back.'},
  cooking:{p:'survival',name:'Cooking',icon:'pan',col:'#ffb347',clue:'Brimble is very hungry.',desc:'Juggle the pans, flip at golden, and a catch becomes strength.',
   unl:{5:'A second pan by the fire',10:'A third pan by the fire',15:'Kelp flares burn longer',20:'Your golden window widens'}},
@@ -38,6 +39,7 @@ const ACH={
  woodcutting:[['First log','Earn a log from a wobble tree',()=>!!S.journal.wobblelog],['In the groove','Land 10 clean chops in a row',()=>!!S.st.groove],['Bonfire','Build a bonfire',()=>!!S.journal.bonfire]],
  cooking:[['Golden','Cook a fish golden on both sides',()=>(S.st.perfC||0)>=1],['Smoke signals','Discover smoky fish',()=>!!S.journal.smoky],['Three pans','Keep three pans going at once',()=>!!S.st.pans3]],
  firemaking:[['Kindled','Feed Brimble',()=>hasSkill('cooking')],['Keeper of flames','Build three fires of your own',()=>(S.st.fires||0)>=3],['Ember pearl','Find an ember pearl in the ashes',()=>!!S.journal.pearl]],
+ foraging:[['Beachcomber','Grab your first wash-up',()=>(S.st.washes||0)>=1],['Salt of the sea','Scrape salt off wet rock',()=>(S.st.pinches||0)>=1],['Quick hands','Grab 25 wash-ups before the backwash',()=>(S.st.washes||0)>=25],['Springy','Catch a wobblewood log on the tide',()=>!!(S.st.found&&S.st.found.wobble)]],
  tinkering:[['Sharp idea','Lash together a hatchet',()=>hasSkill('tinkering')]]};
 function rawCount(){return S.inv.filter(i=>FISH[i.id]).length;}
 function buffOn(){return S.buff&&S.buff.until>Date.now()?S.buff:null;}
