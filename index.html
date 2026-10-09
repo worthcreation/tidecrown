@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#3fa7b8">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tidecrown">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>Tidecrown</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -579,6 +585,10 @@ function longPress(sx,sy){if(C)return;const [wx,wy]=s2w(sx,sy);const o=objAt(wx,
 
 /* ---------- input ---------- */
 let pd=null;
+let fsTried=false;const standalone=matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone;
+function goFull(){if(fsTried||standalone)return;fsTried=true;const el=document.documentElement;if(el.requestFullscreen&&matchMedia('(pointer: coarse)').matches){el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});}}
+cv.addEventListener('pointerdown',goFull,{capture:true});
+if(/iPhone|iPad/.test(navigator.userAgent)&&!standalone)setTimeout(()=>{if(!S.st.homeHint&&!ccOn){S.st.homeHint=1;save();toast('Add to Home Screen to play full screen');}},75000);
 cv.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;
  const cur={x:e.clientX,y:e.clientY,id:e.pointerId,moved:false,lp:false,edge:e.clientX>W-30?'r':(e.clientX<30?'l':null)};pd=cur;
  cur.timer=setTimeout(()=>{if(pd===cur&&!cur.moved){cur.lp=true;longPress(cur.x,cur.y);}},430);});
@@ -1366,7 +1376,7 @@ function scrapeSalt(s){const c=s.pile?[s.x,DOCK.y1-8]:clampLand(s.x+s.rx+10,s.y+
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}
  S.st.found=S.st.found||{};S.st.found.seasalt=(S.st.found.seasalt||0)+1;S.st.pinches=(S.st.pinches||0)+1;discover('seasalt');
  addXP('foraging',6,first?'first':'normal',[s.x,s.y-20]);save();});}
-const BUILD=11;
+const BUILD=12;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
