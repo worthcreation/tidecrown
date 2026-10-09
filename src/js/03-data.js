@@ -26,7 +26,7 @@ const JOURNAL={
  foraging:['Foraging','The tide gives and the tide takes back. Grab what the waves drop before the backwash, and scrape the salt they leave on rock and piling.'],
  tide:['The tide','Twice an hour or so the sea breathes in and out. High water brings wash-ups. Low water bares a band of wet sand, and the rocks sit in their pools.'],
  hearth:['Cooking','Brimble taught me to cook. A fire is a promise: keep it fed and it keeps you.'],
- driftwood:['Driftwood','Bleached and bone dry. The beach coughs up more every so often. Burns steady.'],
+ driftwood:['Driftwood','Bleached and bone dry. The waves leave it on the sand, and take it back if you dawdle. Burns steady.'],
  kelp:['Dry kelp','Brittle seaweed from the rocky shores. Burns hot and wild, and the smoke smells like the deep.'],
  perfectcook:['Golden both sides','Flip at golden, pull at golden. Eat one and my hands get sharper for a while.'],
  smoky:['Smoky fish','Cooked over a kelp flare, fish come out smoky. The smell gets on my hands and the fish come running.'],

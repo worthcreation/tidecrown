@@ -98,14 +98,14 @@ function render(){
  sketch(shallowPts,true,3,6,'#5fbecb',null);
  spots.forEach(drawSpot);
  drawFoam();drawWet();
- sketch(sandPts,true,1,4,'#f3d27a',tideLevel()>.985?INK:'rgba(42,33,64,.25)',3.5);
+ sketch(sandPts,true,1,4,'#f3d27a',tideLevel()>.985?INK:'rgba(42,33,64,.25)',3.5);drawBreaks();
  drawDock();
  sketch(grassPts,true,2,4,'#86c25e',INK,3);
  for(const t of tufts){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;if(t.f){dot(t.x,t.y,3.2,t.c>.5?'#ff8fb1':'#fff6a8');dot(t.x,t.y,1.2,'#ffcf3a');}else ln([[t.x-5,t.y-6],[t.x,t.y],[t.x+5,t.y-7]],t.seed,2,'#5a9a3f',.6);}
  drawPickups();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t)]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k)]));d.push([DOCK.y1+40,drawSurf]);
- washes.forEach(w=>d.push([w.y,()=>drawWashes([w])]));washes.forEach(w=>d.push([w.y,()=>drawWashes([w])]));d.push([FIRE.y-20,drawHome],[POOL.y-40,drawPool],[GULL.y,drawGull],[SIGN.y,drawSign],[HEAD.y,drawHead],[CRAB.y,drawCrab],[G.y,drawGubbins],[P.y,drawPlayer]);allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr)]));if(KW.active)d.push([KW.y,drawKindle]);
+ (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it)]));d.push([FIRE.y-20,drawHome],[POOL.y-40,drawPool],[GULL.y,drawGull],[SIGN.y,drawSign],[HEAD.y,drawHead],[CRAB.y,drawCrab],[G.y,drawGubbins],[P.y,drawPlayer]);allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr)]));if(KW.active)d.push([KW.y,drawKindle]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{if(x[1]===drawPlayer){drawPlayer();drawLine();}else x[1]();});
  drawFly();drawChopFX();if(C)drawCook();
  if(S.eq.trinket==='blankmap'){ctx.strokeStyle='#fffbe0';ctx.lineWidth=2.2;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const tw=(Math.sin(now*3+o.x*.05)+1)/2,sx=o.x+o.r*.6,sy=o.y-o.r*.6,r=3+tw*3.5;

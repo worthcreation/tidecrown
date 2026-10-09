@@ -1,6 +1,4 @@
-function drawPickups(){drawGround();drawAsh();for(const p of PICK){if(p.until>now)continue;if(Math.abs(p.x-cam.x)>W/Z/2+60||Math.abs(p.y-cam.y)>H/Z/2+60)continue;
- if(p.type==='wood'){const c=Math.cos(p.rot),s=Math.sin(p.rot)*.4,a=[p.x-c*16,p.y-s*16],b=[p.x+c*16,p.y+s*16];shadow(p.x,p.y+3,16,4);ln([a,b],p.seed,9,INK,1);ln([a,b],p.seed,5.5,'#d9cdb5',1);ln([[p.x-c*3,p.y-s*3-1],[p.x+c*6,p.y+s*6-6]],p.seed+1,2.4,INK,.4);}
- else{for(let i=-1;i<=1;i++)ln([[p.x+i*7,p.y+4],[p.x+i*7+4,p.y-4],[p.x+i*7-2,p.y-10]],p.seed+i,3.2,'#5f6b3a',.8);}}}
+function drawPickups(){drawGround();drawAsh();}
 function drawFireAt(fr){if(fr.big){ctx.save();ctx.translate(fr.x,fr.y);ctx.scale(1.45,1.45);ctx.translate(-fr.x,-fr.y);drawFireBody(fr);ctx.restore();}else drawFireBody(fr);}
 function drawFireBody(fr){const {x,y}=fr,sd=(fr.seed||0)*7,hot=C&&C.fr===fr?C.heat:lifeHeat(fr);shadow(x,y+3,22,6);
  if(!fr.main&&!fireLit(fr))return;
@@ -21,7 +19,7 @@ function talkWick(){const first=!S.metWick;S.metWick=1;discover('wick');
  say('Brimble',pick(['Back! Bring me something to sizzle?','Crackle crackle. That’s hello, in stove.','The Gull’s cook used to sing to me. You don’t have to. Please don’t.','Driftwood again? Notes of salt and regret. Fine. Hand it over.']),wickOpts());}
 const WTIPS=['Smoke does strange things to fish. Throw on some kelp and let the flare ride.','Two pans is a dance. Three is a brawl. Both are fun. Want a third sooner? Build bigger.','Every fire dies if you starve it. What’s left is ash, and ash is never nothing. Ask me about it.','Our captain wrote letters and tossed them overboard. Signed them just C. Never did learn the rest.','Golden on both sides. That’s the whole secret. That, and not wandering off.'];
 function wickOpts(){const o=[];
- if(!hasSkill('cooking')){if((S.wood||0)>0)o.push({l:'Feed him driftwood',f:feedWick});else o.push({l:'Where’s driftwood?',f:()=>say('Brimble','On the beach, all round the island. Bleached grey, looks like old bones. Tastes like heaven, for driftwood.',wickOpts())});o.push({l:'See you',f:closeDlg});return o;}
+ if(!hasSkill('cooking')){if((S.wood||0)>0)o.push({l:'Feed him driftwood',f:feedWick});else o.push({l:'Where’s driftwood?',f:()=>say('Brimble','The waves bring it in. Watch the foam pull back and it’ll be lying there, grey as old bones. Grab it before the next wave does.',wickOpts())});o.push({l:'See you',f:closeDlg});return o;}
  const n=rawCount();if(n)o.push({l:'Cook ('+n+' raw fish)',f:()=>{closeDlg();goCook(MAINFIRE);}});
  if((S.ash||0)>0)o.push({l:'About this ash...',f:ashTalk});
  if(S.kindle&&S.kindle.seen&&!S.kindle.joined)o.push({l:'A log ran away from me',f:()=>say('Brimble','A runaway log? That’s a Kindle! Wild ones spook easy, but they can’t resist a fire at night. Light one of your own, keep it fed past dark, and bring something tasty. Kindles eat ash, the weirdos. Takes a few nights before they trust you.',wickOpts())});
