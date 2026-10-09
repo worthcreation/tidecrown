@@ -2,8 +2,11 @@
 function shadow(x,y,rx,ry){ctx.fillStyle='rgba(42,33,64,.16)';ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,6.3);ctx.fill();}
 function drawTree(t){const x=t.x,y=t.y,s=t.s;shadow(x,y+2,24*s,8*s);const tx=x+t.lean*s,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
  ln(pts,t.seed,11*s,INK,1.2);ln(pts,t.seed,6*s,'#b07a4a',1.2);const g=['#4fa14a','#5fb35a','#3f9356'][Math.floor(t.hue*3)];
- const ch=P.task&&P.task.chop&&P.task.tree===t,sw=ch?Math.cos(Math.PI*(now-P.task.t0)/chopPer())*7*s:Math.sin(now*1.3+t.seed)*2*((t.rest||0)>now?.3:1);blob(tx-16*s+sw,ty+4*s,20*s,17*s,t.seed+1,g);blob(tx+16*s+sw,ty+2*s,20*s,17*s,t.seed+2,g);blob(tx+sw*1.4,ty-12*s,24*s,20*s,t.seed+3,g);
- ln([[tx-8*s+sw,ty-18*s],[tx-2*s+sw,ty-22*s]],t.seed+4,3,'rgba(255,255,255,.45)',.5);}
+ const lf=leafOf(t),k=.3+.7*lf,ch=P.task&&P.task.chop&&P.task.tree===t,sw=ch?Math.cos(Math.PI*(now-P.task.t0)/chopPer())*7*s:Math.sin(now*1.3+t.seed)*2*(lf<.7?.3:1);
+ if(lf<.95){ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,4*s,INK,.8);ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,2*s,'#b07a4a',.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,4*s,INK,.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,2*s,'#b07a4a',.8);
+  if(lf<.5){ln([[x+20*s,y+4*s],[x+44*s,y-2*s]],t.seed+7,5*s,INK,.8);ln([[x+20*s,y+4*s],[x+44*s,y-2*s]],t.seed+7,2.6*s,'#b07a4a',.8);}}
+ blob(tx-16*s*k+sw,ty+4*s,20*s*k,17*s*k,t.seed+1,g);blob(tx+16*s*k+sw,ty+2*s,20*s*k,17*s*k,t.seed+2,g);blob(tx+sw*1.4,ty-12*s*k,24*s*k,20*s*k,t.seed+3,g);
+ if(lf>.6)ln([[tx-8*s+sw,ty-18*s*k],[tx-2*s+sw,ty-22*s*k]],t.seed+4,3,'rgba(255,255,255,.45)',.5);}
 function drawRock(k){blob(k.x,k.y,k.rx,k.ry,k.seed,'#a39db6');ln([[k.x-k.rx*.4,k.y-k.ry*.3],[k.x,k.y-k.ry*.55]],k.seed+1,2.5,'rgba(255,255,255,.5)',.4);}
 function drawPool(){const {x,y}=POOL;blob(x,y,44,22,170,'#8fd3dc',3);const ph=(now*.4)%1;ctx.globalAlpha=.6*(1-ph);sketch(ell(x,y,8+ph*30,(8+ph*30)*.45,12),true,171,1,null,'#fff',2);ctx.globalAlpha=1;
  ln([[x-16,y-7],[x-4,y-10]],172,2.5,'rgba(255,255,255,.85)',.5);for(const [ox,h] of [[-46,26],[-40,19],[43,24]])ln([[x+ox,y+4],[x+ox+2,y+4-h]],173+ox,2.5,'#3f7f3a',.6);}
