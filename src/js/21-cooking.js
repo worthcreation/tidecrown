@@ -6,9 +6,9 @@ const QD={under:'Still a bit see-through. Your stomach has opinions.',good:'Flak
 const BUFF={good:{win:100,dur:180,txt:'bites hang on longer'},perfect:{win:160,perfect:.06,dur:300,txt:'sharper timing, longer bites'},smoky:{wait:.8,dur:240,txt:'fish bite sooner'}};
 const CXP={minnow:15,perch:25,grump:45,eel:65,koi:140},CK={minnow:1.2,perch:1,grump:.85,eel:.8,koi:.7};
 let C=null,sparks=[];const cookbar=$('cookbar'),cookinfo=$('cookinfo');
-function pz(){return lv('hearth')>=20?.72:.8;}function bT(){return 1.12+Math.min(30,lv('hearth'))*.006;}
+function pz(){return lv('cooking')>=20?.72:.8;}function bT(){return 1.12+Math.min(30,lv('cooking'))*.006;}
 function endCookBurn(){const fr=C.fr;exitCook();burnOut(fr);hint('The fire burned out. Only ash is left.',5000);}
-function enterCook(fr){if(!hasSkill('hearth'))return;const L=lv('hearth'),n=Math.min(3,1+(L>=5?1:0)+(L>=10?1:0)+(fr.big?1:0));
+function enterCook(fr){if(!hasSkill('cooking'))return;const L=lv('cooking'),n=Math.min(3,1+(L>=5?1:0)+(L>=10?1:0)+(fr.big?1:0));
  C={fr,base:.55,flare:0,feed:0,heat:.55,pans:Array.from({length:n},()=>({f:null})),say:'',sayT:0,zone:'sweet'};
  P.face=-1;P.path=[];P.task=null;cookbar.style.display='flex';bag.style.display='none';buffb.style.display='none';fwood.querySelector('img').src=icon('wood');fkelp.querySelector('img').src=icon('kelp');fuelUI();hintEl.classList.remove('on');closeCtx();
  if(!S.cookHint){S.cookHint=1;hint('Tap a pan to add a fish. Tap it again to flip, once more to plate. Tap the woodpile to feed the fire.',9000);}}
@@ -18,11 +18,11 @@ function panPos(i,n){return [[[0,-2]],[[-32,0],[32,0]],[[-58,4],[0,-4],[58,4]]][
 function sideQ(d){return d<.6?'under':d>bT()?'burnt':(d>=pz()&&d<=1)?'perfect':'good';}
 function mixC(a,b,t){t=Math.max(0,Math.min(1,t));const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),m=sh=>Math.round(((A>>sh)&255)+(((B>>sh)&255)-((A>>sh)&255))*t);return'#'+((1<<24)+(m(16)<<16)+(m(8)<<8)+m(0)).toString(16).slice(1);}
 function doneCol(f,d){if(d<.8)return mixC(FISH[f].col,'#e8b04a',d/.8);if(d<=1)return'#f0b444';const b=bT();if(d<b)return mixC('#f0b444','#9a5a2a',(d-1)/(b-1));return mixC('#9a5a2a','#2e2626',(d-b)/.25);}
-function cookUpdate(dt){const L=lv('hearth');C.flare=Math.max(0,C.flare-dt*(L>=15?.09:.12));C.base=Math.max(.12,C.base-dt*(C.fr.big?.018:.028));
+function cookUpdate(dt){const L=lv('cooking');C.flare=Math.max(0,C.flare-dt*(L>=15?.09:.12));C.base=Math.max(.12,C.base-dt*(C.fr.big?.018:.028));
  if(!C.fr.main){C.fr.until-=dt*1500;if(C.heat>.95)C.fr.hot=(C.fr.hot||0)+dt;if(!fireLit(C.fr)){endCookBurn();return;}}
  if(C.feed>0){const a=Math.min(C.feed,dt*.2);C.base+=a;C.feed-=a;}C.base=Math.min(1.15,C.base);C.heat=C.out?0:Math.min(1.4,C.base+C.flare);
  if(!C.out&&C.heat<.03&&C.feed<=0){C.outT=(C.outT||0)+dt;if(C.outT>1.2){C.outT=0;if(!C.fr.main){endCookBurn();return;}C.out=true;C.base=0;C.flare=0;addAsh(C.fr.x-34,C.fr.y+16,1);
-  C.say='...I’m out. Driftwood. Please.';C.sayT=3;hint('Wick went out. Add driftwood to relight him.',5000);}}else if(!C.out)C.outT=0;
+  C.say='...I’m out. Driftwood. Please.';C.sayT=3;hint('Brimble went out. Add driftwood to relight him.',5000);}}else if(!C.out)C.outT=0;
  let warn=false;for(const p of C.pans){if(p.flipT>0)p.flipT-=dt;if(!p.f)continue;p.d[p.side]+=.15*Math.pow(C.heat,1.2)*CK[p.f]*dt;p.tot+=dt;if(C.flare>.15)p.fl+=dt;const d=p.d[p.side];if(d>1&&d<bT())warn=true;}
  C.sayT-=dt;const z=C.heat<.4?'cold':C.heat>.95?'hot':'sweet';
  if(C.fr.main&&C.sayT<=0){let t=null;if(warn)t=pick(['Flip it! Flip it!','That one’s ready!','Golden! Move!']);
@@ -53,7 +53,7 @@ function finishPan(p){const a=sideQ(p.d[0]),b=sideQ(p.d[1]);let q=(a==='burnt'||
  let xp=CXP[p.f];if(q==='under')xp*=.3;if(q==='charred')xp=2;if(gold)xp*=1.5;if(smoky)xp*=1.25;xp=Math.max(1,Math.round(xp));
  S.inv.push({id:'cook',f:p.f,q});S.st.cooked=(S.st.cooked||0)+1;if(gold)S.st.perfC=(S.st.perfC||0)+1;
  const i=C.pans.indexOf(p),pp=panPos(i,C.pans.length),wx=C.fr.x+pp[0],wy=C.fr.y+pp[1];
- addXP('hearth',xp,q==='charred'?'burnt':smoky?'smoky':gold?'perfect':first?'first':'normal',[wx,wy]);
+ addXP('cooking',xp,q==='charred'?'burnt':smoky?'smoky':gold?'perfect':first?'first':'normal',[wx,wy]);
  flies.push({id:p.f,x0:wx,y0:wy-4,t:0,col:QCOL[q]});
  if(gold)discover('perfectcook');if(smoky)discover('smoky');p.f=null;save();}
 function cookTap(sx,sy){const [wx,wy]=s2w(sx,sy),{x,y}=C.fr,n=C.pans.length;

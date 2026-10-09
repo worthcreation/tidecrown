@@ -9,7 +9,7 @@ function barTarget(){const g=barGeo();return[g.x+g.w*Math.max(.03,fracOf(HUD.dis
 function pendingSum(k){return orbs.filter(o=>o.sk===k).reduce((s,o)=>s+o.v,0);}
 function nearestSecret(){let best=null,bd=900;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const d=Math.hypot(o.x-P.x,o.y-P.y);if(d<bd&&d>70){bd=d;best=o;}}
  if(dark>.3&&!S.journal.moonpool){const d=Math.hypot(MOON.x-P.x,MOON.y-P.y);if(d<bd)best=MOON;}return best;}
-function addXP(k,n,kind,src){const before=xpOf(k);unlockSkill(k);S.sk[k].xp+=n;
+function addXP(k,n,kind,src){const before=xpOf(k),p=SUBS[k].p,pl=lv(p);unlockSkill(k);S.sk[k].xp+=n;if(lv(p)>pl){const P=SKILLS[p],u=(P.unl||{})[lv(p)];toast(P.name+' '+lv(p)+(u?': '+u:''));}
  if(HUD.sk!==k){HUD.sk=k;HUD.disp=before-pendingSum(k);HUD.plus=0;}
  const s0=w2s(src[0],src[1]),m=Math.max(2,Math.min(5,Math.round(n/14)+1)),bag=[W-42,H-42];
  let wh=-1,wt=null;if((kind==='normal'||kind==='perfect')&&Math.random()<.35){const t=nearestSecret();if(t){wh=Math.floor(Math.random()*m);wt=w2s(t.x,t.y);wt=[Math.max(30,Math.min(W-30,wt[0])),Math.max(80,Math.min(H-80,wt[1]))];}}
@@ -30,14 +30,14 @@ function updOrbs(dt){for(const o of orbs){o.t+=dt;if(o.t<0)continue;const k=Math
  HUD.hold-=dt;HUD.plusT-=dt;if(HUD.plusT<=0)HUD.plus=0;if(HUD.glint>=0){HUD.glint+=dt*2.6;if(HUD.glint>1)HUD.glint=-1;}HUD.bump=Math.max(0,HUD.bump-dt*4);
  const show=HUD.sk&&(orbs.length||HUD.hold>0);HUD.a+=((show?1:0)-HUD.a)*Math.min(1,dt*7);}
 function orbHit(o){if(HUD.sk!==o.sk)return;const L0=lvl(HUD.disp+.001);HUD.disp+=o.v;HUD.glint=0;HUD.plus+=o.v;HUD.plusT=1.4;HUD.hold=2.2;HUD.bump=1;
- const L1=lvl(HUD.disp+.001);if(L1>L0){const D=SKILLS[o.sk];cele={t:0,l:L1,name:D.name,msg:D.unl[L1]||'You feel a little steadier'};}}
+ const L1=lvl(HUD.disp+.001);if(L1>L0){const D=skd(o.sk);cele={t:0,l:L1,name:D.name,msg:(D.unl||{})[L1]||'You feel a little steadier'};}}
 function drawOrbsHUD(){
  for(const o of orbs){if(o.t<0)continue;const col=o.kind==='perfect'?'#ffeab0':o.kind==='burnt'?'#8a8494':o.kind==='lead'?'#eaf2ff':o.kind==='smoky'?'#e2c9a8':(o.sk==='hearth'?'#ffd2a1':'#bfeaf6');
   o.trail.forEach((q,i)=>{ctx.globalAlpha=(o.kind==='smoky'?.25:.3)*(1-i/o.trail.length);dot(q[0],q[1],o.kind==='smoky'?5-i*.4:Math.max(.6,3-i*.6),o.kind==='smoky'?'#b8aa9a':col);});
   ctx.globalAlpha=o.kind==='lead'?.3+.5*Math.abs(Math.sin(o.t*9)):.8;
   const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,8);g.addColorStop(0,col);g.addColorStop(1,'rgba(255,255,255,0)');ctx.globalAlpha*=.6;ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,8,0,6.3);ctx.fill();ctx.globalAlpha/=.6;
   star(o.x,o.y,3.6,col);dot(o.x,o.y,1.1,'#fff');ctx.globalAlpha=1;}
- if(HUD.a<.02||!HUD.sk)return;const g=barGeo(),D=SKILLS[HUD.sk],y=g.y-(1-HUD.a)*70,L=lvl(HUD.disp+.001),fr=fracOf(HUD.disp+.001),bp=HUD.bump;
+ if(HUD.a<.02||!HUD.sk)return;const g=barGeo(),D=skd(HUD.sk),y=g.y-(1-HUD.a)*70,L=lvl(HUD.disp+.001),fr=fracOf(HUD.disp+.001),bp=HUD.bump;
  ctx.save();ctx.globalAlpha=Math.min(1,HUD.a*1.4);
  sketch(rrPts(g.x-3,y-3,g.w+6,g.h+6,8),true,601,1.5,'#fffaf0',INK,3);
  ctx.save();ctx.beginPath();ctx.rect(g.x,y,g.w*fr,g.h);ctx.clip();ctx.fillStyle=D.col;ctx.fillRect(g.x,y,g.w,g.h);

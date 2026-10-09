@@ -1,4 +1,4 @@
-# Tidecrown: handoff (build 3, 9 Oct 2026)
+# Tidecrown: handoff (build 4, 9 Oct 2026)
 Current state only. Build by build changes are in docs/HISTORY.md. Design rules and story are in docs/design-rules.md.
 
 ## Where the work happens
@@ -9,7 +9,7 @@ Current state only. Build by build changes are in docs/HISTORY.md. Design rules 
 ## Layout
 - src/index.html shell; src/css/*.css and src/js/*.js concatenated in filename order (numeric prefixes) into one closure.
 - tools/build.js builds index.html (--watch --serve for local dev; npm run dev). tools/ship-local.js packs builds.
-- Code map: items in ITEMS (03-data, one entry per item id; cooked fish and bottles use functions of the item). Skills in SKILLS (12) with S.sk[id]={xp}; an entry in S.sk means unlocked; use hasSkill, unlockSkill, xpOf, lv, addXP. World objects come from objects() (06), each with its own journal key, cached per frame. Fuel rules in stoke() (20). Use fdt for any per-frame motion in draw code.
+- Code map: items in ITEMS (03-data, one entry per item id; cooked fish and bottles use functions of the item). Skill tree in 12: SKILLS (five skills with subs) and SUBS (subskills with p: parent); skd(k) looks up either. XP lives on subskills only, S.sk[sub]={xp}; a skill's XP is derived. hasSkill, xpOf, lv work for both; addXP takes a subskill id and toasts skill level-ups. ACH is keyed by subskill. Skill pages: parentPage and skillPage (13), skView/subView (08). World objects come from objects() (06), each with its own journal key, cached per frame. Fuel rules in stoke() (20). Use fdt for any per-frame motion in draw code.
 - Pages serves index.html from the root of main at https://tidecrown.worthcreation.com. The CNAME file in the root keeps the custom domain; never delete it.
 
 ## Current game
@@ -17,4 +17,5 @@ Skills: Fishing, Hearth, Shipwright (woodcutting). Hidden: Delving, Grit, Sailin
 Systems: creator and still pool, gear, 20-slot pack with stacks, Gull Post bank (30 slots), ground drops (3 min despawn), fire life timers and ash byproducts, Kindle, journal, skill pages, XP sparks.
 
 ## Next task
-Build 4, design calls Ross is shaping (see chat of 9 Oct): Salt Tin collects salt types and seasons pans while cooking; fishing rod becomes gear built from parts, which pulls fishing modifiers off other gear and food; skill names and a breakout of Shipwright (woodcutting today) into separate skills; XP sparks change with gear and buffs, possibly leading to undiscovered things on the current island (Blank Map overlap). Sea salt, ember pearl and sunstone still need uses.
+Build 5: the tide and Foraging. Read the planned loops in docs/design-rules.md (Skills section) first. Suggested order: tide cycle with visible cues (foam line, wet sand, shallows); tide-line wash-ups with the grab window and Mortimer competing; salt sparkle on wave-touched surfaces; then the zoomed salt-raking scene at low tide. Foraging XP for all of it; Foraging unlocks on the first tide-line grab. Then Build 6 salt pans and the Salt Tin, Build 7 gull posts.
+Still open: spark behavior; rod as gear; Brimble's galley growing from wash-ups; uses for ember pearl beyond the pan tiers.

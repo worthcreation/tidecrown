@@ -1,4 +1,4 @@
-/* hearth: fires, fuel, Old Wick */
+/* hearth: fires, fuel, Brimble */
 const MAINFIRE={x:FIRE.x,y:FIRE.y,main:true,seed:0};
 function allFires(){return [MAINFIRE].concat((S.fires||[]).map((f,i)=>{if(!f.seed)f.seed=10+i;return f;}));}
 const PICK=[];{const r=mulberry(77);let i=0;

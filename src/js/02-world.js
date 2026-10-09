@@ -20,7 +20,7 @@ const REQ={shallow:1,deep:10,moon:20};
 
 const G={x:R0+170,y:-2,talk:false};
 const SIGN={x:R0-95,y:-58};
-const FIRE={x:R0-220,y:80};
+const FIRE=(()=>{const p=polar(-.95,iR(-.95)-42);return{x:Math.round(p[0]),y:Math.round(p[1])};})();
 const HEAD=(()=>{const a=Math.PI-.45,p=polar(a,iR(a)-70);return{x:p[0],y:p[1]};})();
 const POOL=(()=>{const p=polar(2.05,250);return{x:p[0],y:p[1]};})();
 const GULL={x:R0-150,y:-34};

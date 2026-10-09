@@ -21,6 +21,9 @@
 .x{background:none;border:none;font-size:26px;width:40px;line-height:1}
 .skill{display:flex;gap:12px;align-items:center;padding:6px 0 12px}
 .skill img{width:52px;height:52px}
+.skill.hid{opacity:.6}
+.skill .q{width:52px;height:52px;display:grid;place-items:center;font-size:30px;border:2.5px dashed var(--ink);border-radius:50% 45% 52% 48%;flex:none;color:var(--muted)}
+.sdesc.pd{flex:none;margin-bottom:10px}
 .skill .m{flex:1}
 .skill .top{display:flex;justify-content:space-between;font-size:21px}
 .bar{height:15px;border:2.5px solid var(--ink);border-radius:9px 4px 10px 5px;overflow:hidden;background:var(--paper2);margin:3px 0}

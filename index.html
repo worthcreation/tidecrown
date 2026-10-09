@@ -62,6 +62,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .x{background:none;border:none;font-size:26px;width:40px;line-height:1}
 .skill{display:flex;gap:12px;align-items:center;padding:6px 0 12px}
 .skill img{width:52px;height:52px}
+.skill.hid{opacity:.6}
+.skill .q{width:52px;height:52px;display:grid;place-items:center;font-size:30px;border:2.5px dashed var(--ink);border-radius:50% 45% 52% 48%;flex:none;color:var(--muted)}
+.sdesc.pd{flex:none;margin-bottom:10px}
 .skill .m{flex:1}
 .skill .top{display:flex;justify-content:space-between;font-size:21px}
 .bar{height:15px;border:2.5px solid var(--ink);border-radius:9px 4px 10px 5px;overflow:hidden;background:var(--paper2);margin:3px 0}
@@ -259,7 +262,7 @@ const REQ={shallow:1,deep:10,moon:20};
 
 const G={x:R0+170,y:-2,talk:false};
 const SIGN={x:R0-95,y:-58};
-const FIRE={x:R0-220,y:80};
+const FIRE=(()=>{const p=polar(-.95,iR(-.95)-42);return{x:Math.round(p[0]),y:Math.round(p[1])};})();
 const HEAD=(()=>{const a=Math.PI-.45,p=polar(a,iR(a)-70);return{x:p[0],y:p[1]};})();
 const POOL=(()=>{const p=polar(2.05,250);return{x:p[0],y:p[1]};})();
 const GULL={x:R0-150,y:-34};
@@ -300,27 +303,27 @@ const JOURNAL={
  crab:['Sir Thimble','A crab in a thimble helmet. We salute each other now. It\u2019s our thing.'],
  head:['Stone head','Half buried in the west sand. Eyes closed, like it\u2019s trying to remember a song.'],
  headnight:['The humming','At night the stone head hums. Something about the west shore, and the moon.'],
- wick:['Old Wick','The campfire is alive. Old Wick was the galley stove of the Grinning Gull for forty years, and floated here in a teapot. He is always hungry.'],
- hearth:['The Hearth','Wick taught me the Hearth. A fire is a promise: keep it fed and it keeps you.'],
+ wick:['Brimble','A living galley flame, keeping house in a hollow in the dunes. He fed the crew of the Grinning Gull for forty years and floated here in a teapot. Proud, fussy, always hungry.'],
+ hearth:['Cooking','Brimble taught me to cook. A fire is a promise: keep it fed and it keeps you.'],
  driftwood:['Driftwood','Bleached and bone dry. The beach coughs up more every so often. Burns steady.'],
  kelp:['Dry kelp','Brittle seaweed from the rocky shores. Burns hot and wild, and the smoke smells like the deep.'],
  perfectcook:['Golden both sides','Flip at golden, pull at golden. Eat one and my hands get sharper for a while.'],
  smoky:['Smoky fish','Cooked over a kelp flare, fish come out smoky. The smell gets on my hands and the fish come running.'],
- firstfire:['A fire of my own','I lit a fire with my own hands. Wick says a fire is a promise. Starve it and all it leaves you is ash.'],
- ash:['Ash','What a starved fire leaves behind. Soft, grey, faintly warm. Old Wick gets suspiciously excited about it.'],
- stache:['The Ash Mustache','Wick braided ten scoops of ash into a mustache, exactly like the one the Gull’s head cook wore. It is ridiculous. It is magnificent. Gubbins pays extra to anyone wearing it.'],
+ firstfire:['A fire of my own','I lit a fire with my own hands. Brimble says a fire is a promise. Starve it and all it leaves you is ash.'],
+ ash:['Ash','What a starved fire leaves behind. Soft, grey, faintly warm. Brimble gets suspiciously excited about it.'],
+ stache:['The Ash Mustache','Brimble braided ten scoops of ash into a mustache, exactly like the one the Gull’s head cook wore. It is ridiculous. It is magnificent. Gubbins pays extra to anyone wearing it.'],
  flint:['Flint','A sharp shard wedged between the north rocks. It wants to be a tool.'],
  hatchet:['A hatchet','Flint, driftwood and kelp twine. Ugly, but it bites. The wobble trees went very quiet when I made it.'],
  wobblelog:['Wobblewood','The wobble trees give up a log if you chop in time with their sway. Burns long and bright.'],
  bonfire:['Bonfire','Wobblewood and driftwood stacked high. Burns twice as long and lights half the island.'],
  charcoal:['Charcoal','A black lump left in the ash of a driftwood fire. Hotter than anything I’ve burned.'],
- seasalt:['Sea salt','White crystals left where kelp burned down. Wick would have opinions.'],
+ seasalt:['Sea salt','White crystals left where kelp burned down. Brimble would have opinions.'],
  gullbank:['Mortimer Gull','A seagull in a banker’s visor runs the Gull Post. Gulls steal everything, so naturally they’re the only ones trusted to keep it safe.'],
  sunstone:['Sunstone','A stone left behind by a long, white-hot fire. Warm all the way through. It remembers being part of the sun.'],
  pearl:['Ember pearl','A warm bead that formed in the heart of a wobblewood fire. It hums when I hold it.'],
  kindleseen:['The runaway log','A piece of driftwood on the beach blinked at me, then ran off on tiny legs. Logs are not supposed to do that.'],
  kindle:['Kindle','A wild little log who moved into my woodpile after three nights of firelight and ash. When a fire is about to die he leaps in. He runs on ash, the weirdo.'],
- gull:['The Grinning Gull','Wick’s old ship. Her captain wrote letters and tossed them overboard, signed only with a C.'],
+ gull:['The Grinning Gull','Brimble’s old ship. Her captain wrote letters and tossed them overboard, signed only with a C.'],
  pool:['The still pool','A pond so calm it shows who you could be. Looking in lets me change how I look, and new looks surface as I discover things.'],
  horizon:['A tower to the northeast','Through the spyglass I saw a crooked tower far to the northeast, with a light blinking on top. A heading, if I ever get a boat.'],
  moonpool:['Moonlit pool','When it\u2019s dark, the water off the west shore glows. Something pale circles underneath.'],
@@ -346,7 +349,7 @@ const DEFAULT_LOOK={name:'Wanderer',kin:'human',tone:0,shape:'bean',hair:'none',
 const NAME1=['Pip','Bram','Wex','Tully','Odo','Fen','Juno','Quill','Sable','Rook','Nell','Marlo','Kit','Ione','Gus','Wren'];
 const NAME2=['Tidewhistle','Saltbrook','Quickhook','Lanternfoot','Mudd','Barnaby','Driftley','Gullsworth','Hollowell','Brinebottom','Tuck'];
 const EQUIP={
- stache:{name:'Ash Mustache',slot:'head',desc:'Braided from ash by Old Wick. Ridiculous. Magnificent. Gubbins pays an extra shell for everything you sell him.',eff:{}},
+ stache:{name:'Ash Mustache',slot:'head',desc:'Braided from ash by Brimble. Ridiculous. Magnificent. Gubbins pays an extra shell for everything you sell him.',eff:{}},
  cap:{name:'Barnacle Cap',slot:'head',desc:'Crusty, damp, weirdly lucky. Perfect catches come easier.',eff:{perfect:.12}},
  thimble:{name:'Thimble Helm',slot:'head',desc:'A gift from Sir Thimble. The fish seem to respect it. Bites come sooner.',eff:{wait:.6}},
  coat:{name:'Oilskin Coat',slot:'body',desc:'Keeps the spray off. Your glow reaches farther at night.',eff:{light:70}},
@@ -368,10 +371,10 @@ const ITEMS={
  bait:{name:'Glitter bait',desc:'Fish go silly for it. Used up one per cast while you have it.',stack:50},
  wood:{name:'Driftwood',desc:'Bleached and bone dry. Burns steady. Stacks five to a slot.',stack:5},
  kelp:{name:'Dry kelp',desc:'Brittle and smoky. Burns hot and fast. Stacks ten to a slot.',stack:10},
- ash:{name:'Ash',desc:'What a fire leaves behind. Wick and Kindle both get oddly excited about it.',stack:20},
+ ash:{name:'Ash',desc:'What a fire leaves behind. Brimble and Kindle both get oddly excited about it.',stack:20},
  wobble:{name:'Wobblewood',desc:'A springy log from a wobble tree. Burns long and bright.',stack:3},
  charcoal:{name:'Charcoal',desc:'A black lump from the ashes. Burns hotter than anything. Someone will want this.',stack:5},
- seasalt:{name:'Sea salt',desc:'Crystals left where kelp burned. Wick’s eyes would light up. Well, more.',stack:10},
+ seasalt:{name:'Sea salt',desc:'Crystals left where kelp burned. Brimble’s eyes would light up. Well, more.',stack:10},
  pearl:{name:'Ember pearl',desc:'A warm, glowing bead from the heart of a wobblewood fire. It hums when you hold it.',stack:5},
  sunstone:{name:'Sunstone',desc:'Smooth, and warm all the way through. It remembers being part of the sun. Nobody knows what it does yet.',stack:3},
  flint:{name:'Flint shard',desc:'Sharp as a grudge. Lashed to a stick with something stringy, it would make a fine hatchet.'},
@@ -397,10 +400,14 @@ if(!walkable(S.x,S.y)){S.x=R0-80;S.y=24;}
 /* skills: S.sk[id]={xp}. A skill is unlocked when its entry exists. Migrates the build 1-2 fields. */
 if(!S.sk){S.sk={fishing:{xp:S.xp||0}};if(S.hearth)S.sk.hearth={xp:S.hx||0};if(S.shipwright)S.sk.shipwright={xp:S.sx||0};}
 for(const k of ['xp','hx','sx','hearth','shipwright'])delete S[k];
+/* build 4: Hearth became Cooking (and Firemaking), Shipwright became Woodcutting (and Tinkering, unlocked by the hatchet) */
+if(S.sk.hearth){S.sk.cooking=S.sk.hearth;S.sk.firemaking={xp:0};delete S.sk.hearth;}
+if(S.sk.shipwright){S.sk.woodcutting=S.sk.shipwright;S.sk.tinkering={xp:30};delete S.sk.shipwright;}
 S.st=S.st||{};S.st.fires=Math.max(S.st.fires||0,(S.fires||[]).length,S.journal&&S.journal.firstfire?1:0);
-function hasSkill(k){return !!S.sk[k];}
+/* k may be a skill (gathering) or a subskill (fishing). A skill is unlocked when any subskill is; its XP sums its subskills plus achievements. */
+function hasSkill(k){return SKILLS[k]?SKILLS[k].subs.some(s=>!!S.sk[s]):!!S.sk[k];}
 function unlockSkill(k){if(!S.sk[k])S.sk[k]={xp:0};}
-function xpOf(k){return S.sk[k]?S.sk[k].xp:0;}
+function xpOf(k){if(SKILLS[k])return SKILLS[k].subs.reduce((a,s)=>a+xpOf(s)+(ACH[s]||[]).filter(x=>x[2]()).length*50,0);return S.sk[k]?S.sk[k].xp:0;}
 function lv(k){return lvl(xpOf(k));}
 function cnt(id){return S.inv.reduce((a,i)=>a+(i.id===id?(i.n||1):0),0);}
 function canAdd(id,n){n=n||1;const cap=stackOf(id);if(!cap)return S.inv.length+n<=PACK;let room=(PACK-S.inv.length)*cap;for(const i of S.inv)if(i.id===id)room+=cap-(i.n||1);return room>=n;}
@@ -510,7 +517,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;
   onExamine:()=>think({shallow:'Little fish, busy with little fish business.',deep:'Something heavy is thrashing down there.',moon:'Pale shapes circling slowly. Waiting for something.'}[sp.type])});});
  o.push({x:G.x,y:G.y-20,r:30,name:'Gubbins',key:'gubbins',act:'Talk',onAct:()=>routeTo(G.x-36,6,talkG),onExamine:()=>think('A bucket with opinions.')});
  o.push({x:SIGN.x,y:SIGN.y-30,r:30,name:'Sign',key:'sign',act:'Read',onAct:()=>{discover('sign');say('Sign','DRIFTWOOD KEY. Population: one bucket. Two now, probably.');},onExamine:()=>think('A crooked sign. Someone wrote on it with a burnt stick.')});
- o.push({x:FIRE.x,y:FIRE.y-14,r:30,name:S.metWick?'Old Wick':'Campfire',key:S.metWick?'wick':'fire',act:S.metWick?(hasSkill('hearth')&&rawCount()?'Cook':'Talk'):'Poke',onAct:()=>tapFire(MAINFIRE),more:S.metWick&&hasSkill('hearth')&&rawCount()?[{l:'Talk',f:()=>routeTo(FIRE.x-34,FIRE.y+26,talkWick)}]:null,onExamine:()=>{discover('fire');think(S.metWick?'Old Wick, crackling to himself.':'A little campfire. Wait. Did it just snore?');}});
+ o.push({x:FIRE.x,y:FIRE.y-14,r:30,name:S.metWick?'Brimble':'Campfire',key:S.metWick?'wick':'fire',act:S.metWick?(hasSkill('hearth')&&rawCount()?'Cook':'Talk'):'Poke',onAct:()=>tapFire(MAINFIRE),more:S.metWick&&hasSkill('hearth')&&rawCount()?[{l:'Talk',f:()=>routeTo(FIRE.x-34,FIRE.y+26,talkWick)}]:null,onExamine:()=>{discover('fire');think(S.metWick?'Brimble, crackling to himself.':'A little campfire. Wait. Did it just snore?');}});
  (S.fires||[]).forEach(fr=>{if(!fireLit(fr))return;const more=[{l:'Add driftwood',f:()=>feedFire(fr,'wood')}];if((S.wobble||0)>0)more.push({l:'Add wobblewood',f:()=>feedFire(fr,'wobble')});if(cnt('charcoal')>0)more.push({l:'Add charcoal',f:()=>feedFire(fr,'charcoal')});
   o.push({x:fr.x,y:fr.y-14,r:fr.big?36:28,name:fr.big?'Your bonfire':'Your fire',act:'Cook',onAct:()=>tapFire(fr),more,onExamine:()=>{const m=Math.max(1,Math.ceil((fr.until-Date.now())/60000));const h=lifeHeat(fr);think((fr.big?'My bonfire is ':'My fire is ')+(h>1?'roaring white-hot':h>.7?'burning strong':h>.45?'burning steady':'getting low')+'. About '+m+' minute'+(m>1?'s':'')+' left.');}});});
  if(KW.active){const k=S.kindle,here=KW.mode==='fire'&&Math.hypot(KW.x-KW.tx,KW.y-KW.ty)<8;
@@ -547,7 +554,7 @@ function tap(sx,sy){
 function longPress(sx,sy){if(C)return;const [wx,wy]=s2w(sx,sy);const o=objAt(wx,wy);const items=[];let title;
  if(navigator.vibrate)try{navigator.vibrate(12);}catch(e){}
  if(o){title=o.name;if(o.act)items.push({l:o.act,f:o.onAct});if(o.more)o.more.forEach(m=>items.push(m));items.push({l:'Examine',f:o.onExamine});}
- else if(walkable(wx,wy)){title='Ground';items.push({l:'Walk here',f:()=>routeTo(wx,wy)});if(hasSkill('hearth')&&lv('hearth')>=3){items.push({l:'Build a campfire (3 driftwood)',f:()=>buildFire(wx,wy,false)});if((S.wobble||0)>=2)items.push({l:'Build a bonfire (2 wobblewood, 2 driftwood)',f:()=>buildFire(wx,wy,true)});}items.push({l:'Examine',f:()=>think(pick(['Sand. Warm. Slightly judgmental.','Tiny footprints here. Not mine. Not the crab\u2019s either.','The grass is softer than it has any right to be.']))});}
+ else if(walkable(wx,wy)){title='Ground';items.push({l:'Walk here',f:()=>routeTo(wx,wy)});if(lv('survival')>=3){items.push({l:'Build a campfire (3 driftwood)',f:()=>buildFire(wx,wy,false)});if((S.wobble||0)>=2)items.push({l:'Build a bonfire (2 wobblewood, 2 driftwood)',f:()=>buildFire(wx,wy,true)});}items.push({l:'Examine',f:()=>think(pick(['Sand. Warm. Slightly judgmental.','Tiny footprints here. Not mine. Not the crab\u2019s either.','The grass is softer than it has any right to be.']))});}
  else{title='The sea';if(S.eq.trinket==='spyglass')items.push({l:'Look through spyglass',f:spyglass});items.push({l:'Walk to shore',f:()=>{const c=clampLand(wx,wy);routeTo(c[0],c[1]);}});items.push({l:'Examine',f:()=>think(pick(['The Lantern Sea. Somewhere out there is the Far Light.','Big. Wet. Full of fish and secrets.','I can\u2019t swim that far. Yet.']))});}
  showCtx(sx,sy,title,items);if(S.hint===3)advanceHint(4);}
 
@@ -599,7 +606,7 @@ function infoHTML(){
 function sizePack(){const cs=getComputedStyle(pbody),W=pbody.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),H=pbody.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
  const s=Math.max(38,Math.floor(Math.min((W-24)/4,(H-14-40-138)/6)));pbody.style.setProperty('--s',s+'px');}
 function renderPanel(){panel.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));let h='';
- if(tab==='skills'){if(skView&&hasSkill(skView)){pbody.innerHTML=skillPage(skView);return;}
+ if(tab==='skills'){if(subView&&hasSkill(subView)){pbody.innerHTML=skillPage(subView);return;}if(skView&&hasSkill(skView)){pbody.innerHTML=parentPage(skView);return;}
   if(S.char)h+=`<p class="muted" style="margin:0 0 2px">${esc(S.char.name)}${S.origin?', '+ORIGINS[S.origin].name.replace(/^The /,'the '):''}</p>`;
   Object.keys(SKILLS).forEach(k=>{if(hasSkill(k))h+=skillCard(k);});
   const hid=Object.keys(SKILLS).filter(k=>!hasSkill(k)).map(k=>SKILLS[k].clue);
@@ -621,11 +628,11 @@ function showJPage(){jPage=Math.max(0,Math.min(jPages.length-1,jPage));const lis
 let jsx=null;pbody.addEventListener('pointerdown',e=>{jsx=tab==='journal'?e.clientX:null;});
 pbody.addEventListener('pointerup',e=>{if(jsx==null)return;const dx=e.clientX-jsx;jsx=null;if(Math.abs(dx)>50){jPage+=dx<0?1:-1;showJPage();}});
 addEventListener('resize',()=>{if(panel.classList.contains('on'))renderPanel();});
-pbody.addEventListener('click',e=>{const sp_=e.target.closest('[data-skp]');if(sp_){skView=sp_.dataset.skp;ddSel=null;renderPanel();return;}const dd_=e.target.closest('[data-dd]');if(dd_){ddSel=ddSel===dd_.dataset.dd?null:dd_.dataset.dd;renderPanel();return;}if(e.target.closest('[data-skb]')){skView=null;ddSel=null;renderPanel();return;}const pq=e.target.closest('[data-p]');if(pq){jPage+=+pq.dataset.p;showJPage();return;}const sk=e.target.closest('[data-sk]');if(sk){skSel=+sk.dataset.sk;renderPanel();return;}const s=e.target.closest('[data-i]');if(s){sel=+s.dataset.i;selG=null;renderPanel();return;}const g=e.target.closest('[data-g]');if(g){selG=g.dataset.g;sel=-1;renderPanel();return;}
+pbody.addEventListener('click',e=>{const sp_=e.target.closest('[data-skp]');if(sp_){skView=sp_.dataset.skp;subView=null;ddSel=null;renderPanel();return;}const sb_=e.target.closest('[data-sub]');if(sb_){subView=sb_.dataset.sub;ddSel=null;renderPanel();return;}const dd_=e.target.closest('[data-dd]');if(dd_){ddSel=ddSel===dd_.dataset.dd?null:dd_.dataset.dd;renderPanel();return;}if(e.target.closest('[data-skb]')){if(subView)subView=null;else skView=null;ddSel=null;renderPanel();return;}const pq=e.target.closest('[data-p]');if(pq){jPage+=+pq.dataset.p;showJPage();return;}const sk=e.target.closest('[data-sk]');if(sk){skSel=+sk.dataset.sk;renderPanel();return;}const s=e.target.closest('[data-i]');if(s){sel=+s.dataset.i;selG=null;renderPanel();return;}const g=e.target.closest('[data-g]');if(g){selG=g.dataset.g;sel=-1;renderPanel();return;}
  const a=e.target.closest('[data-a]');if(!a)return;
  if(a.dataset.a==='off'){if(S.inv.length>=PACK){toast('No room in your pack');return;}S.inv.push({id:S.eq[selG]});S.eq[selG]=null;selG=null;save();renderPanel();return;}
  const it=S.inv[sel];if(!it)return;
- if(a.dataset.a==='craft'){if(!((S.wood||0)>0&&(S.kelp||0)>0)){toast('Needs 1 driftwood and 1 dry kelp');return;}S.wood--;S.kelp--;S.inv.splice(sel,1);S.inv.push({id:'hatchet'});unlockSkill('shipwright');S.owned.hatchet=1;sel=-1;discover('hatchet');toast('New skill: Shipwright');addXP('shipwright',30,'first',[P.x,P.y-30]);save();renderPanel();return;}
+ if(a.dataset.a==='craft'){if(!((S.wood||0)>0&&(S.kelp||0)>0)){toast('Needs 1 driftwood and 1 dry kelp');return;}S.wood--;S.kelp--;S.inv.splice(sel,1);S.inv.push({id:'hatchet'});unlockSkill('tinkering');S.owned.hatchet=1;sel=-1;discover('hatchet');toast('New skill: Tinkering');addXP('tinkering',30,'first',[P.x,P.y-30]);save();renderPanel();return;}
  if(a.dataset.a==='eat'){S.inv.splice(sel,1);const B=BUFF[it.q];if(B){S.buff={q:it.q,until:Date.now()+B.dur*1000,dur:B.dur};toast('Well fed: '+B.txt);}else think(it.q==='charred'?'Crunchy. Regrettable.':'My stomach has filed a complaint.');sel=-1;save();renderPanel();return;}
  if(a.dataset.a==='wear'){const E=EQUIP[it.id],old=S.eq[E.slot];S.inv.splice(sel,1);S.eq[E.slot]=it.id;if(old)S.inv.push({id:old});sel=-1;save();renderPanel();toast('Wearing: '+E.name);return;}
  if(a.dataset.a==='read'){discover('bottle'+it.msg);closePanel();say('Message in a bottle',BOTTLES[it.msg],[{l:'Keep it',f:closeDlg}]);return;}
@@ -674,6 +681,9 @@ function icon(id){if(icache[id])return icache[id];const c=document.createElement
  else if(id==='sunstone'){for(let i=0;i<8;i++){const a=i/8*6.28;ln([[32+Math.cos(a)*16,32+Math.sin(a)*16],[32+Math.cos(a)*24,32+Math.sin(a)*24]],490+i,2.4,'#ffcf3a',.3);}blob(32,32,13,12,489,'#ffb347',2.6,.6);blob(29,29,5,4,488,'#fff1b0',0,.3);}
  else if(id==='pearl'){const g=ctx.createRadialGradient(32,32,2,32,32,24);g.addColorStop(0,'rgba(255,200,120,.9)');g.addColorStop(1,'rgba(255,200,120,0)');ctx.fillStyle=g;ctx.fillRect(0,0,64,64);blob(32,32,11,11,485,'#ffb347',2.6,.4);dot(28,28,3,'#fff6d0');}
  else if(id==='ash'){blob(32,40,22,12,470,'#b8b2c4',2.6,1);blob(30,34,12,7,471,'#cdc8d6',0,.6);[[24,40],[38,42],[31,45],[42,37]].forEach(q=>dot(q[0],q[1],1.6,'#5a5266'));}
+ else if(id==='basket'){sketch([[12,28],[52,28],[46,54],[18,54]],true,470,1.5,'#d9a066',INK,2.8);ln([[16,36],[48,36]],471,2,'rgba(42,33,64,.35)',.6);ln([[16,44],[48,44]],472,2,'rgba(42,33,64,.35)',.6);ln([[20,28],[26,12],[38,12],[44,28]],473,3.2,INK,.6);ln([[20,28],[26,12],[38,12],[44,28]],473,1.6,'#d9a066',.6);}
+ else if(id==='crown'){sketch([[12,50],[12,22],[24,34],[32,14],[40,34],[52,22],[52,50]],true,474,1.2,'#ffcf3a',INK,2.8);dot(32,42,3,'#ff6b6b');dot(20,44,2.2,'#3fa7b8');dot(44,44,2.2,'#3fa7b8');}
+ else if(id==='pan'){blob(28,36,18,16,475,'#4a3a3a',2.8,.5);blob(28,35,13,11,476,'#5a4a4a',0,.4);ln([[44,32],[58,22]],477,6,INK,.5);ln([[44,32],[58,22]],477,3,'#9a6236',.5);}
  else if(id==='rod'){ln([[14,52],[34,30],[50,10]],20,4.5,'#a8703f',1);ln([[50,10],[54,30],[52,44]],21,1.6,INK,.6);blob(52,46,4,4,22,'#ff6b6b',2,.4);}
  icache[id]=c.toDataURL();ctx=keep;boil=kb;return icache[id];}
 
@@ -724,6 +734,15 @@ function drawRock(k){blob(k.x,k.y,k.rx,k.ry,k.seed,'#a39db6');ln([[k.x-k.rx*.4,k
 function drawPool(){const {x,y}=POOL;blob(x,y,44,22,170,'#8fd3dc',3);const ph=(now*.4)%1;ctx.globalAlpha=.6*(1-ph);sketch(ell(x,y,8+ph*30,(8+ph*30)*.45,12),true,171,1,null,'#fff',2);ctx.globalAlpha=1;
  ln([[x-16,y-7],[x-4,y-10]],172,2.5,'rgba(255,255,255,.85)',.5);for(const [ox,h] of [[-46,26],[-40,19],[43,24]])ln([[x+ox,y+4],[x+ox+2,y+4-h]],173+ox,2.5,'#3f7f3a',.6);}
 function drawSign(){const {x,y}=SIGN;shadow(x,y+2,14,5);ln([[x,y],[x+1,y-30]],61,5,INK,.8);ln([[x,y],[x+1,y-30]],61,2.5,'#b07a4a',.8);sketch(rrPts(x-24,y-52,48,26,6),true,62,1.5,'#d9a066',INK,2.8);ln([[x-15,y-44],[x+12,y-45]],63,2,INK,1);ln([[x-15,y-36],[x+6,y-36]],64,2,INK,1);}
+function drawHome(){const {x,y}=FIRE;const tx=x-54,ty=y+6;shadow(tx,ty+2,26,8);
+ blob(tx,ty-18,24,20,300,'#7fa8c9',2.6);blob(tx,ty-34,10,4,301,'#5d86a8',2.2,.5);dot(tx,ty-37,3.5,'#ffcf3a');
+ ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,4,INK,.5);ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,2,'#7fa8c9',.5);
+ ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,4,INK,.5);ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,2,'#7fa8c9',.5);
+ ln([[tx-8,ty-14],[tx+8,ty-14]],304,2,'rgba(42,33,64,.3)',.5);
+ if(hasSkill('cooking')){const st=(now*.6)%1;ctx.globalAlpha=.5*(1-st);dot(tx-2+Math.sin(now*2)*3,ty-44-st*18,3+st*3,'#fff');ctx.globalAlpha=1;}
+ const px=x+52,py=y+4;shadow(px,py+2,20,6);ln([[px-16,py],[px,py-46],[px+16,py]],305,3.5,'#9a6236',.8);ln([[px-16,py],[px,py-46],[px+16,py]],305,1.8,'#c98f56',.8);
+ ln([[px,py-44],[px,py-26]],306,1.5,INK,.3);blob(px,py-18,11,8,307,'#4a3a3a',2.4,.5);blob(px,py-26,9,3,308,'#5a4a4a',2,.4);
+ for(let i=0;i<3;i++){const sx=x+24+i*14,sy=y+30;blob(sx,sy-5,5,4.5,310+i,['#d6d0e2','#b9b3c9','#d9a066'][i],2,.4);}}
 function drawHead(){const {x,y}=HEAD;blob(x,y-16,27,24,80,'#b9b3c9');ln([[x-2,y-34],[x+3,y-30]],81,2,'rgba(42,33,64,.4)',.5);
  if(dark>.25){blob(x-9,y-19,3.5,3.5,82,'#ffe58a',1.5,.3);blob(x+9,y-19,3.5,3.5,83,'#ffe58a',1.5,.3);blob(x,y-8,3,4,84,INK,0);
   const ph=(now*.5)%1;ctx.globalAlpha=1-ph;otext('\u266A',x+18+ph*14,y-40-ph*30,18,'#ffe58a');ctx.globalAlpha=1;}
@@ -812,7 +831,7 @@ function render(){
  drawPickups();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t)]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k)]));
- d.push([POOL.y-40,drawPool],[GULL.y,drawGull],[SIGN.y,drawSign],[HEAD.y,drawHead],[CRAB.y,drawCrab],[G.y,drawGubbins],[P.y,drawPlayer]);allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr)]));if(KW.active)d.push([KW.y,drawKindle]);
+ d.push([FIRE.y-20,drawHome],[POOL.y-40,drawPool],[GULL.y,drawGull],[SIGN.y,drawSign],[HEAD.y,drawHead],[CRAB.y,drawCrab],[G.y,drawGubbins],[P.y,drawPlayer]);allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr)]));if(KW.active)d.push([KW.y,drawKindle]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{if(x[1]===drawPlayer){drawPlayer();drawLine();}else x[1]();});
  drawFly();drawChopFX();if(C)drawCook();
  if(S.eq.trinket==='blankmap'){ctx.strokeStyle='#fffbe0';ctx.lineWidth=2.2;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const tw=(Math.sin(now*3+o.x*.05)+1)/2,sx=o.x+o.r*.6,sy=o.y-o.r*.6,r=3+tw*3.5;
@@ -841,35 +860,55 @@ let buffT=0,buffQ=null;const buffb=$('buffb');
 function buffUI(){const B=buffOn();if(!B||C||ccOn){buffb.style.display='none';return;}const D=BUFF[B.q],left=(B.until-Date.now())/1000,p=Math.max(0,Math.min(100,left/(B.dur||D.dur)*100));
  buffb.style.display='block';buffb.style.setProperty('--p',p.toFixed(1));buffb.classList.toggle('low',left<30);if(buffQ!==B.q){buffQ=B.q;buffb.querySelector('img').src=icon('ck_minnow_'+B.q);}}
 buffb.onclick=()=>{const B=buffOn();if(!B)return;const left=Math.ceil((B.until-Date.now())/1000);toast('Well fed: '+BUFF[B.q].txt+'. '+Math.floor(left/60)+'m '+String(left%60).padStart(2,'0')+'s left');};
-let ddSel=null,skView=null,curWho='',guideT=2;
-function hearthGuide(){if(!hasSkill('hearth')||(S.st.cooked||0)>0||C||ccOn||dlgOn||S.hint<3)return;if(hintEl.classList.contains('on')&&hintEl.textContent===HINTS[S.hint])return;
- const t=rawCount()?'Tap Old Wick to cook your catch.':'Catch a fish, then bring it to Old Wick.';if(hintEl.textContent!==t||!hintEl.classList.contains('on'))hint(t);}
-/* skills: display data, level unlocks and the clue shown while hidden. Unbuilt skills carry only name and clue. */
+let ddSel=null,skView=null,subView=null,curWho='',guideT=2;
+function hearthGuide(){if(!hasSkill('cooking')||(S.st.cooked||0)>0||C||ccOn||dlgOn||S.hint<3)return;if(hintEl.classList.contains('on')&&hintEl.textContent===HINTS[S.hint])return;
+ const t=rawCount()?'Tap Brimble to cook your catch.':'Catch a fish, then bring it to Brimble.';if(hintEl.textContent!==t||!hintEl.classList.contains('on'))hint(t);}
+/* skill tree: five skills, each a family of specific subskills. XP lives on subskills (S.sk[sub]={xp}); a skill's XP is the sum of its subskills plus 50 per achievement done. A skill or subskill is unlocked when its entry exists; unbuilt ones carry only name and clue. */
 const SKILLS={
- fishing:{name:'Fishing',icon:'rod',col:'#6fd6ff',desc:'Patience and a quick hand. The Lantern Sea feeds those who wait, and every catch pulls you a little further out.',
+ gathering:{name:'Gathering',icon:'basket',col:'#6fd6ff',clue:'The island gives to those who wait.',desc:'Everything the island gives up, if you know how to ask. Patience, rhythm and quick hands.',subs:['fishing','woodcutting','foraging','growing']},
+ survival:{name:'Survival',icon:'flame',col:'#ffb347',clue:'It starts with a spark. Someone on this island is very hungry.',desc:'Keep yourself fed and warm, and a crew will follow. Juggle the heat and nothing goes cold.',subs:['cooking','firemaking'],
+  unl:{3:'You can build your own fires',6:'Something on the beach starts blinking at night'}},
+ invention:{name:'Invention',icon:'hatchet',col:'#a8d07e',clue:'Something sharp, something to hold, something to tie them.',desc:'Fit what you gathered into tools, then fit tools into grander things. No clock, just the right parts in the right order.',subs:['tinkering','shipwright'],
+  unl:{12:'Brimble has a project in mind for your wood'}},
+ exploration:{name:'Exploration',icon:'spyglass',col:'#c9a7ff',clue:'Past the last lighthouse, and under your feet.',desc:'The known edge, and what lies past it. Down into the ground and out over the water.',subs:['delving','sailing']},
+ dominion:{name:'Dominion',icon:'crown',col:'#ff8aa8',clue:'Not everything out there is friendly. Yet.',desc:'When something faces you, read its tell and commit. Break it, or win it over.',subs:['strife','accord']}};
+const SUBS={
+ fishing:{p:'gathering',name:'Fishing',icon:'rod',col:'#6fd6ff',desc:'Patience and a quick hand. The Lantern Sea feeds those who wait, and every catch pulls you a little further out.',
   unl:{5:'Pebble Perch are biting now',10:'The wild water by the north rocks is yours',15:'Something sweet wriggles in the deep',20:'The moon is tugging at your line'}},
- shipwright:{name:'Shipwright',icon:'hatchet',col:'#a8d07e',clue:'Ask the wobble trees.',desc:'It starts with a hatchet and a tree that sighs. Wood becomes fire, then tools, then a hull. Every voyage begins with a log.',
-  unl:{3:'Wobblewood burns longer in your fires',8:'Wobble trees sway slower for you',12:'Wick has a project in mind for your wood'}},
- hearth:{name:'Hearth',icon:'flame',col:'#ffb347',clue:'It starts with a spark. Someone on this island is very hungry.',desc:'Keep a fire, keep a crew. Juggle the heat, flip at golden, and a catch becomes strength.',
-  unl:{3:'You can build your own fires',5:'A second pan by the fire',6:'Something on the beach starts blinking at night',10:'A third pan by the fire',15:'Kelp flares burn longer',20:'Your golden window widens'}},
- delving:{name:'Delving',clue:'Something is buried under your feet.'},
- grit:{name:'Grit',clue:'Not everything out there is friendly. Yet.'},
- sailing:{name:'Sailing',clue:'Past the last lighthouse.'}};
+ woodcutting:{p:'gathering',name:'Woodcutting',icon:'hatchet',col:'#a8d07e',clue:'Ask the wobble trees.',desc:'A hatchet, a tree that sighs, and a beat to keep. Every voyage begins with a log.',
+  unl:{8:'Wobble trees sway slower for you'}},
+ foraging:{p:'gathering',name:'Foraging',clue:'The tide gives, and the tide takes back.'},
+ growing:{p:'gathering',name:'Growing',clue:'Plant something. Leave. Come back.'},
+ cooking:{p:'survival',name:'Cooking',icon:'pan',col:'#ffb347',clue:'Brimble is very hungry.',desc:'Juggle the pans, flip at golden, and a catch becomes strength.',
+  unl:{5:'A second pan by the fire',10:'A third pan by the fire',15:'Kelp flares burn longer',20:'Your golden window widens'}},
+ firemaking:{p:'survival',name:'Firemaking',icon:'flame',col:'#ff8a3d',clue:'Feed a fire and it keeps you.',desc:'Build them, feed them, keep them. Some fires leave more than ash.',
+  unl:{3:'Wobblewood burns longer in your fires'}},
+ tinkering:{p:'invention',name:'Tinkering',icon:'flint',col:'#a8d07e',clue:'Something sharp, something to hold, something to tie them.',desc:'Small things, fitted right. A hatchet first. Then whatever the island needs.',unl:{}},
+ shipwright:{p:'invention',name:'Shipwright',clue:'A hull begins with a lot of logs.'},
+ delving:{p:'exploration',name:'Delving',clue:'Something is buried under your feet.'},
+ sailing:{p:'exploration',name:'Sailing',clue:'Past the last lighthouse.'},
+ strife:{p:'dominion',name:'Strife',clue:'Counter the tell.'},
+ accord:{p:'dominion',name:'Accord',clue:'Mirror the tell.'}};
+function skd(k){return SKILLS[k]||SUBS[k];}
 const ACH={
- shipwright:[['Sharp idea','Lash together a hatchet',()=>hasSkill('shipwright')],['First log','Earn a log from a wobble tree',()=>!!S.journal.wobblelog],['In the groove','Land 10 clean chops in a row',()=>!!S.st.groove],['Bonfire','Build a bonfire',()=>!!S.journal.bonfire],['Ember pearl','Find an ember pearl in the ashes',()=>!!S.journal.pearl]],
  fishing:[['First bite','Catch your first fish',()=>S.catches>=1],['Steady hand','Land 10 perfect catches',()=>(S.st.perf||0)>=10],['Wild water','Catch a Grumpfish',()=>!!S.journal.fish_grump],['Letters from C.','Find a message in a bottle',()=>S.bottles>=1],['Moonlit','Catch a Moonkoi',()=>!!S.journal.fish_koi]],
- hearth:[['Kindled','Feed Old Wick',()=>!!hasSkill('hearth')],['Golden','Cook a fish golden on both sides',()=>(S.st.perfC||0)>=1],['Smoke signals','Discover smoky fish',()=>!!S.journal.smoky],['Three pans','Keep three pans going at once',()=>!!S.st.pans3],['Keeper of flames','Build three fires of your own',()=>(S.st.fires||0)>=3]]};
+ woodcutting:[['First log','Earn a log from a wobble tree',()=>!!S.journal.wobblelog],['In the groove','Land 10 clean chops in a row',()=>!!S.st.groove],['Bonfire','Build a bonfire',()=>!!S.journal.bonfire]],
+ cooking:[['Golden','Cook a fish golden on both sides',()=>(S.st.perfC||0)>=1],['Smoke signals','Discover smoky fish',()=>!!S.journal.smoky],['Three pans','Keep three pans going at once',()=>!!S.st.pans3]],
+ firemaking:[['Kindled','Feed Brimble',()=>hasSkill('cooking')],['Keeper of flames','Build three fires of your own',()=>(S.st.fires||0)>=3],['Ember pearl','Find an ember pearl in the ashes',()=>!!S.journal.pearl]],
+ tinkering:[['Sharp idea','Lash together a hatchet',()=>hasSkill('tinkering')]]};
 function rawCount(){return S.inv.filter(i=>FISH[i.id]).length;}
 function buffOn(){return S.buff&&S.buff.until>Date.now()?S.buff:null;}
 
 /* skill pages */
-function skBar(k){const D=SKILLS[k],x=xpOf(k),L=lvl(x),c=XP[L],n=XP[L+1]||c,pct=L>=99?100:(x-c)/(n-c)*100;
+function skBar(k){const D=skd(k),x=xpOf(k),L=lvl(x),c=XP[L],n=XP[L+1]||c,pct=L>=99?100:(x-c)/(n-c)*100;
  return `<img src="${icon(D.icon)}" alt=""><div class="m"><div class="top"><b>${D.name}</b><span>Level ${L}</span></div><div class="bar"><i style="width:${pct.toFixed(1)}%;background:${D.col}"></i></div><small>${L>=99?'Mastered':Math.ceil(n-x)+' xp to level '+(L+1)}</small></div>`;}
-function skillCard(k){return `<button class="skill skb" data-skp="${k}">${skBar(k)}<span class="chev">›</span></button>`;}
+function skillCard(k,sub){return `<button class="skill skb" data-${sub?'sub':'skp'}="${k}">${skBar(k)}<span class="chev">›</span></button>`;}
+function subRow(k){const D=SUBS[k];return hasSkill(k)?skillCard(k,1):`<div class="skill hid"><span class="q">?</span><div class="m"><div class="top"><b>${D.name}</b></div><small>${D.clue}</small></div></div>`;}
 function dxb(key,img,ok,badge){return `<button class="dx${ddSel===key?' sel':''}" data-dd="${key}" aria-label="Details"><img class="${ok?'':'sil'}" src="${img}" alt="">${badge||''}</button>`;}
 function xGot(id){return !!S.journal[id==='wobble'?'wobblelog':id];}
 function discHTML(k){
- if(k==='shipwright')return ['hatchet','wobble','charcoal','seasalt','pearl','sunstone'].map(id=>dxb('x:'+id,icon(id),xGot(id))).join('');
+ const X={woodcutting:['wobble'],firemaking:['charcoal','seasalt','pearl','sunstone'],tinkering:['hatchet']}[k];
+ if(X)return X.map(id=>dxb('x:'+id,icon(id),xGot(id))).join('');
  if(k==='fishing')return Object.keys(FISH).map(id=>dxb('f:'+id,icon(id),S.journal['fish_'+id])).join('')+dxb('bottle',icon('bottle'),S.bottles,`<i>${S.bottles||0}/3</i>`);
  const ck=(S.st&&S.st.ck)||{};
  return Object.keys(FISH).map(id=>dxb('c:'+id,icon('ck_'+id+'_good'),ck[id])).join('')+dxb('gold',icon('ck_minnow_perfect'),S.journal.perfectcook)+dxb('smoky',icon('ck_minnow_smoky'),S.journal.smoky);}
@@ -881,20 +920,22 @@ function ddText(key){const st=S.st||{},fc=st.fc||{},fp=st.fp||{},cc=st.cc||{};
   const extra=id==='wobble'?` Chopped ${st.logs||0}. You carry ${S.wobble||0}.`:id==='hatchet'?' Keep it in your pack to chop.':` Found ${(st.found||{})[id]||0}.`;return `<b>${M.name}</b><br>${M.desc}${extra}`;}
  if(key==='bottle')return `<b>Letters from C.</b><br>${S.bottles||0} of 3 found. They tangle on your line in the shallows. Read them from your pack.`;
  if(key==='gold'){const n=st.perfC||0;return S.journal.perfectcook?`<b>Golden</b><br>Gold band on both sides. Eat one for sharper timing and longer bites, 5 min. Made ${n}.`:`<b>Golden</b><br>Flip and plate while the marker sits in the gold band. Not made yet.`;}
- if(key==='smoky'){const n=Object.values(cc).reduce((a,c)=>a+(c.s||0),0);return S.journal.smoky?`<b>Smoky</b><br>Cooked mostly over a kelp flare. Eat one and fish bite sooner, 4 min. Made ${n}.`:`<b>Something smoky</b><br>Wick keeps muttering about kelp and smoke.`;}
+ if(key==='smoky'){const n=Object.values(cc).reduce((a,c)=>a+(c.s||0),0);return S.journal.smoky?`<b>Smoky</b><br>Cooked mostly over a kelp flare. Eat one and fish bite sooner, 4 min. Made ${n}.`:`<b>Something smoky</b><br>Brimble keeps muttering about kelp and smoke.`;}
  const [t,id]=key.split(':'),F=FISH[id];
  if(t==='f'){if(!S.journal['fish_'+id])return `<b>Unknown fish</b><br>Bites in ${WHERE[F.spot]}${F.lvl>1?' once you reach Fishing '+F.lvl:''}.`;
   return `<b>${F.name}</b><br>Caught ${fc[id]||0}${fp[id]?', '+fp[id]+' perfect':''}. Found in ${WHERE[F.spot]}. Gubbins pays ${F.val} shell${F.val>1?'s':''}.`;}
  const c=cc[id];if(!c||!(st.ck||{})[id])return `<b>Not cooked yet</b><br>${S.journal['fish_'+id]?'Bring a '+F.name+' to a fire.':'Catch it first. The sea is hiding this one.'}`;
  const parts=[c.g?c.g+' golden':'',c.s?c.s+' smoky':'',c.c?c.c+' charred':''].filter(Boolean).join(', ');
  return `<b>Cooked ${F.name}</b><br>Cooked ${c.n}${parts?': '+parts:''}. Eat for longer bites, 3 min. Sells for ${Math.ceil(F.val*2)}+ shells.`;}
-function skillPage(k){const D=SKILLS[k],L=lv(k),B=buffOn();
- let h=`<button class="back2" data-skb="1">‹ All skills</button><div class="skill">${skBar(k)}</div><p class="sdesc${ddSel?' dd':''}">${ddSel?ddText(ddSel):D.desc}</p><div class="sh">Discoveries</div><div class="disc">${discHTML(k)}</div><div class="sh">Achievements</div><div class="ach">`;
- h+=ACH[k].map(([n,,f],i)=>{const ok=f(),key='a:'+k+':'+i;return `<button class="${ok?'ok':''}${ddSel===key?' sel':''}" data-dd="${key}"><span class="ck">${ok?'✓':''}</span><b>${n}</b></button>`;}).join('')+'</div>';
+function parentPage(k){const D=SKILLS[k];
+ return `<button class="back2" data-skb="1">‹ All skills</button><div class="skill">${skBar(k)}</div><p class="sdesc pd">${D.desc}</p>`+D.subs.map(subRow).join('');}
+function skillPage(k){const D=SUBS[k],L=lv(k),B=buffOn();
+ let h=`<button class="back2" data-skb="1">‹ ${SKILLS[D.p].name}</button><div class="skill">${skBar(k)}</div><p class="sdesc${ddSel?' dd':''}">${ddSel?ddText(ddSel):D.desc}</p><div class="sh">Discoveries</div><div class="disc">${discHTML(k)}</div><div class="sh">Achievements</div><div class="ach">`;
+ h+=(ACH[k]||[]).map(([n,,f],i)=>{const ok=f(),key='a:'+k+':'+i;return `<button class="${ok?'ok':''}${ddSel===key?' sel':''}" data-dd="${key}"><span class="ck">${ok?'✓':''}</span><b>${n}</b></button>`;}).join('')+'</div>';
  const nl=Object.keys(D.unl).map(Number).sort((a,b)=>a-b).find(l=>l>L);
  h+=`<div class="next">${nl?`At level ${nl}: ${D.unl[nl]}.`:'Every secret this skill holds, you’ve heard. For now.'}`+
   (k==='fishing'&&B&&BUFF[B.q]?`<br><span class="muted">Well fed: ${BUFF[B.q].txt}, ${Math.ceil((B.until-Date.now())/60000)}m left</span>`:'')+
-  (k==='hearth'?`<br><span class="muted">Fires built: ${S.st.fires||0}. Fish cooked: ${S.st.cooked||0}.</span>`:'')+'</div>';
+  (k==='cooking'?`<br><span class="muted">Fish cooked: ${S.st.cooked||0}.</span>`:k==='firemaking'?`<br><span class="muted">Fires built: ${S.st.fires||0}.</span>`:'')+'</div>';
  return h;}
 
 /* xp orbs + level bar */
@@ -908,7 +949,7 @@ function barTarget(){const g=barGeo();return[g.x+g.w*Math.max(.03,fracOf(HUD.dis
 function pendingSum(k){return orbs.filter(o=>o.sk===k).reduce((s,o)=>s+o.v,0);}
 function nearestSecret(){let best=null,bd=900;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const d=Math.hypot(o.x-P.x,o.y-P.y);if(d<bd&&d>70){bd=d;best=o;}}
  if(dark>.3&&!S.journal.moonpool){const d=Math.hypot(MOON.x-P.x,MOON.y-P.y);if(d<bd)best=MOON;}return best;}
-function addXP(k,n,kind,src){const before=xpOf(k);unlockSkill(k);S.sk[k].xp+=n;
+function addXP(k,n,kind,src){const before=xpOf(k),p=SUBS[k].p,pl=lv(p);unlockSkill(k);S.sk[k].xp+=n;if(lv(p)>pl){const P=SKILLS[p],u=(P.unl||{})[lv(p)];toast(P.name+' '+lv(p)+(u?': '+u:''));}
  if(HUD.sk!==k){HUD.sk=k;HUD.disp=before-pendingSum(k);HUD.plus=0;}
  const s0=w2s(src[0],src[1]),m=Math.max(2,Math.min(5,Math.round(n/14)+1)),bag=[W-42,H-42];
  let wh=-1,wt=null;if((kind==='normal'||kind==='perfect')&&Math.random()<.35){const t=nearestSecret();if(t){wh=Math.floor(Math.random()*m);wt=w2s(t.x,t.y);wt=[Math.max(30,Math.min(W-30,wt[0])),Math.max(80,Math.min(H-80,wt[1]))];}}
@@ -929,14 +970,14 @@ function updOrbs(dt){for(const o of orbs){o.t+=dt;if(o.t<0)continue;const k=Math
  HUD.hold-=dt;HUD.plusT-=dt;if(HUD.plusT<=0)HUD.plus=0;if(HUD.glint>=0){HUD.glint+=dt*2.6;if(HUD.glint>1)HUD.glint=-1;}HUD.bump=Math.max(0,HUD.bump-dt*4);
  const show=HUD.sk&&(orbs.length||HUD.hold>0);HUD.a+=((show?1:0)-HUD.a)*Math.min(1,dt*7);}
 function orbHit(o){if(HUD.sk!==o.sk)return;const L0=lvl(HUD.disp+.001);HUD.disp+=o.v;HUD.glint=0;HUD.plus+=o.v;HUD.plusT=1.4;HUD.hold=2.2;HUD.bump=1;
- const L1=lvl(HUD.disp+.001);if(L1>L0){const D=SKILLS[o.sk];cele={t:0,l:L1,name:D.name,msg:D.unl[L1]||'You feel a little steadier'};}}
+ const L1=lvl(HUD.disp+.001);if(L1>L0){const D=skd(o.sk);cele={t:0,l:L1,name:D.name,msg:(D.unl||{})[L1]||'You feel a little steadier'};}}
 function drawOrbsHUD(){
  for(const o of orbs){if(o.t<0)continue;const col=o.kind==='perfect'?'#ffeab0':o.kind==='burnt'?'#8a8494':o.kind==='lead'?'#eaf2ff':o.kind==='smoky'?'#e2c9a8':(o.sk==='hearth'?'#ffd2a1':'#bfeaf6');
   o.trail.forEach((q,i)=>{ctx.globalAlpha=(o.kind==='smoky'?.25:.3)*(1-i/o.trail.length);dot(q[0],q[1],o.kind==='smoky'?5-i*.4:Math.max(.6,3-i*.6),o.kind==='smoky'?'#b8aa9a':col);});
   ctx.globalAlpha=o.kind==='lead'?.3+.5*Math.abs(Math.sin(o.t*9)):.8;
   const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,8);g.addColorStop(0,col);g.addColorStop(1,'rgba(255,255,255,0)');ctx.globalAlpha*=.6;ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,8,0,6.3);ctx.fill();ctx.globalAlpha/=.6;
   star(o.x,o.y,3.6,col);dot(o.x,o.y,1.1,'#fff');ctx.globalAlpha=1;}
- if(HUD.a<.02||!HUD.sk)return;const g=barGeo(),D=SKILLS[HUD.sk],y=g.y-(1-HUD.a)*70,L=lvl(HUD.disp+.001),fr=fracOf(HUD.disp+.001),bp=HUD.bump;
+ if(HUD.a<.02||!HUD.sk)return;const g=barGeo(),D=skd(HUD.sk),y=g.y-(1-HUD.a)*70,L=lvl(HUD.disp+.001),fr=fracOf(HUD.disp+.001),bp=HUD.bump;
  ctx.save();ctx.globalAlpha=Math.min(1,HUD.a*1.4);
  sketch(rrPts(g.x-3,y-3,g.w+6,g.h+6,8),true,601,1.5,'#fffaf0',INK,3);
  ctx.save();ctx.beginPath();ctx.rect(g.x,y,g.w*fr,g.h);ctx.clip();ctx.fillStyle=D.col;ctx.fillRect(g.x,y,g.w,g.h);
@@ -950,7 +991,7 @@ function drawOrbsHUD(){
  if(HUD.plus>0){ctx.globalAlpha=Math.min(1,HUD.plusT)*HUD.a;otext('+'+Math.round(HUD.plus)+' '+D.name,g.x+g.w/2,y+g.h+18,17,'#fff');}
  ctx.restore();}
 
-/* hearth: fires, fuel, Old Wick */
+/* hearth: fires, fuel, Brimble */
 const MAINFIRE={x:FIRE.x,y:FIRE.y,main:true,seed:0};
 function allFires(){return [MAINFIRE].concat((S.fires||[]).map((f,i)=>{if(!f.seed)f.seed=10+i;return f;}));}
 const PICK=[];{const r=mulberry(77);let i=0;
@@ -991,32 +1032,32 @@ function drawFireBody(fr){const {x,y}=fr,sd=(fr.seed||0)*7,hot=C&&C.fr===fr?C.he
  if(hot>1&&Math.random()<24*fdt)sparks.push({x:x+(Math.random()-.5)*12,y:fy-fh*.6,vx:(Math.random()-.5)*50,vy:-70-Math.random()*60,t:0});
  if(fr.main){const ey=ck?fy-fh*.35:fy+1;
   if(!S.metWick){ln([[x-7,ey],[x-3,ey+1]],74,2,INK,.2);ln([[x+3,ey+1],[x+7,ey]],75,2,INK,.2);const zp=(now*.5)%1;ctx.globalAlpha=1-zp;otext('z',x+12+zp*10,fy-fh-zp*20,14,'#fff');ctx.globalAlpha=1;}
-  else{dot(x-4,ey,2);dot(x+4,ey,2);const talking=(C&&C.fr===fr&&C.sayT>0)||(dlgOn&&curWho==='Old Wick');
+  else{dot(x-4,ey,2);dot(x+4,ey,2);const talking=(C&&C.fr===fr&&C.sayT>0)||(dlgOn&&curWho==='Brimble');
    if(talking)blob(x,ey+6,2.6,1.4+Math.abs(Math.sin(now*14))*2.2,76,INK,0);else ln([[x-3,ey+6],[x+3,ey+5.5]],77,1.8,INK,.2);}}}
 function talkWick(){const first=!S.metWick;S.metWick=1;discover('wick');
- if(!hasSkill('hearth')){say('Old Wick',first?'Hm? Oh! Company. Name’s Old Wick. Forty years I was the galley stove of the Grinning Gull, till she went down and I floated here in a teapot. Long story. Look, I’m starving. Bring me driftwood from the beach and I’ll teach you the Hearth.':
-  ((S.wood||0)>0?'Is that driftwood I smell? Don’t tease a stove.':'Still starving. Driftwood. Please. Flames don’t usually beg.'),wickOpts());return;}
- if(!rawCount()){say('Old Wick',pick(['Nothing to cook? The sea’s full of fish. Catch one and bring it here.','Empty hands, empty pans. Go fish, then tap me.']),wickOpts());return;}
- say('Old Wick',pick(['Back! Bring me something to sizzle?','Crackle crackle. That’s hello, in stove.','The Gull’s cook used to sing to me. You don’t have to. Please don’t.']),wickOpts());}
+ if(!hasSkill('cooking')){say('Brimble',first?'Hm? Oh. An audience. Brimble, galley flame of the Grinning Gull, finest ship that ever sank. Forty years I fed that crew. Now I feed myself, badly, from a teapot. Bring me driftwood from the beach and I’ll teach you to cook. Properly.':
+  ((S.wood||0)>0?'Is that driftwood I smell? Don’t tease a stove.':'Still starving. Driftwood. Flames don’t beg, as a rule. Consider this the exception.'),wickOpts());return;}
+ if(!rawCount()){say('Brimble',pick(['Nothing to cook? The sea’s full of fish. Catch one and bring it here.','Empty hands, empty pans. Go fish, then tap me.']),wickOpts());return;}
+ say('Brimble',pick(['Back! Bring me something to sizzle?','Crackle crackle. That’s hello, in stove.','The Gull’s cook used to sing to me. You don’t have to. Please don’t.','Driftwood again? Notes of salt and regret. Fine. Hand it over.']),wickOpts());}
 const WTIPS=['Smoke does strange things to fish. Throw on some kelp and let the flare ride.','Two pans is a dance. Three is a brawl. Both are fun. Want a third sooner? Build bigger.','Every fire dies if you starve it. What’s left is ash, and ash is never nothing. Ask me about it.','Our captain wrote letters and tossed them overboard. Signed them just C. Never did learn the rest.','Golden on both sides. That’s the whole secret. That, and not wandering off.'];
 function wickOpts(){const o=[];
- if(!hasSkill('hearth')){if((S.wood||0)>0)o.push({l:'Feed him driftwood',f:feedWick});else o.push({l:'Where’s driftwood?',f:()=>say('Old Wick','On the beach, all round the island. Bleached grey, looks like old bones. Tastes like heaven.',wickOpts())});o.push({l:'See you',f:closeDlg});return o;}
+ if(!hasSkill('cooking')){if((S.wood||0)>0)o.push({l:'Feed him driftwood',f:feedWick});else o.push({l:'Where’s driftwood?',f:()=>say('Brimble','On the beach, all round the island. Bleached grey, looks like old bones. Tastes like heaven, for driftwood.',wickOpts())});o.push({l:'See you',f:closeDlg});return o;}
  const n=rawCount();if(n)o.push({l:'Cook ('+n+' raw fish)',f:()=>{closeDlg();goCook(MAINFIRE);}});
  if((S.ash||0)>0)o.push({l:'About this ash...',f:ashTalk});
- if(S.kindle&&S.kindle.seen&&!S.kindle.joined)o.push({l:'A log ran away from me',f:()=>say('Old Wick','A runaway log? That’s a Kindle! Wild ones spook easy, but they can’t resist a fire at night. Light one of your own, keep it fed past dark, and bring something tasty. Kindles eat ash, the weirdos. Takes a few nights before they trust you.',wickOpts())});
- o.push({l:'Any tips?',f:()=>{const i=Math.floor(Math.random()*WTIPS.length);if(i===3)discover('gull');say('Old Wick',WTIPS[i],wickOpts());}});o.push({l:'See you',f:closeDlg});return o;}
-function feedWick(){S.wood--;unlockSkill('hearth');discover('hearth');save();addXP('hearth',20,'first',[FIRE.x,FIRE.y-24]);toast('New skill: Hearth');
- say('Old Wick','Ahhh. That’s the stuff. Lesson one: a fire is a promise. Keep it fed and it keeps you. Put a fish on, flip it when it goes golden, pull it when the other side matches. Driftwood burns steady, kelp burns wild. I’ll holler if you’re doing it wrong. '+(rawCount()?'You’ve got fish on you. Let’s cook!':'Now go catch me a fish and come back. A Minnowbit will do.'),wickOpts());}
+ if(S.kindle&&S.kindle.seen&&!S.kindle.joined)o.push({l:'A log ran away from me',f:()=>say('Brimble','A runaway log? That’s a Kindle! Wild ones spook easy, but they can’t resist a fire at night. Light one of your own, keep it fed past dark, and bring something tasty. Kindles eat ash, the weirdos. Takes a few nights before they trust you.',wickOpts())});
+ o.push({l:'Any tips?',f:()=>{const i=Math.floor(Math.random()*WTIPS.length);if(i===3)discover('gull');say('Brimble',WTIPS[i],wickOpts());}});o.push({l:'See you',f:closeDlg});return o;}
+function feedWick(){S.wood--;unlockSkill('cooking');discover('hearth');save();addXP('firemaking',20,'first',[FIRE.x,FIRE.y-24]);toast('New skill: Cooking');
+ say('Brimble','Ahhh. That’s the stuff. Lesson one: a fire is a promise. Keep it fed and it keeps you. Put a fish on, flip it when it goes golden, pull it when the other side matches. Driftwood burns steady, kelp burns wild. I’ll holler if you’re doing it wrong. '+(rawCount()?'You’ve got fish on you. Let’s cook!':'Now go catch me a fish and come back. A Minnowbit will do.'),wickOpts());}
 function ashTalk(){const a=S.ash||0;
- if(S.owned.stache){say('Old Wick','Ash keeps. Hang onto it. I’ve got more tricks, once there’s more fire in you.',wickOpts());return;}
- if(a<10){say('Old Wick','Ash! Wonderful stuff. The Gull’s head cook could do things with ash that’d make a grown bucket weep. Bring me ten scoops. You’ve got '+a+'.',wickOpts());return;}
- if(S.inv.length>=PACK){say('Old Wick','Ten scoops! Make some room in that satchel first, this is going to be glorious.',wickOpts());return;}
+ if(S.owned.stache){say('Brimble','Ash keeps. Hang onto it. I’ve got more tricks, once there’s more fire in you.',wickOpts());return;}
+ if(a<10){say('Brimble','Ash! Wonderful stuff. The Gull’s head cook could do things with ash that’d make a grown bucket weep. Bring me ten scoops. You’ve got '+a+'.',wickOpts());return;}
+ if(S.inv.length>=PACK){say('Brimble','Ten scoops! Make some room in that satchel first, this is going to be glorious.',wickOpts());return;}
  S.ash-=10;S.owned.stache=1;S.inv.push({id:'stache'});discover('stache');toast('Found: Ash Mustache');save();
- say('Old Wick','Hold still. A pinch here. A braid there. Little curl... THERE. The head cook’s own mustache, braided proper. Wear it with pride. Gubbins is going to lose his mind.',wickOpts());}
+ say('Brimble','Hold still. A pinch here. A braid there. Little curl... THERE. The head cook’s own mustache, braided proper. Wear it with pride. Gubbins is going to lose his mind.',wickOpts());}
 const KW={active:false,x:0,y:0,tx:0,ty:0,mode:'beach',flee:false,f:null};
 function beachSpot(){const a=Math.random()*6.2832;return polar(a,iR(a)-30);}
 function kindleTick(){const k=S.kindle||(S.kindle={trust:0,lastNight:-1,joined:0,hops:0,seen:0});
- if(k.joined||!hasSkill('hearth')||lv('hearth')<6||dark<.3||C){KW.active=false;return;}
+ if(k.joined||!hasSkill('cooking')||lv('survival')<6||dark<.3||C){KW.active=false;return;}
  const lit=(S.fires||[]).filter(fireLit);
  if(lit.length){const f=lit.reduce((a,b)=>Math.hypot(a.x-P.x,a.y-P.y)<=Math.hypot(b.x-P.x,b.y-P.y)?a:b);
   if(!KW.active){const sp=beachSpot();KW.x=sp[0];KW.y=sp[1];}if(KW.f!==f||KW.mode!=='fire'){KW.f=f;KW.mode='fire';const c=clampLand(f.x+40,f.y+18);KW.tx=c[0];KW.ty=c[1];KW.flee=false;}}
@@ -1025,12 +1066,12 @@ function kindleTick(){const k=S.kindle||(S.kindle={trust:0,lastNight:-1,joined:0
 function kindleMove(dt){if(!KW.active)return;const dx=KW.tx-KW.x,dy=KW.ty-KW.y,d=Math.hypot(dx,dy);if(d<1){KW.flee=false;return;}const sp=Math.min(d,(KW.flee?170:45)*dt);KW.x+=dx/d*sp;KW.y+=dy/d*sp;}
 function spookKindle(){const c=clampLand(KW.x-22,KW.y+6);routeTo(c[0],c[1],()=>{if(!KW.active||KW.mode!=='beach')return;const k=S.kindle;
  pop('!',KW.x,KW.y-30,'#ffcf3a',26);let sp;for(let i=0;i<12;i++){sp=beachSpot();if(Math.hypot(sp[0]-KW.x,sp[1]-KW.y)>260)break;}KW.tx=sp[0];KW.ty=sp[1];KW.flee=true;
- think(k.seen?'He bolts again. Wick said something about fire and nighttime.':'The driftwood blinked. Then it ran away on tiny legs.');k.seen=1;discover('kindleseen');save();});}
+ think(k.seen?'He bolts again. Brimble said something about fire and nighttime.':'The driftwood blinked. Then it ran away on tiny legs.');k.seen=1;discover('kindleseen');save();});}
 function offerAsh(){const c=clampLand(KW.x-26,KW.y+6);routeTo(c[0],c[1],()=>{const k=S.kindle;k.seen=1;discover('kindleseen');
  if(k.lastNight===(S.dayN||0)){think('He’s had his ash tonight. Snoring like a tiny kettle.');return;}
  if(!((S.ash||0)>0)){think('He keeps eyeing the ash at the edge of my fire. Maybe he eats it?');return;}
  S.ash--;k.trust++;k.lastNight=S.dayN||0;pop('♥',KW.x,KW.y-30,'#ff8fb1',22);
- if(k.trust>=3){k.joined=1;k.hops=4;KW.active=false;discover('kindle');toast('Kindle joined your woodpile');think('Kindle hops into my woodpile like he owns it. I think he does now.');addXP('hearth',60,'first',[KW.x,KW.y]);}
+ if(k.trust>=3){k.joined=1;k.hops=4;KW.active=false;discover('kindle');toast('Kindle joined your woodpile');think('Kindle hops into my woodpile like he owns it. I think he does now.');addXP('firemaking',60,'first',[KW.x,KW.y]);}
  else think(k.trust===1?'Crunch. He eats the ash and scoots a little closer to the fire. Same time tomorrow night?':'He eats it and leans against my boot. One more night, I think.');save();});}
 function drawKindle(){const {x,y}=KW,mv=Math.hypot(KW.tx-x,KW.ty-y)>3,b=mv?Math.abs(Math.sin(now*16))*3:0,f=KW.mode==='fire'&&!mv?(KW.f&&KW.f.x<x?-1:1):(KW.tx<x?-1:1);shadow(x,y+2,16,4);
  if(mv){const s2=Math.sin(now*16)*4;ln([[x-6,y-4],[x-6+s2,y]],990,2,INK,.2);ln([[x+6,y-4],[x+6-s2,y]],991,2,INK,.2);}
@@ -1038,21 +1079,21 @@ function drawKindle(){const {x,y}=KW,mv=Math.hypot(KW.tx-x,KW.ty-y)>3,b=mv?Math.
  const blink=(now%3.2)<.15,ex=x+f*6;if(blink){ln([[ex-3,yy-2],[ex-1,yy-2]],994,1.6,INK,.1);ln([[ex+2,yy-2],[ex+4,yy-2]],995,1.6,INK,.1);}else{dot(ex-2,yy-2,1.6);dot(ex+3,yy-2.3,1.6);}
  if(S.kindle&&S.kindle.lastNight===(S.dayN||0)&&!mv&&KW.mode==='fire'){const zp=(now*.5)%1;ctx.globalAlpha=1-zp;otext('z',x+10+zp*8,yy-12-zp*16,12,'#fff');ctx.globalAlpha=1;}}
 let chips=[];
-function chopPer(){return lv('shipwright')>=8?1.25:1.05;}
+function chopPer(){return lv('woodcutting')>=8?1.25:1.05;}
 function chopTree(t){if(!hasHatchet()){discover('tree');think('I’d need a hatchet. Something sharp, something to hold, something to tie them together.');return;}
  if((t.rest||0)>now){think('This one needs a breather. It’s sighing at me.');return;}
  const side=P.x<t.x?-1:1,c=clampLand(t.x+side*26,t.y+6);routeTo(c[0],c[1],()=>startChop(t));}
 function startChop(t){if((t.rest||0)>now)return;if(!canAdd('wobble')){think('My pack is full. Nowhere to put a log.');return;}P.task={chop:1,tree:t,t0:now,prog:0,combo:0,miss:0,swing:0};P.face=t.x>P.x?1:-1;
  if(!S.chopHint){S.chopHint=1;hint('Tap as the ring closes on the trunk. Keep the rhythm.',7000);}}
 function beatPh(T){return((now-T.t0)/chopPer())%1;}
-function strike(){const T=P.task;T.swing=.22;const ph=beatPh(T),e=Math.min(ph,1-ph)*chopPer(),win=.11+Math.min(.06,lv('shipwright')*.003),t=T.tree,cx=t.x+t.lean*.4*t.s,cy=t.y-24*t.s;
+function strike(){const T=P.task;T.swing=.22;const ph=beatPh(T),e=Math.min(ph,1-ph)*chopPer(),win=.11+Math.min(.06,lv('woodcutting')*.003),t=T.tree,cx=t.x+t.lean*.4*t.s,cy=t.y-24*t.s;
  const chip=n=>{for(let i=0;i<n;i++)chips.push({x:cx,y:cy,vx:(Math.random()-.5)*120,vy:-60-Math.random()*90,t:0});};
  if(e<win){T.combo++;T.prog+=1+Math.min(T.combo,6)*.15;chip(8);if(T.combo>=10)S.st.groove=1;}
  else if(e<win*2.2){T.prog+=.5;chip(4);}
  else{T.combo=0;T.miss++;T.prog+=.15;pop('thunk',cx,cy-20,'#fff',15);}
  if(T.prog>=6)finishChop();}
 function finishChop(){const T=P.task,t=T.tree;if(!canAdd('wobble')){P.task=null;think('My pack filled up. The tree keeps its log.');return;}S.wobble+=1;S.st.logs=(S.st.logs||0)+1;const first=!S.journal.wobblelog;
- addXP('shipwright',T.miss?18:24,first?'first':(T.miss?'normal':'perfect'),[t.x,t.y-30]);flies.push({id:'misc',img:'wobble',x0:t.x,y0:t.y-30,t:0});discover('wobblelog');
+ addXP('woodcutting',T.miss?18:24,first?'first':(T.miss?'normal':'perfect'),[t.x,t.y-30]);flies.push({id:'misc',img:'wobble',x0:t.x,y0:t.y-30,t:0});discover('wobblelog');
  t.rest=now+45;P.task=null;think(pick(['The tree sighs and lets a log drop. Thanks, tree.','A log falls loose. The tree seems relieved, honestly.','It shudders, then drops a log at my feet.']));save();}
 function drawChopFX(){const T=P.task;if(T&&T.chop){const t=T.tree,cx=t.x+t.lean*.4*t.s+Math.cos(Math.PI*(now-T.t0)/chopPer())*5*t.s,cy=t.y-24*t.s,ph=beatPh(T),r=12+(1-ph)*30;
   ctx.globalAlpha=.25+ph*.6;sketch(ell(cx,cy,r,r*.8,16),true,940,1,null,'#fffaf0',3);ctx.globalAlpha=1;
@@ -1064,12 +1105,12 @@ function addAsh(x,y,n,items){S.ashp=S.ashp||[];const a=S.ashp.find(q=>Math.hypot
 function scoopAsh(a){const i=(S.ashp||[]).indexOf(a);if(i<0)return;if(a.n>0&&!canAdd('ash',a.n)){think('No room in my pack for the ash.');return;}S.ash=(S.ash||0)+a.n;pop('+'+a.n+' ash',a.x,a.y-26,'#fff',17);discover('ash');
  const left=[];(a.items||[]).forEach(id=>{if(canAdd(id)){addItem(id);S.st.found=S.st.found||{};S.st.found[id]=(S.st.found[id]||0)+1;flies.push({id:'misc',img:id,x0:a.x,y0:a.y,t:0});discover(id);}else left.push(id);});
  if(left.length){a.n=0;a.items=left;think('Something else is in the ash, but my satchel is full.');}else S.ashp.splice(i,1);save();
- if(!S.ashHint&&S.metWick){S.ashHint=1;setTimeout(()=>think('Old Wick got weirdly excited about ash once. Maybe ask him.'),900);}}
+ if(!S.ashHint&&S.metWick){S.ashHint=1;setTimeout(()=>think('Brimble got weirdly excited about ash once. Maybe ask him.'),900);}}
 /* one rule for every fuel, whether added from the menu or the cooking woodpile */
 const FUELMIN={wood:4,kelp:1,charcoal:3,wobble:8};
-function stoke(fr,kind){if(fr.main)return;fr.fuel=fr.fuel||{};fr.fuel[kind]=(fr.fuel[kind]||0)+1;const m=kind==='wobble'&&lv('shipwright')>=3?10:FUELMIN[kind];
+function stoke(fr,kind){if(fr.main)return;fr.fuel=fr.fuel||{};fr.fuel[kind]=(fr.fuel[kind]||0)+1;const m=kind==='wobble'&&lv('firemaking')>=3?10:FUELMIN[kind];
  fr.mins=(fr.mins||8)+m;fr.until=Math.min(Date.now()+(fr.big?45:30)*60000,Math.max(fr.until||0,Date.now())+m*60000);}
-function feedFire(fr,kind){const c=clampLand(fr.x+34,fr.y+16);routeTo(c[0],c[1],()=>{const nm={wood:'driftwood',wobble:'wobblewood',charcoal:'charcoal'}[kind];if(!(cnt(kind)>0)){think('No '+nm+' on me.');return;}takeItem(kind);stoke(fr,kind);pop('+ '+nm,fr.x,fr.y-40,'#fff',16);save();});}
+function feedFire(fr,kind){const c=clampLand(fr.x+34,fr.y+16);routeTo(c[0],c[1],()=>{const nm={wood:'driftwood',wobble:'wobblewood',charcoal:'charcoal'}[kind];if(!(cnt(kind)>0)){think('No '+nm+' on me.');return;}takeItem(kind);stoke(fr,kind);addXP('firemaking',3,'normal',[fr.x,fr.y-20]);pop('+ '+nm,fr.x,fr.y-40,'#fff',16);save();});}
 function lifeHeat(fr){if(fr.main)return .6;const rem=(fr.until-Date.now())/60000,f=fr.fuel||{};let v=Math.min(1,.22+rem/7)+(f.charcoal?.15:0)+(f.wobble?.08:0)+(fr.big?.1:0);if(rem<1)v=.18+.22*Math.abs(Math.sin(now*6+fr.seed)*Math.sin(now*2.3));return v;}
 function burnOut(fr){const i=(S.fires||[]).indexOf(fr);if(i<0)return;S.fires.splice(i,1);const f=fr.fuel||{wood:3},items=[],mins=fr.mins||(fr.big?20:8);
  const heatF=1+.25*(f.wobble||0)+.5*(f.charcoal||0)+.1*(f.kelp||0)+(fr.big?.5:0)+(fr.hot||0)/120,score=mins*heatF,R=Math.random;
@@ -1079,14 +1120,14 @@ function burnOut(fr){const i=(S.fires||[]).indexOf(fr);if(i<0)return;S.fires.spl
 function searchRocks(k){const c=clampLand(k.x,k.y);routeTo(c[0],c[1],()=>{discover('rocks');if(!S.owned.flint&&!S.owned.hatchet){if(S.inv.length>=PACK){think('Something sharp is wedged in here, but my satchel is full.');return;}S.owned.flint=1;S.inv.push({id:'flint'});flies.push({id:'misc',img:'flint',x0:k.x,y0:k.y,t:0});discover('flint');think('One of these has a wicked edge. Flint!');save();}
  else think(pick(['Barnacles, and a crab-shaped dent. Nothing else.','Just wet rock. The flint was a one-off.']));});}
 
-function tapFire(fr){if(!fr.main&&!fireLit(fr))return;if(fr.main&&(!hasSkill('hearth')||!rawCount())){routeTo(fr.x-34,fr.y+26,talkWick);return;}
- if(!hasSkill('hearth')){think('A fire. Strange, it seems to know me.');return;}
+function tapFire(fr){if(!fr.main&&!fireLit(fr))return;if(fr.main&&(!hasSkill('cooking')||!rawCount())){routeTo(fr.x-34,fr.y+26,talkWick);return;}
+ if(!hasSkill('cooking')){think('A fire. Strange, it seems to know me.');return;}
  if(!rawCount()){think('Nothing raw to cook. The sea has plenty.');return;}goCook(fr);}
 function goCook(fr){const c=clampLand(fr.x+88,fr.y-34);routeTo(c[0],c[1],()=>enterCook(fr));}
 function buildFire(x,y,big){if(!onIsland(x,y)){think('Not here.');return;}if(allFires().some(f=>Math.hypot(f.x-x,f.y-y)<(big?140:110))){think('Too close to another fire.');return;}
- const needW=big?2:3,needB=big?2:0;if((S.wood||0)<needW||(S.wobble||0)<needB){think(big?'A bonfire needs 2 wobblewood and 2 driftwood.':'I need 3 driftwood to build a fire.');return;}if((S.fires||[]).length>=5){think('Five fires is plenty. Wick says so.');return;}
+ const needW=big?2:3,needB=big?2:0;if((S.wood||0)<needW||(S.wobble||0)<needB){think(big?'A bonfire needs 2 wobblewood and 2 driftwood.':'I need 3 driftwood to build a fire.');return;}if((S.fires||[]).length>=5){think('Five fires is plenty. Brimble says so.');return;}
  const c=clampLand(x+(big?44:34),y+16);routeTo(c[0],c[1],()=>{if((S.wood||0)<needW||(S.wobble||0)<needB)return;S.wood-=needW;S.wobble-=needB;S.fires=S.fires||[];
-  S.st.fires=(S.st.fires||0)+1;S.fires.push({x,y,seed:10+S.fires.length,big:!!big,until:Date.now()+(big?20:8)*60000,mins:big?20:8,fuel:big?{wood:2,wobble:2}:{wood:3}});addXP('hearth',big?40:25,S.journal.firstfire?'normal':'first',[x,y-10]);discover('firstfire');if(big)discover('bonfire');save();});}
+  S.st.fires=(S.st.fires||0)+1;S.fires.push({x,y,seed:10+S.fires.length,big:!!big,until:Date.now()+(big?20:8)*60000,mins:big?20:8,fuel:big?{wood:2,wobble:2}:{wood:3}});addXP('firemaking',big?40:25,S.journal.firstfire?'normal':'first',[x,y-10]);discover('firstfire');if(big)discover('bonfire');save();});}
 
 /* cooking: quality data, then the cooking scene */
 const QN={under:'Underdone',good:'Cooked',perfect:'Golden',smoky:'Smoky',charred:'Charred'};
@@ -1096,9 +1137,9 @@ const QD={under:'Still a bit see-through. Your stomach has opinions.',good:'Flak
 const BUFF={good:{win:100,dur:180,txt:'bites hang on longer'},perfect:{win:160,perfect:.06,dur:300,txt:'sharper timing, longer bites'},smoky:{wait:.8,dur:240,txt:'fish bite sooner'}};
 const CXP={minnow:15,perch:25,grump:45,eel:65,koi:140},CK={minnow:1.2,perch:1,grump:.85,eel:.8,koi:.7};
 let C=null,sparks=[];const cookbar=$('cookbar'),cookinfo=$('cookinfo');
-function pz(){return lv('hearth')>=20?.72:.8;}function bT(){return 1.12+Math.min(30,lv('hearth'))*.006;}
+function pz(){return lv('cooking')>=20?.72:.8;}function bT(){return 1.12+Math.min(30,lv('cooking'))*.006;}
 function endCookBurn(){const fr=C.fr;exitCook();burnOut(fr);hint('The fire burned out. Only ash is left.',5000);}
-function enterCook(fr){if(!hasSkill('hearth'))return;const L=lv('hearth'),n=Math.min(3,1+(L>=5?1:0)+(L>=10?1:0)+(fr.big?1:0));
+function enterCook(fr){if(!hasSkill('cooking'))return;const L=lv('cooking'),n=Math.min(3,1+(L>=5?1:0)+(L>=10?1:0)+(fr.big?1:0));
  C={fr,base:.55,flare:0,feed:0,heat:.55,pans:Array.from({length:n},()=>({f:null})),say:'',sayT:0,zone:'sweet'};
  P.face=-1;P.path=[];P.task=null;cookbar.style.display='flex';bag.style.display='none';buffb.style.display='none';fwood.querySelector('img').src=icon('wood');fkelp.querySelector('img').src=icon('kelp');fuelUI();hintEl.classList.remove('on');closeCtx();
  if(!S.cookHint){S.cookHint=1;hint('Tap a pan to add a fish. Tap it again to flip, once more to plate. Tap the woodpile to feed the fire.',9000);}}
@@ -1108,11 +1149,11 @@ function panPos(i,n){return [[[0,-2]],[[-32,0],[32,0]],[[-58,4],[0,-4],[58,4]]][
 function sideQ(d){return d<.6?'under':d>bT()?'burnt':(d>=pz()&&d<=1)?'perfect':'good';}
 function mixC(a,b,t){t=Math.max(0,Math.min(1,t));const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),m=sh=>Math.round(((A>>sh)&255)+(((B>>sh)&255)-((A>>sh)&255))*t);return'#'+((1<<24)+(m(16)<<16)+(m(8)<<8)+m(0)).toString(16).slice(1);}
 function doneCol(f,d){if(d<.8)return mixC(FISH[f].col,'#e8b04a',d/.8);if(d<=1)return'#f0b444';const b=bT();if(d<b)return mixC('#f0b444','#9a5a2a',(d-1)/(b-1));return mixC('#9a5a2a','#2e2626',(d-b)/.25);}
-function cookUpdate(dt){const L=lv('hearth');C.flare=Math.max(0,C.flare-dt*(L>=15?.09:.12));C.base=Math.max(.12,C.base-dt*(C.fr.big?.018:.028));
+function cookUpdate(dt){const L=lv('cooking');C.flare=Math.max(0,C.flare-dt*(L>=15?.09:.12));C.base=Math.max(.12,C.base-dt*(C.fr.big?.018:.028));
  if(!C.fr.main){C.fr.until-=dt*1500;if(C.heat>.95)C.fr.hot=(C.fr.hot||0)+dt;if(!fireLit(C.fr)){endCookBurn();return;}}
  if(C.feed>0){const a=Math.min(C.feed,dt*.2);C.base+=a;C.feed-=a;}C.base=Math.min(1.15,C.base);C.heat=C.out?0:Math.min(1.4,C.base+C.flare);
  if(!C.out&&C.heat<.03&&C.feed<=0){C.outT=(C.outT||0)+dt;if(C.outT>1.2){C.outT=0;if(!C.fr.main){endCookBurn();return;}C.out=true;C.base=0;C.flare=0;addAsh(C.fr.x-34,C.fr.y+16,1);
-  C.say='...I’m out. Driftwood. Please.';C.sayT=3;hint('Wick went out. Add driftwood to relight him.',5000);}}else if(!C.out)C.outT=0;
+  C.say='...I’m out. Driftwood. Please.';C.sayT=3;hint('Brimble went out. Add driftwood to relight him.',5000);}}else if(!C.out)C.outT=0;
  let warn=false;for(const p of C.pans){if(p.flipT>0)p.flipT-=dt;if(!p.f)continue;p.d[p.side]+=.15*Math.pow(C.heat,1.2)*CK[p.f]*dt;p.tot+=dt;if(C.flare>.15)p.fl+=dt;const d=p.d[p.side];if(d>1&&d<bT())warn=true;}
  C.sayT-=dt;const z=C.heat<.4?'cold':C.heat>.95?'hot':'sweet';
  if(C.fr.main&&C.sayT<=0){let t=null;if(warn)t=pick(['Flip it! Flip it!','That one’s ready!','Golden! Move!']);
@@ -1143,7 +1184,7 @@ function finishPan(p){const a=sideQ(p.d[0]),b=sideQ(p.d[1]);let q=(a==='burnt'||
  let xp=CXP[p.f];if(q==='under')xp*=.3;if(q==='charred')xp=2;if(gold)xp*=1.5;if(smoky)xp*=1.25;xp=Math.max(1,Math.round(xp));
  S.inv.push({id:'cook',f:p.f,q});S.st.cooked=(S.st.cooked||0)+1;if(gold)S.st.perfC=(S.st.perfC||0)+1;
  const i=C.pans.indexOf(p),pp=panPos(i,C.pans.length),wx=C.fr.x+pp[0],wy=C.fr.y+pp[1];
- addXP('hearth',xp,q==='charred'?'burnt':smoky?'smoky':gold?'perfect':first?'first':'normal',[wx,wy]);
+ addXP('cooking',xp,q==='charred'?'burnt':smoky?'smoky':gold?'perfect':first?'first':'normal',[wx,wy]);
  flies.push({id:p.f,x0:wx,y0:wy-4,t:0,col:QCOL[q]});
  if(gold)discover('perfectcook');if(smoky)discover('smoky');p.f=null;save();}
 function cookTap(sx,sy){const [wx,wy]=s2w(sx,sy),{x,y}=C.fr,n=C.pans.length;
@@ -1231,7 +1272,7 @@ function renderPreview(){const c=$('pv');if(!c)return;const d=Math.min(2,deviceP
  drawChar(draft,ccMode==='mirror'?S.eq:{},0,0,1,false,false);ctx.restore();ctx=keep;}
 function begin(){intro=RM?null:0;setTimeout(showHint,RM?300:2600);if(!S.journal.washed)setTimeout(()=>discover('washed'),3400);}
 
-const BUILD=3;
+const BUILD=4;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);

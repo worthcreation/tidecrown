@@ -6,10 +6,14 @@ if(!walkable(S.x,S.y)){S.x=R0-80;S.y=24;}
 /* skills: S.sk[id]={xp}. A skill is unlocked when its entry exists. Migrates the build 1-2 fields. */
 if(!S.sk){S.sk={fishing:{xp:S.xp||0}};if(S.hearth)S.sk.hearth={xp:S.hx||0};if(S.shipwright)S.sk.shipwright={xp:S.sx||0};}
 for(const k of ['xp','hx','sx','hearth','shipwright'])delete S[k];
+/* build 4: Hearth became Cooking (and Firemaking), Shipwright became Woodcutting (and Tinkering, unlocked by the hatchet) */
+if(S.sk.hearth){S.sk.cooking=S.sk.hearth;S.sk.firemaking={xp:0};delete S.sk.hearth;}
+if(S.sk.shipwright){S.sk.woodcutting=S.sk.shipwright;S.sk.tinkering={xp:30};delete S.sk.shipwright;}
 S.st=S.st||{};S.st.fires=Math.max(S.st.fires||0,(S.fires||[]).length,S.journal&&S.journal.firstfire?1:0);
-function hasSkill(k){return !!S.sk[k];}
+/* k may be a skill (gathering) or a subskill (fishing). A skill is unlocked when any subskill is; its XP sums its subskills plus achievements. */
+function hasSkill(k){return SKILLS[k]?SKILLS[k].subs.some(s=>!!S.sk[s]):!!S.sk[k];}
 function unlockSkill(k){if(!S.sk[k])S.sk[k]={xp:0};}
-function xpOf(k){return S.sk[k]?S.sk[k].xp:0;}
+function xpOf(k){if(SKILLS[k])return SKILLS[k].subs.reduce((a,s)=>a+xpOf(s)+(ACH[s]||[]).filter(x=>x[2]()).length*50,0);return S.sk[k]?S.sk[k].xp:0;}
 function lv(k){return lvl(xpOf(k));}
 function cnt(id){return S.inv.reduce((a,i)=>a+(i.id===id?(i.n||1):0),0);}
 function canAdd(id,n){n=n||1;const cap=stackOf(id);if(!cap)return S.inv.length+n<=PACK;let room=(PACK-S.inv.length)*cap;for(const i of S.inv)if(i.id===id)room+=cap-(i.n||1);return room>=n;}
