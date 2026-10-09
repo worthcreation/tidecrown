@@ -249,7 +249,7 @@ const NP=150,sandPts=[],grassPts=[],shallowPts=[],foamPts=[];
 for(let i=0;i<NP;i++){const a=i/NP*6.2832,c=Math.cos(a),s=Math.sin(a);sandPts.push([c*iR(a),s*iR(a)]);grassPts.push([c*gR(a),s*gR(a)]);shallowPts.push([c*(iR(a)+60),s*(iR(a)+60)]);foamPts.push([c*(iR(a)+9),s*(iR(a)+9)]);}
 const R0=iR(0);
 /* tide: 1 is high water, 0 is low. Low water exposes a wet band of TIDE_REACH outside the dry sand. */
-const TIDE_PERIOD=24*60000,TIDE_REACH=46;let tideF=null;
+const TIDE_PERIOD=24*60000,DAY_PERIOD=2*TIDE_PERIOD,TIDE_REACH=46;let tideF=null;
 function tideLevel(){if(tideF!=null)return tideF;return .5+.5*Math.cos(Date.now()/TIDE_PERIOD*6.2832);}
 function wetR(a){return iR(a)+(1-tideLevel())*TIDE_REACH;}
 const DOCK={x0:R0-40,x1:R0+192,y0:-24,y1:24};
@@ -260,7 +260,7 @@ function clampLand(x,y){if(walkable(x,y))return[x,y];const a=Math.atan2(y,x);ret
 
 /* fishing spots roam: a spot fades in, lives a couple of minutes, fades out, and a new one bubbles up somewhere else. The glowing pool is a place and stays put. */
 const spots=[];
-function spotHere(a,type){const p=polar(a,iR(a)+60),ap=polar(a,iR(a)-24);return {x:p[0],y:p[1],ax:ap[0],ay:ap[1],type,seed:Math.floor(Math.random()*900)+5,a,al:0,st:'in',life:70+Math.random()*70};}
+function spotHere(a,type){const p=polar(a,iR(a)+60),ap=polar(a,iR(a)-24);return {x:p[0],y:p[1],ax:ap[0],ay:ap[1],type,seed:Math.floor(Math.random()*900)+5,a,al:0,st:'in',life:120+Math.random()*180};}
 function spotAngle(type){for(let i=0;i<40;i++){let a;if(type==='deep')a=-2.7+Math.random()*1.2;else{a=Math.random()*6.2832;if(a>Math.PI)a-=6.2832;if(Math.abs(a)<.5||(a<-1.4&&a>-2.8)||Math.abs(Math.abs(a)-Math.PI)<.4)continue;}
  if(spots.some(s=>Math.abs(angDiff(s.a,a))<.42))continue;return a;}return null;}
 function addSpot(a,type){spots.push(spotHere(a,type));}
@@ -270,7 +270,7 @@ spots.push(spotHere(.42,'shallow'));
 const MOON=spots.find(s=>s.type==='moon');
 function spotsUpdate(dt){for(const sp of spots){if(sp.type==='moon')continue;
  if(sp.st==='in'){sp.al=Math.min(1,sp.al+dt/2.5);if(sp.al>=1)sp.st='on';}
- else if(sp.st==='on'){const busy=P.task&&P.task.sp===sp;if(!busy)sp.life-=dt;if(sp.life<=0&&!busy)sp.st='out';}
+ else if(sp.st==='on'){sp.life-=dt;if(sp.life<=0)sp.st='out';}
  else{sp.al=Math.max(0,sp.al-dt/2.5);}}
  for(let i=spots.length-1;i>=0;i--){const sp=spots[i];if(sp.st==='out'&&sp.al<=0){spots.splice(i,1);const a=spotAngle(sp.type);if(a!=null)spots.push(spotHere(a,sp.type));}}}
 const REQ={shallow:1,deep:10,moon:20};
@@ -320,7 +320,7 @@ const JOURNAL={
  headnight:['The humming','At night the stone head hums. Something about the west shore, and the moon.'],
  wick:['Brimble','A living galley flame, keeping house in a hollow in the dunes. He fed the crew of the Grinning Gull for forty years and floated here in a teapot. Proud, fussy, always hungry.'],
  foraging:['Foraging','The tide gives and the tide takes back. Grab what the waves drop before the backwash, and scrape the salt they leave on rock and piling.'],
- tide:['The tide','Twice an hour or so the sea breathes in and out. High water brings wash-ups. Low water bares a band of wet sand, and the rocks sit in their pools.'],
+ tide:['The tide','Twice a day the sea breathes in and out. High water brings wash-ups. Low water bares a band of wet sand, and the rocks sit in their pools.'],
  hearth:['Cooking','Brimble taught me to cook. A fire is a promise: keep it fed and it keeps you.'],
  driftwood:['Driftwood','Bleached and bone dry. The waves leave it on the sand, and take it back if you dawdle. Burns steady.'],
  kelp:['Dry kelp','Brittle seaweed from the rocky shores. Burns hot and wild, and the smoke smells like the deep.'],
@@ -334,7 +334,7 @@ const JOURNAL={
  wobblelog:['Wobblewood','The wobble trees give up a log if you chop in time with their sway. Burns long and bright.'],
  bonfire:['Bonfire','Wobblewood and driftwood stacked high. Burns twice as long and lights half the island.'],
  charcoal:['Charcoal','A black lump left in the ash of a driftwood fire. Hotter than anything I’ve burned.'],
- seasalt:['Sea salt','White crystals, scraped off wet rock between waves or left where kelp burned down. Brimble would have opinions.'],
+ seasalt:['Sea salt','White crystals a wave leaves on rock or piling, or what is left where kelp burned down. Brimble would have opinions.'],
  gullbank:['Mortimer Gull','A seagull in a banker’s visor runs the Gull Post. Gulls steal everything, so naturally they’re the only ones trusted to keep it safe.'],
  sunstone:['Sunstone','A stone left behind by a long, white-hot fire. Warm all the way through. It remembers being part of the sun.'],
  pearl:['Ember pearl','A warm bead that formed in the heart of a wobblewood fire. It hums when I hold it.'],
@@ -439,7 +439,7 @@ for(const k of ['shells','bait','wood','kelp','ash','wobble']){const v=S[k];dele
 function save(){S.x=P.x;S.y=P.y;try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){}}
 const P={x:S.x,y:S.y,path:[],then:null,face:-1,moving:false,task:null,pathT:0};
 const cam={x:P.x,y:P.y};
-(S.fires||[]).forEach(f=>{if(!f.until)f.until=Date.now()+8*60000;if(!f.fuel)f.fuel={wood:3};});
+(S.fires||[]).forEach(f=>{if(!f.until)f.until=Date.now()+90000;if(f.until>Date.now()+8*60000)f.until=Date.now()+90000;if(!f.fuel)f.fuel={wood:3};});
 setInterval(save,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
 
 let flies=[],pops=[],bub=null,cele=null,fly=null,mark=null,intro=null,dark=0;
@@ -536,7 +536,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;
  o.push({x:SIGN.x,y:SIGN.y-30,r:30,name:'Sign',key:'sign',act:'Read',onAct:()=>{discover('sign');say('Sign','DRIFTWOOD KEY. Population: one bucket. Two now, probably.');},onExamine:()=>think('A crooked sign. Someone wrote on it with a burnt stick.')});
  o.push({x:FIRE.x,y:FIRE.y-14,r:30,name:S.metWick?'Brimble':'Campfire',key:S.metWick?'wick':'fire',act:S.metWick?(hasSkill('hearth')&&rawCount()?'Cook':'Talk'):'Poke',onAct:()=>tapFire(MAINFIRE),more:S.metWick&&hasSkill('hearth')&&rawCount()?[{l:'Talk',f:()=>routeTo(FIRE.x-34,FIRE.y+26,talkWick)}]:null,onExamine:()=>{discover('fire');think(S.metWick?'Brimble, crackling to himself.':'A little campfire. Wait. Did it just snore?');}});
  (S.fires||[]).forEach(fr=>{if(!fireLit(fr))return;const more=[{l:'Add driftwood',f:()=>feedFire(fr,'wood')}];if((S.wobble||0)>0)more.push({l:'Add wobblewood',f:()=>feedFire(fr,'wobble')});if(cnt('charcoal')>0)more.push({l:'Add charcoal',f:()=>feedFire(fr,'charcoal')});
-  o.push({x:fr.x,y:fr.y-14,r:fr.big?36:28,name:fr.big?'Your bonfire':'Your fire',act:'Cook',onAct:()=>tapFire(fr),more,onExamine:()=>{const m=Math.max(1,Math.ceil((fr.until-Date.now())/60000));const h=lifeHeat(fr);think((fr.big?'My bonfire is ':'My fire is ')+(h>1?'roaring white-hot':h>.7?'burning strong':h>.45?'burning steady':'getting low')+'. About '+m+' minute'+(m>1?'s':'')+' left.');}});});
+  o.push({x:fr.x,y:fr.y-14,r:fr.big?36:28,name:fr.big?'Your bonfire':'Your fire',act:'Cook',onAct:()=>tapFire(fr),more,onExamine:()=>{const sec=Math.max(1,Math.round((fr.until-Date.now())/1000)),m=sec>=90?Math.round(sec/60):0;const h=lifeHeat(fr);think((fr.big?'My bonfire is ':'My fire is ')+(h>1?'roaring white-hot':h>.7?'burning strong':h>.45?'burning steady':'getting low')+'. About '+(m?m+' minute'+(m>1?'s':''):sec+' seconds')+' left.');}});});
  if(KW.active){const k=S.kindle,here=KW.mode==='fire'&&Math.hypot(KW.x-KW.tx,KW.y-KW.ty)<8;
   o.push({x:KW.x,y:KW.y-7,r:22,name:k.seen?'Kindle':'Driftwood',act:KW.mode==='fire'?(here?'Offer ash':null):'Pick up',onAct:()=>KW.mode==='fire'?offerAsh():spookKindle(),
    onExamine:()=>think(KW.mode==='fire'?'The little log is warming himself by my fire, eyes half shut. He keeps glancing at the ash.':(k.seen?'The runaway log. He’s pretending to be ordinary driftwood. Badly.':'Driftwood. With eyes. That just blinked.'))});}
@@ -707,7 +707,7 @@ function icon(id){if(icache[id])return icache[id];const c=document.createElement
 
 /* ---------- update ---------- */
 function update(dt){
- {const nd=S.day+dt/300;if(nd>=1)S.dayN=(S.dayN||0)+1;S.day=nd%1;}const light=.5-.5*Math.cos(S.day*6.2832);dark=Math.min(1,Math.max(0,(.42-light)/.3))*.62;
+ {const q=Date.now()/DAY_PERIOD;S.day=q%1;S.dayN=Math.floor(q);}const light=.5-.5*Math.cos(S.day*6.2832);dark=Math.min(1,Math.max(0,(.42-light)/.3))*.62;
  if(intro!=null){intro+=dt;if(intro>3.2)intro=null;}
  if(P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),sp=175*dt;
   if(Math.abs(dx)>1)P.face=dx>0?1:-1;
@@ -721,7 +721,8 @@ function update(dt){
  }else P.moving=false;
  const T=P.task&&!P.task.chop?P.task:null;
  if(T){T.t+=dt;
-  if(T.sp.type==='moon'&&dark<.12){P.task=null;think('The glow faded. The moonkoi slipped away.');}
+  if(T.sp.st==='out'&&T.sp.al<.5){P.task=null;think('The water went still under my line.');}
+  else if(T.sp.type==='moon'&&dark<.12){P.task=null;think('The glow faded. The moonkoi slipped away.');}
   else if(T.phase==='cast'&&T.t>.55){T.phase='wait';T.t=0;T.wait=Math.max(.8,1.6+Math.random()*3.2-(T.baited?.7:0)-eff('wait'));}
   else if(T.phase==='wait'&&T.t>T.wait){T.phase='bite';T.t=0;T.fish=rollFish(T.sp);T.win=(T.fish==='bottle'?800:FISH[T.fish].win)+(T.baited?220:0)+Math.min(150,lv('fishing')*5)+eff('win');if(navigator.vibrate)try{navigator.vibrate(35);}catch(e){}}
   else if(T.phase==='bite'&&T.t*1000>T.win){T.phase='miss';T.t=0;pop('It got away...',P.x,P.y-70,'#fff',19);}
@@ -1096,7 +1097,7 @@ function drawKindle(){const {x,y}=KW,mv=Math.hypot(KW.tx-x,KW.ty-y)>3,b=mv?Math.
  const yy=y-7-b;ln([[x-15,yy],[x+15,yy-2]],992,10,INK,.8);ln([[x-15,yy],[x+15,yy-2]],992,6.5,'#d9cdb5',.8);
  const blink=(now%3.2)<.15,ex=x+f*6;if(blink){ln([[ex-3,yy-2],[ex-1,yy-2]],994,1.6,INK,.1);ln([[ex+2,yy-2],[ex+4,yy-2]],995,1.6,INK,.1);}else{dot(ex-2,yy-2,1.6);dot(ex+3,yy-2.3,1.6);}
  if(S.kindle&&S.kindle.lastNight===(S.dayN||0)&&!mv&&KW.mode==='fire'){const zp=(now*.5)%1;ctx.globalAlpha=1-zp;otext('z',x+10+zp*8,yy-12-zp*16,12,'#fff');ctx.globalAlpha=1;}}
-let chips=[],leaves=[];const REGROW=8*60000;
+let chips=[],leaves=[];const REGROW=3*60000;
 /* a chopped tree loses most of its canopy and a branch, then grows back over REGROW. S.treeCut[seed]=time of the cut. */
 function leafOf(t){const c=(S.treeCut||{})[t.seed];if(!c)return 1;return Math.min(1,.12+.88*(Date.now()-c)/REGROW);}
 function treeReady(t){return leafOf(t)>=.7;}
@@ -1131,13 +1132,14 @@ function scoopAsh(a){const i=(S.ashp||[]).indexOf(a);if(i<0)return;if(a.n>0&&!ca
  if(left.length){a.n=0;a.items=left;think('Something else is in the ash, but my satchel is full.');}else S.ashp.splice(i,1);save();
  if(!S.ashHint&&S.metWick){S.ashHint=1;setTimeout(()=>think('Brimble got weirdly excited about ash once. Maybe ask him.'),900);}}
 /* one rule for every fuel, whether added from the menu or the cooking woodpile */
-const FUELMIN={wood:4,kelp:1,charcoal:3,wobble:8};
-function stoke(fr,kind){if(fr.main)return;fr.fuel=fr.fuel||{};fr.fuel[kind]=(fr.fuel[kind]||0)+1;const m=kind==='wobble'&&lv('firemaking')>=3?10:FUELMIN[kind];
- fr.mins=(fr.mins||8)+m;fr.until=Math.min(Date.now()+(fr.big?45:30)*60000,Math.max(fr.until||0,Date.now())+m*60000);}
+/* fuel in seconds. A fire is short, like a Runescape log: feed it or lose it. fr.mins stays as the fuel score for burn-out drops (one unit per 11.25 s). */
+const FUELSEC={wood:45,kelp:12,charcoal:40,wobble:90},FIRESEC=90,FIRECAP=300;
+function stoke(fr,kind){if(fr.main)return;fr.fuel=fr.fuel||{};fr.fuel[kind]=(fr.fuel[kind]||0)+1;const sec=kind==='wobble'&&lv('firemaking')>=3?120:FUELSEC[kind];
+ fr.mins=(fr.mins||8)+sec/11.25;fr.until=Math.min(Date.now()+(fr.big?FIRECAP*1.6:FIRECAP)*1000,Math.max(fr.until||0,Date.now())+sec*1000);}
 function feedFire(fr,kind){const c=clampLand(fr.x+34,fr.y+16);routeTo(c[0],c[1],()=>{const nm={wood:'driftwood',wobble:'wobblewood',charcoal:'charcoal'}[kind];if(!(cnt(kind)>0)){think('No '+nm+' on me.');return;}takeItem(kind);stoke(fr,kind);addXP('firemaking',3,'normal',[fr.x,fr.y-20]);pop('+ '+nm,fr.x,fr.y-40,'#fff',16);save();});}
-function lifeHeat(fr){if(fr.main)return .6;const rem=(fr.until-Date.now())/60000,f=fr.fuel||{};let v=Math.min(1,.22+rem/7)+(f.charcoal?.15:0)+(f.wobble?.08:0)+(fr.big?.1:0);if(rem<1)v=.18+.22*Math.abs(Math.sin(now*6+fr.seed)*Math.sin(now*2.3));return v;}
+function lifeHeat(fr){if(fr.main)return .6;const rem=(fr.until-Date.now())/1000,f=fr.fuel||{};let v=Math.min(1,.22+rem/80)+(f.charcoal?.15:0)+(f.wobble?.08:0)+(fr.big?.1:0);if(rem<12)v=.18+.22*Math.abs(Math.sin(now*6+fr.seed)*Math.sin(now*2.3));return v;}
 function burnOut(fr){const i=(S.fires||[]).indexOf(fr);if(i<0)return;S.fires.splice(i,1);const f=fr.fuel||{wood:3},items=[],mins=fr.mins||(fr.big?20:8);
- const heatF=1+.25*(f.wobble||0)+.5*(f.charcoal||0)+.1*(f.kelp||0)+(fr.big?.5:0)+(fr.hot||0)/120,score=mins*heatF,R=Math.random;
+ const heatF=1+.25*(f.wobble||0)+.5*(f.charcoal||0)+.1*(f.kelp||0)+(fr.big?.5:0)+(fr.hot||0)/30,score=mins*heatF,R=Math.random;
  if(R()<Math.min(.6,score/60))items.push('charcoal');if((f.kelp||0)>0&&R()<Math.min(.7,.15*f.kelp+score/200))items.push('seasalt');
  if((f.wobble||0)>0&&R()<Math.min(.4,score/150))items.push('pearl');if(score>80&&R()<Math.min(.25,(score-80)/300))items.push('sunstone');
  addAsh(fr.x,fr.y,Math.min(9,1+Math.floor(mins/6)),items);save();}
@@ -1151,7 +1153,7 @@ function goCook(fr){const c=clampLand(fr.x+88,fr.y-34);routeTo(c[0],c[1],()=>ent
 function buildFire(x,y,big){if(!onIsland(x,y)){think('Not here.');return;}if(allFires().some(f=>Math.hypot(f.x-x,f.y-y)<(big?140:110))){think('Too close to another fire.');return;}
  const needW=big?2:3,needB=big?2:0;if((S.wood||0)<needW||(S.wobble||0)<needB){think(big?'A bonfire needs 2 wobblewood and 2 driftwood.':'I need 3 driftwood to build a fire.');return;}if((S.fires||[]).length>=5){think('Five fires is plenty. Brimble says so.');return;}
  const c=clampLand(x+(big?44:34),y+16);routeTo(c[0],c[1],()=>{if((S.wood||0)<needW||(S.wobble||0)<needB)return;S.wood-=needW;S.wobble-=needB;S.fires=S.fires||[];
-  S.st.fires=(S.st.fires||0)+1;S.fires.push({x,y,seed:10+S.fires.length,big:!!big,until:Date.now()+(big?20:8)*60000,mins:big?20:8,fuel:big?{wood:2,wobble:2}:{wood:3}});addXP('firemaking',big?40:25,S.journal.firstfire?'normal':'first',[x,y-10]);discover('firstfire');if(big)discover('bonfire');save();});}
+  S.st.fires=(S.st.fires||0)+1;S.fires.push({x,y,seed:10+S.fires.length,big:!!big,until:Date.now()+(big?FIRESEC*2:FIRESEC)*1000,mins:big?16:8,fuel:big?{wood:2,wobble:2}:{wood:3}});addXP('firemaking',big?40:25,S.journal.firstfire?'normal':'first',[x,y-10]);discover('firstfire');if(big)discover('bonfire');save();});}
 
 /* cooking: quality data, then the cooking scene */
 const QN={under:'Underdone',good:'Cooked',perfect:'Golden',smoky:'Smoky',charred:'Charred'};
@@ -1174,7 +1176,7 @@ function sideQ(d){return d<.6?'under':d>bT()?'burnt':(d>=pz()&&d<=1)?'perfect':'
 function mixC(a,b,t){t=Math.max(0,Math.min(1,t));const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),m=sh=>Math.round(((A>>sh)&255)+(((B>>sh)&255)-((A>>sh)&255))*t);return'#'+((1<<24)+(m(16)<<16)+(m(8)<<8)+m(0)).toString(16).slice(1);}
 function doneCol(f,d){if(d<.8)return mixC(FISH[f].col,'#e8b04a',d/.8);if(d<=1)return'#f0b444';const b=bT();if(d<b)return mixC('#f0b444','#9a5a2a',(d-1)/(b-1));return mixC('#9a5a2a','#2e2626',(d-b)/.25);}
 function cookUpdate(dt){const L=lv('cooking');C.flare=Math.max(0,C.flare-dt*(L>=15?.09:.12));C.base=Math.max(.12,C.base-dt*(C.fr.big?.018:.028));
- if(!C.fr.main){C.fr.until-=dt*1500;if(C.heat>.95)C.fr.hot=(C.fr.hot||0)+dt;if(!fireLit(C.fr)){endCookBurn();return;}}
+ if(!C.fr.main){C.fr.until-=dt*500;if(C.heat>.95)C.fr.hot=(C.fr.hot||0)+dt;if(!fireLit(C.fr)){endCookBurn();return;}}
  if(C.feed>0){const a=Math.min(C.feed,dt*.2);C.base+=a;C.feed-=a;}C.base=Math.min(1.15,C.base);C.heat=C.out?0:Math.min(1.4,C.base+C.flare);
  if(!C.out&&C.heat<.03&&C.feed<=0){C.outT=(C.outT||0)+dt;if(C.outT>1.2){C.outT=0;if(!C.fr.main){endCookBurn();return;}C.out=true;C.base=0;C.flare=0;addAsh(C.fr.x-34,C.fr.y+16,1);
   C.say='...I’m out. Driftwood. Please.';C.sayT=3;hint('Brimble went out. Add driftwood to relight him.',5000);}}else if(!C.out)C.outT=0;
@@ -1330,9 +1332,8 @@ function tideUpdate(dt){tideGeom();if(ccOn||C)return;if(tideLevel()<.5&&!S.journ
  for(const w of BREAKS){w.t+=dt;if(!w.done&&w.t>=1.6){w.done=true;coverBreak(w);if(w.n&&!S.st.sawWash){S.st.sawWash=1;think('The wave left something behind.');}}}
  for(const w of BREAKS){if(w.t<=0)continue;for(const s of SURF){const a=Math.atan2(s.y,s.x);if(Math.abs(angDiff(a,w.a0))>w.hw)continue;const r=Math.hypot(s.x,s.y),fr=frontR(w,a);
   if(s.hit!==w&&fr<=r+2){s.hit=w;s.st='wet';s.t=99;splash(s);}
-  else if(s.hit===w&&w.t>1.6&&fr>r+6&&s.st==='wet'){s.st='sparkle';s.t=3.4;}}}
+  else if(s.hit===w&&w.t>1.6&&fr>r+6&&s.st==='wet'){s.st=Math.random()<.45?'sparkle':'dry';}}}
  for(let i=BREAKS.length-1;i>=0;i--)if(BREAKS[i].t>3)BREAKS.splice(i,1);
- for(const s of SURF){if(s.st!=='sparkle')continue;s.t-=dt;if(s.t<=0)s.st='dry';}
  splashes=splashes.filter(p=>(p.t+=dt)<.7);}
 let splashes=[];function splash(s){for(let i=0;i<7;i++)splashes.push({x:s.x+(Math.random()-.5)*s.rx*1.4,y:s.y-s.ry*.5,vx:(Math.random()-.5)*60,vy:-60-Math.random()*70,t:0});}
 function drawSplashes(){for(const p of splashes){const k=p.t/.7;ctx.globalAlpha=1-k;dot(p.x+p.vx*p.t,p.y+p.vy*p.t+160*p.t*p.t,3-k*2,'#fff');}ctx.globalAlpha=1;}
@@ -1351,18 +1352,18 @@ function grabShore(it){const i=(S.shore||[]).indexOf(it);if(i<0||underFoam(it)){
  S.st.found=S.st.found||{};S.st.found[it.id]=(S.st.found[it.id]||0)+got;S.st.washes=(S.st.washes||0)+1;
  addXP('foraging',xp,first?'first':'normal',[it.x,it.y-20]);save();}
 
-/* salt sparkle: hard surfaces the waves touch go wet, then sparkle for a moment before the next wave. Sand never holds it. */
+/* salt sparkle: a wave that breaks on a hard surface sometimes leaves salt as it pulls back. It stays until the next wave hits that surface. Sand never holds it. */
 const SURF=[];{const r=mulberry(31);rocks.forEach(k=>SURF.push({x:k.x,y:k.y,rx:k.rx,ry:k.ry,name:'Rocks',st:'dry',t:0}));
  [DOCK.x0+60,DOCK.x0+130,DOCK.x1-6].forEach(px=>SURF.push({x:px,y:DOCK.y1+6,rx:7,ry:5,name:'Dock piling',st:'dry',t:0,pile:1}));}
 function drawSurf(){drawSplashes();for(const s of SURF){if(s.st==='dry')continue;if(Math.abs(s.x-cam.x)>W/Z/2+60||Math.abs(s.y-cam.y)>H/Z/2+60)continue;
  if(s.st==='wet'){ctx.globalAlpha=.22;blob(s.x,s.y-s.ry*.3,s.rx*.9,s.ry*.8,s.x,INK,0);ctx.globalAlpha=1;}
- else{for(let i=0;i<4;i++){const tw=.5+.5*Math.sin(now*9+i*1.9+s.x);ctx.globalAlpha=tw*Math.min(1,s.t*2);const sx=s.x-s.rx*.6+((i*17+s.x)%(s.rx*1.2)),sy=s.y-s.ry*.6+((i*11)%(s.ry*1.1));dot(sx,sy,5*tw,'rgba(255,255,255,.35)');star(sx,sy,4.2,'#fff');}ctx.globalAlpha=1;}}}
+ else{for(let i=0;i<4;i++){const tw=.5+.5*Math.sin(now*9+i*1.9+s.x);ctx.globalAlpha=tw;const sx=s.x-s.rx*.6+((i*17+s.x)%(s.rx*1.2)),sy=s.y-s.ry*.6+((i*11)%(s.ry*1.1));dot(sx,sy,5*tw,'rgba(255,255,255,.35)');star(sx,sy,4.2,'#fff');}ctx.globalAlpha=1;}}}
 function scrapeSalt(s){const c=s.pile?[s.x,DOCK.y1-8]:clampLand(s.x+s.rx+10,s.y+8);routeTo(c[0],c[1],()=>{if(s.st!=='sparkle'){think(pick(['Washed off. Wait for the next one.','Gone. The sea keeps its salt.']));return;}
- if(!addItem('seasalt',1)){think('No room in my pack.');return;}s.st='dry';s.t=0;pop('+1 sea salt',s.x,s.y-30,'#fff',17);
+ if(!addItem('seasalt',1)){think('No room in my pack.');return;}s.st='dry';pop('+1 sea salt',s.x,s.y-30,'#fff',17);
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}
  S.st.found=S.st.found||{};S.st.found.seasalt=(S.st.found.seasalt||0)+1;S.st.pinches=(S.st.pinches||0)+1;discover('seasalt');
  addXP('foraging',6,first?'first':'normal',[s.x,s.y-20]);save();});}
-const BUILD=9;
+const BUILD=10;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);

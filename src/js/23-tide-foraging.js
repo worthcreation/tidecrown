@@ -32,9 +32,8 @@ function tideUpdate(dt){tideGeom();if(ccOn||C)return;if(tideLevel()<.5&&!S.journ
  for(const w of BREAKS){w.t+=dt;if(!w.done&&w.t>=1.6){w.done=true;coverBreak(w);if(w.n&&!S.st.sawWash){S.st.sawWash=1;think('The wave left something behind.');}}}
  for(const w of BREAKS){if(w.t<=0)continue;for(const s of SURF){const a=Math.atan2(s.y,s.x);if(Math.abs(angDiff(a,w.a0))>w.hw)continue;const r=Math.hypot(s.x,s.y),fr=frontR(w,a);
   if(s.hit!==w&&fr<=r+2){s.hit=w;s.st='wet';s.t=99;splash(s);}
-  else if(s.hit===w&&w.t>1.6&&fr>r+6&&s.st==='wet'){s.st='sparkle';s.t=3.4;}}}
+  else if(s.hit===w&&w.t>1.6&&fr>r+6&&s.st==='wet'){s.st=Math.random()<.45?'sparkle':'dry';}}}
  for(let i=BREAKS.length-1;i>=0;i--)if(BREAKS[i].t>3)BREAKS.splice(i,1);
- for(const s of SURF){if(s.st!=='sparkle')continue;s.t-=dt;if(s.t<=0)s.st='dry';}
  splashes=splashes.filter(p=>(p.t+=dt)<.7);}
 let splashes=[];function splash(s){for(let i=0;i<7;i++)splashes.push({x:s.x+(Math.random()-.5)*s.rx*1.4,y:s.y-s.ry*.5,vx:(Math.random()-.5)*60,vy:-60-Math.random()*70,t:0});}
 function drawSplashes(){for(const p of splashes){const k=p.t/.7;ctx.globalAlpha=1-k;dot(p.x+p.vx*p.t,p.y+p.vy*p.t+160*p.t*p.t,3-k*2,'#fff');}ctx.globalAlpha=1;}
@@ -53,14 +52,14 @@ function grabShore(it){const i=(S.shore||[]).indexOf(it);if(i<0||underFoam(it)){
  S.st.found=S.st.found||{};S.st.found[it.id]=(S.st.found[it.id]||0)+got;S.st.washes=(S.st.washes||0)+1;
  addXP('foraging',xp,first?'first':'normal',[it.x,it.y-20]);save();}
 
-/* salt sparkle: hard surfaces the waves touch go wet, then sparkle for a moment before the next wave. Sand never holds it. */
+/* salt sparkle: a wave that breaks on a hard surface sometimes leaves salt as it pulls back. It stays until the next wave hits that surface. Sand never holds it. */
 const SURF=[];{const r=mulberry(31);rocks.forEach(k=>SURF.push({x:k.x,y:k.y,rx:k.rx,ry:k.ry,name:'Rocks',st:'dry',t:0}));
  [DOCK.x0+60,DOCK.x0+130,DOCK.x1-6].forEach(px=>SURF.push({x:px,y:DOCK.y1+6,rx:7,ry:5,name:'Dock piling',st:'dry',t:0,pile:1}));}
 function drawSurf(){drawSplashes();for(const s of SURF){if(s.st==='dry')continue;if(Math.abs(s.x-cam.x)>W/Z/2+60||Math.abs(s.y-cam.y)>H/Z/2+60)continue;
  if(s.st==='wet'){ctx.globalAlpha=.22;blob(s.x,s.y-s.ry*.3,s.rx*.9,s.ry*.8,s.x,INK,0);ctx.globalAlpha=1;}
- else{for(let i=0;i<4;i++){const tw=.5+.5*Math.sin(now*9+i*1.9+s.x);ctx.globalAlpha=tw*Math.min(1,s.t*2);const sx=s.x-s.rx*.6+((i*17+s.x)%(s.rx*1.2)),sy=s.y-s.ry*.6+((i*11)%(s.ry*1.1));dot(sx,sy,5*tw,'rgba(255,255,255,.35)');star(sx,sy,4.2,'#fff');}ctx.globalAlpha=1;}}}
+ else{for(let i=0;i<4;i++){const tw=.5+.5*Math.sin(now*9+i*1.9+s.x);ctx.globalAlpha=tw;const sx=s.x-s.rx*.6+((i*17+s.x)%(s.rx*1.2)),sy=s.y-s.ry*.6+((i*11)%(s.ry*1.1));dot(sx,sy,5*tw,'rgba(255,255,255,.35)');star(sx,sy,4.2,'#fff');}ctx.globalAlpha=1;}}}
 function scrapeSalt(s){const c=s.pile?[s.x,DOCK.y1-8]:clampLand(s.x+s.rx+10,s.y+8);routeTo(c[0],c[1],()=>{if(s.st!=='sparkle'){think(pick(['Washed off. Wait for the next one.','Gone. The sea keeps its salt.']));return;}
- if(!addItem('seasalt',1)){think('No room in my pack.');return;}s.st='dry';s.t=0;pop('+1 sea salt',s.x,s.y-30,'#fff',17);
+ if(!addItem('seasalt',1)){think('No room in my pack.');return;}s.st='dry';pop('+1 sea salt',s.x,s.y-30,'#fff',17);
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}
  S.st.found=S.st.found||{};S.st.found.seasalt=(S.st.found.seasalt||0)+1;S.st.pinches=(S.st.pinches||0)+1;discover('seasalt');
  addXP('foraging',6,first?'first':'normal',[s.x,s.y-20]);save();});}

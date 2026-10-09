@@ -29,6 +29,7 @@ Everything has its place. Every new feature connects to existing systems, lore, 
 | Dominion | Read the tell, then commit | Strife (counter it), Accord (mirror it) |
 
 Planned loops, agreed 9 Oct 2026:
+- Timing is in the Runescape ballpark: short fires you feed, trees back in minutes, fishing spots that move every few minutes, a day and night on real time with two tides a day. Dial by play, not by exact copy.
 - Tide: a real-time cycle read off the beach (foam line, wet sand, shallows). High tide brings wash-ups; low tide exposes salt flats, tide pools, later a sandbar.
 - Foraging: breaking waves run up the beach and reveal what they carried when they pull back; the next wave may take it again; small waves only break on the shore, rocks and pier and carry at most one thing, rare big waves run far up the beach and carry up to three; everything on the sand comes from the waves (Mortimer competing still planned); salt sparkle only where a wave has just broken on a hard surface (rocks, pilings, never sand): wet on the hit, sparkle as the foam pulls back, a pinch if you reach it in time; big salt harvest from pools and flats at low tide in a zoomed scene (drag to rake, before the swell). Salt types: rock salt by day, moon salt from glowing pools at night.
 - Salt pans: placed anywhere on the flats, more allowed as Foraging levels; built by Tinkering from Foraging and Invention materials. Tiers: driftwood tray, stone-lined (ash sealant), slate, sunstone pan (its own salt). Light upkeep.

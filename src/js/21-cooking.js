@@ -19,7 +19,7 @@ function sideQ(d){return d<.6?'under':d>bT()?'burnt':(d>=pz()&&d<=1)?'perfect':'
 function mixC(a,b,t){t=Math.max(0,Math.min(1,t));const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16),m=sh=>Math.round(((A>>sh)&255)+(((B>>sh)&255)-((A>>sh)&255))*t);return'#'+((1<<24)+(m(16)<<16)+(m(8)<<8)+m(0)).toString(16).slice(1);}
 function doneCol(f,d){if(d<.8)return mixC(FISH[f].col,'#e8b04a',d/.8);if(d<=1)return'#f0b444';const b=bT();if(d<b)return mixC('#f0b444','#9a5a2a',(d-1)/(b-1));return mixC('#9a5a2a','#2e2626',(d-b)/.25);}
 function cookUpdate(dt){const L=lv('cooking');C.flare=Math.max(0,C.flare-dt*(L>=15?.09:.12));C.base=Math.max(.12,C.base-dt*(C.fr.big?.018:.028));
- if(!C.fr.main){C.fr.until-=dt*1500;if(C.heat>.95)C.fr.hot=(C.fr.hot||0)+dt;if(!fireLit(C.fr)){endCookBurn();return;}}
+ if(!C.fr.main){C.fr.until-=dt*500;if(C.heat>.95)C.fr.hot=(C.fr.hot||0)+dt;if(!fireLit(C.fr)){endCookBurn();return;}}
  if(C.feed>0){const a=Math.min(C.feed,dt*.2);C.base+=a;C.feed-=a;}C.base=Math.min(1.15,C.base);C.heat=C.out?0:Math.min(1.4,C.base+C.flare);
  if(!C.out&&C.heat<.03&&C.feed<=0){C.outT=(C.outT||0)+dt;if(C.outT>1.2){C.outT=0;if(!C.fr.main){endCookBurn();return;}C.out=true;C.base=0;C.flare=0;addAsh(C.fr.x-34,C.fr.y+16,1);
   C.say='...I’m out. Driftwood. Please.';C.sayT=3;hint('Brimble went out. Add driftwood to relight him.',5000);}}else if(!C.out)C.outT=0;

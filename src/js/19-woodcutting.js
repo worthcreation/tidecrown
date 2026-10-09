@@ -1,4 +1,4 @@
-let chips=[],leaves=[];const REGROW=8*60000;
+let chips=[],leaves=[];const REGROW=3*60000;
 /* a chopped tree loses most of its canopy and a branch, then grows back over REGROW. S.treeCut[seed]=time of the cut. */
 function leafOf(t){const c=(S.treeCut||{})[t.seed];if(!c)return 1;return Math.min(1,.12+.88*(Date.now()-c)/REGROW);}
 function treeReady(t){return leafOf(t)>=.7;}

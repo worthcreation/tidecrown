@@ -28,7 +28,7 @@ for(const k of ['shells','bait','wood','kelp','ash','wobble']){const v=S[k];dele
 function save(){S.x=P.x;S.y=P.y;try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){}}
 const P={x:S.x,y:S.y,path:[],then:null,face:-1,moving:false,task:null,pathT:0};
 const cam={x:P.x,y:P.y};
-(S.fires||[]).forEach(f=>{if(!f.until)f.until=Date.now()+8*60000;if(!f.fuel)f.fuel={wood:3};});
+(S.fires||[]).forEach(f=>{if(!f.until)f.until=Date.now()+90000;if(f.until>Date.now()+8*60000)f.until=Date.now()+90000;if(!f.fuel)f.fuel={wood:3};});
 setInterval(save,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
 
 let flies=[],pops=[],bub=null,cele=null,fly=null,mark=null,intro=null,dark=0;

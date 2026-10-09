@@ -1,6 +1,6 @@
 /* ---------- update ---------- */
 function update(dt){
- {const nd=S.day+dt/300;if(nd>=1)S.dayN=(S.dayN||0)+1;S.day=nd%1;}const light=.5-.5*Math.cos(S.day*6.2832);dark=Math.min(1,Math.max(0,(.42-light)/.3))*.62;
+ {const q=Date.now()/DAY_PERIOD;S.day=q%1;S.dayN=Math.floor(q);}const light=.5-.5*Math.cos(S.day*6.2832);dark=Math.min(1,Math.max(0,(.42-light)/.3))*.62;
  if(intro!=null){intro+=dt;if(intro>3.2)intro=null;}
  if(P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),sp=175*dt;
   if(Math.abs(dx)>1)P.face=dx>0?1:-1;
@@ -14,7 +14,8 @@ function update(dt){
  }else P.moving=false;
  const T=P.task&&!P.task.chop?P.task:null;
  if(T){T.t+=dt;
-  if(T.sp.type==='moon'&&dark<.12){P.task=null;think('The glow faded. The moonkoi slipped away.');}
+  if(T.sp.st==='out'&&T.sp.al<.5){P.task=null;think('The water went still under my line.');}
+  else if(T.sp.type==='moon'&&dark<.12){P.task=null;think('The glow faded. The moonkoi slipped away.');}
   else if(T.phase==='cast'&&T.t>.55){T.phase='wait';T.t=0;T.wait=Math.max(.8,1.6+Math.random()*3.2-(T.baited?.7:0)-eff('wait'));}
   else if(T.phase==='wait'&&T.t>T.wait){T.phase='bite';T.t=0;T.fish=rollFish(T.sp);T.win=(T.fish==='bottle'?800:FISH[T.fish].win)+(T.baited?220:0)+Math.min(150,lv('fishing')*5)+eff('win');if(navigator.vibrate)try{navigator.vibrate(35);}catch(e){}}
   else if(T.phase==='bite'&&T.t*1000>T.win){T.phase='miss';T.t=0;pop('It got away...',P.x,P.y-70,'#fff',19);}
