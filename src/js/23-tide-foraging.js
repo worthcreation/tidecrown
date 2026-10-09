@@ -11,8 +11,12 @@ const BREAKS=[];let breakT=3;const SHORE_MAX=14;
 const WASH=[['wood',44,10],['kelp',30,8],['shells',16,12],['bait',6,14],['wobble',4,24]];
 function rollWash(){const r=Math.random()*100;let acc=0;for(const [k,wt] of WASH){acc+=wt;if(r<acc)return k;}return 'wood';}
 function spawnBreak(){const pa=Math.atan2(P.y,P.x),a0=pa+(Math.random()-.5)*1.8,t=tideLevel();
- let n=0;const p=Math.random();if(p<.18+.3*t)n=1;if(p<.05+.12*t)n=2;
- BREAKS.push({a0,hw:.2+Math.random()*.08,t:-1.4,reach:34+14*t,n,seed:Math.floor(Math.random()*999),done:false});}
+ /* size: most waves are small and just break on the shore, rocks and pier. Big ones are rare, run far up the beach and can carry up to three things. */
+ const r=Math.random(),size=r<.55?r*.5:r<.86?.4+(r-.55)*1.2:.8+(r-.86)*1.4;let n=0;
+ if(size<.4){if(Math.random()<.22+.18*t)n=1;}
+ else if(size<.8){const p=Math.random();n=p<.35+.3*t?1:0;if(p<.08+.1*t)n=2;}
+ else{const p=Math.random();n=p<.9?1:0;if(p<.5)n=2;if(p<.14)n=3;}
+ BREAKS.push({a0,hw:.16+size*.18+Math.random()*.05,t:-1.4,reach:10+size*52+8*t,size,n,seed:Math.floor(Math.random()*999),done:false});}
 function frontR(w,a){const u=Math.abs(angDiff(a,w.a0))/w.hw;if(u>=1)return wetR(a)+70;const prof=Math.cos(u*1.5708),t=w.t;let k;
  if(t<0)k=0;else if(t<1.1){const q=t/1.1;k=1-(1-q)*(1-q);}else if(t<1.6)k=1;else{const q=Math.min(1,(t-1.6)/1.4);k=1-q*q;}
  return wetR(a)+70*(1-k)-w.reach*prof*k;}
@@ -36,11 +40,11 @@ let splashes=[];function splash(s){for(let i=0;i<7;i++)splashes.push({x:s.x+(Mat
 function drawSplashes(){for(const p of splashes){const k=p.t/.7;ctx.globalAlpha=1-k;dot(p.x+p.vx*p.t,p.y+p.vy*p.t+160*p.t*p.t,3-k*2,'#fff');}ctx.globalAlpha=1;}
 function drawBreaks(){for(const w of BREAKS){const t=w.t;ctx.save();
  if(t<0){const q=(t+1.4)/1.4,pts=[];for(let i=0;i<=16;i++){const a=w.a0-w.hw+2*w.hw*i/16,r=wetR(a)+96-q*24+Math.sin(a*11+now*3)*2;pts.push([Math.cos(a)*r,Math.sin(a)*r]);}
-  ctx.globalAlpha=.25+.55*q;ln(pts,w.seed,3,'#fff',1.4);ctx.restore();continue;}
+  ctx.globalAlpha=.25+.55*q;ln(pts,w.seed,2+w.size*3.5,'#fff',1.4+w.size);ctx.restore();continue;}
  const pts=[],N=26;for(let i=0;i<=N;i++){const a=w.a0-w.hw+2*w.hw*i/N,r=frontR(w,a);pts.push([Math.cos(a)*r,Math.sin(a)*r]);}
  for(let i=N;i>=0;i--){const a=w.a0-w.hw+2*w.hw*i/N,r=Math.min(wetR(a)+100,frontR(w,a)+64);pts.push([Math.cos(a)*r,Math.sin(a)*r]);}
  ctx.globalAlpha=t>2.3?1-(t-2.3)/.7:1;sketch(pts,true,w.seed,3,'rgba(170,225,235,.55)',null);
- const fp=pts.slice(3,N-2);ln(fp,w.seed+1,7,'rgba(255,255,255,.85)',2.2);ln(fp,w.seed+2,2.5,'#fff',3);ctx.restore();}}
+ const fp=pts.slice(3,N-2);ln(fp,w.seed+1,4+w.size*6,'rgba(255,255,255,.85)',2.2);ln(fp,w.seed+2,2+w.size*1.5,'#fff',3);ctx.restore();}}
 function drawShore(it){if(underFoam(it))return;shadow(it.x,it.y+2,10,3.5);ctx.drawImage(iconImg(itemIcon({id:it.id})),it.x-12,it.y-20+Math.sin(now*2+it.seed)*1.2,24,24);if(it.n>1)otext(String(it.n),it.x+11,it.y-2,12,'#fff');}
 function grabShore(it){const i=(S.shore||[]).indexOf(it);if(i<0||underFoam(it)){think(pick(['The sea took it back.','Too slow. Next wave.']));return;}
  const got=addItem(it.id,it.n);if(!got){think('No room in my pack.');return;}if(got<it.n)it.n-=got;else S.shore.splice(i,1);
