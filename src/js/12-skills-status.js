@@ -14,7 +14,8 @@ const SKILLS={
  invention:{name:'Invention',icon:'hatchet',col:'#a8d07e',clue:'Something sharp, something to hold, something to tie them.',desc:'Fit what you gathered into tools, then fit tools into grander things. No clock, just the right parts in the right order.',subs:['tinkering','shipwright'],
   unl:{12:'Brimble has a project in mind for your wood'}},
  exploration:{name:'Exploration',icon:'spyglass',col:'#c9a7ff',clue:'Past the last lighthouse, and under your feet.',desc:'The known edge, and what lies past it. Across the water, down into the ground, out over the sea.',subs:['swimming','delving','sailing']},
- dominion:{name:'Dominion',icon:'crown',col:'#ff8aa8',clue:'Not everything out there is friendly. Yet.',desc:'When something faces you, read its tell and commit. Break it, or win it over.',subs:['strife','accord']}};
+ dominion:{name:'Dominion',icon:'crown',col:'#ff8aa8',clue:'Not everything out there is friendly. Yet.',desc:'When something faces you, read its tell and commit. Break it, or win it over. Your scarf is the weapon, both ways.',subs:['strife','accord'],
+  unl:{3:'Your scarf reaches a little farther',6:'Your scarf reaches farther still',10:'Beasts show their tells sooner'}}};
 const SUBS={
  fishing:{p:'gathering',name:'Fishing',icon:'rod',col:'#6fd6ff',desc:'Patience and a quick hand. The Lantern Sea feeds those who wait, and every catch pulls you a little further out.',
   unl:{5:'Pebble Perch are biting now',10:'The wild water by the north rocks is yours',15:'Something sweet wriggles in the deep',20:'The moon is tugging at your line'}},
@@ -33,8 +34,10 @@ const SUBS={
   unl:{5:'Deeper breath',10:'A quicker stroke',15:'Lantern jellies keep their distance'}},
  delving:{p:'exploration',name:'Delving',clue:'Something is buried under your feet.'},
  sailing:{p:'exploration',name:'Sailing',clue:'Past the last lighthouse.'},
- strife:{p:'dominion',name:'Strife',clue:'Counter the tell.'},
- accord:{p:'dominion',name:'Accord',clue:'Mirror the tell.'}};
+ strife:{p:'dominion',name:'Strife',icon:'slap',col:'#ff8aa8',clue:'Counter the tell.',desc:'Slap and trip. Slap to provoke, read the tell, trip on the tell to break it. What comes off a beast when it goes down is yours.',
+  unl:{5:'Trips land from a step farther out',10:'A tripped beast stays down longer'}},
+ accord:{p:'dominion',name:'Accord',icon:'wrap',col:'#ffb3c6',clue:'Mirror the tell.',desc:'Wrap and bind. Wrap on the tell to mirror it, bind to keep what you won. The bound come willingly, mostly.',
+  unl:{5:'Warmth lingers longer in the wrap',10:'A wrap holds long enough to bind at leisure'}}};
 function skd(k){return SKILLS[k]||SUBS[k];}
 const ACH={
  fishing:[['First bite','Catch your first fish',()=>S.catches>=1],['Steady hand','Land 10 perfect catches',()=>(S.st.perf||0)>=10],['Wild water','Catch a Grumpfish',()=>!!S.journal.fish_grump],['Letters from C.','Find a message in a bottle',()=>S.bottles>=1],['Moonlit','Catch a Moonkoi',()=>!!S.journal.fish_koi]],
@@ -43,7 +46,9 @@ const ACH={
  firemaking:[['Kindled','Feed Brimble',()=>hasSkill('cooking')],['Keeper of flames','Build three fires of your own',()=>(S.st.fires||0)>=3],['Ember pearl','Find an ember pearl in the ashes',()=>!!S.journal.pearl]],
  foraging:[['Beachcomber','Grab your first wash-up',()=>(S.st.washes||0)>=1],['Salt of the sea','Scrape salt off wet rock',()=>(S.st.pinches||0)>=1],['Quick hands','Grab 25 wash-ups before the backwash',()=>(S.st.washes||0)>=25],['Springy','Catch a wobblewood log on the tide',()=>!!(S.st.found&&S.st.found.wobble)]],
  swimming:[['First dip','Wade in and swim',()=>hasSkill('swimming')],['Beachcomber at sea','Swim through 10 floating things',()=>(S.st.swum||0)>=10],['Stung','Meet a lantern jelly',()=>!!S.journal.jelly],['Far shore','Swim all the way to the dark islands',()=>!!S.journal.swamfar]],
- tinkering:[['Sharp idea','Lash together a hatchet',()=>hasSkill('tinkering')]]};
+ tinkering:[['Sharp idea','Lash together a hatchet',()=>hasSkill('tinkering')]],
+ strife:[['First slap','Slap something',()=>(S.st.slaps||0)>=1],['Countered','Break a tell with a slap or a trip',()=>!!S.st.countered],['Rung','Ring Old Bollard on the lean',()=>(S.st.rings||0)>=1],['Driven off','Put a Hollowmaw down',()=>!!S.journal.deadwood]],
+ accord:[['First wrap','Wrap something',()=>(S.st.wraps||0)>=1],['Mirrored','Mirror a tell with a wrap',()=>!!S.st.mirrored],['Warm welcome','Warm a shivering Mossback',()=>!!S.st.mosswarm],['Planted','Plant a Hollowmaw',()=>!!S.journal.planted]]};
 function rawCount(){return S.inv.filter(i=>FISH[i.id]).length;}
 function buffOn(){return S.buff&&S.buff.until>Date.now()?S.buff:null;}
 

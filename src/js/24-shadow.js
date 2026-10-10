@@ -99,23 +99,31 @@ function shObjects(){const o=[];
  o.push({x:HOLLOW.x,y:HOLLOW.y,r:HOLLOW.r,name:'The Hollow',key:'thehollow',act:null,onExamine:()=>{discover('thehollow');think(pick(['It’s breathing.','Everything here keeps its distance from it.','I don’t think it’s asleep. I think it’s waiting.']));}});
  for(const t of shTrees){if(Math.hypot(t.x-P.x,t.y-P.y)>260)continue;o.push({x:t.x,y:t.y-36*t.s,r:24*t.s,name:'Shadow tree',key:'shadowtree',act:'Chop',onAct:()=>chopTree(t),onExamine:()=>{discover('shadowtree');think(pick(['Black bark. It leans in when I’m not looking.','Dead, or close to it. Something has been eating at the roots.']));}});}
  const deadTxt=()=>pick(['A dead tree. Bark hanging off it like skin.','Dead. Probably dead.','It is not moving. I am going to assume that is good.']);
- for(const m of MAWS)o.push({x:m.x,y:m.y-20,r:30,name:m.st==='still'?'Dead tree':'Hollowmaw',key:m.st==='still'?null:'hollowmaw',act:null,onExamine:()=>think(m.st==='still'?deadTxt():'Its chest is creaking open. Back away.')});
+ for(const m of MAWS)o.push({x:m.x,y:m.y-20,r:30,name:m.st==='still'?'Dead tree':'Hollowmaw',key:m.st==='still'?null:'hollowmaw',act:null,onExamine:()=>think(m.st==='still'?deadTxt():m.st==='down'?'Flat on its roots, rocking. It will get up.':m.st==='calm'?'Held still, chest open. The hollow inside is black and cold. It is waiting for something warm.':'Its chest is creaking open. Back away.')});
+ for(const p of PLANTED)o.push({x:p.x,y:p.y-24,r:26,name:'Planted Hollowmaw',key:'planted',act:null,onExamine:()=>think('A tree again. The pearl glows low in the trunk, and the bark is warm.')});
  for(const d of DEAD)o.push({x:d.x,y:d.y-20,r:30,name:'Dead tree',key:null,act:null,onExamine:()=>think(deadTxt())});
- for(const m of MOSS)o.push({x:m.x,y:m.y-10,r:24,name:'Mossback',key:'mossback',act:S.inv.some(i=>i.id==='cook')?'Feed':null,onAct:()=>{const c=shClamp(m.x+20,m.y+8);routeTo(c[0],c[1],()=>feedMoss(m));},onExamine:()=>think(m.fed?'It keeps close now. Warm, for a mossy thing.':pick(['Too thin. It looks at my pack.','Moss on its back, nothing in its belly.']))});
+ for(const m of MOSS)o.push({x:m.x,y:m.y-10,r:24,name:'Mossback',key:'mossback',act:S.inv.some(i=>i.id==='cook')?'Feed':null,onAct:()=>{const c=shClamp(m.x+20,m.y+8);routeTo(c[0],c[1],()=>feedMoss(m));},onExamine:()=>think(m.bound?'Mine, by a knot and its own choosing. It hums.':m.fed?'It keeps close now. Warm, for a mossy thing.':m.sh>0?'Shivering. It is cold more than hungry, just now.':m.follow?'Warm from the scarf, and sticking close while it lasts.':pick(['Too thin. It looks at my pack.','Moss on its back, nothing in its belly.','Every so often it shivers.']))});
  for(const l of LAPPERS)if(nightNow()&&l.st!=='gone')o.push({x:l.x,y:l.y,r:26,name:'Moonlapper',key:'moonlapper',act:null,onExamine:()=>{discover('moonlapper');think('Eyeless. Drinking the moon off the water.');}});
  for(const m of MUD)o.push({x:m.x,y:m.y,r:m.rx+4,name:'Mud',key:'fallow',act:null,onExamine:()=>{discover('fallow');think(pick(['It bubbles. It smells like something gave up.','Fallow ground. Nothing has grown here in a long while.']));}});
  return o;}
 function feedMoss(m){const i=S.inv.findIndex(x=>x.id==='cook');if(i<0)return;S.inv.splice(i,1);m.fed=true;m.follow=true;discover('mossback');pop('*munch*',m.x,m.y-30,'#fff',17);think(pick(['It ate the lot. It’s looking at me differently.','Fed. It’s following. I suppose I have a Mossback now.']));save();}
 function nightNow(){const light=.5-.5*Math.cos(S.day*6.2832);return light<.4;}
 function shUpdate(dt){if(!SW.on&&!P.path.length&&!shWalkable(P.x,P.y)&&shDepth(P.x,P.y)<=0){const c=shClamp(P.x,P.y);P.x=c[0];P.y=c[1];}
- for(const m of MAWS){const d=Math.hypot(P.x-m.x,P.y-m.y);m.t+=dt;
-  if(m.st==='still'&&d<80){m.st='creak';m.t=0;}
+ for(const p of PLANTED)p.t+=dt;
+ for(const m of MAWS){const d=Math.hypot(P.x-m.x,P.y-m.y);m.t+=dt;if(m.dazed>0)m.dazed-=dt;
+  if(m.st==='down'){if(m.t>(lv('strife')>=10?14:9)){m.st='still';m.t=0;m.dazed=2;}}
+  else if(m.st==='calm'){if(m.t>(lv('accord')>=10?20:12)){m.st='still';m.t=0;m.dazed=3;}}
+  else if(m.st==='still'&&d<80&&!(m.dazed>0)){m.st='creak';m.t=0;}
   else if(m.st==='creak'&&m.t>.9){m.st='lunge';m.t=0;discover('hollowmaw');if(d<110&&!SW.on){const dx=P.x-m.x,dy=P.y-m.y,n=Math.hypot(dx,dy)||1;const c=shClamp(P.x+dx/n*70,P.y+dy/n*70);P.x=c[0];P.y=c[1];P.path=[];P.task=null;think(pick(['It lunged. The bark smells of rot.','It wants warmth, not me. I think.']));}}
   else if(m.st==='lunge'&&m.t>.6){m.st='open';m.t=0;}
   else if(m.st==='open'&&m.t>4&&d>120){m.st='still';m.t=0;}}
  for(const d of DEAD){d.creak-=dt;if(d.creak<=0){d.creak=18+Math.random()*40;if(Math.hypot(P.x-d.x,P.y-d.y)<160){d.st='creak';d.t=0;}}if(d.st==='creak'){d.t+=dt;if(d.t>.5)d.st='still';}}
- for(const m of MOSS){m.t-=dt;
-  if(m.follow){const d=Math.hypot(P.x-m.x,P.y-m.y);if(d>46&&!SW.on){const k=Math.min(1,dt*2.2);m.x+=(P.x-24*m.dir-m.x)*k;m.y+=(P.y+6-m.y)*k;}continue;}
+ for(const m of MOSS){m.t-=dt;const dp=Math.hypot(P.x-m.x,P.y-m.y);
+  if(m.tumble>0)m.tumble-=dt;if(m.sh>0)m.sh-=dt;
+  if(m.flee>0){m.flee-=dt;const dx=m.x-P.x,dy=m.y-P.y,n=Math.hypot(dx,dy)||1;const c=shClamp(m.x+dx/n*90*dt,m.y+dy/n*90*dt);m.x=c[0];m.y=c[1];m.dir=dx>0?1:-1;if(m.flee<=0){m.cell=cellOf(m.x,m.y);}continue;}
+  if(m.follow&&!m.fed&&!m.bound&&m.warm&&m.warm<Date.now()){m.follow=false;m.warm=0;}
+  if(!m.follow&&!m.fed&&!m.bound){m.shT=(m.shT==null?4+Math.random()*6:m.shT)-dt;if(m.shT<=0){m.shT=6+Math.random()*6;if(dp<300)m.sh=1.6;}}
+  if(m.follow){if(dp>46&&!SW.on){const k=Math.min(1,dt*2.2);m.x+=(P.x-24*m.dir-m.x)*k;m.y+=(P.y+6-m.y)*k;}continue;}
   if(m.t<=0){m.t=2+Math.random()*3;const [i,j]=m.cell,w=MZ[i][j],D=[[-1,0,0],[0,1,1],[1,0,2],[0,-1,3]].filter(([di,dj,k])=>!w[k]&&inMaze(i+di,j+dj)&&cellLand(i+di,j+dj));if(D.length){const [di,dj]=pick(D);m.cell=[i+di,j+dj];m.dir=dj||m.dir;}}
   const c=cellC(m.cell[0],m.cell[1]);m.x+=(c[0]-m.x)*Math.min(1,dt*1.2);m.y+=(c[1]-m.y)*Math.min(1,dt*1.2);}
  for(const l of LAPPERS){l.t+=dt;const d=Math.hypot(P.x-l.x,P.y-l.y);if(l.st==='lap'&&d<120){l.st='still';l.t=0;}else if(l.st==='still'&&l.t>1.1){l.st='gone';l.t=0;}else if(l.st==='gone'&&l.t>25&&d>240)l.st='lap';}
@@ -124,7 +132,8 @@ function shUpdate(dt){if(!SW.on&&!P.path.length&&!shWalkable(P.x,P.y)&&shDepth(P
 function drawShTree(t){const s=t.s,x=t.x,y=t.y;ln([[x,y],[x+2*s,y-30*s]],t.seed,7*s,INK,.6);ln([[x,y],[x+2*s,y-30*s]],t.seed,3.5*s,'#2b2433',.6);
  blob(x-9*s,y-30*s,13*s,11*s,t.seed+1,'#1f2b24',2.4,.7);blob(x+9*s,y-32*s,13*s,11*s,t.seed+2,'#1f2b24',2.4,.7);blob(x+1*s,y-42*s,15*s,12*s,t.seed+3,'#243429',2.4,.7);}
 /* dead trees and Hollowmaws share one drawing, shaped by seed, in the forest's palette. A real one shows only a seam down the chest and, rarely, the faintest warm fleck in it. */
-function drawMaw(m){const x=m.x,y=m.y,real=!('creak' in m),open=m.st==='open'||m.st==='lunge',creak=real&&m.st==='creak',sway=!real&&m.st==='creak';
+function drawMaw(m){const x=m.x,y=m.y,real=!('creak' in m),open=m.st==='open'||m.st==='lunge',creak=real&&m.st==='creak',sway=!real&&m.st==='creak',down=m.st==='down',calm=m.st==='calm';
+ ctx.save();if(down){const k=Math.min(1,m.t/.45),e=1-(1-k)*(1-k),side=m.seed%2?1:-1,rock=Math.sin(m.t*3)*.05;ctx.translate(x,y);ctx.rotate(side*1.25*e+rock*e);ctx.translate(-x,-y);}
  const r=mulberry(400+m.seed),h=46+r()*22,lean=(r()-.5)*10,nb=2+Math.floor(r()*3),sh=creak?Math.sin(now*40)*2:sway?Math.sin(now*12)*1.2:0,tx=x+sh,ty=y-h;
  shadow(x,y+2,20,6);ln([[x,y],[tx+lean,ty]],300+m.seed,15,INK,.5);ln([[x,y],[tx+lean,ty]],300+m.seed,10,'#2f2a3a',.5);
  for(let i=0;i<nb;i++){const by=y-h*(.45+.5*(i/nb)),side=i%2?1:-1,len=18+r()*16,up=10+r()*18;const bx=tx+lean*(1-(y-by)/h);
@@ -134,10 +143,13 @@ function drawMaw(m){const x=m.x,y=m.y,real=!('creak' in m),open=m.st==='open'||m
  if(r()<.6){blob(tx+lean+(r()-.5)*16,ty-6,9+r()*6,6+r()*4,340+m.seed,'#1f2b24',2,.7);}
  if(real&&!open){ln([[tx+lean*.7,y-h*.72],[tx+lean*.5,y-h*.42]],350+m.seed,1.4,'rgba(0,0,0,.5)',.4);const fl=Math.max(0,Math.sin(now*.9+m.seed*2)-.82)*5;if(fl>0){ctx.globalAlpha=fl*.6;dot(tx+lean*.6,y-h*.56,2,'#ff8a3d');ctx.globalAlpha=1;}}
  if(open||creak){const g=open?1:.25,cy=y-h*.55;sketch([[x-9,cy-8],[x+9,cy-8],[x+12,cy+6+8*g],[x+2,cy+14+10*g],[x-8,cy+6+8*g]],true,360+m.seed,1,'#0d0a12',INK,2);for(let i=0;i<4;i++){const px=x-7+i*5;ln([[px,cy-7],[px+1,cy-g*5]],370+i,2,'#e9dfc8',.6);ln([[px,cy+12+g*6],[px+1,cy+6+g*2]],374+i,2,'#e9dfc8',.6);}dot(x-4,cy-14,2,'#ff8a3d');dot(x+3,cy-14,2,'#ff8a3d');}
- if(open){ln([[x-14,y+2],[x-34,y+8]],380+m.seed,6,INK,.6);ln([[x+14,y+2],[x+34,y+10]],381+m.seed,6,INK,.6);}}
-function drawMoss(m){const x=m.x,y=m.y,b=Math.sin(now*3+m.seed)*1.5;shadow(x,y+2,16,5);blob(x,y-10+b,15,12,400+m.seed,'#8a9d7a',2.6,1);blob(x-2,y-19+b,11,6,401+m.seed,'#5fa352',2,.5);
+ if(open||down){ln([[x-14,y+2],[x-34,y+8]],380+m.seed,6,INK,.6);ln([[x+14,y+2],[x+34,y+10]],381+m.seed,6,INK,.6);}
+ if(calm){const g=1,cy=y-h*.55;sketch([[x-9,cy-8],[x+9,cy-8],[x+12,cy+14],[x+2,cy+24],[x-8,cy+14]],true,360+m.seed,1,'#0d0a12',INK,2);ctx.globalAlpha=.5+.3*Math.sin(now*2);dot(x+1,cy+6,3,'#2a2140');ctx.globalAlpha=1;}
+ ctx.restore();}
+function drawMoss(m){const sh=m.sh>0?Math.sin(now*42)*1.6:0,x=m.x+sh,y=m.y,b=Math.sin(now*3+m.seed)*1.5;shadow(m.x,y+2,16,5);ctx.save();if(m.tumble>0){ctx.translate(x,y);ctx.rotate(Math.sin(m.tumble*8)*.6);ctx.translate(-x,-y);}
+ if(m.sh>0){for(let i=0;i<3;i++){const a=now*9+i*2.1,px=x+Math.cos(a)*20,py=y-12+Math.sin(a)*8;ln([[px-3,py],[px,py-3],[px+3,py]],420+i,1.6,'#cfe6ff',.3);}}blob(x,y-10+b,15,12,400+m.seed,'#8a9d7a',2.6,1);blob(x-2,y-19+b,11,6,401+m.seed,'#5fa352',2,.5);
  ln([[x-6,y],[x-6,y+6]],402+m.seed,3,INK,.4);ln([[x+6,y],[x+6,y+6]],403+m.seed,3,INK,.4);dot(x-5*m.dir+10*m.dir,y-11+b,2,INK);dot(x+2*m.dir+10*m.dir,y-11+b,2,INK);
- if(m.fed&&Math.floor(now*2)%3===0)dot(x+14*m.dir,y-22+b,2.5,'#ff8fb1');}
+ if((m.fed||m.bound||(m.warm&&m.warm>Date.now()))&&Math.floor(now*2)%3===0)dot(x+14*m.dir,y-22+b,2.5,m.bound?'#ffcf3a':'#ff8fb1');ctx.restore();}
 function drawLapper(l){if(!nightNow()||l.st==='gone')return;const x=l.x,y=l.y,dip=l.st==='lap'?Math.sin(now*1.6+l.ph)*6:0;
  ctx.globalAlpha=.85;blob(x,y-6,16,9,500+l.ph,'#d9d6e8',2.2,.6);ln([[x+10,y-10],[x+26,y-40+dip],[x+36,y-30+dip]],501+l.ph,9,INK,.4);ln([[x+10,y-10],[x+26,y-40+dip],[x+36,y-30+dip]],501+l.ph,5,'#e4e1f0',.4);
  blob(x+37,y-30+dip,7,5,502+l.ph,'#e4e1f0',2,.5);if(l.st==='lap'){ctx.globalAlpha=.35;sketch(ell(x+42,y-18,16+dip,5,10),true,503,1,null,'#fff',1.5);}ctx.globalAlpha=1;}
@@ -161,7 +173,7 @@ function shWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
  shadow(BOAT_SH.x,BOAT_SH.y+4,30,8);sketch([[BOAT_SH.x-32,BOAT_SH.y-6],[BOAT_SH.x+32,BOAT_SH.y-6],[BOAT_SH.x+22,BOAT_SH.y+8],[BOAT_SH.x-22,BOAT_SH.y+8]],true,803,2,'#9a6236',INK,3);
  const d=[];for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;d.push([t.y,()=>drawShTree(t)]);}
  const near=o=>Math.abs(o.x-cam.x)<vw&&Math.abs(o.y-cam.y)<vh;
- MAWS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m)]);});DEAD.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m)]);});MOSS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMoss(m)]);});LAPPERS.forEach(l=>{if(near(l))d.push([l.y,()=>drawLapper(l)]);});d.push([HOLLOW.y+40,drawHollow],[P.y,drawSwimmer]);
+ MAWS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m)]);});DEAD.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m)]);});PLANTED.forEach(p=>{if(near(p))d.push([p.y,()=>drawPlanted(p)]);});MOSS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMoss(m)]);});LAPPERS.forEach(l=>{if(near(l))d.push([l.y,()=>drawLapper(l)]);});d.push([HOLLOW.y+40,drawHollow],[P.y,drawSwimmer]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{if(x[1]===drawSwimmer){drawSwimmer();if(!SW.on)drawLine();}else x[1]();});drawFlies(vw,vh);}
-function shLights(){const L=[[P.x,P.y-20,95+eff('light')]];MAWS.forEach(m=>{if(m.st==='open'||m.st==='lunge')L.push([m.x,m.y-46,40]);});L.push([HOLLOW.x-150,HOLLOW.y,70]);
+function shLights(){const L=[[P.x,P.y-20,95+eff('light')]];MAWS.forEach(m=>{if(m.st==='open'||m.st==='lunge')L.push([m.x,m.y-46,40]);});PLANTED.forEach(p=>L.push([p.x,p.y-16,55+15*Math.min(1,p.t/8)]));L.push([HOLLOW.x-150,HOLLOW.y,70]);
  ISLES.forEach(I=>{if(I.kind==='clearing')L.push([I.x,I.y,Math.max(I.rx,I.ry)*.9]);});return L;}

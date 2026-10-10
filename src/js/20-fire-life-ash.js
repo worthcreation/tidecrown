@@ -6,10 +6,10 @@ function scoopAsh(a){const i=(S.ashp||[]).indexOf(a);if(i<0)return;if(a.n>0&&!ca
  if(!S.ashHint&&S.metWick){S.ashHint=1;setTimeout(()=>think('Brimble got weirdly excited about ash once. Maybe ask him.'),900);}}
 /* one rule for every fuel, whether added from the menu or the cooking woodpile */
 /* fuel in seconds. A fire is short, like a Runescape log: feed it or lose it. fr.mins stays as the fuel score for burn-out drops (one unit per 11.25 s). */
-const FUELSEC={wood:45,kelp:12,charcoal:40,wobble:90},FIRESEC=90,FIRECAP=300;
+const FUELSEC={wood:45,kelp:12,charcoal:40,wobble:90,deadwood:30},FIRESEC=90,FIRECAP=300;
 function stoke(fr,kind){if(fr.main)return;fr.fuel=fr.fuel||{};fr.fuel[kind]=(fr.fuel[kind]||0)+1;const sec=kind==='wobble'&&lv('firemaking')>=3?120:FUELSEC[kind];
  fr.mins=(fr.mins||8)+sec/11.25;fr.until=Math.min(Date.now()+(fr.big?FIRECAP*1.6:FIRECAP)*1000,Math.max(fr.until||0,Date.now())+sec*1000);}
-function feedFire(fr,kind){const c=clampLand(fr.x+34,fr.y+16);routeTo(c[0],c[1],()=>{const nm={wood:'driftwood',wobble:'wobblewood',charcoal:'charcoal'}[kind];if(!(cnt(kind)>0)){think('No '+nm+' on me.');return;}takeItem(kind);stoke(fr,kind);addXP('firemaking',1,'normal',[fr.x,fr.y-20]);pop('+ '+nm,fr.x,fr.y-40,'#fff',16);save();});}
+function feedFire(fr,kind){const c=clampLand(fr.x+34,fr.y+16);routeTo(c[0],c[1],()=>{const nm={wood:'driftwood',wobble:'wobblewood',charcoal:'charcoal',deadwood:'dead wood'}[kind];if(!(cnt(kind)>0)){think('No '+nm+' on me.');return;}takeItem(kind);stoke(fr,kind);addXP('firemaking',1,'normal',[fr.x,fr.y-20]);pop('+ '+nm,fr.x,fr.y-40,'#fff',16);save();});}
 function lifeHeat(fr){if(fr.main)return .6;const rem=(fr.until-Date.now())/1000,f=fr.fuel||{};let v=Math.min(1,.22+rem/80)+(f.charcoal?.15:0)+(f.wobble?.08:0)+(fr.big?.1:0);if(rem<12)v=.18+.22*Math.abs(Math.sin(now*6+fr.seed)*Math.sin(now*2.3));return v;}
 function burnOut(fr){const i=(S.fires||[]).indexOf(fr);if(i<0)return;S.fires.splice(i,1);const f=fr.fuel||{wood:3},items=[],mins=fr.mins||(fr.big?20:8);
  const heatF=1+.25*(f.wobble||0)+.5*(f.charcoal||0)+.1*(f.kelp||0)+(fr.big?.5:0)+(fr.hot||0)/30,score=mins*heatF,R=Math.random;

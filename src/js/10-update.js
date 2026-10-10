@@ -22,7 +22,7 @@ function update(dt){
   else if(T.phase==='bite'&&T.t*1000>T.win){T.phase='miss';T.t=0;streak('fish',false);pop('It got away...',P.x,P.y-70,'#fff',19);}
   else if((T.phase==='miss'&&T.t>.8)||(T.phase==='reel'&&T.t>.7)){if(S.inv.length>=PACK)P.task=null;else cast(T);}}
  // crab
- if(!SH.on)kindleMove(dt);
+ if(!SH.on){kindleMove(dt);bollardUpdate(dt);}
  CRAB.wait-=dt;if(CRAB.hop>0)CRAB.hop-=dt;
  if(CRAB.wait<=0){const dx=CRAB.tx-CRAB.x,dy=CRAB.ty-CRAB.y,d=Math.hypot(dx,dy);
   if(d<2){CRAB.wait=1+Math.random()*3;const a=Math.random()*6.28,r=Math.random()*90;const nx=crabHome[0]+Math.cos(a)*r,ny=crabHome[1]+Math.sin(a)*r;if(onIsland(nx,ny)){CRAB.tx=nx;CRAB.ty=ny;}}
