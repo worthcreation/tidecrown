@@ -2,7 +2,8 @@
 const SAVE='driftwood_key_v1';
 let S={x:R0-80,y:24,sk:null,inv:[],shells:0,bait:0,journal:{},day:.27,hint:0,bottles:0,catches:0,metG:false,char:null,origin:null,eq:{head:null,body:null,hand:null,trinket:null},owned:{},salutes:0,wobble:0,wood:0,kelp:0,fires:[],st:{},buff:null,metWick:0};
 try{const raw=localStorage.getItem(SAVE);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
-if(!walkable(S.x,S.y)){S.x=R0-80;S.y=24;}
+if(S.isle==='shadow')SH.on=true;
+if(!SH.on&&!walkable(S.x,S.y)){const a=Math.atan2(S.y,S.x);if(Math.hypot(S.x,S.y)<iR(a)+900){const e=polar(a,iR(a)-18);S.x=e[0];S.y=e[1];}else{S.x=R0-80;S.y=24;}}
 /* skills: S.sk[id]={xp}. A skill is unlocked when its entry exists. Migrates the build 1-2 fields. */
 if(!S.sk){S.sk={fishing:{xp:S.xp||0}};if(S.hearth)S.sk.hearth={xp:S.hx||0};if(S.shipwright)S.sk.shipwright={xp:S.sx||0};}
 for(const k of ['xp','hx','sx','hearth','shipwright'])delete S[k];

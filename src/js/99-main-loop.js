@@ -1,6 +1,6 @@
-const BUILD=12;
+const BUILD=13;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 if(S.char)begin();else openCreator('new');
-if(location.hash==='#dev')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},fn:{hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,searchRocks,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
+if(location.hash==='#dev')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,MAWS,MOSS,LAPPERS,ISLES,BRIDGES,shWalkable,get MZ(){return MZ;},cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},fn:{routeTo,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,searchRocks,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};

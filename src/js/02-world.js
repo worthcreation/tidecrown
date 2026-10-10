@@ -13,8 +13,9 @@ function wetR(a){return iR(a)+(1-tideLevel())*TIDE_REACH;}
 const DOCK={x0:R0-40,x1:R0+192,y0:-24,y1:24};
 function onIsland(x,y){return Math.hypot(x,y)<=wetR(Math.atan2(y,x))-10;}
 function onDock(x,y){return x>=DOCK.x0&&x<=DOCK.x1-10&&y>=DOCK.y0+6&&y<=DOCK.y1-6;}
-function walkable(x,y){return onIsland(x,y)||onDock(x,y);}
-function clampLand(x,y){if(walkable(x,y))return[x,y];const a=Math.atan2(y,x);return polar(a,wetR(a)-18);}
+const SH={on:false};
+function walkable(x,y){if(SH.on)return shWalkable(x,y);return onIsland(x,y)||onDock(x,y);}
+function clampLand(x,y){if(SH.on)return shClamp(x,y);if(walkable(x,y))return[x,y];const a=Math.atan2(y,x);return polar(a,wetR(a)-18);}
 
 /* fishing spots roam: a spot fades in, lives a couple of minutes, fades out, and a new one bubbles up somewhere else. The glowing pool is a place and stays put. */
 const spots=[];

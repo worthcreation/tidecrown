@@ -16,7 +16,7 @@
 #panel{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);bottom:calc(env(safe-area-inset-bottom,0px) + 10px);right:10px;width:min(360px,calc(100vw - 20px));transform:translateX(118%);transition:transform .35s cubic-bezier(.3,1.2,.5,1);z-index:8;display:flex;flex-direction:column;overflow:hidden}
 #panel.on{transform:none}
 .tabs{display:flex;gap:2px;padding:6px 8px 0;align-items:center}
-.tab{flex:1;font-size:21px;background:none;border:none;color:var(--muted);padding:6px 0 4px;border-bottom:3px solid transparent;border-radius:0}
+.tab{flex:1;font-size:19px;background:none;border:none;color:var(--muted);padding:6px 0 4px;border-bottom:3px solid transparent;border-radius:0}
 .tab.on{color:var(--ink);border-bottom-color:var(--coral)}
 .x{background:none;border:none;font-size:26px;width:40px;line-height:1}
 .skill{display:flex;gap:12px;align-items:center;padding:6px 0 12px}

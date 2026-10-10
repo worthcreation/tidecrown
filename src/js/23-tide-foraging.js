@@ -8,7 +8,7 @@ function drawFoam(){const t=tideLevel();ctx.setLineDash([16,12]);ctx.lineDashOff
 
 /* breaking waves: a swell builds offshore, foam runs up the beach, and whatever it carried is lying there when it pulls back. The next wave over an item may take it again. Everything on the sand comes from this. S.shore holds what the beach has right now. */
 const BREAKS=[];let breakT=3;const SHORE_MAX=14;
-const WASH=[['wood',44,10],['kelp',30,8],['shells',16,12],['bait',6,14],['wobble',4,24]];
+const WASH=[['wood',44,4],['kelp',30,3],['shells',16,5],['bait',6,6],['wobble',4,10]];
 function rollWash(){const r=Math.random()*100;let acc=0;for(const [k,wt] of WASH){acc+=wt;if(r<acc)return k;}return 'wood';}
 function spawnBreak(){const pa=Math.atan2(P.y,P.x),t=tideLevel();let a0=pa+(Math.random()-.5)*1.8;
  /* the sea comes for its salt: a wave near you aims at a sparkling surface more often than not */
@@ -29,7 +29,7 @@ function coverBreak(w){S.shore=S.shore||[];const inArc=it=>Math.abs(angDiff(it.a
   const id=rollWash();S.shore.push({a,r,x,y,id,n:id==='shells'?1+Math.floor(Math.random()*3):1,seed:Math.floor(Math.random()*999)});}
  while(S.shore.length>SHORE_MAX)S.shore.shift();save();}
 function underFoam(it){for(const w of BREAKS)if(w.t>0&&w.t<3&&it.r>=frontR(w,it.a)-3)return true;return false;}
-function tideUpdate(dt){tideGeom();if(ccOn||C)return;if(tideLevel()<.5&&!S.journal.tide&&!dlgOn)discover('tide');
+function tideUpdate(dt){tideGeom();if(ccOn||C||SH.on)return;if(tideLevel()<.5&&!S.journal.tide&&!dlgOn)discover('tide');
  breakT-=dt;if(breakT<=0){breakT=5.5+Math.random()*3.5;if(BREAKS.length<3)spawnBreak();}
  for(const w of BREAKS){w.t+=dt;if(!w.done&&w.t>=1.6){w.done=true;coverBreak(w);if(w.n&&!S.st.sawWash){S.st.sawWash=1;think('The wave left something behind.');}}}
  for(const w of BREAKS){if(w.t<=0)continue;for(const s of SURF){const a=Math.atan2(s.y,s.x);if(Math.abs(angDiff(a,w.a0))>w.hw)continue;const r=Math.hypot(s.x,s.y),fr=frontR(w,a);
@@ -52,7 +52,8 @@ function grabShore(it){const i=(S.shore||[]).indexOf(it);if(i<0||underFoam(it)){
  flies.push({id:'misc',img:itemIcon({id:it.id}),x0:it.x,y0:it.y,t:0});const xp=WASH.find(x=>x[0]===it.id)[2];
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}discover(it.id==='wood'?'driftwood':it.id==='kelp'?'kelp':'foraging');
  S.st.found=S.st.found||{};S.st.found[it.id]=(S.st.found[it.id]||0)+got;S.st.washes=(S.st.washes||0)+1;
- addXP('foraging',xp,first?'first':'normal',[it.x,it.y-20]);save();}
+ addXP('foraging',xp,first?'first':'normal',[it.x,it.y-20]);
+ const close=BREAKS.some(w=>w.t>0&&w.t<1.6&&Math.abs(angDiff(it.a,w.a0))<w.hw);if(close)burst('foraging','Last second',8,[it.x,it.y-50]);save();}
 
 /* salt sparkle: a wave that breaks on a hard surface sometimes leaves salt as it pulls back. It stays until the next wave hits that surface. Sand never holds it. */
 const SURF=[];{const r=mulberry(31);rocks.forEach(k=>SURF.push({x:k.x,y:k.y,rx:k.rx,ry:k.ry,name:'Rocks',st:'dry',t:0}));
@@ -64,4 +65,4 @@ function scrapeSalt(s){const c=s.pile?[s.x,DOCK.y1-8]:clampLand(s.x+s.rx+10,s.y+
  if(!addItem('seasalt',1)){think('No room in my pack.');return;}s.st='dry';pop('+1 sea salt',s.x,s.y-30,'#fff',17);
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}
  S.st.found=S.st.found||{};S.st.found.seasalt=(S.st.found.seasalt||0)+1;S.st.pinches=(S.st.pinches||0)+1;discover('seasalt');
- addXP('foraging',6,first?'first':'normal',[s.x,s.y-20]);save();});}
+ addXP('foraging',3,first?'first':'normal',[s.x,s.y-20]);save();});}

@@ -13,7 +13,7 @@ const SKILLS={
   unl:{3:'You can build your own fires',6:'Something on the beach starts blinking at night'}},
  invention:{name:'Invention',icon:'hatchet',col:'#a8d07e',clue:'Something sharp, something to hold, something to tie them.',desc:'Fit what you gathered into tools, then fit tools into grander things. No clock, just the right parts in the right order.',subs:['tinkering','shipwright'],
   unl:{12:'Brimble has a project in mind for your wood'}},
- exploration:{name:'Exploration',icon:'spyglass',col:'#c9a7ff',clue:'Past the last lighthouse, and under your feet.',desc:'The known edge, and what lies past it. Down into the ground and out over the water.',subs:['delving','sailing']},
+ exploration:{name:'Exploration',icon:'spyglass',col:'#c9a7ff',clue:'Past the last lighthouse, and under your feet.',desc:'The known edge, and what lies past it. Across the water, down into the ground, out over the sea.',subs:['swimming','delving','sailing']},
  dominion:{name:'Dominion',icon:'crown',col:'#ff8aa8',clue:'Not everything out there is friendly. Yet.',desc:'When something faces you, read its tell and commit. Break it, or win it over.',subs:['strife','accord']}};
 const SUBS={
  fishing:{p:'gathering',name:'Fishing',icon:'rod',col:'#6fd6ff',desc:'Patience and a quick hand. The Lantern Sea feeds those who wait, and every catch pulls you a little further out.',
@@ -29,6 +29,8 @@ const SUBS={
   unl:{3:'Wobblewood burns longer in your fires'}},
  tinkering:{p:'invention',name:'Tinkering',icon:'flint',col:'#a8d07e',clue:'Something sharp, something to hold, something to tie them.',desc:'Small things, fitted right. A hatchet first. Then whatever the island needs.',unl:{}},
  shipwright:{p:'invention',name:'Shipwright',clue:'A hull begins with a lot of logs.'},
+ swimming:{p:'exploration',name:'Swimming',icon:'wave',col:'#6fd6ff',clue:'People say they have swum between islands.',desc:'Keep the stroke, keep your breath. The sea gives things to the swimmer, and sends a few things to sting.',
+  unl:{5:'Deeper breath',10:'A quicker stroke',15:'Lantern jellies keep their distance'}},
  delving:{p:'exploration',name:'Delving',clue:'Something is buried under your feet.'},
  sailing:{p:'exploration',name:'Sailing',clue:'Past the last lighthouse.'},
  strife:{p:'dominion',name:'Strife',clue:'Counter the tell.'},
@@ -40,6 +42,7 @@ const ACH={
  cooking:[['Golden','Cook a fish golden on both sides',()=>(S.st.perfC||0)>=1],['Smoke signals','Discover smoky fish',()=>!!S.journal.smoky],['Three pans','Keep three pans going at once',()=>!!S.st.pans3]],
  firemaking:[['Kindled','Feed Brimble',()=>hasSkill('cooking')],['Keeper of flames','Build three fires of your own',()=>(S.st.fires||0)>=3],['Ember pearl','Find an ember pearl in the ashes',()=>!!S.journal.pearl]],
  foraging:[['Beachcomber','Grab your first wash-up',()=>(S.st.washes||0)>=1],['Salt of the sea','Scrape salt off wet rock',()=>(S.st.pinches||0)>=1],['Quick hands','Grab 25 wash-ups before the backwash',()=>(S.st.washes||0)>=25],['Springy','Catch a wobblewood log on the tide',()=>!!(S.st.found&&S.st.found.wobble)]],
+ swimming:[['First dip','Wade in and swim',()=>hasSkill('swimming')],['Beachcomber at sea','Swim through 10 floating things',()=>(S.st.swum||0)>=10],['Stung','Meet a lantern jelly',()=>!!S.journal.jelly],['Far shore','Swim all the way to the dark islands',()=>!!S.journal.swamfar]],
  tinkering:[['Sharp idea','Lash together a hatchet',()=>hasSkill('tinkering')]]};
 function rawCount(){return S.inv.filter(i=>FISH[i.id]).length;}
 function buffOn(){return S.buff&&S.buff.until>Date.now()?S.buff:null;}

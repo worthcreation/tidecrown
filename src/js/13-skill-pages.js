@@ -36,6 +36,7 @@ function skillPage(k){const D=SUBS[k],L=lv(k),B=buffOn();
  const nl=Object.keys(D.unl).map(Number).sort((a,b)=>a-b).find(l=>l>L);
  h+=`<div class="next">${nl?`At level ${nl}: ${D.unl[nl]}.`:'Every secret this skill holds, you’ve heard. For now.'}`+
   (k==='fishing'&&B&&BUFF[B.q]?`<br><span class="muted">Well fed: ${BUFF[B.q].txt}, ${Math.ceil((B.until-Date.now())/60000)}m left</span>`:'')+
-  (k==='foraging'?`<br><span class="muted">Wash-ups grabbed: ${S.st.washes||0}. Salt scraped: ${S.st.pinches||0}. Tide is ${tideLevel()>.66?'high':tideLevel()<.33?'low':tideLevel()>.5?'going out':'coming in'}.</span>`:k==='cooking'?`<br><span class="muted">Fish cooked: ${S.st.cooked||0}.</span>`:k==='firemaking'?`<br><span class="muted">Fires built: ${S.st.fires||0}.</span>`:'')+'</div>';
+  (['fishing','woodcutting','cooking','foraging','swimming'].includes(k)?`<br><span class="muted">Bursts found: ${Object.keys(S.st.bursts||{}).filter(n=>n.startsWith(k+':')).map(n=>n.slice(k.length+1)).join(', ')||'none yet'}.</span>`:'')+
+ (k==='foraging'?`<br><span class="muted">Wash-ups grabbed: ${S.st.washes||0}. Salt scraped: ${S.st.pinches||0}. Tide is ${tideLevel()>.66?'high':tideLevel()<.33?'low':tideLevel()>.5?'going out':'coming in'}.</span>`:k==='cooking'?`<br><span class="muted">Fish cooked: ${S.st.cooked||0}.</span>`:k==='firemaking'?`<br><span class="muted">Fires built: ${S.st.fires||0}.</span>`:'')+'</div>';
  return h;}
 

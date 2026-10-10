@@ -53,7 +53,7 @@ function finishPan(p){const a=sideQ(p.d[0]),b=sideQ(p.d[1]);let q=(a==='burnt'||
  let xp=CXP[p.f];if(q==='under')xp*=.3;if(q==='charred')xp=2;if(gold)xp*=1.5;if(smoky)xp*=1.25;xp=Math.max(1,Math.round(xp));
  S.inv.push({id:'cook',f:p.f,q});S.st.cooked=(S.st.cooked||0)+1;if(gold)S.st.perfC=(S.st.perfC||0)+1;
  const i=C.pans.indexOf(p),pp=panPos(i,C.pans.length),wx=C.fr.x+pp[0],wy=C.fr.y+pp[1];
- addXP('cooking',xp,q==='charred'?'burnt':smoky?'smoky':gold?'perfect':first?'first':'normal',[wx,wy]);
+ xp=Math.max(2,Math.round(xp*.4));addXP('cooking',xp,q==='charred'?'burnt':smoky?'smoky':first?'first':'normal',[wx,wy]);streak('gold',gold,'cooking','Golden run',4,[wx,wy-20]);
  flies.push({id:p.f,x0:wx,y0:wy-4,t:0,col:QCOL[q]});
  if(gold)discover('perfectcook');if(smoky)discover('smoky');p.f=null;save();}
 function cookTap(sx,sy){const [wx,wy]=s2w(sx,sy),{x,y}=C.fr,n=C.pans.length;

@@ -10,8 +10,10 @@ Everything has its place. Every new feature connects to existing systems, lore, 
 - Intuitive first. Tap does the obvious thing; hold opens options. Examine is always present, and every other option does something different from Examine.
 - Mobile first, full screen, minimal overlay. No scrolling menus anywhere. Test at 375x548 and 390x760.
 - Show, don't label: icons hopping to the player, flame size and color, XP spark paths.
-- Five skills, each a family of specific subskills (see Skills below). A skill is a way of interacting with the world; its subskills share that feel but each is one concrete act with its own loop, levels and unlocks. A subskill earns its place only if it has a loop worth repeating a hundred times. Traversal (climbing, swimming) is gated by gear and skill level, not trained.
+- Five skills, each a family of specific subskills (see Skills below). A skill is a way of interacting with the world; its subskills share that feel but each is one concrete act with its own loop, levels and unlocks. A subskill earns its place only if it has a loop worth repeating a hundred times. Climbing is gated by gear and skill level, not trained. Swimming earned its subskill once it had a loop: stroke rhythm, things to collect, things to avoid.
 - Skill XP is the sum of its subskills plus achievements. Skill levels gate cross-cutting things (building fires, Kindle, islands); subskill levels gate their own content.
+- XP is a quiet trickle per action; the real pay is in bursts (Streak, Tempo, Stint, Mark) hidden in each subskill and found by doing. A burst is a named gold shower. Rules are never spelled out; the name is revealed when earned and listed on the subskill page.
+- What you need is found near you, in most instances. An island that asks for a tool also offers the makings of it; a shore has something to fish and something to forage.
 - Grind comes from the interlock, not tedium: each skill's output feeds another (fish to pans, wood to hulls), so repetition always has a reason.
 - Unlocks are earned through story, discovery, or effort, not just levels. Helpers cost something.
 - Islands are discovered by seeing, hearing, reading, or experiencing them, or by wandering the sea at risk.
@@ -25,7 +27,7 @@ Everything has its place. Every new feature connects to existing systems, lore, 
 | Gathering | Wait, then react | Fishing, Woodcutting, Foraging, Growing |
 | Survival | Juggle several things at once | Cooking, Firemaking |
 | Invention | Fit parts together, no clock | Tinkering (small tools, pans, posts), Shipwright (hulls) |
-| Exploration | Read the way through | Delving, Sailing |
+| Exploration | Read the way through | Swimming, Delving, Sailing |
 | Dominion | Read the tell, then commit | Strife (counter it), Accord (mirror it) |
 
 Planned loops, agreed 9 Oct 2026:
@@ -40,6 +42,35 @@ Planned loops, agreed 9 Oct 2026:
 - Sparks: plain by default; gear and buffs change their behavior; the Blank Map makes some lead to undiscovered things on the current island. Still open.
 
 - Fishing spots roam: they fade in, live a minute or two, fade out and reappear elsewhere. Wild water stays near the north rocks; the glowing pool is a place and stays put.
+
+## Swimming, the scarf and projectiles (agreed 9 Oct)
+- Swimming is the first way off the Key. Keep the stroke, keep your breath; the sea gives things to the swimmer and sends things to sting. Rumours of people swimming between islands, even past the Shadow Forest, are the breadcrumb. Bridges and a cluster of islands are specific to the Shadow Forest: some of its islands are bridged, some stand apart, so swimming and bridges both matter there.
+- Something in the water you cannot outswim is the reason to learn projectiles.
+- Projectiles are collected (Foraging: stones, shells, seed pods) or made (Tinkering), with many kinds of propulsion: thrown and spat first, then slung, blown, sprung, later fired. Each propulsion is a different feel; each ammo a different effect. Projectiles must serve Accord too (a spat seed feeds at range, a thrown ember warms a Hollowmaw).
+- The scarf every character wears is the weapon. Short reach now, medium later, growing with Dominion level. Slap and trip (Strife), wrap and bind (Accord). Simple controls: tap and slide drive scarf moves; experiment with gestures on mobile: single, double, triple tap and beyond.
+- Projectiles: tap and hold on the player, then drag to the target; the swipe's speed sets propulsion, relative to the method (a thrown stone and a spat seed answer the same swipe differently).
+- Swimming controls: tap to stroke toward the tap; slide to stroke in that direction with the slide's speed as the push; keep tapping or you sink.
+- Beasts are threatening and dangerous unless avoided. Approaching one means combat, or being prepared with the proper equipment to help, harvest, pick ticks off, fold laundry with, solve problems, give directions, and generally be heroic and generous. Preparation is the Accord path; the equipment is what Invention and Foraging are for.
+
+## Gear, fragments and essence (agreed 9 Oct)
+- The You tab is the player: a Runescape-shaped paperdoll with ten slots (head, back, neck, scarf, body, charm, hands, legs, ring, feet), the character drawn as they are, name, origin, total level, and essence.
+- Beasts drop fragments, rarely. Not one in ten thousand, but it should feel like that: a drop is an event. Several fragments make one piece, so a set is a long hunt.
+- Wearing a piece assimilates the beast: the player takes on some of its appearance (bark skin, a hollow glow) and its essence (what it could do, what it could sense). Hollowmaw first.
+- Fragments can only be combined at a camp. That is what camps are for beyond rest.
+
+## Camps (planned)
+A camp is a place Invention builds and Survival keeps, and it stays in the world: lean-to, tent, shack, with a fire. Time spent at a camp charges it (the Stint idea applied to a place); a charged camp gives an aura, bigger with the better shelter. Building a project (a hull, a rod) at a charged camp makes it come out better or unlocks what bare sand cannot. A wooden bathtub is the rest action: sit, and a buff sets in. Finnigin's House of Wood is a sentient wobblewood house with its own voice, the one who teaches shelter, and where the bathtub comes from.
+- A camp can be damaged and destroyed. Build it from the wrong elements (the wrong wood, the wrong colours, the wrong smell for that ground) and the place reacts: things are attracted to it, attack it, steal from it, and confound you while they dismantle your camp and your equipment. The land has preferences and it is on you to learn them.
+- Certain places scare the gulls off unless conditions are right, so no gull post stands there until you have mended something.
+- Righting a wrong place may take serious doing; the goal is at least enough to let a little light and life in. That is dominion as tending, with teeth.
+
+## The Shadow Forest (test island cluster, build 13)
+A collection of dark islands far past the Key, a long swim east, never one big island. Each island is one kind: maze (walls of black trees), grove (open, scattered trees), clearing (serene, fireflies, a little light of its own) or fallow (grey, bubbling, dead trees). A few are bridged; most crossings are swims. Always dim and foreboding, with serene pockets. A sad island the player tends back to life: that is the Dominion pillar in one place. Travel there is a placeholder rowboat until Sailing exists.
+- Hollowmaws eat the trees. A dead tree until it unfolds: a trunk split into a mouth, root-legs, bark hanging off like skin. Its heartwood is rotting, so it eats living trees to feel warm. Tell: the bark on its chest creaks open before it lunges. Strife drives it off and leaves dead wood. Accord: an ember pearl pressed into the hollow warms the heart, and it stops eating and starts planting.
+- Moonlappers eat the moon. Pale, long-necked, eyeless, they lap the moon's reflection off the water at night, and the real moon thins, taking Moonkoi and moon salt with it. Tell: the pack goes silent and still a beat before turning. Strife scatters them. Accord: they drink light because the forest has none; a fire by the water gives them something else to drink, and the moon fills back in.
+- Mossbacks are the starving ordinary animals: soft, round, mossy, pitiable. Feed them cooked fish and they follow; a fed Mossback can carry, forage, or warm a camp. The first crew that is not a person.
+- The Hollow is why. Something the size of a ship lying across the heart of the forest, breathing. Its shadow is the shadow the forest is named for. Every other creature is a symptom of it. Its answer is unwritten until the rest of the forest exists; it may not be a fight.
+None of them has a face from another world; their hungers are for warmth and light, not meat; each can be set right rather than killed.
 
 ## Story so far
 Driftwood Key, smallest island in the Lantern Sea. Gubbins the talking bucket buys fish. Brimble, a living galley flame, was the stove of the Grinning Gull and floated here in a teapot. Proud, fussy and theatrical, he keeps house in a hollow in the north-east dunes, rebuilding his galley from whatever the tide brings, and teaches Cooking. His dream is to be a ship's galley fire again. The Gull's captain wrote letters signed "C." that wash up in bottles; the Far Light lies past the last lighthouse. Mortimer Gull runs the Gull Post bank and hints he'd fly to you for something crunchy. Kindle, a wild living log, joins your woodpile after three nights of firelight and ash. A stone head hums about the west shore and the moon. A crooked tower blinks on the horizon to the northeast.
