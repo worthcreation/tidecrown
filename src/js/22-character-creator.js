@@ -25,16 +25,16 @@ function renderCC(){ccEl.classList.add('on');const m=ccMode==='mirror';
    `<button class="dice" id="ccrand">Surprise me</button></div></div><div id="ccrows" class="pgrid">${rowsHTML()}</div><div class="lockhint" id="cclock">${KIN[draft.kin].blurb}</div>`;
   ccGo.textContent=m?'Step back':'Next: how you got here';ccGo.disabled=false;}
  else{ccT.textContent='How did you get here?';const sel=ccOrigin?EQUIP[ORIGINS[ccOrigin].keep]:null;
-  ccBody.innerHTML='<div class="origins">'+Object.keys(ORIGINS).map(k=>{const O=ORIGINS[k];return `<button class="org sk${ccOrigin===k?' on':''}" data-o="${k}"><b>${O.name}</b><span>${O.line}</span><span class="keep">Keepsake: ${EQUIP[O.keep].name}</span></button>`;}).join('')+
-   `</div><div class="odetail">${sel?sel.name+'. '+sel.desc:'Pick a past. Each comes with a keepsake.'}</div><button class="back" id="ccback">Back to looks</button>`;
+  ccBody.innerHTML=`<div class="cctop otop"><canvas id="pv" aria-label="Your character"></canvas><div class="odetail">${sel?'<b>'+sel.name+'.</b> '+sel.desc:'<b>'+esc(draft.name)+'</b> washed up with nothing but a scarf. Pick a past. Each comes with a keepsake.'}</div></div><div class="origins">`+Object.keys(ORIGINS).map(k=>{const O=ORIGINS[k];return `<button class="org sk${ccOrigin===k?' on':''}" data-o="${k}"><b>${O.name}</b><span>${O.line}</span><span class="keep">Keepsake: ${EQUIP[O.keep].name}</span></button>`;}).join('')+
+   `</div><button class="back" id="ccback">Back to looks</button>`;
   ccGo.textContent='Wash ashore';ccGo.disabled=!ccOrigin;}}
 ccBody.addEventListener('click',e=>{const b=e.target.closest('[data-k]');
  if(b){const k=b.dataset.k,d=+b.dataset.d,vals=PICKS.find(p=>p[0]===k)[2]();const cur=view[k]!=null?view[k]:draft[k];let i=vals.indexOf(cur);i=(i+d+vals.length)%vals.length;
-  const nv=vals[i];view[k]=nv;const lk=isLocked(k,nv);if(!lk)draft[k]=nv;$('ccrows').innerHTML=rowsHTML();$('cclock').textContent=lk||(k==='kin'?KIN[nv].blurb:'');return;}
+  const nv=vals[i];view[k]=nv;const lk=isLocked(k,nv);if(!lk)draft[k]=nv;SCF.k=1;SCF.dir=d;$('ccrows').innerHTML=rowsHTML();$('cclock').textContent=lk||(k==='kin'?KIN[nv].blurb:'');return;}
  if(e.target.id==='ccdice'){draft.name=rName();$('ccname').value=draft.name;return;}
  if(e.target.id==='ccrand'){const n=draft.name;draft=randomLook();draft.name=n;view={};$('ccrows').innerHTML=rowsHTML();$('cclock').textContent=KIN[draft.kin].blurb;return;}
  if(e.target.id==='ccback'){ccStep=1;renderCC();return;}
- const o=e.target.closest('[data-o]');if(o){ccOrigin=o.dataset.o;renderCC();}});
+ const o=e.target.closest('[data-o]');if(o){ccOrigin=o.dataset.o;SCF.k=1.3;SCF.dir=1;renderCC();}});
 ccBody.addEventListener('input',e=>{if(e.target.id==='ccname')draft.name=e.target.value;});
 ccGo.onclick=()=>{
  if(ccMode==='mirror'){S.char=draft;save();closeCC();return;}
@@ -48,6 +48,9 @@ function renderPreview(){const c=$('pv');if(!c)return;const d=Math.min(2,deviceP
  const keep=ctx;ctx=c.getContext('2d');ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
  const g=ctx.createRadialGradient(w/2,h*.55,6,w/2,h*.55,w*.55);g.addColorStop(0,'rgba(255,255,255,.75)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
  const sc=(h-16)/60;blob(w/2,h-12,w*.4,8,300,'#f3d27a',2.5);ctx.save();ctx.translate(w/2,h-13);ctx.scale(sc,sc);
- drawChar(draft,ccMode==='mirror'?S.eq:{},0,0,1,false,false);ctx.restore();ctx=keep;}
+ SCF.k=Math.max(0,SCF.k-fdt*1.6);drawChar(draft,ccMode==='mirror'?S.eq:(ccOrigin?{trinket:ORIGINS[ccOrigin].keep}:{}),0,0,1,false,false);ctx.restore();ctx=keep;}
+/* the scarf is alive while you decide: it stretches and twists on its own, and flicks when you change something */
+const SCF={k:0,dir:1};
+function scarfIdle(){if(!ccOn)return [1,0];const st=1+.22*Math.sin(now*.9)+.14*Math.sin(now*2.3+1)+SCF.k*.6,tw=Math.sin(now*1.3)*5+Math.cos(now*.5)*3-SCF.k*8*SCF.dir;return [st,tw];}
 function begin(){intro=RM?null:0;setTimeout(showHint,RM?300:2600);if(!S.journal.washed)setTimeout(()=>discover('washed'),3400);}
 

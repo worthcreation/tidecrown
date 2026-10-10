@@ -101,7 +101,7 @@ const ORIGINS={
  lighthouse:{name:'The Lighthouse Kid',line:'Raised at the top of a lonely tower. You know how to look far.',keep:'spyglass'},
  cook:{name:'The Galley Runaway',line:'Fled a ship’s kitchen with the one thing worth stealing.',keep:'salttin'},
  tide:{name:'The Tide-Touched',line:'Fell overboard as a baby. The sea still talks to you.',keep:'whisper'},
- nobody:{name:'The Nobody',line:'No name you remember, no past you can prove. Only a map that draws itself.',keep:'blankmap'}
+ nobody:{name:'The Nobody',line:'No name, no past you can prove. Only a map that draws itself.',keep:'blankmap'}
 };
 /* items: one registry. Plain fields, or functions of the item for cooked fish and bottles. */
 const ITEMS={

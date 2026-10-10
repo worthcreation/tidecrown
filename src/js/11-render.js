@@ -45,7 +45,7 @@ function drawChar(a,eq,x,y,f,mv,fishing){
  if(mv){const s=Math.sin(now*12)*5;ln([[x-5,y-6],[x-5+s,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+5-s,y]],111,3.5,INK,.3);}else{ln([[x-5,y-6],[x-6,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+6,y]],111,3.5,INK,.3);}
  const by=y-ry-3-b,ny=by-ry+3,hx=x+f*2,hy=ny-9,coat=eq.body==='coat';
  const sp=mv?10:4,w=Math.sin(now*sp)*(mv?2.5:1.2),w2=Math.sin(now*sp+1.3)*(mv?3.2:1.6),kx=x-f*rx*.55,ky=ny+1;
- sketch([[kx,ky-2],[kx-f*9,ky+w],[kx-f*17,ky-2+w2],[kx-f*13,ky+3+w],[kx-f*19,ky+8+w2],[kx-f*8,ky+7+w],[kx,ky+4]],true,113,.4,acc,INK,2.2);
+ const [st,tw]=scarfIdle();sketch([[kx,ky-2],[kx-f*9*st,ky+w+tw*.3],[kx-f*17*st,ky-2+w2+tw*.7],[kx-f*13*st,ky+3+w+tw*.5],[kx-f*19*st,ky+8+w2+tw],[kx-f*8*st,ky+7+w+tw*.3],[kx,ky+4]],true,113,.4,acc,INK,2.2);
  blob(x,by,rx,ry,112,coat?'#f2c230':(COLS[a.col]||COLS[0]));
  if(coat){ln([[x+f*1,ny+3],[x+f*2,by+ry-3]],119,2,INK,.5);dot(x+f*5,by,1.6);dot(x+f*5,by+7,1.6);}
  if(K.feat==='fins'){for(const sd of[-1,1])sketch([[hx+sd*8,hy-2],[hx+sd*17,hy-8],[hx+sd*14,hy+3]],true,120+sd,.6,skin,INK,2.2);}

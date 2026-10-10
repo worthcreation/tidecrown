@@ -109,14 +109,15 @@ button{font:inherit;color:inherit;cursor:pointer}
 .lockhint{min-height:19px;text-align:center;color:var(--muted);font-size:16px;line-height:1.15}
 #ccgo{align-self:center;font-size:22px;padding:5px 24px;background:var(--coral);color:#fff}
 #ccgo:disabled{opacity:.45}
-.origins{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.org{text-align:left;padding:8px 10px;font-size:15px;line-height:1.2;display:flex;flex-direction:column;gap:4px}
+.origins{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 2px}
+.org{text-align:left;padding:10px 12px 11px;font-size:15px;line-height:1.25;display:flex;flex-direction:column;gap:5px}
+.otop{margin-top:2px}.otop #pv{width:96px;height:108px}
 .org b{font-size:19px;font-weight:400;line-height:1.05}
 .org .keep{color:var(--muted)}
 .org.on{background:var(--sun)}
-.odetail{min-height:38px;text-align:center;font-size:16px;color:#4a3f63;line-height:1.2}
-#cc .back{background:none;border:none;color:var(--muted);font-size:17px;text-decoration:underline;align-self:center;padding:0}
-@media (max-height:600px){#pv{width:92px;height:100px}#cc h1{font-size:24px}.ccid .sub{display:none}.pk{height:40px}}
+.odetail{flex:1;min-height:38px;text-align:left;font-size:16px;color:#4a3f63;line-height:1.2}.odetail b{font-weight:400;color:var(--ink)}
+#cc .back{background:none;border:none;color:var(--muted);font-size:17px;text-decoration:underline;align-self:center;padding:4px 0 0}
+@media (max-height:600px){#pv{width:92px;height:100px}#cc h1{font-size:24px}.ccid .sub{display:none}.pk{height:40px}.otop #pv{width:72px;height:82px}.origins{gap:7px}.org{padding:7px 9px 8px;gap:3px;font-size:14px}.org b{font-size:17px}.odetail{font-size:15px}}
 #pbody{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:10px 14px 12px;font-size:19px}
 #pbody .grid{grid-template-columns:repeat(4,var(--s,64px));justify-content:center;gap:8px;flex:none}
 #pbody .grid+.grid{margin-top:14px}
@@ -422,7 +423,7 @@ const ORIGINS={
  lighthouse:{name:'The Lighthouse Kid',line:'Raised at the top of a lonely tower. You know how to look far.',keep:'spyglass'},
  cook:{name:'The Galley Runaway',line:'Fled a ship’s kitchen with the one thing worth stealing.',keep:'salttin'},
  tide:{name:'The Tide-Touched',line:'Fell overboard as a baby. The sea still talks to you.',keep:'whisper'},
- nobody:{name:'The Nobody',line:'No name you remember, no past you can prove. Only a map that draws itself.',keep:'blankmap'}
+ nobody:{name:'The Nobody',line:'No name, no past you can prove. Only a map that draws itself.',keep:'blankmap'}
 };
 /* items: one registry. Plain fields, or functions of the item for cooked fish and bottles. */
 const ITEMS={
@@ -875,7 +876,7 @@ function drawChar(a,eq,x,y,f,mv,fishing){
  if(mv){const s=Math.sin(now*12)*5;ln([[x-5,y-6],[x-5+s,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+5-s,y]],111,3.5,INK,.3);}else{ln([[x-5,y-6],[x-6,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+6,y]],111,3.5,INK,.3);}
  const by=y-ry-3-b,ny=by-ry+3,hx=x+f*2,hy=ny-9,coat=eq.body==='coat';
  const sp=mv?10:4,w=Math.sin(now*sp)*(mv?2.5:1.2),w2=Math.sin(now*sp+1.3)*(mv?3.2:1.6),kx=x-f*rx*.55,ky=ny+1;
- sketch([[kx,ky-2],[kx-f*9,ky+w],[kx-f*17,ky-2+w2],[kx-f*13,ky+3+w],[kx-f*19,ky+8+w2],[kx-f*8,ky+7+w],[kx,ky+4]],true,113,.4,acc,INK,2.2);
+ const [st,tw]=scarfIdle();sketch([[kx,ky-2],[kx-f*9*st,ky+w+tw*.3],[kx-f*17*st,ky-2+w2+tw*.7],[kx-f*13*st,ky+3+w+tw*.5],[kx-f*19*st,ky+8+w2+tw],[kx-f*8*st,ky+7+w+tw*.3],[kx,ky+4]],true,113,.4,acc,INK,2.2);
  blob(x,by,rx,ry,112,coat?'#f2c230':(COLS[a.col]||COLS[0]));
  if(coat){ln([[x+f*1,ny+3],[x+f*2,by+ry-3]],119,2,INK,.5);dot(x+f*5,by,1.6);dot(x+f*5,by+7,1.6);}
  if(K.feat==='fins'){for(const sd of[-1,1])sketch([[hx+sd*8,hy-2],[hx+sd*17,hy-8],[hx+sd*14,hy+3]],true,120+sd,.6,skin,INK,2.2);}
@@ -1381,16 +1382,16 @@ function renderCC(){ccEl.classList.add('on');const m=ccMode==='mirror';
    `<button class="dice" id="ccrand">Surprise me</button></div></div><div id="ccrows" class="pgrid">${rowsHTML()}</div><div class="lockhint" id="cclock">${KIN[draft.kin].blurb}</div>`;
   ccGo.textContent=m?'Step back':'Next: how you got here';ccGo.disabled=false;}
  else{ccT.textContent='How did you get here?';const sel=ccOrigin?EQUIP[ORIGINS[ccOrigin].keep]:null;
-  ccBody.innerHTML='<div class="origins">'+Object.keys(ORIGINS).map(k=>{const O=ORIGINS[k];return `<button class="org sk${ccOrigin===k?' on':''}" data-o="${k}"><b>${O.name}</b><span>${O.line}</span><span class="keep">Keepsake: ${EQUIP[O.keep].name}</span></button>`;}).join('')+
-   `</div><div class="odetail">${sel?sel.name+'. '+sel.desc:'Pick a past. Each comes with a keepsake.'}</div><button class="back" id="ccback">Back to looks</button>`;
+  ccBody.innerHTML=`<div class="cctop otop"><canvas id="pv" aria-label="Your character"></canvas><div class="odetail">${sel?'<b>'+sel.name+'.</b> '+sel.desc:'<b>'+esc(draft.name)+'</b> washed up with nothing but a scarf. Pick a past. Each comes with a keepsake.'}</div></div><div class="origins">`+Object.keys(ORIGINS).map(k=>{const O=ORIGINS[k];return `<button class="org sk${ccOrigin===k?' on':''}" data-o="${k}"><b>${O.name}</b><span>${O.line}</span><span class="keep">Keepsake: ${EQUIP[O.keep].name}</span></button>`;}).join('')+
+   `</div><button class="back" id="ccback">Back to looks</button>`;
   ccGo.textContent='Wash ashore';ccGo.disabled=!ccOrigin;}}
 ccBody.addEventListener('click',e=>{const b=e.target.closest('[data-k]');
  if(b){const k=b.dataset.k,d=+b.dataset.d,vals=PICKS.find(p=>p[0]===k)[2]();const cur=view[k]!=null?view[k]:draft[k];let i=vals.indexOf(cur);i=(i+d+vals.length)%vals.length;
-  const nv=vals[i];view[k]=nv;const lk=isLocked(k,nv);if(!lk)draft[k]=nv;$('ccrows').innerHTML=rowsHTML();$('cclock').textContent=lk||(k==='kin'?KIN[nv].blurb:'');return;}
+  const nv=vals[i];view[k]=nv;const lk=isLocked(k,nv);if(!lk)draft[k]=nv;SCF.k=1;SCF.dir=d;$('ccrows').innerHTML=rowsHTML();$('cclock').textContent=lk||(k==='kin'?KIN[nv].blurb:'');return;}
  if(e.target.id==='ccdice'){draft.name=rName();$('ccname').value=draft.name;return;}
  if(e.target.id==='ccrand'){const n=draft.name;draft=randomLook();draft.name=n;view={};$('ccrows').innerHTML=rowsHTML();$('cclock').textContent=KIN[draft.kin].blurb;return;}
  if(e.target.id==='ccback'){ccStep=1;renderCC();return;}
- const o=e.target.closest('[data-o]');if(o){ccOrigin=o.dataset.o;renderCC();}});
+ const o=e.target.closest('[data-o]');if(o){ccOrigin=o.dataset.o;SCF.k=1.3;SCF.dir=1;renderCC();}});
 ccBody.addEventListener('input',e=>{if(e.target.id==='ccname')draft.name=e.target.value;});
 ccGo.onclick=()=>{
  if(ccMode==='mirror'){S.char=draft;save();closeCC();return;}
@@ -1404,7 +1405,10 @@ function renderPreview(){const c=$('pv');if(!c)return;const d=Math.min(2,deviceP
  const keep=ctx;ctx=c.getContext('2d');ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
  const g=ctx.createRadialGradient(w/2,h*.55,6,w/2,h*.55,w*.55);g.addColorStop(0,'rgba(255,255,255,.75)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
  const sc=(h-16)/60;blob(w/2,h-12,w*.4,8,300,'#f3d27a',2.5);ctx.save();ctx.translate(w/2,h-13);ctx.scale(sc,sc);
- drawChar(draft,ccMode==='mirror'?S.eq:{},0,0,1,false,false);ctx.restore();ctx=keep;}
+ SCF.k=Math.max(0,SCF.k-fdt*1.6);drawChar(draft,ccMode==='mirror'?S.eq:(ccOrigin?{trinket:ORIGINS[ccOrigin].keep}:{}),0,0,1,false,false);ctx.restore();ctx=keep;}
+/* the scarf is alive while you decide: it stretches and twists on its own, and flicks when you change something */
+const SCF={k:0,dir:1};
+function scarfIdle(){if(!ccOn)return [1,0];const st=1+.22*Math.sin(now*.9)+.14*Math.sin(now*2.3+1)+SCF.k*.6,tw=Math.sin(now*1.3)*5+Math.cos(now*.5)*3-SCF.k*8*SCF.dir;return [st,tw];}
 function begin(){intro=RM?null:0;setTimeout(showHint,RM?300:2600);if(!S.journal.washed)setTimeout(()=>discover('washed'),3400);}
 
 /* tide and foraging. The tide is a real-time cycle shared by everyone: high water brings wash-ups, low water exposes the wet band (and later the flats). */
