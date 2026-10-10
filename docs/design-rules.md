@@ -2,75 +2,57 @@
 
 ## Vision
 Tidecrown: Isles Unclaimed is a mobile-first skilling RPG set in the Lantern Sea. The player washes up on Driftwood Key and grows outward island by island.
-Pillars: explore, discover, take dominion. Dominion means tending and keeping, not just conquering: what the player builds, lights, and cares for leaves a lasting mark on the world.
-Influences, always checked against all three: Runescape (skills, leveling, gathering and processing loops, banking), One Piece (sea adventure, crew, dreams, lost ships and lore), Adventure Time (sentient objects, gentle weirdness, humor with melancholy underneath). All characters, names, and art are original.
-Everything has its place. Every new feature connects to existing systems, lore, or characters.
+Pillars: explore, discover, take dominion. Dominion means tending and keeping, not just conquering: what the player builds, lights and cares for leaves a lasting mark.
+Influences, each feature checked against all three: Runescape (skills, loops, banking, timing in its ballpark), One Piece (sea, crew, dreams, lost ships), Adventure Time (sentient objects, gentle weirdness, humour with melancholy underneath). All characters, names and art are original. Everything has its place; every feature connects to existing systems, lore or characters.
 
 ## Rules
-- Intuitive first. Tap does the obvious thing; hold opens options. Examine is always present, and every other option does something different from Examine.
-- Mobile first, full screen, minimal overlay. No scrolling menus anywhere. Test at 375x548 and 390x760.
-- Show, don't label: icons hopping to the player, flame size and color, XP spark paths.
-- Five skills, each a family of specific subskills (see Skills below). A skill is a way of interacting with the world; its subskills share that feel but each is one concrete act with its own loop, levels and unlocks. A subskill earns its place only if it has a loop worth repeating a hundred times. Climbing is gated by gear and skill level, not trained. Swimming earned its subskill once it had a loop: stroke rhythm, things to collect, things to avoid.
-- Skill XP is the sum of its subskills plus achievements. Skill levels gate cross-cutting things (building fires, Kindle, islands); subskill levels gate their own content.
-- XP is a quiet trickle per action; the real pay is in bursts (Streak, Tempo, Stint, Mark) hidden in each subskill and found by doing. A burst is a named gold shower. Rules are never spelled out; the name is revealed when earned and listed on the subskill page.
-- What you need is found near you, in most instances. An island that asks for a tool also offers the makings of it; a shore has something to fish and something to forage.
-- Grind comes from the interlock, not tedium: each skill's output feeds another (fish to pans, wood to hulls), so repetition always has a reason.
-- Unlocks are earned through story, discovery, or effort, not just levels. Helpers cost something.
-- Islands are discovered by seeing, hearing, reading, or experiencing them, or by wandering the sea at risk.
+- Intuitive first. Tap does the obvious thing; hold opens options; Examine is always there and every other option does something different.
+- Mobile first, full screen, no scrolling menus. Test at 375x548 and 390x760.
+- Show, don't label: icons hop to the player, flames change size and colour, sparks have paths.
+- Five skills, each a family of specific subskills. A skill is a way of interacting with the world; a subskill is one concrete act with its own loop, levels and unlocks, and earns its place only if the loop is worth repeating a hundred times.
+- Skill XP is the sum of its subskills plus achievements. Skill levels gate cross-cutting things; subskill levels gate their own content.
+- XP is a quiet trickle; the pay is in bursts (Streak, Tempo, Stint, Mark) hidden in each subskill, found by doing, named only when earned.
+- What you need is found near you, in most instances.
+- Grind comes from the interlock, not tedium: every skill's output feeds another.
+- Unlocks are earned through story, discovery or effort, not just levels. Helpers cost something.
+- Beasts are dangerous unless avoided. Approaching one means combat, or being prepared with the right equipment to help, harvest, solve, guide and be generous. Preparation is the Accord path.
 - Player-facing text: short, warm, a little wry. No em dashes.
-- Everything is drawn in code on canvas with the hand-drawn helpers and line boil. No image assets.
-- Save key stays driftwood_key_v1. New save fields get safe defaults and old saves are migrated.
+- Everything is drawn in code on canvas with the hand-drawn helpers and line boil. No image assets (app icons excepted).
+- Save key stays driftwood_key_v1; old saves migrate.
 
 ## Skills
-| Skill | Interaction | Subskills (built ones first) |
+| Skill | Interaction | Subskills (built first) |
 |---|---|---|
 | Gathering | Wait, then react | Fishing, Woodcutting, Foraging, Growing |
 | Survival | Juggle several things at once | Cooking, Firemaking |
-| Invention | Fit parts together, no clock | Tinkering (small tools, pans, posts), Shipwright (hulls) |
+| Invention | Fit parts together, no clock | Tinkering, Shipwright |
 | Exploration | Read the way through | Swimming, Delving, Sailing |
 | Dominion | Read the tell, then commit | Strife (counter it), Accord (mirror it) |
 
-Planned loops, agreed 9 Oct 2026:
-- Timing is in the Runescape ballpark: short fires you feed, trees back in minutes, fishing spots that move every few minutes, a day and night on real time (24 min) with two tides a day, the water always moving. Dial by play, not by exact copy.
-- Tide: a real-time cycle read off the beach (foam line, wet sand, shallows). High tide brings wash-ups; low tide exposes salt flats, tide pools, later a sandbar.
-- Foraging: breaking waves run up the beach and reveal what they carried when they pull back; the next wave may take it again; small waves only break on the shore, rocks and pier and carry at most one thing, rare big waves run far up the beach and carry up to three; everything on the sand comes from the waves (Mortimer competing still planned); salt sparkle only where a wave has just broken on a hard surface (rocks, pilings, never sand): wet on the hit, sparkle as the foam pulls back (about half the time, rarely if salt is already there), and it stays until the next wave hits that surface; waves aim at salted surfaces more often than not; big salt harvest from pools and flats at low tide in a zoomed scene (drag to rake, before the swell). Salt types: rock salt by day, moon salt from glowing pools at night.
-- Salt pans: placed anywhere on the flats, more allowed as Foraging levels; built by Tinkering from Foraging and Invention materials. Tiers: driftwood tray, stone-lined (ash sealant), slate, sunstone pan (its own salt). Light upkeep.
-- Salt Tin: holds salt apart from the pack; a third button beside the woodpile while cooking seasons the next pan. Brimble gives everyone a tin later; the Galley Runaway's is a head start.
-- Gull posts: mobile banking. Tinkering builds a post from driftwood and twine, baited; one gull perches at a time, one bank visit each, then flies; bait sets how soon the next comes (scraps slow, minnows steady, glitter bait fast); materials set how long the post stands (driftwood, wobblewood, charred wobblewood). When it runs out it collapses and leaves guano: flares hotter and faster than kelp, later fertilizer for Growing. A summoning consumable calls one gull now.
-- Rod as gear built from parts (blank, line, hook, float), the home for fishing stats; gloves, thimble and cap then get new jobs or go.
-- Dominion: every creature telegraphs; counter the tell to break it (materials now) or mirror it to win it over (a lasting helper). Thimble crab's salute is the seed of Accord; Kindle can only be won over.
-- Sparks: plain by default; gear and buffs change their behavior; the Blank Map makes some lead to undiscovered things on the current island. Still open.
+## World systems (built)
+- Timing in the Runescape ballpark: fires of 90 s you feed, trees back in 3 min, fishing spots that roam every 2 to 5 min, a 24-minute real-time day with two tides, the water always moving. Dial by play.
+- Tide: read off the beach (foam line, wet sand). High tide brings wash-ups; low tide bares the wet band and the rock pools.
+- Waves: a swell builds, foam runs up the beach, and what it carried lies there when it pulls back; the next wave may take it. Small waves break on shore, rocks and pier and carry at most one thing; rare big ones run far up and carry up to three. Everything on the sand comes from waves.
+- Salt: only where a wave has just broken on a hard surface (rocks, pilings, never sand), wet on the hit, sparkle on the pull-back about half the time, staying until the next wave hits that surface; waves aim at salted surfaces more often than not.
+- Trees: a chopped tree drops a branch, loses its canopy, grows back; a small pulse marks the beat window. Shadow trees never regrow; the middle tree holds a maze wall.
+- Swimming: walk in and sink through the shallows; where it is deep the walk becomes a swim. Prone on the water, only the submerged body tinted, a sheet of water flowing over it, the swell drifting you. Tap to stroke toward the tap, slide to stroke that way with the slide's speed as the push, on the beat for breath and a streak. Stop stroking and you sink. Lantern jellies sting; floating things are yours. The sea between islands is long.
+- Gear: the You tab is a Runescape-shaped paperdoll with ten slots and the character drawn as they are.
 
-- Fishing spots roam: they fade in, live a minute or two, fade out and reappear elsewhere. Wild water stays near the north rocks; the glowing pool is a place and stays put.
+## Planned
+- Scarf: every character wears it; it is the weapon. Slap and trip (Strife), wrap and bind (Accord); reach grows with Dominion level; tap and slide controls, tap combos to try.
+- Projectiles: collected (Foraging) or made (Tinkering); thrown and spat first, then slung, blown, sprung, fired. Hold on the player, drag to the target; swipe speed sets propulsion relative to the method. Must serve Accord too (a spat seed feeds, a thrown ember warms).
+- Dominion loop: every creature telegraphs; counter to break it (materials now), mirror to win it (a lasting helper). The Thimble crab's salute is the seed of Accord; Kindle can only be won over.
+- Fragments and essence: beasts drop fragments rarely enough that a drop is an event; several make a piece; wearing it assimilates the beast's appearance and essence. Hollowmaw first. Combined only at a camp.
+- Camps: lean-to, tent, shack, fire, wooden bathtub. Time spent charges a camp; a charged camp gives an aura and makes projects built there better. Built from the wrong wood, colours or smell for the ground, a camp draws things that attack, steal and confound while they dismantle it. Some places scare the gulls off until mended. Righting a place takes serious doing; the goal is to let a little light and life in. Finnigin's House of Wood is a sentient wobblewood house who teaches shelter.
+- Salt pans on the flats (Foraging 10 raking scene; tiers from driftwood tray to sunstone pan), the Salt Tin seasoning pans while cooking, gull posts (one gull at a time, bait sets return, materials set life, collapses to guano), the rod as gear from parts, Mortimer racing for shiny wash-ups, Brimble's galley growing from wash-ups, sparks shaped by gear and buffs.
 
-## Swimming, the scarf and projectiles (agreed 9 Oct)
-- Swimming is the first way off the Key. Keep the stroke, keep your breath; the sea gives things to the swimmer and sends things to sting. Rumours of people swimming between islands, even past the Shadow Forest, are the breadcrumb. Bridges and a cluster of islands are specific to the Shadow Forest: some of its islands are bridged, some stand apart, so swimming and bridges both matter there.
-- Something in the water you cannot outswim is the reason to learn projectiles.
-- Projectiles are collected (Foraging: stones, shells, seed pods) or made (Tinkering), with many kinds of propulsion: thrown and spat first, then slung, blown, sprung, later fired. Each propulsion is a different feel; each ammo a different effect. Projectiles must serve Accord too (a spat seed feeds at range, a thrown ember warms a Hollowmaw).
-- The scarf every character wears is the weapon. Short reach now, medium later, growing with Dominion level. Slap and trip (Strife), wrap and bind (Accord). Simple controls: tap and slide drive scarf moves; experiment with gestures on mobile: single, double, triple tap and beyond.
-- Projectiles: tap and hold on the player, then drag to the target; the swipe's speed sets propulsion, relative to the method (a thrown stone and a spat seed answer the same swipe differently).
-- Swimming controls: tap to stroke toward the tap; slide to stroke in that direction with the slide's speed as the push; keep tapping or you sink.
-- Beasts are threatening and dangerous unless avoided. Approaching one means combat, or being prepared with the proper equipment to help, harvest, pick ticks off, fold laundry with, solve problems, give directions, and generally be heroic and generous. Preparation is the Accord path; the equipment is what Invention and Foraging are for.
-
-## Gear, fragments and essence (agreed 9 Oct)
-- The You tab is the player: a Runescape-shaped paperdoll with ten slots (head, back, neck, scarf, body, charm, hands, legs, ring, feet), the character drawn as they are, name, origin, total level, and essence.
-- Beasts drop fragments, rarely. Not one in ten thousand, but it should feel like that: a drop is an event. Several fragments make one piece, so a set is a long hunt.
-- Wearing a piece assimilates the beast: the player takes on some of its appearance (bark skin, a hollow glow) and its essence (what it could do, what it could sense). Hollowmaw first.
-- Fragments can only be combined at a camp. That is what camps are for beyond rest.
-
-## Camps (planned)
-A camp is a place Invention builds and Survival keeps, and it stays in the world: lean-to, tent, shack, with a fire. Time spent at a camp charges it (the Stint idea applied to a place); a charged camp gives an aura, bigger with the better shelter. Building a project (a hull, a rod) at a charged camp makes it come out better or unlocks what bare sand cannot. A wooden bathtub is the rest action: sit, and a buff sets in. Finnigin's House of Wood is a sentient wobblewood house with its own voice, the one who teaches shelter, and where the bathtub comes from.
-- A camp can be damaged and destroyed. Build it from the wrong elements (the wrong wood, the wrong colours, the wrong smell for that ground) and the place reacts: things are attracted to it, attack it, steal from it, and confound you while they dismantle your camp and your equipment. The land has preferences and it is on you to learn them.
-- Certain places scare the gulls off unless conditions are right, so no gull post stands there until you have mended something.
-- Righting a wrong place may take serious doing; the goal is at least enough to let a little light and life in. That is dominion as tending, with teeth.
-
-## The Shadow Forest (test island cluster, build 13)
-A collection of dark islands far past the Key, a long swim east, never one big island. Each island is one kind: maze (walls of black trees), grove (open, scattered trees), clearing (serene, fireflies, a little light of its own) or fallow (grey, bubbling, dead trees). A few are bridged; most crossings are swims. Always dim and foreboding, with serene pockets. A sad island the player tends back to life: that is the Dominion pillar in one place. Travel there is a placeholder rowboat until Sailing exists.
-- Hollowmaws eat the trees. A dead tree until it unfolds: a trunk split into a mouth, root-legs, bark hanging off like skin. Its heartwood is rotting, so it eats living trees to feel warm. Tell: the bark on its chest creaks open before it lunges. Strife drives it off and leaves dead wood. Accord: an ember pearl pressed into the hollow warms the heart, and it stops eating and starts planting.
-- Moonlappers eat the moon. Pale, long-necked, eyeless, they lap the moon's reflection off the water at night, and the real moon thins, taking Moonkoi and moon salt with it. Tell: the pack goes silent and still a beat before turning. Strife scatters them. Accord: they drink light because the forest has none; a fire by the water gives them something else to drink, and the moon fills back in.
-- Mossbacks are the starving ordinary animals: soft, round, mossy, pitiable. Feed them cooked fish and they follow; a fed Mossback can carry, forage, or warm a camp. The first crew that is not a person.
-- The Hollow is why. Something the size of a ship lying across the heart of the forest, breathing. Its shadow is the shadow the forest is named for. Every other creature is a symptom of it. Its answer is unwritten until the rest of the forest exists; it may not be a fight.
-None of them has a face from another world; their hungers are for warmth and light, not meat; each can be set right rather than killed.
+## The Shadow Forest
+A collection of dark islands far east of the Key, never one big island. Each island is one kind: maze, grove, clearing (serene, fireflies, its own light) or fallow (grey, bubbling, dead trees). A few are bridged; most crossings are swims. Dim and foreboding with serene pockets; a sad place the player tends back to life.
+- Hollowmaws eat the trees: a dead tree until it unfolds, mouth in the trunk, root-legs, bark like skin; heartwood rotting, so it eats living trees for warmth. Tell: the chest creaks open before the lunge. Strife drives it off for dead wood; Accord presses an ember pearl into the hollow and it plants instead. They hide among dead trees drawn the same; a real one shows only a seam and, rarely, a warm fleck.
+- Moonlappers eat the moon: pale, long-necked, eyeless, lapping its reflection at night so the real moon thins. Tell: the pack goes silent before turning. Strife scatters them; Accord gives them a fire's light to drink instead.
+- Mossbacks: soft, mossy, starving, pitiable. Fed, they follow. The first crew that is not a person.
+- The Hollow lies across its own isle, breathing. Everything else is a symptom of it. Its answer is unwritten; it may not be a fight.
+No faces from other worlds; hungers for warmth and light, not meat; each can be set right.
 
 ## Story so far
-Driftwood Key, smallest island in the Lantern Sea. Gubbins the talking bucket buys fish. Brimble, a living galley flame, was the stove of the Grinning Gull and floated here in a teapot. Proud, fussy and theatrical, he keeps house in a hollow in the north-east dunes, rebuilding his galley from whatever the tide brings, and teaches Cooking. His dream is to be a ship's galley fire again. The Gull's captain wrote letters signed "C." that wash up in bottles; the Far Light lies past the last lighthouse. Mortimer Gull runs the Gull Post bank and hints he'd fly to you for something crunchy. Kindle, a wild living log, joins your woodpile after three nights of firelight and ash. A stone head hums about the west shore and the moon. A crooked tower blinks on the horizon to the northeast.
+Driftwood Key, smallest island in the Lantern Sea. Gubbins the talking bucket buys fish. Brimble, a living galley flame, was the stove of the Grinning Gull and floated here in a teapot; proud, fussy, theatrical, he keeps house in the north-east dunes, rebuilding his galley from what the tide brings, and teaches Cooking; his dream is to be a ship's fire again. The Gull's captain wrote letters signed "C." that wash up in bottles; the Far Light lies past the last lighthouse. Mortimer Gull runs the Gull Post bank. Kindle, a wild living log, joins your woodpile after three nights of firelight and ash. A stone head hums about the west shore and the moon. A crooked tower blinks on the horizon. A rowboat appeared at the pier one morning; people say they have swum between islands, even past the Shadow Forest.

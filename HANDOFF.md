@@ -1,30 +1,43 @@
 # Tidecrown: handoff (build 13, 9 Oct 2026)
-Current state only. Build by build changes are in docs/HISTORY.md. Design rules and story are in docs/design-rules.md.
+Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/design-rules.md.
 
-## Where the work happens
-- Start of every chat: `git clone https://github.com/worthcreation/tidecrown.git` into /home/claude, `node tools/build.js`, check `const BUILD` in src/js/99-main-loop.js (next build is main's plus one), read Next task.
-- Edit src/, never index.html. Test headlessly (Playwright) at 375x548 and 390x760; add #dev to the URL for window.DK.
-- Ship: add one line at the top of docs/HISTORY.md, then `node tools/ship-local.js NN "Build NN: ..."`. Deliver the zip with present_files, also publish the play-test artifact, and end the reply with the printed PowerShell and zsh lines and the play link. Claude never commits or pushes. An unzip never deletes: list any deleted file for Ross to remove by hand.
+## Workflow
+- Start of chat: clone https://github.com/worthcreation/tidecrown.git into /home/claude, `node tools/build.js`, check `const BUILD` in src/js/99-main-loop.js (next build is main's plus one), read Next.
+- Edit src/ only. Test headlessly (Playwright) at 375x548 and 390x760; #dev exposes window.DK (state, fn.*, warps, setTide, shEnter, swimTo).
+- Ship: one line at the top of docs/HISTORY.md, `node tools/ship-local.js NN "Build NN: ..."`, present the zip, publish the play-test artifact, end with the PowerShell and zsh lines and the play link. Claude never commits or pushes. Name any deleted file (an unzip never deletes).
+- If Ross has not committed the previous zip, main's BUILD is still the old one: unzip the last zip over the clone and reship under the same number.
+- Handoff: rewrite this file, docs/design-rules.md and the project instructions; audit, condense, keep only what is true now.
 
 ## Layout
-- src/index.html shell; src/css/*.css and src/js/*.js concatenated in filename order (numeric prefixes) into one closure.
-- tools/build.js builds index.html (--watch --serve for local dev; npm run dev). tools/ship-local.js packs builds.
-- Code map: items in ITEMS (03-data, one entry per item id; cooked fish and bottles use functions of the item). Skill tree in 12: SKILLS (five skills with subs) and SUBS (subskills with p: parent); skd(k) looks up either. XP lives on subskills only, S.sk[sub]={xp}; a skill's XP is derived. hasSkill, xpOf, lv work for both; addXP takes a subskill id and toasts skill level-ups. ACH is keyed by subskill. Skill pages: parentPage and skillPage (13), skView/subView (08). World objects come from objects() (06), each with its own journal key, cached per frame. Fuel rules in stoke() (20), in seconds (FUELSEC, FIRESEC, FIRECAP). Day and tide are real time: DAY_PERIOD and TIDE_PERIOD in 02-world; Ross will dial these numbers in by play. Use fdt for any per-frame motion in draw code. The Shadow Forest cluster is its own scene in 24-shadow (ISLES, each with a kind; BRIDGES; one cell grid over the cluster, odd-sized so bridges run through cell middles; mazes generated per maze island): SH.on switches walkable, clampLand, routeTo (maze BFS), objects() and the world draw; the Key's code is untouched. Creatures: MAWS (real), DEAD (decoys drawn the same), MOSS, LAPPERS, HOLLOW. Shore: SHSPOTS, SHROCK, SHFORAGE. Routing: gridBuild and shRoute (grid BFS, rebuilt when a wall opens). Swimming in 25-swim: SW state, swimTo, swimStroke, swimUpdate; tap() routes water taps to it, swipe() (06) slides a stroke; seaDepth(), canStep() and inSea() work on both islands; wading is allowed to WADE depth and the walk turns into a swim past it (P.swimTo); FAR_X is where the long swim east lands you in the Shadow cluster. Trees: leafOf(t) and treeReady(t) in 19 read S.treeCut; the canopy and bare branches scale off leafOf in drawTree (11). Tide: tideLevel() and wetR(a) in 02-world (walkable follows the tide); breaking waves (BREAKS, spawnBreak, coverBreak), the beach's items (S.shore, grabShore), SURF sparkle and Foraging XP in 23-tide-foraging. Waves spawn near the player every 5 to 9 seconds with a size (spawnBreak: small, medium, rare large) that sets reach, width, foam weight and how many items; items drop on walkable sand inside the foam's reach. Salt surfaces (SURF) go wet when a wave's front reaches them and sparkle when it recedes past. Fishing spots roam: spotsUpdate, spotAngle, spotHere in 02-world; each has al (fade) and st (in, on, out).
-- Root also holds manifest.webmanifest, icon.svg, icon-512.png and icon-180.png (the only image files; app icons, not game art). Never delete them.
-- Pages serves index.html from the root of main at https://tidecrown.worthcreation.com. The CNAME file in the root keeps the custom domain; never delete it.
+- src/index.html shell; src/css/*.css and src/js/*.js concatenated in filename order into one closure. tools/build.js builds; tools/ship-local.js packs.
+- Root also holds CNAME, manifest.webmanifest, icon.svg, icon-512.png, icon-180.png. Never delete them. Pages serves index.html from main at https://tidecrown.worthcreation.com.
+- Save key driftwood_key_v1. New fields get defaults; migrations live in 04-state-inventory.
+
+## Code map
+- 02-world: Key geometry (iR, gR, wetR), DOCK, tide (tideLevel, DAY_PERIOD 24 min real time, TIDE_PERIOD half), roaming fishing spots, walkable/clampLand (SH-aware).
+- 03-data: FISH, EQUIP, ITEMS registry (iget, itemName/Desc/Icon/Val/Key, stackOf), JOURNAL, ORIGINS.
+- 04-state-inventory: S, migrations, skill helpers (hasSkill, unlockSkill, xpOf, lv), inventory (addItem, canAdd, cnt).
+- 06-interactions: routeTo, objects() (per-frame cache, Key objects incl. rowboat), tap, swipe, longPress, fishing (goFish, hook).
+- 08-panel-bank: tabs Skills, Pack, Journal, You (SLOTS paperdoll), Map (warpTo, testing only), bank.
+- 10-update: movement (canStep allows wading; P.swimTo turns a walk into a swim), day/dark, Key-only logic guarded by !SH.on.
+- 11-render: Key world draw; shWorld() replaces it when SH.on; dark overlay uses shLights() in the forest; drawFarIsles while swimming east.
+- 12-skills-status: SKILLS (five), SUBS (subskills, p: parent, unl), ACH by subskill. 13-skill-pages: parentPage, skillPage.
+- 14-xp-orbs: addXP(sub,...), bursts (burst, streak), HUD bar.
+- 19-woodcutting: chop rhythm, pulse cue, leafOf/treeReady (S.treeCut, REGROW 3 min), shadow trees chop via shChop.
+- 20-fire-life-ash: fires in seconds (FUELSEC, FIRESEC 90, FIRECAP 300), stoke(), burnOut drops.
+- 21-cooking: pans, QN/QV/QD, buffs.
+- 23-tide-foraging: breaking waves (spawnBreak sizes, coverBreak), S.shore items (grabShore), SURF salt (wet on hit, sparkle on recede, stays until the next hit), Foraging XP.
+- 24-shadow: the Shadow Forest cluster. ISLES (seven, each a kind), BRIDGES, one odd-sized cell grid over the cluster (bridges run through cell middles), mazes per maze island, shWalkable/shClamp, grid BFS routing (gridBuild/shRoute), shTrees (walls; middle tree holds a wall; cuts saved in S.shCut, no regrowth), MAWS (real) and DEAD (decoys, same drawing), MOSS, LAPPERS, HOLLOW, FLIES, MUD, SHSPOTS/SHROCK/SHFORAGE, shEnter/shLeave (S.isle, S.shPos).
+- 25-swim: SW state, seaDepth/canStep/inSea (both scenes), swimTo/swimStroke/swimUpdate (beat, breath, sink, jellies, floaters, swell drift), drawSwimmer (offscreen tint on the submerged body, flowing sheet), FAR_X lands the long swim at the Landing.
+- Use fdt for per-frame motion in draw code. Player-facing text: no em dashes.
 
 ## Current game
-Skills: Fishing, Hearth, Shipwright (woodcutting). Hidden: Delving, Grit, Sailing.
-Systems: creator and still pool, gear, 20-slot pack with stacks, Gull Post bank (30 slots), ground drops (3 min despawn), fire life timers and ash byproducts, Kindle, journal, skill pages, XP sparks.
+Key: creator, Gubbins (fish buyer), Brimble (galley flame, teaches Cooking, north-east dunes), Mortimer's bank at the pier, Kindle, stone head, still pool, roaming fishing spots, tide and breaking waves, salt on rocks and pilings, wobble trees that regrow, fires, cooking with buffs, journal, XP bursts, rowboat (placeholder travel). Five skills, built subskills: Fishing, Woodcutting, Foraging, Cooking, Firemaking, Tinkering, Swimming.
+Shadow Forest: seven islands (Landing, Maze, Lesser Maze, Fallow, Hollow's Isle, Clearing, Far Grove), two bridges, swims between, creatures with presence and tells, no Dominion loop yet.
 
-## Next task
-Map tab and warpTo in 08 (testing only; remove or gate once travel exists). Gear: SLOTS and the You tab in 08; EQUIP items carry a slot. Fragments, essence and camps are designed in docs/design-rules.md and unbuilt.
-
-Next loops in order from the 9 Oct chat: the scarf as the player's weapon (slap, trip, wrap, bind; reach grows with Dominion level; simple gesture controls: tap and slide for scarf moves; try single, double and triple taps), projectiles (tap and hold on the player, then drag to the target; swipe speed sets propulsion relative to the method; collected by Foraging or made by Tinkering; thrown and spat first, then slung, blown, sprung, fired), and the Dominion loop on the Shadow Forest beasts. Swimming in the Shadow cluster and bridges between its islands after that.
-
-Shadow Forest is a test island: creatures have presence and tells but no Dominion loop yet (Strife and Accord are unbuilt). Camps (shack, lean-to, tent, bathtub, auras) are designed in docs/design-rules.md and unbuilt.
-
-First: Ross is refining the feel of XP bursts (build 13). Expect tuning of base XP, burst sizes, the shower and the label before more bursts are added. Planned kinds: Streak, Tempo, Stint (2, 5, 10 min on one thing), Mark; see chat of 9 Oct for where each subskill hides them.
-
-Build 9: salt pans and the Salt Tin. Read the planned loops in docs/design-rules.md (Skills section). The zoomed salt-raking scene at low tide (drag to rake pools and flats before the swell, several pools crusting at different speeds) is the Foraging level 10 unlock already promised in SUBS.foraging.unl; pans placed on the flats and built by Tinkering; the tin holds salt and seasons a pan while cooking. Then Build 10 gull posts.
-Also pending: Mortimer competing for shiny wash-ups; Brimble's galley growing from rare wash-ups; spark behavior; rod as gear. Tune wave frequency and drop rates once Ross has played: a new player needs a few driftwood within a couple of minutes to feed Brimble.
+## Next
+1. Ross is refining the feel of XP bursts: base XP, burst size, shower, label. Planned kinds: Streak, Tempo, Stint (2, 5, 10 min), Mark.
+2. Scarf (slap, trip, wrap, bind; reach grows with Dominion; tap and slide; try tap combos), then projectiles (hold on player, drag to target, swipe speed sets propulsion), then the Dominion loop on the forest beasts (Strife counters the tell, Accord mirrors it). Hollowmaw fragments and essence after that.
+3. Camps (lean-to, tent, shack, bathtub, auras, wrong-element hazards), where fragments combine.
+4. Salt pans and the Salt Tin (Foraging 10 raking scene), gull posts, rod as gear, Mortimer competing for wash-ups, Brimble's galley growing from wash-ups, sparks behavior.
+5. Tune by play: wave rates (a new player needs driftwood for Brimble within minutes), swim beat and breath, jelly density, day and tide lengths.
