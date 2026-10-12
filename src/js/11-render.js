@@ -1,6 +1,22 @@
 /* ---------- draw ---------- */
-function shadow(x,y,rx,ry){ctx.fillStyle='rgba(42,33,64,.16)';ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,6.3);ctx.fill();}
-function drawTree(t){const x=t.x,y=t.y,s=t.s;shadow(x,y+2,24*s,8*s);const tx=x+t.lean*s,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
+/* Shadows. One sky light: a tropical sun that rises east, passes nearly overhead and sets west, so shadows run long
+   west at dawn, almost vanish at noon and run long east at dusk; a moon on the opposite path at night, faint; and
+   every lit fire, casting outward. SKY is set once a frame (skyLights); shadow() draws a soft contact patch plus one
+   cast per light. h is the caster's height; cr, if given, is a canopy radius cast from the top (trees). */
+let SKY={sun:null,moon:null},SHF=[];
+function skyLights(){const d=S.day,h=(d-.5)*6.2832,e=Math.cos(h)*1.45,mk=(az,el,a)=>{if(el<=.04)return null;const sx=-Math.sin(az),sy=-.1,n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
+ SKY.sun=mk(h,e,.24);SKY.moon=mk(h+Math.PI,-e,.09);
+ SHF=[];if(!SH.on){SHF.push({x:FIRE.x,y:FIRE.y-6,a:.26});(S.fires||[]).forEach(f=>{if(fireLit(f))SHF.push({x:f.x,y:f.y-6,a:f.big?.3:.24});});}}
+function castOne(x,y,rx,ry,h,cr,dx,dy,k,a){const L=h*k,ox=dx*L,oy=dy*L*.5,ang=Math.atan2(oy,ox),si=Math.abs(Math.sin(ang));
+ ctx.globalAlpha=a;ctx.beginPath();if(cr){const w=cr*(1-si*.55);ctx.ellipse(x+ox,y+oy,cr,cr*.5,0,0,6.3);ctx.fill();ctx.beginPath();ctx.ellipse(x+ox*.5,y+oy*.5,Math.max(3,Math.hypot(ox,oy)*.5),Math.max(2,rx*.25),ang,0,6.3);ctx.fill();}
+ else{ctx.ellipse(x+ox*.5,y+oy*.5,Math.hypot(ox,oy)*.5+rx*.7,ry*(1-si)+rx*.7*si,ang,0,6.3);ctx.fill();}}
+function shadow(x,y,rx,ry,h,cr,m){h=h||rx*2.2;m=m||1;ctx.fillStyle='rgb(42,33,64)';ctx.globalAlpha=.1;ctx.beginPath();ctx.ellipse(x,y,rx*.75,ry*.75,0,0,6.3);ctx.fill();
+ for(const L of [SKY.sun,SKY.moon])if(L)castOne(x,y,rx,ry,h,cr,L.dx,L.dy,L.k,Math.min(.6,L.a*m));
+ /* sun flecks: under a big canopy by day, a few coins of light get through the gaps */
+ if(cr&&m>1&&SKY.sun&&SKY.sun.a>.12){const L=SKY.sun,cx=x+L.dx*h*L.k,cy=y+L.dy*h*L.k*.5;ctx.fillStyle='rgb(255,236,170)';for(let i=0;i<3;i++){const a=i*2.1+now*.05+x,rr=cr*(.25+.2*i);ctx.globalAlpha=.18*L.a/.24;ctx.beginPath();ctx.ellipse(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.5,2.6,1.4,0,0,6.3);ctx.fill();}ctx.fillStyle='rgb(42,33,64)';}
+ for(const f of SHF){const ddx=x-f.x,ddy=y-f.y,d=Math.hypot(ddx,ddy);if(d<14||d>260)continue;const fa=f.a*(1-d/260)*(.35+.65*dark/.62);castOne(x,y,rx,ry,h,cr,ddx/d,ddy/d*2,Math.min(4,40/d+.3),fa);}
+ ctx.globalAlpha=1;}
+function drawTree(t){const x=t.x,y=t.y,s=t.s;shadow(x,y+2,10*s,4*s,52*s,26*s*(.3+.7*leafOf(t)));const tx=x+t.lean*s,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
  ln(pts,t.seed,11*s,INK,1.2);ln(pts,t.seed,6*s,'#b07a4a',1.2);const g=['#4fa14a','#5fb35a','#3f9356'][Math.floor(t.hue*3)];
  const lf=leafOf(t),k=.3+.7*lf,ch=P.task&&P.task.chop&&P.task.tree===t,sw=ch?Math.cos(Math.PI*(now-P.task.t0)/chopPer())*7*s:Math.sin(now*1.3+t.seed)*2*(lf<.7?.3:1);
  if(lf<.95){ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,4*s,INK,.8);ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,2*s,'#b07a4a',.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,4*s,INK,.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,2*s,'#b07a4a',.8);
@@ -94,7 +110,7 @@ function drawFly(){for(const f of flies){const k=Math.min(1,f.t/.6),x=f.x0+(P.x-
  ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(k<1?Math.sin(now*22)*.35:0);
  if(f.id==='misc'){ctx.drawImage(iconImg(f.img),-14,-14,28,28);}else if(f.id==='bottle')sketch(rrPts(-6,-9,12,18,5),true,4,.6,'#9fd8b4',INK,2.2);else drawFish(f.id,0,0,1.05,P.x>f.x0?1:-1,f.col);ctx.restore();}}
 
-function render(){
+function render(){skyLights();
  ctx.setTransform(DPR,0,0,DPR,0,0);const far=farness();ctx.fillStyle=waterCol(3);ctx.fillRect(0,0,W,H);
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(Z,Z);ctx.translate(-cam.x,-cam.y);
  if(SH.on)shWorld();else{

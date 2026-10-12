@@ -5,11 +5,11 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - 0 Foundations (builds 1 to 15): the Key, five skills, fishing, woodcutting, foraging, cooking, fires, tide, waves and salt, bank, swimming and water depth, scarf and hatchet combat, sound, the Shadow Forest prototype, straight water taps, stack models.
 - 1 Two versions (build 16): play (index.html, Key only, a current turns back the swim east) and test (test.html, open world, map warps, Test tab, own save); both rowboats removed; the shell hatchet chain replaces flint.
 - 2 Given-things cleanup, first part (build 16): Sir Thimble's helm is now a quest reward (the sailmaker's kit) with sewing knowledge; the earned/bought/source rules written into design-rules.
+- 3 Light and day (build 17): the sky alone sets the light, no darkness floor anywhere; tropical sun, moon and fire shadows on everything; canopy shade with sun flecks.
 
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |
 |---|---|---|
-| 3 | Light and day | Real day and night everywhere, canopy shade, tannin-dark water, readability floor |
 | 4 | Weather | Moving cloud and shadow, dawn fog, terrain modifiers; regional calls tuned by play |
 | 5 | Terrain height | Height fields, contour shading, slope speed on a hiking-pace basis |
 | 6 | Shadow regrowth | Slow regrowth of shadow trees (test build until the Shadow Forest opens) |

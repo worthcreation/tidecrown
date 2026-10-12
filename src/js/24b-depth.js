@@ -60,5 +60,5 @@ function drawDepthBands(){const vw=W/Z/2+80,vh=H/Z/2+80;
 /* islet land, drawn over the bands */
 function drawIsletLand(){const vw=W/Z/2+80,vh=H/Z/2+80;for(const f of SH.on?SHFEAT:KFEAT){if(f.kind!=='islet'||!inView(f.x,f.y,f.reach,vw,vh))continue;sketch(fPts(f,0,36),true,7100+(f.seed*10|0),2.5,SH.on?'#7a6f58':'#f3d27a',INK,3);sketch(fPts(f,-Math.min(f.rx,f.ry)*.32,30),true,7200+(f.seed*10|0),2.5,SH.on?'#3a4a33':'#86c25e',INK,2.2);}}
 /* a small sea palm for the Key's islets */
-function drawPalm(t){const x=t.x,y=t.y,s=t.s,sw=Math.sin(now*1.2+t.seed)*2;shadow(x,y+2,10*s,3.5*s);const top=[x+8*s+sw,y-38*s];ln([[x,y],[x+3*s,y-18*s],top],t.seed,6*s,INK,.5);ln([[x,y],[x+3*s,y-18*s],top],t.seed,3.4*s,'#b08452',.5);
+function drawPalm(t){const x=t.x,y=t.y,s=t.s,sw=Math.sin(now*1.2+t.seed)*2;shadow(x,y+2,5*s,2*s,40*s,16*s);const top=[x+8*s+sw,y-38*s];ln([[x,y],[x+3*s,y-18*s],top],t.seed,6*s,INK,.5);ln([[x,y],[x+3*s,y-18*s],top],t.seed,3.4*s,'#b08452',.5);
  for(let i=0;i<5;i++){const a=-2.6+i*.55+Math.sin(now*1.5+i+t.seed)*.08,e=[top[0]+Math.cos(a)*20*s,top[1]+Math.sin(a)*12*s+8*s];ln([top,[(top[0]+e[0])/2,top[1]+Math.sin(a)*6*s-3],e],t.seed+i,4.5*s,INK,.5);ln([top,[(top[0]+e[0])/2,top[1]+Math.sin(a)*6*s-3],e],t.seed+i,2.6*s,'#5fae4a',.5);}}

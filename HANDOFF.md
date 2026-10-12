@@ -1,4 +1,4 @@
-# Tidecrown: handoff (build 16, 12 Oct 2026)
+# Tidecrown: handoff (build 17, 12 Oct 2026)
 Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/design-rules.md. Milestones and work order: docs/roadmap.md.
 
 ## Workflow
@@ -25,7 +25,7 @@ Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/de
 - 28-test (test only): Test tab (levels, gear, items, time via DAYOFF, tide via tideF, wipe via WIPED).
 - 08-panel-bank: cntFmt badge; tabs Skills, Pack (true grid, pointer drag and drop: dgMove/dgDrop swap, push-apart insert, drop on a You slot to wear), Journal, You (SLOTS paperdoll, every slot tappable via canFit/wearFrom; Weapon slot holds scarf or hatchet), Map (drawMapTo sea chart; test: names and warps; play: the Key plus an unnamed smudge, no taps), bank.
 - 10-update: movement (wading slows with depth; a walk into deep water turns into a swim), day/dark, Key-only logic guarded by !SH.on.
-- 11-render: Key world draw (drawDepthBands, drawIsletLand, islet palms); shWorld() replaces it when SH.on.
+- 11-render: skyLights() each frame sets SKY.sun and SKY.moon (tropical path from S.day) and SHF (lit fires); shadow(x,y,rx,ry,h,cr,m) draws a contact patch plus one cast per light, cr for a tree canopy, m for denser shade with sun flecks. dark comes from the day alone. Key world draw (drawDepthBands, drawIsletLand, islet palms); shWorld() replaces it when SH.on.
 - 12-skills-status: SKILLS (five), SUBS, METHODS (the ways under Strife and Accord: scarf, hatchet, thrown, food, ember, light). 13-skill-pages: parentPage, skillPage, ways pages.
 - 14-xp-orbs: addXP(sub,...), bursts, HUD bar. 19-woodcutting: chop rhythm, regrow (Key 3 min), shadow trees by twist. 20-fire-life-ash: fires in seconds. 21-cooking. 22-character-creator. 23-tide-foraging: breaking waves, S.shore items, salt.
 - 24-shadow: ISLES (seven, irregular outlines via isleR: Landing, Tangle, Thicket, Fallow, Hollow's Isle, Clearing, Far Grove), BRIDGES, shTrees (density-scattered, canopy pass dims the player under it; cuts in S.shCut, no regrowth yet), shWalkable/shClamp, MAWS and DEAD (decoys), MOSS, LAPPERS, HOLLOW, shEnter/shLeave.
@@ -41,6 +41,6 @@ Key: creator, Gubbins (fish buyer), Brimble (galley flame, teaches Cooking), Mor
 Shadow Forest (test build only for now): seven islands, reached by map warp or the swim east, long gradual swim with a mid-swim scene change, forests of twisted trees (black wood, twisted wood, ironbark), creatures with tells that Strife and Accord can each set right.
 
 ## Next
-Work order is docs/roadmap.md. Ross approved the pipeline: light and day, weather, terrain height, shadow regrowth, in that order; each starts on "next" with a short design check. Then Invention design, which gates the fire ladder, glass and the lantern.
+Work order is docs/roadmap.md. Ross approved the pipeline: weather, terrain height, shadow regrowth, in that order (light and day done in 17); each starts on "next" with a short design check. Then Invention design, which gates the fire ladder, glass and the lantern.
 - Tune by play: wave rates, swim feel, depth shelves, jelly density, day and tide lengths, the current's strength, grind stroke count (48).
-- Open for Ross: the Oilskin Coat's upgrade or take-apart path; whether to run builds in Claude Code on a branch per build; move the Playwright tests into the repo (tools/tests/).
+- Open for Ross: the Oilskin Coat's upgrade or take-apart path; at the next handoff, add to the project instructions: attach PROJECT_INSTRUCTIONS.md only when asked, when it changed, or at a handoff; whether to run builds in Claude Code on a branch per build; move the Playwright tests into the repo (tools/tests/).
