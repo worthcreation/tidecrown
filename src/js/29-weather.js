@@ -19,10 +19,12 @@ function wxUpdate(){const t=Date.now()/1000,sm=x=>Math.max(0,Math.min(1,x));
  const F=WXT.force;if(F==='clear'){cover=.05;rain=0;fog=0;seaFog=0;}else if(F==='cloudy'){cover=.85;rain=0;}else if(F==='fog'){fog=1;seaFog=1;}else if(F==='squall'){rain=1;cover=1;ws=.85;}
  wa+=WXT.turn;WX={wa,ws,cover,rain,fog,seaFog};}
 /* how much fog sits at a place, 0 to 1 */
-function fogAt(x,y){if(SH.on){const I=ISLES.find(I=>isleK(I,x,y)<=1.05),n=I?I.name:'';const k=n==='The Clearing'?.55:n==='The Fallow'?1.4:n==='The Tangle'?1.25:n==='Landing'?1:1.15;return Math.min(1,Math.max(WX.fog*k,WX.seaFog*.6));}
+/* valleys hold fog, high ground sheds it */
+function fogAt(x,y){const th=terrH(x,y),tk=(1+Math.min(1,Math.max(0,-th/30))*.6)*(1-Math.min(1,Math.max(0,th/80))*.5);return Math.min(1,fogAt0(x,y)*tk);}
+function fogAt0(x,y){if(SH.on){const I=ISLES.find(I=>isleK(I,x,y)<=1.05),n=I?I.name:'';const k=n==='The Clearing'?.55:n==='The Fallow'?1.4:n==='The Tangle'?1.25:n==='Landing'?1:1.15;return Math.min(1,Math.max(WX.fog*k,WX.seaFog*.6));}
  const r=Math.hypot(x,y),a=Math.atan2(y,x);let k;if(walkable(x,y))k=r>gR(a)?.5:.8;else k=1;
  const sea=curK(x,y)>0||x>CUR0()-400?WX.seaFog*Math.min(1,(x-CUR0()+400)/500):0;return Math.min(1,Math.max(WX.fog*k,sea));}
-function fogR(){const f=fogAt(P.x,P.y);return f<.04?1e9:120+(1-f)*900;}
+function fogR(){const f=fogAt(P.x,P.y);return f<.04?1e9:(120+(1-f)*900)*(1+Math.max(0,terrH(P.x,P.y))/50);}
 function fogHides(x,y){const R=fogR();return R<1e8&&Math.hypot(x-P.x,y-P.y)>R*.95;}
 /* clouds: puffs on a 3000px tile that slides with the wind; low cumulus casts crisp shade, high cirrus faint */
 const CLOUDS=[];{const r=mulberry(77);for(let i=0;i<16;i++)CLOUDS.push({x:r()*3000,y:r()*3000,rx:120+r()*200,ry:60+r()*90,low:r()<.6,h:r(),seed:600+i});}

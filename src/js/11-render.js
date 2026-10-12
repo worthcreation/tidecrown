@@ -121,7 +121,7 @@ function render(){skyLights();
  drawFoam();drawWet();
  sketch(sandPts,true,1,4,'#f3d27a',tideLevel()>.985?INK:'rgba(42,33,64,.25)',3.5);drawBreaks();
  drawDock();
- sketch(grassPts,true,2,4,'#86c25e',INK,3);
+ sketch(grassPts,true,2,4,'#86c25e',INK,3);drawTerrain(vw,vh);
  for(const t of tufts){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;if(t.f){dot(t.x,t.y,3.2,t.c>.5?'#ff8fb1':'#fff6a8');dot(t.x,t.y,1.2,'#ffcf3a');}else ln([[t.x-5,t.y-6],[t.x,t.y],[t.x+5,t.y-7]],t.seed,2,'#5a9a3f',.6);}
  drawPickups();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}

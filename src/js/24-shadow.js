@@ -164,7 +164,7 @@ function shWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
  ctx.fillStyle=waterCol(3);ctx.fillRect(cam.x-vw,cam.y-vh,vw*2,vh*2);
  if(P.x<-2300){const kx=SH_WEST-1200;if(Math.abs(kx-cam.x)<vw+700){sketch(ell(kx,0,520,300,20),true,830,4,'#c9b56a',INK,3);sketch(ell(kx,-20,400,210,16),true,831,4,'#86c25e',null);}}
  ctx.globalAlpha=.3;for(let i=0;i<140;i++){const x=-3600+(i*131)%6000+Math.sin(now*.6+i)*12,y=-2000+(i*257)%4000;if(Math.abs(x-cam.x)>vw||Math.abs(y-cam.y)>vh)continue;ln([[x-10,y],[x,y-4],[x+10,y]],800+i,2.5,'#9fc4cc',1);}ctx.globalAlpha=1;
- drawIslets();drawBridge();drawZones(vw,vh);
+ drawIslets();drawBridge();drawZones(vw,vh);drawTerrain(vw,vh);
  SHSPOTS.forEach(drawSpot);drawSwimWorld();blob(SHROCK.x,SHROCK.y,SHROCK.rx,SHROCK.ry,SHROCK.seed,'#4a4658');ln([[SHROCK.x-10,SHROCK.y-6],[SHROCK.x,SHROCK.y-11]],67,2.5,'rgba(255,255,255,.35)',.4);
  for(const f of SHFORAGE){if(f.taken>Date.now())continue;if(Math.abs(f.x-cam.x)>vw||Math.abs(f.y-cam.y)>vh)continue;shadow(f.x,f.y+2,10,3.5);ctx.drawImage(iconImg(itemIcon({id:f.id})),f.x-12,f.y-20+Math.sin(now*2+f.seed)*1.2,24,24);}
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}

@@ -7,11 +7,11 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - 2 Given-things cleanup, first part (build 16): Sir Thimble's helm is now a quest reward (the sailmaker's kit) with sewing knowledge; the earned/bought/source rules written into design-rules.
 - 3 Light and day (build 17): the sky alone sets the light, no darkness floor anywhere; tropical sun, moon and fire shadows on everything; canopy shade with sun flecks.
 - 4 Weather (build 18): wandering trade wind that moves trees, scarf, smoke and rain; cloud shade; rare low clouds; squalls that drown small fires and wash off salt; dawn fog and sea fog that hide what is out of sight; big waves from the windward side.
+- 5 Terrain height (build 19): dunes and a rise on the Key, a landform per dark island, contours and sun hillshade, Tobler walking speed, fog pooling in valleys, wider view from high ground.
 
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |
 |---|---|---|
-| 5 | Terrain height | Height fields, contour shading, slope speed on a hiking-pace basis |
 | 6 | Shadow regrowth | Slow regrowth of shadow trees (test build until the Shadow Forest opens) |
 
 After the pipeline: design Invention, then the made-things milestones it unlocks.

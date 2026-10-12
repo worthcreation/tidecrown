@@ -899,7 +899,7 @@ function stackIcon(id,n){const t=stackTier(n);if(t===1)return icon(id);const k=i
 function update(dt){
  {const q=(Date.now()+DAYOFF)/DAY_PERIOD;S.day=q%1;S.dayN=Math.floor(q);}const light=.5-.5*Math.cos(S.day*6.2832);dark=Math.min(1,Math.max(0,(.42-light)/.3))*.62;dark=Math.min(.75,dark+.18*WX.rain);/* the sky alone sets the light: no fixed floor anywhere, no dimming for distance */
  if(intro!=null){intro+=dt;if(intro>3.2)intro=null;}
- if(!SW.on&&P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const wd=inSea(P.x,P.y)?seaDepth(P.x,P.y):0;const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),sp=175*dt*(1-.68*Math.min(1,wd));
+ if(!SW.on&&P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const wd=inSea(P.x,P.y)?seaDepth(P.x,P.y):0;const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),sp=175*dt*(1-.68*Math.min(1,wd))*(wd>0?1:slopeK(P.x,P.y,dx/(d||1),dy/(d||1)));
   /* wading: the deeper, the slower; the first time past the knee, a word */
   if(wd>.45&&!S.st.wadeHint){S.st.wadeHint=1;discover('shallows');hint('The deeper it gets, the slower you go. Past your depth, slide to swim.',7000);}
   if(Math.abs(dx)>1)P.face=dx>0?1:-1;
@@ -933,7 +933,7 @@ function update(dt){
  flies=flies.filter(f=>(f.t+=dt)<.75);
  if(mark&&(mark.t+=dt)>.6)mark=null;
  if(cele&&(cele.t+=dt)>3.2)cele=null;
- const k=Math.min(1,dt*5),tx=C?C.fr.x:P.x,ty=C?C.fr.y-50:P.y;cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;const zt=C?cookZoom():(P.task&&P.task.chop?1.25:SW.on?swimZoom():1);camZ+=(zt-camZ)*Math.min(1,dt*(SW.on||zt===1&&camZ<1?1.4:4));Z=ZB*camZ;
+ const k=Math.min(1,dt*5),tx=C?C.fr.x:P.x,ty=C?C.fr.y-50:P.y;cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;const zt=C?cookZoom():(P.task&&P.task.chop?1.25:SW.on?swimZoom():hillZoom());camZ+=(zt-camZ)*Math.min(1,dt*(SW.on||zt===1&&camZ<1?1.4:4));Z=ZB*camZ;
  wxTick(dt);if(C)cookUpdate(dt);tideUpdate(dt);spotsUpdate(dt);if(SH.on)shUpdate(dt);swimUpdate(dt);updOrbs(dt);guideT-=dt;if(guideT<=0&&!SH.on){guideT=1;hearthGuide();}buffT-=dt;if(buffT<=0){buffT=.5;buffUI();kindleTick();if(S.ground&&S.ground.length){const T=Date.now(),n0=S.ground.length;S.ground=S.ground.filter(g=>g.exp>T);if(S.ground.length!==n0)save();}(S.fires||[]).slice().forEach(fr=>{if(!fireLit(fr)&&!(C&&C.fr===fr))burnOut(fr);});}
 }
 
@@ -1060,7 +1060,7 @@ function render(){skyLights();
  drawFoam();drawWet();
  sketch(sandPts,true,1,4,'#f3d27a',tideLevel()>.985?INK:'rgba(42,33,64,.25)',3.5);drawBreaks();
  drawDock();
- sketch(grassPts,true,2,4,'#86c25e',INK,3);
+ sketch(grassPts,true,2,4,'#86c25e',INK,3);drawTerrain(vw,vh);
  for(const t of tufts){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;if(t.f){dot(t.x,t.y,3.2,t.c>.5?'#ff8fb1':'#fff6a8');dot(t.x,t.y,1.2,'#ffcf3a');}else ln([[t.x-5,t.y-6],[t.x,t.y],[t.x+5,t.y-7]],t.seed,2,'#5a9a3f',.6);}
  drawPickups();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
@@ -1852,7 +1852,7 @@ function shWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
  ctx.fillStyle=waterCol(3);ctx.fillRect(cam.x-vw,cam.y-vh,vw*2,vh*2);
  if(P.x<-2300){const kx=SH_WEST-1200;if(Math.abs(kx-cam.x)<vw+700){sketch(ell(kx,0,520,300,20),true,830,4,'#c9b56a',INK,3);sketch(ell(kx,-20,400,210,16),true,831,4,'#86c25e',null);}}
  ctx.globalAlpha=.3;for(let i=0;i<140;i++){const x=-3600+(i*131)%6000+Math.sin(now*.6+i)*12,y=-2000+(i*257)%4000;if(Math.abs(x-cam.x)>vw||Math.abs(y-cam.y)>vh)continue;ln([[x-10,y],[x,y-4],[x+10,y]],800+i,2.5,'#9fc4cc',1);}ctx.globalAlpha=1;
- drawIslets();drawBridge();drawZones(vw,vh);
+ drawIslets();drawBridge();drawZones(vw,vh);drawTerrain(vw,vh);
  SHSPOTS.forEach(drawSpot);drawSwimWorld();blob(SHROCK.x,SHROCK.y,SHROCK.rx,SHROCK.ry,SHROCK.seed,'#4a4658');ln([[SHROCK.x-10,SHROCK.y-6],[SHROCK.x,SHROCK.y-11]],67,2.5,'rgba(255,255,255,.35)',.4);
  for(const f of SHFORAGE){if(f.taken>Date.now())continue;if(Math.abs(f.x-cam.x)>vw||Math.abs(f.y-cam.y)>vh)continue;shadow(f.x,f.y+2,10,3.5);ctx.drawImage(iconImg(itemIcon({id:f.id})),f.x-12,f.y-20+Math.sin(now*2+f.seed)*1.2,24,24);}
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
@@ -2293,10 +2293,12 @@ function wxUpdate(){const t=Date.now()/1000,sm=x=>Math.max(0,Math.min(1,x));
  const F=WXT.force;if(F==='clear'){cover=.05;rain=0;fog=0;seaFog=0;}else if(F==='cloudy'){cover=.85;rain=0;}else if(F==='fog'){fog=1;seaFog=1;}else if(F==='squall'){rain=1;cover=1;ws=.85;}
  wa+=WXT.turn;WX={wa,ws,cover,rain,fog,seaFog};}
 /* how much fog sits at a place, 0 to 1 */
-function fogAt(x,y){if(SH.on){const I=ISLES.find(I=>isleK(I,x,y)<=1.05),n=I?I.name:'';const k=n==='The Clearing'?.55:n==='The Fallow'?1.4:n==='The Tangle'?1.25:n==='Landing'?1:1.15;return Math.min(1,Math.max(WX.fog*k,WX.seaFog*.6));}
+/* valleys hold fog, high ground sheds it */
+function fogAt(x,y){const th=terrH(x,y),tk=(1+Math.min(1,Math.max(0,-th/30))*.6)*(1-Math.min(1,Math.max(0,th/80))*.5);return Math.min(1,fogAt0(x,y)*tk);}
+function fogAt0(x,y){if(SH.on){const I=ISLES.find(I=>isleK(I,x,y)<=1.05),n=I?I.name:'';const k=n==='The Clearing'?.55:n==='The Fallow'?1.4:n==='The Tangle'?1.25:n==='Landing'?1:1.15;return Math.min(1,Math.max(WX.fog*k,WX.seaFog*.6));}
  const r=Math.hypot(x,y),a=Math.atan2(y,x);let k;if(walkable(x,y))k=r>gR(a)?.5:.8;else k=1;
  const sea=curK(x,y)>0||x>CUR0()-400?WX.seaFog*Math.min(1,(x-CUR0()+400)/500):0;return Math.min(1,Math.max(WX.fog*k,sea));}
-function fogR(){const f=fogAt(P.x,P.y);return f<.04?1e9:120+(1-f)*900;}
+function fogR(){const f=fogAt(P.x,P.y);return f<.04?1e9:(120+(1-f)*900)*(1+Math.max(0,terrH(P.x,P.y))/50);}
 function fogHides(x,y){const R=fogR();return R<1e8&&Math.hypot(x-P.x,y-P.y)>R*.95;}
 /* clouds: puffs on a 3000px tile that slides with the wind; low cumulus casts crisp shade, high cirrus faint */
 const CLOUDS=[];{const r=mulberry(77);for(let i=0;i<16;i++)CLOUDS.push({x:r()*3000,y:r()*3000,rx:120+r()*200,ry:60+r()*90,low:r()<.6,h:r(),seed:600+i});}
@@ -2324,12 +2326,63 @@ function wxTick(dt){wxUpdate();const r=WX.rain;if(r<.3)return;
  if(r>.6&&!S.st.rainHint){S.st.rainHint=1;think('Rain. Squalls blow through here fast. Fires will not like it.');}}
 /* waves: they still come at every shore, but the big ones come from where the wind blows */
 function waveAlign(a0){return .5+.5*Math.cos(angDiff(a0,WX.wa+Math.PI));}
-const BUILD=18;
+/* ---------- terrain height ----------
+   A height field per scene, a pure function of place, nothing saved. Heights are in world pixels of rise.
+   The Key stays small: low dunes along the sand and one low rise inland, where the stone head sits.
+   The dark islands each get their own landform: the Thicket rolls, the Tangle runs in ravines, the Far Grove has
+   the tallest hill (a lookout), the Clearing is a shallow bowl, the Fallow a sunken basin, the Hollow a real hollow.
+   Drawn as soft contour lines plus hillshade from the sun (slopes facing away stay shaded and the shade swings
+   through the day). Walking speed follows Tobler's hiking function. Valleys hold fog; high ground sees farther.
+   No impassable ground yet: cliffs and scree wait for Climbing. */
+const gs=(x,y,cx,cy,r,h)=>h*Math.exp(-((x-cx)**2+(y-cy)**2)/(2*r*r));
+function hKey(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),g=gR(a),i=iR(a);if(r>i)return 0;let h=0;
+ if(r>g&&r<i){const t=(r-g)/(i-g);h+=10*Math.sin(t*Math.PI)*(.6+.4*Math.sin(a*13+1.3));}
+ else if(r<=g)h+=4*Math.max(0,1-(g-r)/40);
+ h+=gs(x,y,HEAD.x,HEAD.y,170,34);return h;}
+function hShadow(x,y){let best=null,bk=9;for(const I of ISLES){const k=isleK(I,x,y);if(k<bk){bk=k;best=I;}}if(!best||bk>1)return 0;
+ const I=best,f=Math.min(1,(1-bk)/.25),n=I.name,cx=I.x,cy=I.y,m=Math.min(I.rx,I.ry);let h;
+ if(n==='The Thicket')h=18+gs(x,y,cx-I.rx*.35,cy-I.ry*.2,m*.32,34)+gs(x,y,cx+I.rx*.3,cy+I.ry*.15,m*.28,30)+gs(x,y,cx,cy+I.ry*.4,m*.25,22);
+ else if(n==='The Tangle')h=10+30*Math.abs(Math.sin(x/110+Math.sin(y/140)));
+ else if(n==='The Far Grove')h=8+gs(x,y,cx,cy,m*.42,90);
+ else if(n==='The Clearing')h=6+14*Math.min(1,bk);
+ else if(n==='The Fallow')h=-30*(1-bk);
+ else h=8+10*Math.sin(x/180)*Math.cos(y/220);
+ if(typeof HOLLOW!=='undefined')h+=gs(x,y,HOLLOW.x,HOLLOW.y,200,-40);
+ return h*f;}
+function terrH(x,y){return SH.on?hShadow(x,y):hKey(x,y);}
+/* grid cache per scene for drawing: heights on a 20px grid, contour segments bucketed */
+const TG=20,TCACHE={};let TSC=null,TSX=null;
+function tgrid(){const key=SH.on?'sh':'key';if(TCACHE[key])return TCACHE[key];
+ let x0,x1,y0,y1;if(SH.on){x0=1e9;y0=1e9;x1=-1e9;y1=-1e9;for(const I of ISLES){x0=Math.min(x0,I.x-I.rx*1.2);x1=Math.max(x1,I.x+I.rx*1.2);y0=Math.min(y0,I.y-I.ry*1.2);y1=Math.max(y1,I.y+I.ry*1.2);}}else{x0=y0=-720;x1=y1=720;}
+ x0=Math.floor(x0/TG)*TG;y0=Math.floor(y0/TG)*TG;const nx=Math.ceil((x1-x0)/TG)+1,ny=Math.ceil((y1-y0)/TG)+1,h=new Float32Array(nx*ny);
+ for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)h[j*nx+i]=SH.on?hShadow(x0+i*TG,y0+j*TG):hKey(x0+i*TG,y0+j*TG);
+ const seg=new Map(),add=(ax,ay,bx,by)=>{const k=Math.floor(ax/400)+','+Math.floor(ay/400);let a=seg.get(k);if(!a)seg.set(k,a=[]);a.push(ax,ay,bx,by);};
+ for(let L=-40;L<=100;L+=10){if(L===0)continue;for(let j=0;j<ny-1;j++)for(let i=0;i<nx-1;i++){const a=h[j*nx+i],b=h[j*nx+i+1],c=h[(j+1)*nx+i+1],d=h[(j+1)*nx+i];
+  const pts=[],X=x0+i*TG,Y=y0+j*TG,e=(p,q)=>(L-p)/(q-p);
+  if((a<L)!==(b<L))pts.push([X+e(a,b)*TG,Y]);if((b<L)!==(c<L))pts.push([X+TG,Y+e(b,c)*TG]);if((d<L)!==(c<L))pts.push([X+e(d,c)*TG,Y+TG]);if((a<L)!==(d<L))pts.push([X,Y+e(a,d)*TG]);
+  if(pts.length>=2)add(pts[0][0],pts[0][1],pts[1][0],pts[1][1]);if(pts.length===4)add(pts[2][0],pts[2][1],pts[3][0],pts[3][1]);}}
+ return TCACHE[key]={x0,y0,nx,ny,h,seg};}
+function drawTerrain(vw,vw2){const G=tgrid(),vh=vw2;const i0=Math.max(0,Math.floor((cam.x-vw-G.x0)/TG)),i1=Math.min(G.nx-2,Math.ceil((cam.x+vw-G.x0)/TG)),j0=Math.max(0,Math.floor((cam.y-vh-G.y0)/TG)),j1=Math.min(G.ny-2,Math.ceil((cam.y+vh-G.y0)/TG));
+ /* hillshade: one pixel per grid cell in a small canvas, drawn scaled up with smoothing so it reads as soft light */
+ const sun=SKY.sun;if(sun){const el=Math.atan(1/sun.k),ce=Math.cos(el),se=Math.sin(el),lx=-sun.dx*ce,ly=-sun.dy*ce,str=Math.min(1,sun.a/.24),w=i1-i0+1,hh=j1-j0+1;
+  if(w>0&&hh>0){if(!TSC||TSC.width<w||TSC.height<hh){TSC=document.createElement('canvas');TSC.width=w+20;TSC.height=hh+20;TSX=TSC.getContext('2d');}
+   const im=TSX.createImageData(w,hh),D=im.data;let any=false;
+   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const a=G.h[j*G.nx+i];if(a===0)continue;const gx=(G.h[j*G.nx+i+1]-a)/TG,gy=(G.h[(j+1)*G.nx+i]-a)/TG;
+    const nl=Math.hypot(gx,gy,1),dlt=((-gx*lx-gy*ly+se)/nl-se)*str,o=((j-j0)*w+(i-i0))*4;
+    if(dlt<-.01){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.32,-dlt*1.4)*255;any=true;}else if(dlt>.01){D[o]=255;D[o+1]=248;D[o+2]=220;D[o+3]=Math.min(.18,dlt*.9)*255;any=true;}}
+   if(any){TSX.clearRect(0,0,TSC.width,TSC.height);TSX.putImageData(im,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(TSC,0,0,w,hh,G.x0+i0*TG+TG/2,G.y0+j0*TG+TG/2,w*TG,hh*TG);}}}
+ ctx.globalAlpha=1;ctx.strokeStyle='rgba(42,33,64,.13)';ctx.lineWidth=1.3;ctx.beginPath();
+ for(let bx=Math.floor((cam.x-vw)/400);bx<=Math.floor((cam.x+vw)/400);bx++)for(let by=Math.floor((cam.y-vh)/400);by<=Math.floor((cam.y+vh)/400);by++){const s=G.seg.get(bx+','+by);if(!s)continue;for(let k=0;k<s.length;k+=4){ctx.moveTo(s[k],s[k+1]);ctx.lineTo(s[k+2],s[k+3]);}}
+ ctx.stroke();}
+/* Tobler: speed = 6 exp(-3.5 |slope + 0.05|) km/h, fastest on a gentle downhill; scaled so flat ground is 1 */
+function slopeK(x,y,ux,uy){const s=(terrH(x+ux*6,y+uy*6)-terrH(x,y))/6;return Math.max(.35,Math.min(1.2,Math.exp(-3.5*Math.abs(s+.05))/Math.exp(-.175)));}
+function hillZoom(){return 1/(1+Math.max(0,terrH(P.x,P.y))/520);}
+const BUILD=19;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 sndUI();if(S.char)begin();else openCreator('new');
-if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},WXT,fogR,fn:{thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
+if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},terrH,tgrid,WXT,fogR,fn:{thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
 })();
 </script>
 </body>
