@@ -1,6 +1,8 @@
 /* ---------- interactions ---------- */
-function routeTo(x,y,then){if(SH.on)return shRoute(x,y,then);P.task=null;const path=[];const pd=onDock(P.x,P.y)&&!onIsland(P.x,P.y),td=onDock(x,y)&&!onIsland(x,y);
+function routeTo(x,y,then){P.straight=0;if(SH.on)return shRoute(x,y,then);P.task=null;const path=[];const pd=onDock(P.x,P.y)&&!onIsland(P.x,P.y),td=onDock(x,y)&&!onIsland(x,y);
  if(pd!==td)path.push([R0-25,0]);path.push([x,y]);P.path=path;P.then=then||null;P.pathT=0;mark={x,y,t:0};}
+/* a tap in the water: walk straight at it, no detour, and stop where something blocks the way */
+function walkStraight(x,y,then){P.task=null;P.path=[[x,y]];P.then=then||null;P.pathT=0;P.straight=1;mark={x,y,t:0};}
 function goFish(sp){if(sp.st==='out'){think('The water went still.');return;}const L=lv('fishing');if(L<REQ[sp.type]){think(sp.type==='deep'?'This water is too wild for me yet. (Fishing '+REQ.deep+')':'The pale fish ignore my line. (Fishing '+REQ.moon+')');return;}
  if(S.inv.length>=PACK){think('My satchel is stuffed. Gubbins on the dock might want these.');return;}
  const [ax,ay]=SH.on?shClamp(sp.ax,sp.ay):[sp.ax,sp.ay];routeTo(ax,ay,()=>{if(sp.st==='out'||sp.al<=0){think('The water went still. Look for more bubbles.');return;}startFish(sp);});}
@@ -98,7 +100,7 @@ function tap(sx,sy){
   if(near){if(T.phase==='wait')tooEarly();return;}}
  const [wx,wy]=s2w(sx,sy);if(SW.on){swimTo(wx,wy);return;}const tg=scarfAt(wx,wy);if(tg){scarfMove('slap',tg);return;}const o=objAt(wx,wy);
  if(o){(o.onAct||o.onExamine)();return;}
- if(inSea(wx,wy)){P.swimTo=null;routeTo(wx,wy);return;}
+ if(inSea(wx,wy)){P.swimTo=null;walkStraight(wx,wy);return;}
  const c=clampLand(wx,wy);routeTo(c[0],c[1]);}
 /* a slide: direction and speed. Swimming uses it now; the scarf and projectiles will. */
 function swipe(x0,y0,x1,y1,ms){if(C||ccOn||dlgOn)return;const dx=x1-x0,dy=y1-y0,d=Math.hypot(dx,dy);if(d<18)return;const sp=d/Math.max(60,ms);

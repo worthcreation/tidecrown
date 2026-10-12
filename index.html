@@ -531,8 +531,10 @@ function say(who,txt,opts){curWho=who;dlg.querySelector('.who').textContent=who;
 function closeDlg(){dlg.style.display='none';dlgOn=false;G.talk=false;}
 
 /* ---------- interactions ---------- */
-function routeTo(x,y,then){if(SH.on)return shRoute(x,y,then);P.task=null;const path=[];const pd=onDock(P.x,P.y)&&!onIsland(P.x,P.y),td=onDock(x,y)&&!onIsland(x,y);
+function routeTo(x,y,then){P.straight=0;if(SH.on)return shRoute(x,y,then);P.task=null;const path=[];const pd=onDock(P.x,P.y)&&!onIsland(P.x,P.y),td=onDock(x,y)&&!onIsland(x,y);
  if(pd!==td)path.push([R0-25,0]);path.push([x,y]);P.path=path;P.then=then||null;P.pathT=0;mark={x,y,t:0};}
+/* a tap in the water: walk straight at it, no detour, and stop where something blocks the way */
+function walkStraight(x,y,then){P.task=null;P.path=[[x,y]];P.then=then||null;P.pathT=0;P.straight=1;mark={x,y,t:0};}
 function goFish(sp){if(sp.st==='out'){think('The water went still.');return;}const L=lv('fishing');if(L<REQ[sp.type]){think(sp.type==='deep'?'This water is too wild for me yet. (Fishing '+REQ.deep+')':'The pale fish ignore my line. (Fishing '+REQ.moon+')');return;}
  if(S.inv.length>=PACK){think('My satchel is stuffed. Gubbins on the dock might want these.');return;}
  const [ax,ay]=SH.on?shClamp(sp.ax,sp.ay):[sp.ax,sp.ay];routeTo(ax,ay,()=>{if(sp.st==='out'||sp.al<=0){think('The water went still. Look for more bubbles.');return;}startFish(sp);});}
@@ -630,7 +632,7 @@ function tap(sx,sy){
   if(near){if(T.phase==='wait')tooEarly();return;}}
  const [wx,wy]=s2w(sx,sy);if(SW.on){swimTo(wx,wy);return;}const tg=scarfAt(wx,wy);if(tg){scarfMove('slap',tg);return;}const o=objAt(wx,wy);
  if(o){(o.onAct||o.onExamine)();return;}
- if(inSea(wx,wy)){P.swimTo=null;routeTo(wx,wy);return;}
+ if(inSea(wx,wy)){P.swimTo=null;walkStraight(wx,wy);return;}
  const c=clampLand(wx,wy);routeTo(c[0],c[1]);}
 /* a slide: direction and speed. Swimming uses it now; the scarf and projectiles will. */
 function swipe(x0,y0,x1,y1,ms){if(C||ccOn||dlgOn)return;const dx=x1-x0,dy=y1-y0,d=Math.hypot(dx,dy);if(d<18)return;const sp=d/Math.max(60,ms);
@@ -662,6 +664,8 @@ cv.addEventListener('pointercancel',()=>{if(pd){clearTimeout(pd.timer);pd=null;}
 cv.addEventListener('contextmenu',e=>{e.preventDefault();if(pd){clearTimeout(pd.timer);pd=null;}longPress(e.clientX,e.clientY);});
 dlg.addEventListener('click',e=>{if(e.target===dlg||e.target.classList.contains('say')){if(dlg.querySelectorAll('.opt').length===1)closeDlg();}});
 
+/* count badge: plain up to 9999 (999 in the bank's small cells), then k, then M */
+function cntFmt(n,sm){return n<(sm?1e3:1e4)?''+n:n<1e7?Math.floor(n/1e3)+'k':Math.floor(n/1e6)+'M';}
 /* ---------- panel ---------- */
 let tab='pack',sel=-1,selG=null;
 function openPanel(t){sfx('open');tab=t||tab;sel=-1;selG=null;jPage=0;skView=null;methView=null;ddSel=null;renderPanel();panel.classList.add('on');scrim.style.display='block';closeCtx();bag.classList.remove('pulse');if(S.hint===4)advanceHint(5);}
@@ -670,8 +674,8 @@ const BANKSLOTS=30,bankEl=$('bank');let bankOpen=false,bankMode='all';
 function openBank(){discover('gullbank');S.bank=S.bank||[];bankOpen=true;closeCtx();closePanel();bankEl.classList.add('on');scrim.style.display='block';renderBank();}
 function closeBank(){bankOpen=false;bankEl.classList.remove('on');scrim.style.display='none';}
 function renderBank(note){const st=getComputedStyle(bankEl),W2=bankEl.clientWidth-24,H2=bankEl.clientHeight-20-44-40-24;const bs=Math.max(34,Math.floor(Math.min((W2-30)/6,(H2-8*6)/9)));bankEl.style.setProperty('--bs',bs+'px');
- const b=S.bank;let h='';for(let i=0;i<BANKSLOTS;i++){const e=b[i];h+=e?`<button class="slot f" data-b="${i}" aria-label="${itemName(e.it)}"><img src="${icon(itemIcon(e.it))}" alt=""><i class="cnt">${e.n>999?Math.floor(e.n/1000)+'k':e.n}</i></button>`:'<div class="slot"></div>';}
- $('bgrid').innerHTML=h;h='';for(let i=0;i<PACK;i++){const it=S.inv[i];h+=it?`<button class="slot f" data-p="${i}" aria-label="${itemName(it)}"><img src="${icon(itemIcon(it))}" alt="">${(it.n||1)>1?'<i class="cnt">'+it.n+'</i>':''}</button>`:'<div class="slot"></div>';}
+ const b=S.bank;let h='';for(let i=0;i<BANKSLOTS;i++){const e=b[i];h+=e?`<button class="slot f" data-b="${i}" aria-label="${itemName(e.it)}"><img src="${stackIcon(itemIcon(e.it),e.n)}" alt=""><i class="cnt">${cntFmt(e.n,1)}</i></button>`:'<div class="slot"></div>';}
+ $('bgrid').innerHTML=h;h='';for(let i=0;i<PACK;i++){const it=S.inv[i];h+=it?`<button class="slot f" data-p="${i}" aria-label="${itemName(it)}"><img src="${stackIcon(itemIcon(it),it.n)}" alt="">${(it.n||1)>1?'<i class="cnt">'+cntFmt(it.n,1)+'</i>':''}</button>`:'<div class="slot"></div>';}
  $('bpack').innerHTML=h;$('bnote').textContent=note||(b.length+' of '+BANKSLOTS+' bank slots used');bankEl.querySelectorAll('.bmode button').forEach(x=>x.classList.toggle('on',x.dataset.m===bankMode));}
 function deposit(i){const it=S.inv[i];if(!it)return false;const k=itemKey(it);let e=S.bank.find(q=>q.k===k);if(!e){if(S.bank.length>=BANKSLOTS){renderBank('The bank is full.');return false;}const proto=Object.assign({},it);delete proto.n;e={k,it:proto,n:0};S.bank.push(e);}e.n+=it.n||1;S.inv.splice(i,1);return true;}
 function withdraw(j){const e=S.bank[j];if(!e)return;const want=bankMode==='1'?1:e.n;let got=0;
@@ -734,7 +738,7 @@ function slotFor(it){return EQUIP[it.id]?EQUIP[it.id].slot:it.id==='hatchet'?'we
 function canFit(sl){return S.inv.map((it,i)=>[i,it]).filter(([i,it])=>slotFor(it)===sl);}
 function wearFrom(i,sl){const it=S.inv[i];if(!it||slotFor(it)!==sl)return;const cell=it.c;S.inv.splice(i,1);if(sl==='weapon'){if(S.eq.weapon==='hatchet')S.inv.push({id:'hatchet',c:cell});S.eq.weapon='hatchet';sfx('chop',.6);toast('Hatchet in hand. The scarf stays on.');}else{const old=S.eq[sl];S.eq[sl]=it.id;if(old)S.inv.push({id:old,c:cell});sfx('open');toast('Wearing: '+EQUIP[it.id].name);}save();}
 function dgStart(e,i){const it=S.inv[i];if(!it)return;DG={i,it,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,moved:false,id:e.pointerId};}
-function dgMakeGhost(it){const g=document.createElement('div');g.className='dgghost';g.innerHTML='<img src="'+icon(itemIcon(it))+'" alt="">';document.body.appendChild(g);g.style.left=DG.x+'px';g.style.top=DG.y+'px';return g;}
+function dgMakeGhost(it){const g=document.createElement('div');g.className='dgghost';g.innerHTML='<img src="'+stackIcon(itemIcon(it),it.n)+'" alt="">';document.body.appendChild(g);g.style.left=DG.x+'px';g.style.top=DG.y+'px';return g;}
 function dgMove(e){if(!DG||e.pointerId!==DG.id)return;DG.x=e.clientX;DG.y=e.clientY;if(!DG.moved&&Math.hypot(DG.x-DG.x0,DG.y-DG.y0)>14){DG.moved=true;dgGhost=dgMakeGhost(DG.it);const src=pbody.querySelector('[data-i="'+DG.i+'"]');if(src)src.classList.add('dgsrc');}
  if(dgGhost){dgGhost.style.left=DG.x+'px';dgGhost.style.top=DG.y+'px';pbody.querySelectorAll('.over').forEach(x=>x.classList.remove('over'));const r=dgDrop(DG.x,DG.y);if(r){const slots=[...pbody.querySelectorAll('.grid .slot')];if(r[0]==='swap'){const t=slots[r[1]];if(t)t.classList.add('over');}else{const a=slots[Math.min(r[1],slots.length-1)],b=slots[r[1]-1];if(a)a.classList.add('over');if(b)b.classList.add('over');}}}}
 function dgEnd(e){if(!DG||e.pointerId!==DG.id)return;const d=DG;DG=null;if(dgGhost){dgGhost.remove();dgGhost=null;}pbody.querySelectorAll('.over,.dgsrc').forEach(x=>x.classList.remove('over','dgsrc'));
@@ -769,7 +773,7 @@ function renderPanel(){panel.querySelectorAll('.tab').forEach(b=>b.classList.tog
   pbody.innerHTML=h;return;}
  if(tab==='pack'){
   h+=`<div class="grid">`;
-  const cells=invLayout();for(let c=0;c<PACK;c++){const i=cells[c],it=i>=0?S.inv[i]:null;h+=it?`<button class="slot f${sel===i?' sel':''}" data-i="${i}" aria-label="${itemName(it)}"><img src="${icon(itemIcon(it))}" alt="">${(it.n||1)>1||stackOf(it.id)?'<i class="cnt">'+(it.n||1)+'</i>':''}</button>`:'<div class="slot"></div>';}
+  const cells=invLayout();for(let c=0;c<PACK;c++){const i=cells[c],it=i>=0?S.inv[i]:null;h+=it?`<button class="slot f${sel===i?' sel':''}" data-i="${i}" aria-label="${itemName(it)}"><img src="${stackIcon(itemIcon(it),it.n)}" alt="">${(it.n||1)>1||stackOf(it.id)?'<i class="cnt">'+cntFmt(it.n||1)+'</i>':''}</button>`:'<div class="slot"></div>';}
   h+=`</div><div class="info">${infoHTML()}</div>`;pbody.innerHTML=h;sizePack();return;}
  if(tab==='you'){pbody.innerHTML=youHTML();return;}
  if(tab==='map'){pbody.innerHTML=mapHTML();drawMapTo($('mapc'));return;}
@@ -799,7 +803,7 @@ pbody.addEventListener('click',e=>{if(e.target.id==='mapc'){mapTap(e);return;}co
  sel=-1;save();renderPanel();});
 
 /* ---------- icons ---------- */
-const icache={};
+const icache={},ICV={};
 function drawFish(id,x,y,s,dir,cOv){const F=FISH[id];dir=dir||1;const FC=cOv||F.col;const seed=id.length*17;let rx=14,ry=8;if(id==='eel'){rx=19;ry=5;}if(id==='grump'){rx=13;ry=10;}
  sketch([[x-rx*.7*s*dir,y],[x-(rx+9)*s*dir,y-8*s],[x-(rx+6)*s*dir,y],[x-(rx+9)*s*dir,y+8*s]],true,seed+1,.8,FC,INK,2.2);
  blob(x,y,rx*s,ry*s,seed,FC,2.4,.8);
@@ -850,7 +854,19 @@ function icon(id){if(icache[id])return icache[id];const c=document.createElement
  else if(id==='slap'){ln([[10,44],[22,36],[30,22],[44,18],[54,26]],500,8,INK,1);ln([[10,44],[22,36],[30,22],[44,18],[54,26]],500,5,'#ff8aa8',1);star(56,16,7,'#fff');for(let i=0;i<3;i++)ln([[40+i*6,36+i*4],[48+i*6,34+i*4]],501+i,2,INK,.3);}
  else if(id==='wrap'){ln([[12,46],[20,36],[30,30]],505,8,INK,1);ln([[12,46],[20,36],[30,30]],505,5,'#ffb3c6',1);sketch(ell(38,28,16,10,14),true,506,1,null,INK,8);sketch(ell(38,28,16,10,14),true,506,1,null,'#ffb3c6',5);blob(50,20,5,4,507,'#ffb3c6',2,.4);}
  else if(id==='rod'){ln([[14,52],[34,30],[50,10]],20,4.5,'#a8703f',1);ln([[50,10],[54,30],[52,44]],21,1.6,INK,.6);blob(52,46,4,4,22,'#ff6b6b',2,.4);}
- icache[id]=c.toDataURL();ctx=keep;boil=kb;return icache[id];}
+ ICV[id]=c;icache[id]=c.toDataURL();ctx=keep;boil=kb;return icache[id];}
+/* stacks by count, the Runescape way: one to five laid out, then a small pile at 10, a pile at 25, a heap at 100, a big heap at 250, a mound at 1000 */
+function stackTier(n){n=n||1;return n<=5?n:n<10?5:n<25?10:n<100?25:n<250?100:n<1000?250:1000;}
+const STACK_SMALL={2:[.7,[[-11,-9],[11,9]]],3:[.6,[[-13,-10],[13,-10],[0,11]]],4:[.54,[[-13,-12],[13,-12],[-13,11],[13,11]]],5:[.5,[[-15,-14],[15,-14],[-15,13],[15,13],[0,0]]]};
+const STACK_PILE={10:[3,.54],25:[4,.47],100:[5,.42],250:[6,.38],1000:[7,.35]};
+function stackIcon(id,n){const t=stackTier(n);if(t===1)return icon(id);const k=id+'#'+t;if(icache[k])return icache[k];icon(id);const src=ICV[id];
+ const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');let h=t*7.31;const rnd=()=>{h=(h*9301+49297)%233280;return h/233280;};
+ const put=(x,y,s,a)=>{const z=96*s;g.save();g.translate(x,y);g.rotate(a);g.drawImage(src,-z/2,-z/2,z,z);g.restore();};
+ if(STACK_SMALL[t]){const [s,ps]=STACK_SMALL[t];ps.forEach(p=>put(48+p[0]*1.5,48+p[1]*1.5,s,(rnd()-.5)*.3));}
+ else{const [R,s]=STACK_PILE[t],z=96*s,sp=Math.min(z*.5,80/R),vs=z*.3,base=88-z/2;
+  g.fillStyle='rgba(42,33,64,.16)';g.beginPath();g.ellipse(48,base+z*.24,Math.min(47,R*sp/2+z*.3),5+R*1.3,0,0,6.2832);g.fill();
+  for(let r=0;r<R;r++){const k2=R-r;for(let j=0;j<k2;j++)put(48+(j-(k2-1)/2)*sp+(rnd()-.5)*sp*.35,base-r*vs+(rnd()-.5)*3,s*(1-r*.02),(rnd()-.5)*1.1);}}
+ icache[k]=c.toDataURL();return icache[k];}
 
 /* ---------- update ---------- */
 function update(dt){
@@ -863,7 +879,7 @@ function update(dt){
   if(d<=sp){P.x=tx;P.y=ty;P.path.shift();}
   else{const nx=P.x+dx/d*sp,ny=P.y+dy/d*sp;
    if(inSea(nx,ny)&&seaDepth(nx,ny)>=STAND){const t=P.path[P.path.length-1];P.swimTo=null;P.path=[];P.then=null;swimStart(t[0],t[1]);SW.idle=.4;return;}
-   if(canStep(nx,ny)){P.x=nx;P.y=ny;}else if(canStep(nx,P.y))P.x=nx;else if(canStep(P.x,ny))P.y=ny;
+   if(canStep(nx,ny)){P.x=nx;P.y=ny;}else if(P.straight){P.path=[];P.then=null;P.swimTo=null;}else if(canStep(nx,P.y))P.x=nx;else if(canStep(P.x,ny))P.y=ny;
    else{const c=Math.hypot(P.x,P.y)||1,mx=P.x-P.x/c*sp,my=P.y-P.y/c*sp;if(walkable(mx,my)){P.x=mx;P.y=my;}}}
   if(P.pathT>(SH.on||wd>0?60:14))P.path=[];
   P.moving=true;
@@ -1830,7 +1846,7 @@ function swimStart(tx,ty){SW.on=true;SW.vx=0;SW.vy=0;SW.tx=tx;SW.ty=ty;SW.beat=0
  splashAt(P.x,P.y,8);sfx('splash');}
 function swimTo(wx,wy){if(SW.on){tread();return;}
  /* walk in: the shallows are walkable, and the walk turns into a swim where it gets deep */
- P.swimTo=[wx,wy];routeTo(wx,wy,()=>{P.swimTo=null;});}
+ P.swimTo=[wx,wy];walkStraight(wx,wy,()=>{P.swimTo=null;});}
 /* tread water: a tap keeps you up and holds your place; on the beat it costs nothing and builds the streak */
 function tread(){if(SW.stun>0)return;const ph=SW.beat/swimBeat(),e=Math.min(ph,1-ph)*swimBeat(),win=.13+Math.min(.07,lv('swimming')*.004),good=e<win;
  SW.idle=0;SW.sink=Math.max(0,SW.sink-.35);SW.vx*=.7;SW.vy*=.7;SW.tx=P.x;SW.ty=P.y;splashAt(P.x,P.y+6,good?4:2);SW.beat=0;sfx(good?'strokeGood':'stroke',.6);hap(good?8:4);
@@ -1862,7 +1878,7 @@ function swimUpdate(dt){
  const drag=Math.exp(-dt*1.6);SW.vx*=drag;SW.vy*=drag;SW.vx+=Math.sin(now*.55)*14*dt;SW.vy+=Math.cos(now*.4)*10*dt;
  const dx=SW.tx-P.x,dy=SW.ty-P.y,d=Math.hypot(dx,dy);if(d>6&&SW.stun<=0){SW.vx+=dx/d*22*dt;SW.vy+=dy/d*22*dt;}
  const nx=P.x+SW.vx*dt,ny=P.y+SW.vy*dt;const moved=Math.hypot(nx-P.x,ny-P.y);
- if(seaDepth(nx,ny)<.42&&canStep(nx,ny)){P.x=nx;P.y=ny;const tx=SW.tx,ty=SW.ty;swimEnd(false);addXP('swimming',Math.max(1,Math.round(SW.dist/40)),'normal',[P.x,P.y-20]);SW.dist=0;if(seaDepth(tx,ty)<STAND&&canStep(tx,ty))routeTo(tx,ty);return;}
+ if(seaDepth(nx,ny)<.42&&canStep(nx,ny)){P.x=nx;P.y=ny;const tx=SW.tx,ty=SW.ty;swimEnd(false);addXP('swimming',Math.max(1,Math.round(SW.dist/40)),'normal',[P.x,P.y-20]);SW.dist=0;if(seaDepth(tx,ty)<STAND&&canStep(tx,ty)){if(inSea(tx,ty))walkStraight(tx,ty);else routeTo(tx,ty);}return;}
  if(inSea(nx,ny)){P.x=nx;P.y=ny;SW.dist+=moved;}
  P.moving=moved>4;
  if(SW.sink>0)SW.breath-=dt*SW.sink*.96;
@@ -2114,7 +2130,7 @@ function sfx(k,v){if(!AC||!SND.on||AC.state!=='running')return;v=v==null?1:v;con
  case 'whoosh':noise(.5,.25*v,{bp:700,bpTo:180,q:.8,a:.06});break;
  case 'open':noise(.05,.12*v,{hp:1500});break;
  case 'talk':tone(NOTE(74),'triangle',.07,.08*v);tone(NOTE(76),'triangle',.07,.08*v,{at:t+.07});break;}}
-const BUILD=14;
+const BUILD=15;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);

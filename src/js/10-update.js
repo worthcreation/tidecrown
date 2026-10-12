@@ -9,7 +9,7 @@ function update(dt){
   if(d<=sp){P.x=tx;P.y=ty;P.path.shift();}
   else{const nx=P.x+dx/d*sp,ny=P.y+dy/d*sp;
    if(inSea(nx,ny)&&seaDepth(nx,ny)>=STAND){const t=P.path[P.path.length-1];P.swimTo=null;P.path=[];P.then=null;swimStart(t[0],t[1]);SW.idle=.4;return;}
-   if(canStep(nx,ny)){P.x=nx;P.y=ny;}else if(canStep(nx,P.y))P.x=nx;else if(canStep(P.x,ny))P.y=ny;
+   if(canStep(nx,ny)){P.x=nx;P.y=ny;}else if(P.straight){P.path=[];P.then=null;P.swimTo=null;}else if(canStep(nx,P.y))P.x=nx;else if(canStep(P.x,ny))P.y=ny;
    else{const c=Math.hypot(P.x,P.y)||1,mx=P.x-P.x/c*sp,my=P.y-P.y/c*sp;if(walkable(mx,my)){P.x=mx;P.y=my;}}}
   if(P.pathT>(SH.on||wd>0?60:14))P.path=[];
   P.moving=true;

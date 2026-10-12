@@ -1,3 +1,5 @@
+/* count badge: plain up to 9999 (999 in the bank's small cells), then k, then M */
+function cntFmt(n,sm){return n<(sm?1e3:1e4)?''+n:n<1e7?Math.floor(n/1e3)+'k':Math.floor(n/1e6)+'M';}
 /* ---------- panel ---------- */
 let tab='pack',sel=-1,selG=null;
 function openPanel(t){sfx('open');tab=t||tab;sel=-1;selG=null;jPage=0;skView=null;methView=null;ddSel=null;renderPanel();panel.classList.add('on');scrim.style.display='block';closeCtx();bag.classList.remove('pulse');if(S.hint===4)advanceHint(5);}
@@ -6,8 +8,8 @@ const BANKSLOTS=30,bankEl=$('bank');let bankOpen=false,bankMode='all';
 function openBank(){discover('gullbank');S.bank=S.bank||[];bankOpen=true;closeCtx();closePanel();bankEl.classList.add('on');scrim.style.display='block';renderBank();}
 function closeBank(){bankOpen=false;bankEl.classList.remove('on');scrim.style.display='none';}
 function renderBank(note){const st=getComputedStyle(bankEl),W2=bankEl.clientWidth-24,H2=bankEl.clientHeight-20-44-40-24;const bs=Math.max(34,Math.floor(Math.min((W2-30)/6,(H2-8*6)/9)));bankEl.style.setProperty('--bs',bs+'px');
- const b=S.bank;let h='';for(let i=0;i<BANKSLOTS;i++){const e=b[i];h+=e?`<button class="slot f" data-b="${i}" aria-label="${itemName(e.it)}"><img src="${icon(itemIcon(e.it))}" alt=""><i class="cnt">${e.n>999?Math.floor(e.n/1000)+'k':e.n}</i></button>`:'<div class="slot"></div>';}
- $('bgrid').innerHTML=h;h='';for(let i=0;i<PACK;i++){const it=S.inv[i];h+=it?`<button class="slot f" data-p="${i}" aria-label="${itemName(it)}"><img src="${icon(itemIcon(it))}" alt="">${(it.n||1)>1?'<i class="cnt">'+it.n+'</i>':''}</button>`:'<div class="slot"></div>';}
+ const b=S.bank;let h='';for(let i=0;i<BANKSLOTS;i++){const e=b[i];h+=e?`<button class="slot f" data-b="${i}" aria-label="${itemName(e.it)}"><img src="${stackIcon(itemIcon(e.it),e.n)}" alt=""><i class="cnt">${cntFmt(e.n,1)}</i></button>`:'<div class="slot"></div>';}
+ $('bgrid').innerHTML=h;h='';for(let i=0;i<PACK;i++){const it=S.inv[i];h+=it?`<button class="slot f" data-p="${i}" aria-label="${itemName(it)}"><img src="${stackIcon(itemIcon(it),it.n)}" alt="">${(it.n||1)>1?'<i class="cnt">'+cntFmt(it.n,1)+'</i>':''}</button>`:'<div class="slot"></div>';}
  $('bpack').innerHTML=h;$('bnote').textContent=note||(b.length+' of '+BANKSLOTS+' bank slots used');bankEl.querySelectorAll('.bmode button').forEach(x=>x.classList.toggle('on',x.dataset.m===bankMode));}
 function deposit(i){const it=S.inv[i];if(!it)return false;const k=itemKey(it);let e=S.bank.find(q=>q.k===k);if(!e){if(S.bank.length>=BANKSLOTS){renderBank('The bank is full.');return false;}const proto=Object.assign({},it);delete proto.n;e={k,it:proto,n:0};S.bank.push(e);}e.n+=it.n||1;S.inv.splice(i,1);return true;}
 function withdraw(j){const e=S.bank[j];if(!e)return;const want=bankMode==='1'?1:e.n;let got=0;
@@ -70,7 +72,7 @@ function slotFor(it){return EQUIP[it.id]?EQUIP[it.id].slot:it.id==='hatchet'?'we
 function canFit(sl){return S.inv.map((it,i)=>[i,it]).filter(([i,it])=>slotFor(it)===sl);}
 function wearFrom(i,sl){const it=S.inv[i];if(!it||slotFor(it)!==sl)return;const cell=it.c;S.inv.splice(i,1);if(sl==='weapon'){if(S.eq.weapon==='hatchet')S.inv.push({id:'hatchet',c:cell});S.eq.weapon='hatchet';sfx('chop',.6);toast('Hatchet in hand. The scarf stays on.');}else{const old=S.eq[sl];S.eq[sl]=it.id;if(old)S.inv.push({id:old,c:cell});sfx('open');toast('Wearing: '+EQUIP[it.id].name);}save();}
 function dgStart(e,i){const it=S.inv[i];if(!it)return;DG={i,it,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,moved:false,id:e.pointerId};}
-function dgMakeGhost(it){const g=document.createElement('div');g.className='dgghost';g.innerHTML='<img src="'+icon(itemIcon(it))+'" alt="">';document.body.appendChild(g);g.style.left=DG.x+'px';g.style.top=DG.y+'px';return g;}
+function dgMakeGhost(it){const g=document.createElement('div');g.className='dgghost';g.innerHTML='<img src="'+stackIcon(itemIcon(it),it.n)+'" alt="">';document.body.appendChild(g);g.style.left=DG.x+'px';g.style.top=DG.y+'px';return g;}
 function dgMove(e){if(!DG||e.pointerId!==DG.id)return;DG.x=e.clientX;DG.y=e.clientY;if(!DG.moved&&Math.hypot(DG.x-DG.x0,DG.y-DG.y0)>14){DG.moved=true;dgGhost=dgMakeGhost(DG.it);const src=pbody.querySelector('[data-i="'+DG.i+'"]');if(src)src.classList.add('dgsrc');}
  if(dgGhost){dgGhost.style.left=DG.x+'px';dgGhost.style.top=DG.y+'px';pbody.querySelectorAll('.over').forEach(x=>x.classList.remove('over'));const r=dgDrop(DG.x,DG.y);if(r){const slots=[...pbody.querySelectorAll('.grid .slot')];if(r[0]==='swap'){const t=slots[r[1]];if(t)t.classList.add('over');}else{const a=slots[Math.min(r[1],slots.length-1)],b=slots[r[1]-1];if(a)a.classList.add('over');if(b)b.classList.add('over');}}}}
 function dgEnd(e){if(!DG||e.pointerId!==DG.id)return;const d=DG;DG=null;if(dgGhost){dgGhost.remove();dgGhost=null;}pbody.querySelectorAll('.over,.dgsrc').forEach(x=>x.classList.remove('over','dgsrc'));
@@ -105,7 +107,7 @@ function renderPanel(){panel.querySelectorAll('.tab').forEach(b=>b.classList.tog
   pbody.innerHTML=h;return;}
  if(tab==='pack'){
   h+=`<div class="grid">`;
-  const cells=invLayout();for(let c=0;c<PACK;c++){const i=cells[c],it=i>=0?S.inv[i]:null;h+=it?`<button class="slot f${sel===i?' sel':''}" data-i="${i}" aria-label="${itemName(it)}"><img src="${icon(itemIcon(it))}" alt="">${(it.n||1)>1||stackOf(it.id)?'<i class="cnt">'+(it.n||1)+'</i>':''}</button>`:'<div class="slot"></div>';}
+  const cells=invLayout();for(let c=0;c<PACK;c++){const i=cells[c],it=i>=0?S.inv[i]:null;h+=it?`<button class="slot f${sel===i?' sel':''}" data-i="${i}" aria-label="${itemName(it)}"><img src="${stackIcon(itemIcon(it),it.n)}" alt="">${(it.n||1)>1||stackOf(it.id)?'<i class="cnt">'+cntFmt(it.n||1)+'</i>':''}</button>`:'<div class="slot"></div>';}
   h+=`</div><div class="info">${infoHTML()}</div>`;pbody.innerHTML=h;sizePack();return;}
  if(tab==='you'){pbody.innerHTML=youHTML();return;}
  if(tab==='map'){pbody.innerHTML=mapHTML();drawMapTo($('mapc'));return;}

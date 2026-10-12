@@ -1,4 +1,4 @@
-# Tidecrown: handoff (build 14, 12 Oct 2026)
+# Tidecrown: handoff (build 15, 12 Oct 2026)
 Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/design-rules.md.
 
 ## Workflow
@@ -18,8 +18,9 @@ Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/de
 - 02-world: Key geometry (iR, gR, wetR), DOCK, tide (tideLevel, DAY_PERIOD 24 min real time, TIDE_PERIOD half), roaming fishing spots, walkable/clampLand (SH-aware, tiny islets walkable via onIsletK).
 - 03-data: FISH, EQUIP, ITEMS registry (iget, itemName/Desc/Icon/Val/Key, stackOf; hatchet, dead wood, black, twist and ironbark wood), JOURNAL, ORIGINS, PXP (parent skill levels, 10 levels).
 - 04-state-inventory: S, migrations, skill helpers, inventory (addItem, canAdd, cnt); items keep a persistent pack cell (it.c) so gaps survive save and reload.
-- 06-interactions: routeTo (on the Key it detours via the dock root when the player is on the dock and the target is water; known bug), objects(), tap, swipe, longPress, fishing.
-- 08-panel-bank: tabs Skills, Pack (true grid, pointer drag and drop: dgMove/dgDrop swap, push-apart insert, drop on a You slot to wear), Journal, You (SLOTS paperdoll, every slot tappable via canFit/wearFrom; Weapon slot holds scarf or hatchet), Map (drawMapTo sea chart, tap warps for testing only), bank.
+- 06-interactions: routeTo (land taps and actions; Key detours via the dock root between dock and island), walkStraight (water taps: one straight leg, P.straight, stops where canStep fails), objects(), tap, swipe, longPress, fishing.
+- 09-icons: icon(id) cached data URLs, ICV canvases, stackIcon(id,n) and stackTier for count models.
+- 08-panel-bank: cntFmt badge; tabs Skills, Pack (true grid, pointer drag and drop: dgMove/dgDrop swap, push-apart insert, drop on a You slot to wear), Journal, You (SLOTS paperdoll, every slot tappable via canFit/wearFrom; Weapon slot holds scarf or hatchet), Map (drawMapTo sea chart, tap warps for testing only), bank.
 - 10-update: movement (wading slows with depth; a walk into deep water turns into a swim), day/dark, Key-only logic guarded by !SH.on.
 - 11-render: Key world draw (drawDepthBands, drawIsletLand, islet palms); shWorld() replaces it when SH.on.
 - 12-skills-status: SKILLS (five), SUBS, METHODS (the ways under Strife and Accord: scarf, hatchet, thrown, food, ember, light). 13-skill-pages: parentPage, skillPage, ways pages.
@@ -37,7 +38,6 @@ Shadow Forest: seven islands, long gradual swim with a mid-swim scene change, fo
 
 ## Next
 Design is in docs/design-rules.md (nothing below is built unless stated). Ross has not yet approved a build queue; the proposed order is a suggestion.
-1. Parked small fixes: tap in water walks straight to the point (today it detours); stack models by count in pack and bank (Runescape tiers).
-2. Proposed: Shadow Forest real day and night with local canopy shade and tannin-dark water; fire structures and real charcoal; glass and containers (Opus, touches save); jelly oil, trap and lantern; weather layer; terrain height and climbing; dwellers, camps and entropy (one small proof first); character creation rework once its scenarios are fleshed out.
-3. Tune by play: wave rates, swim feel, depth shelves, jelly density, day and tide lengths.
-4. Open for Ross: approve a build queue so items on it can start on "next" without a fresh ask (design changes still come first); decide whether to run builds in Claude Code (desktop Code tab) on a branch per build, which would loosen "Claude never commits or pushes"; the tests in /home/claude do not persist, so move them into the repo (tools/tests/).
+1. Proposed: Shadow Forest real day and night with local canopy shade and tannin-dark water; fire structures and real charcoal; glass and containers (Opus, touches save); jelly oil, trap and lantern; weather layer; terrain height and climbing; dwellers, camps and entropy (one small proof first); character creation rework once its scenarios are fleshed out.
+2. Tune by play: wave rates, swim feel, depth shelves, jelly density, day and tide lengths.
+3. Open for Ross: approve a build queue so items on it can start on "next" without a fresh ask (design changes still come first); decide whether to run builds in Claude Code (desktop Code tab) on a branch per build, which would loosen "Claude never commits or pushes"; the tests in /home/claude do not persist, so move them into the repo (tools/tests/).

@@ -21,7 +21,7 @@ function swimStart(tx,ty){SW.on=true;SW.vx=0;SW.vy=0;SW.tx=tx;SW.ty=ty;SW.beat=0
  splashAt(P.x,P.y,8);sfx('splash');}
 function swimTo(wx,wy){if(SW.on){tread();return;}
  /* walk in: the shallows are walkable, and the walk turns into a swim where it gets deep */
- P.swimTo=[wx,wy];routeTo(wx,wy,()=>{P.swimTo=null;});}
+ P.swimTo=[wx,wy];walkStraight(wx,wy,()=>{P.swimTo=null;});}
 /* tread water: a tap keeps you up and holds your place; on the beat it costs nothing and builds the streak */
 function tread(){if(SW.stun>0)return;const ph=SW.beat/swimBeat(),e=Math.min(ph,1-ph)*swimBeat(),win=.13+Math.min(.07,lv('swimming')*.004),good=e<win;
  SW.idle=0;SW.sink=Math.max(0,SW.sink-.35);SW.vx*=.7;SW.vy*=.7;SW.tx=P.x;SW.ty=P.y;splashAt(P.x,P.y+6,good?4:2);SW.beat=0;sfx(good?'strokeGood':'stroke',.6);hap(good?8:4);
@@ -53,7 +53,7 @@ function swimUpdate(dt){
  const drag=Math.exp(-dt*1.6);SW.vx*=drag;SW.vy*=drag;SW.vx+=Math.sin(now*.55)*14*dt;SW.vy+=Math.cos(now*.4)*10*dt;
  const dx=SW.tx-P.x,dy=SW.ty-P.y,d=Math.hypot(dx,dy);if(d>6&&SW.stun<=0){SW.vx+=dx/d*22*dt;SW.vy+=dy/d*22*dt;}
  const nx=P.x+SW.vx*dt,ny=P.y+SW.vy*dt;const moved=Math.hypot(nx-P.x,ny-P.y);
- if(seaDepth(nx,ny)<.42&&canStep(nx,ny)){P.x=nx;P.y=ny;const tx=SW.tx,ty=SW.ty;swimEnd(false);addXP('swimming',Math.max(1,Math.round(SW.dist/40)),'normal',[P.x,P.y-20]);SW.dist=0;if(seaDepth(tx,ty)<STAND&&canStep(tx,ty))routeTo(tx,ty);return;}
+ if(seaDepth(nx,ny)<.42&&canStep(nx,ny)){P.x=nx;P.y=ny;const tx=SW.tx,ty=SW.ty;swimEnd(false);addXP('swimming',Math.max(1,Math.round(SW.dist/40)),'normal',[P.x,P.y-20]);SW.dist=0;if(seaDepth(tx,ty)<STAND&&canStep(tx,ty)){if(inSea(tx,ty))walkStraight(tx,ty);else routeTo(tx,ty);}return;}
  if(inSea(nx,ny)){P.x=nx;P.y=ny;SW.dist+=moved;}
  P.moving=moved>4;
  if(SW.sink>0)SW.breath-=dt*SW.sink*.96;

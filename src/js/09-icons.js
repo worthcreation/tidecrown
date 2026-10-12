@@ -1,5 +1,5 @@
 /* ---------- icons ---------- */
-const icache={};
+const icache={},ICV={};
 function drawFish(id,x,y,s,dir,cOv){const F=FISH[id];dir=dir||1;const FC=cOv||F.col;const seed=id.length*17;let rx=14,ry=8;if(id==='eel'){rx=19;ry=5;}if(id==='grump'){rx=13;ry=10;}
  sketch([[x-rx*.7*s*dir,y],[x-(rx+9)*s*dir,y-8*s],[x-(rx+6)*s*dir,y],[x-(rx+9)*s*dir,y+8*s]],true,seed+1,.8,FC,INK,2.2);
  blob(x,y,rx*s,ry*s,seed,FC,2.4,.8);
@@ -50,5 +50,17 @@ function icon(id){if(icache[id])return icache[id];const c=document.createElement
  else if(id==='slap'){ln([[10,44],[22,36],[30,22],[44,18],[54,26]],500,8,INK,1);ln([[10,44],[22,36],[30,22],[44,18],[54,26]],500,5,'#ff8aa8',1);star(56,16,7,'#fff');for(let i=0;i<3;i++)ln([[40+i*6,36+i*4],[48+i*6,34+i*4]],501+i,2,INK,.3);}
  else if(id==='wrap'){ln([[12,46],[20,36],[30,30]],505,8,INK,1);ln([[12,46],[20,36],[30,30]],505,5,'#ffb3c6',1);sketch(ell(38,28,16,10,14),true,506,1,null,INK,8);sketch(ell(38,28,16,10,14),true,506,1,null,'#ffb3c6',5);blob(50,20,5,4,507,'#ffb3c6',2,.4);}
  else if(id==='rod'){ln([[14,52],[34,30],[50,10]],20,4.5,'#a8703f',1);ln([[50,10],[54,30],[52,44]],21,1.6,INK,.6);blob(52,46,4,4,22,'#ff6b6b',2,.4);}
- icache[id]=c.toDataURL();ctx=keep;boil=kb;return icache[id];}
+ ICV[id]=c;icache[id]=c.toDataURL();ctx=keep;boil=kb;return icache[id];}
+/* stacks by count, the Runescape way: one to five laid out, then a small pile at 10, a pile at 25, a heap at 100, a big heap at 250, a mound at 1000 */
+function stackTier(n){n=n||1;return n<=5?n:n<10?5:n<25?10:n<100?25:n<250?100:n<1000?250:1000;}
+const STACK_SMALL={2:[.7,[[-11,-9],[11,9]]],3:[.6,[[-13,-10],[13,-10],[0,11]]],4:[.54,[[-13,-12],[13,-12],[-13,11],[13,11]]],5:[.5,[[-15,-14],[15,-14],[-15,13],[15,13],[0,0]]]};
+const STACK_PILE={10:[3,.54],25:[4,.47],100:[5,.42],250:[6,.38],1000:[7,.35]};
+function stackIcon(id,n){const t=stackTier(n);if(t===1)return icon(id);const k=id+'#'+t;if(icache[k])return icache[k];icon(id);const src=ICV[id];
+ const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');let h=t*7.31;const rnd=()=>{h=(h*9301+49297)%233280;return h/233280;};
+ const put=(x,y,s,a)=>{const z=96*s;g.save();g.translate(x,y);g.rotate(a);g.drawImage(src,-z/2,-z/2,z,z);g.restore();};
+ if(STACK_SMALL[t]){const [s,ps]=STACK_SMALL[t];ps.forEach(p=>put(48+p[0]*1.5,48+p[1]*1.5,s,(rnd()-.5)*.3));}
+ else{const [R,s]=STACK_PILE[t],z=96*s,sp=Math.min(z*.5,80/R),vs=z*.3,base=88-z/2;
+  g.fillStyle='rgba(42,33,64,.16)';g.beginPath();g.ellipse(48,base+z*.24,Math.min(47,R*sp/2+z*.3),5+R*1.3,0,0,6.2832);g.fill();
+  for(let r=0;r<R;r++){const k2=R-r;for(let j=0;j<k2;j++)put(48+(j-(k2-1)/2)*sp+(rnd()-.5)*sp*.35,base-r*vs+(rnd()-.5)*3,s*(1-r*.02),(rnd()-.5)*1.1);}}
+ icache[k]=c.toDataURL();return icache[k];}
 
