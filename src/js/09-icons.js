@@ -33,8 +33,12 @@ function icon(id){if(icache[id])return icache[id];const c=document.createElement
  else if(id==='bait'){sketch(rrPts(18,22,28,28,7),true,12,1,'#d8c8ff',INK,2.6);sketch(rrPts(16,15,32,9,3),true,13,.6,'#ffcf3a',INK,2.4);[[26,32],[36,38],[30,43],[38,28]].forEach(p=>dot(p[0],p[1],2.2,'#ff6bb5'));}
  else if(EQUIP[id])drawGearIcon(id);
  else if(id==='wobble'){ln([[12,42],[52,26]],472,13,INK,1);ln([[12,42],[52,26]],472,8.5,'#b9d88f',1);blob(52,26,6,6.5,473,'#e8dcb0',2,.4);ln([[50,25],[53,27]],474,1.4,INK,.2);}
- else if(id==='flint'){sketch([[16,46],[30,14],[48,22],[44,48]],true,475,1,'#8a8494',INK,2.6);ln([[30,18],[40,44]],476,1.6,'rgba(255,255,255,.5)',.3);}
- else if(id==='hatchet'){ln([[16,52],[40,16]],477,7,INK,.6);ln([[16,52],[40,16]],477,4,'#d9cdb5',.6);sketch([[34,10],[52,14],[48,30],[38,22]],true,478,.6,'#8a8494',INK,2.4);ln([[34,24],[42,26]],479,2.4,'#5f6b3a',.3);}
+ else if(id==='palm'){sketch([[12,26],[52,22],[54,40],[14,44]],true,520,1,'#a8743f',INK,2.6);blob(34,33,7,6,521,'#b9b4c4',2,.4);dot(32,31,1.2);dot(36,34,1.2);}
+ else if(id==='fid'){sketch([[14,50],[18,44],[50,12],[22,50]],true,522,.6,'#f1e7cf',INK,2.6);ln([[22,44],[44,20]],523,1.2,'rgba(42,33,64,.3)',.3);}
+ else if(id==='twine'){for(let i=0;i<4;i++)sketch(ell(32,34,18-i*4,10-i*2,14),true,524+i,.5,i?null:'#d9c98f',INK,2);ln([[48,34],[56,44]],529,2,INK,.3);}
+ else if(id==='clamshell')drawClamShell(32,38,1.25,475);
+ else if(id==='shellblade'){sketch([[14,44],[22,20],[46,14],[52,26],[30,48]],true,475,1,'#efe6d2',INK,2.6);ln([[24,22],[46,16]],476,2,'#fffaf0',.3);ln([[20,36],[40,30]],477,1.2,'rgba(150,120,170,.5)',.3);}
+ else if(id==='hatchet'){ln([[16,52],[40,16]],477,7,INK,.6);ln([[16,52],[40,16]],477,4,'#d9cdb5',.6);sketch([[34,10],[52,14],[48,30],[38,22]],true,478,.6,'#efe6d2',INK,2.4);ln([[34,24],[42,26]],479,2.4,'#5f6b3a',.3);}
  else if(id==='charcoal'){blob(32,36,17,13,480,'#3a3340',2.6,1.2);dot(26,32,2,'#5a5266');dot(36,38,1.6,'#5a5266');}
  else if(id==='seasalt'){for(const q of[[24,40],[36,34],[42,44],[30,28]])sketch([[q[0],q[1]-8],[q[0]+6,q[1]],[q[0],q[1]+6],[q[0]-6,q[1]]],true,481+q[0],.4,'#f4f6ff',INK,2);}
  else if(id==='sunstone'){for(let i=0;i<8;i++){const a=i/8*6.28;ln([[32+Math.cos(a)*16,32+Math.sin(a)*16],[32+Math.cos(a)*24,32+Math.sin(a)*24]],490+i,2.4,'#ffcf3a',.3);}blob(32,32,13,12,489,'#ffb347',2.6,.6);blob(29,29,5,4,488,'#fff1b0',0,.3);}

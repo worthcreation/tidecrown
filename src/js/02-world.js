@@ -8,6 +8,7 @@ const R0=iR(0);
 /* tide: 1 is high water, 0 is low. Low water exposes a wet band of TIDE_REACH outside the dry sand. */
 /* a day is 24 minutes; like real tides there are two highs a day, so the tide cycles every 12 and the water is always on the move. */
 const DAY_PERIOD=24*60000,TIDE_PERIOD=DAY_PERIOD/2,TIDE_REACH=46;let tideF=null;
+var DAYOFF=0;/* test build only: shifts the time of day */
 function tideLevel(){if(tideF!=null)return tideF;return .5+.5*Math.cos(Date.now()/TIDE_PERIOD*6.2832);}
 function wetR(a){return iR(a)+(1-tideLevel())*TIDE_REACH;}
 const DOCK={x0:R0-40,x1:R0+192,y0:-24,y1:24};

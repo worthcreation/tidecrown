@@ -51,14 +51,15 @@ function shRoute(x,y,then){P.task=null;if(!grid)gridBuild();const s0=gnear(P.x,P
   if(found){const cells=[];let c=T;while(prev[c]!==c){cells.unshift(c);c=prev[c];}
    let last=null,dir=null;cells.forEach(c=>{const ci=c%GW,cj=(c-ci)/GW;const d=last?(ci-last[0])+','+(cj-last[1]):null;if(last&&d!==dir)path.push([GX0+(last[0]+.5)*GR,GY0+(last[1]+.5)*GR]);dir=d;last=[ci,cj];});}}
  path.push([x,y]);P.path=path;P.then=then||null;P.pathT=0;mark={x,y,t:0};}
-const BOAT_KEY={x:DOCK.x1-10,y:DOCK.y1+22},BOAT_SH={x:ISLES[0].x,y:ISLES[0].y+ISLES[0].ry*.75};
+/* where you first come ashore on the Landing */
+const SH_LAND={x:ISLES[0].x,y:ISLES[0].y+ISLES[0].ry*.75};
 /* wood by twist: a Hollowmaw’s dead wood aside, the forest gives black wood from plain trees, twisted wood from the gnarled ones, and ironbark from the worst of them. Harder wood takes more chops and more Woodcutting. */
 function woodOf(t){return t.tw>.8?'ironbark':t.tw>.45?'twistwood':'blackwood';}
 const WOODREQ={blackwood:1,twistwood:10,ironbark:20},WOODPROG={blackwood:6,twistwood:9,ironbark:13};
 function shChop(t){const i=shTrees.indexOf(t);if(i<0)return;S.shCut=S.shCut||{};S.shCut[t.seed]=1;shTrees.splice(i,1);tbDel(t);grid=null;}
 {const cut=S.shCut||{};for(let i=shTrees.length-1;i>=0;i--){const t=shTrees[i];if(cut[t.seed]){shTrees.splice(i,1);tbDel(t);}}}
 
-/* the shore: fishing, flint, forage. What you need is found near you. */
+/* the shore: fishing, a grinding rock, forage. What you need is found near you. */
 
 const SHSPOTS=[],SHFORAGE=[];{let k=0;ISLES.forEach((I,n)=>{const spots=n===0?[[.9,'shallow'],[2.4,'shallow']]:n===3||n===4?[[1.1+n,'deep']]:[[1.2+n*1.3,'shallow']];
  spots.forEach(([a,type])=>{const R=isleR(I,a);SHSPOTS.push({x:I.x+Math.cos(a)*I.rx*R*1.12,y:I.y+Math.sin(a)*I.ry*R*1.12,ax:I.x+Math.cos(a)*I.rx*R*.9,ay:I.y+Math.sin(a)*I.ry*R*.9,type,seed:300+n*3+k,a,al:1,st:'on',life:1e9});});
@@ -78,13 +79,12 @@ const FLIES=[],MUD=[];{const r=mulberry(82);for(let i=0;i<MR;i++)for(let j=0;j<M
  if(z==='fallow'&&r()<.35)MUD.push({x:c[0]+(r()-.5)*50,y:c[1]+(r()-.5)*50,rx:18+r()*18,ry:9+r()*9,seed:200+i*40+j,ph:r()*6.28});}
 }
 
-function shEnter(){if(SH.on)return;SH.on=true;save();S.isle='shadow';P.path=[];P.task=null;hintEl.classList.remove('on');const p=S.shPos||[BOAT_SH.x,BOAT_SH.y-40];P.x=p[0];P.y=p[1];cam.x=P.x;cam.y=P.y;
+function shEnter(){if(SH.on)return;SH.on=true;save();S.isle='shadow';P.path=[];P.task=null;hintEl.classList.remove('on');const p=S.shPos||[SH_LAND.x,SH_LAND.y-40];P.x=p[0];P.y=p[1];cam.x=P.x;cam.y=P.y;
  if(!S.journal.shadow){discover('shadow');think('The trees are listening.');}save();}
 function shLeave(){if(!SH.on)return;S.shPos=[P.x,P.y];SH.on=false;S.isle='key';P.path=[];P.task=null;P.x=DOCK.x1-30;P.y=0;cam.x=P.x;cam.y=P.y;save();}
 function shObjects(){const o=[];
- o.push({x:BOAT_SH.x,y:BOAT_SH.y,r:34,name:'Rowboat',key:'rowboat',act:'Row back to the Key',onAct:()=>{const c=shClamp(BOAT_SH.x,BOAT_SH.y-30);routeTo(c[0],c[1],shLeave);},onExamine:()=>think('Still here. Good.')});
  SHSPOTS.forEach(sp=>o.push({x:sp.x,y:sp.y,r:42,name:sp.type==='deep'?'Black water':'Bubbling water',act:'Fish',onAct:()=>goFish(sp),onExamine:()=>think(sp.type==='deep'?'Something heavy turns over down there.':'Little fish. Even here.')}));
- o.push({x:SHROCK.x,y:SHROCK.y,r:34,name:'Rocks',key:'rocks',act:S.owned.flint||S.owned.hatchet?null:'Search',onAct:()=>searchRocks(SHROCK),onExamine:()=>think('Black rock, wet all over. Something sharp glints in a crack.')});
+ {const ga=grindAct(SHROCK);o.push({x:SHROCK.x,y:SHROCK.y,r:34,name:'Rocks',key:'rocks',act:ga,onAct:ga?()=>startGrind(SHROCK):null,onExamine:()=>think('Black rock, wet all over. Flat enough to grind on.')});}
  for(const f of SHFORAGE){if(f.taken>Date.now())continue;o.push({x:f.x,y:f.y-6,r:20,name:itemName({id:f.id}),key:f.id==='wood'?'driftwood':f.id==='kelp'?'kelp':'wash',act:'Grab',onAct:()=>{const c=shClamp(f.x,f.y+6);routeTo(c[0],c[1],()=>{if(f.taken>Date.now())return;const got=addItem(f.id,f.id==='shells'?2:1);if(!got){think('No room in my pack.');return;}f.taken=Date.now()+90000;flies.push({id:'misc',img:itemIcon({id:f.id}),x0:f.x,y0:f.y,t:0});const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}addXP('foraging',3,first?'first':'normal',[f.x,f.y-20]);save();});},onExamine:()=>think('The dark water left it. It will leave more.')});}
  o.push({x:HOLLOW.x,y:HOLLOW.y,r:HOLLOW.r,name:'The Hollow',key:'thehollow',act:null,onExamine:()=>{discover('thehollow');think(pick(['It’s breathing.','Everything here keeps its distance from it.','I don’t think it’s asleep. I think it’s waiting.']));}});
  for(const t of shTrees){if(Math.hypot(t.x-P.x,t.y-P.y)>260)continue;const w=woodOf(t);o.push({x:t.x,y:t.y-30*t.s,r:22*t.s,name:w==='ironbark'?'Gnarled tree':w==='twistwood'?'Twisted tree':'Shadow tree',key:'shadowtree',act:'Chop',onAct:()=>chopTree(t),onExamine:()=>{discover('shadowtree');if(w!=='blackwood')discover(w);think(treeTwistTxt(t));}});}
@@ -168,7 +168,7 @@ function shWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
  SHSPOTS.forEach(drawSpot);drawSwimWorld();blob(SHROCK.x,SHROCK.y,SHROCK.rx,SHROCK.ry,SHROCK.seed,'#4a4658');ln([[SHROCK.x-10,SHROCK.y-6],[SHROCK.x,SHROCK.y-11]],67,2.5,'rgba(255,255,255,.35)',.4);
  for(const f of SHFORAGE){if(f.taken>Date.now())continue;if(Math.abs(f.x-cam.x)>vw||Math.abs(f.y-cam.y)>vh)continue;shadow(f.x,f.y+2,10,3.5);ctx.drawImage(iconImg(itemIcon({id:f.id})),f.x-12,f.y-20+Math.sin(now*2+f.seed)*1.2,24,24);}
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
- shadow(BOAT_SH.x,BOAT_SH.y+4,30,8);sketch([[BOAT_SH.x-32,BOAT_SH.y-6],[BOAT_SH.x+32,BOAT_SH.y-6],[BOAT_SH.x+22,BOAT_SH.y+8],[BOAT_SH.x-22,BOAT_SH.y+8]],true,803,2,'#9a6236',INK,3);
+ 
  const d=[];for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;d.push([t.y,()=>drawShTree(t)]);}
  const near=o=>Math.abs(o.x-cam.x)<vw&&Math.abs(o.y-cam.y)<vh;
  MAWS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m)]);});DEAD.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m)]);});PLANTED.forEach(p=>{if(near(p))d.push([p.y,()=>drawPlanted(p)]);});MOSS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMoss(m)]);});LAPPERS.forEach(l=>{if(near(l))d.push([l.y,()=>drawLapper(l)]);});d.push([HOLLOW.y+40,drawHollow],[P.y,drawSwimmer]);

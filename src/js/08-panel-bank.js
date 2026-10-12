@@ -27,27 +27,28 @@ let skSel=-1,jPage=0,jPages=[];
 /* gear slots, Runescape-shaped: a paperdoll, three across. Empty cells are spacers. */
 const SLOTS=[['back','head','neck'],['weapon','body','trinket'],['hand','legs','ring'],[null,'feet',null]];
 const SLOTLAB={head:'Head',body:'Body',hand:'Hands',trinket:'Charm',back:'Back',neck:'Neck',weapon:'Weapon',legs:'Legs',feet:'Feet',ring:'Ring'};
-/* the map: a sea chart, nothing else on the tab. Every island drawn with its name, the bridges, you. Tap an island to go there; that is for testing until travel is a system, and the chart says so in its corner. */
+/* the map: a sea chart, nothing else on the tab. Test: every island drawn with its name, the bridges, you, and a tap on an island goes there. Play: the Key, you, and the dark islands only as an unnamed smudge on the horizon; no taps. */
 let MAPHIT=[];
 function drawMapTo(c){const w=c.clientWidth||300,h=c.clientHeight||300,d=Math.min(2,devicePixelRatio||1);c.width=Math.round(w*d);c.height=Math.round(h*d);const k=ctx;ctx=c.getContext('2d');ctx.setTransform(d,0,0,d,0,0);
  /* the chart is turned so east is up: the Key at the bottom, the dark islands above it, the sea between them shortened */
  const KX=-2350,KY=0,X0=-1560,X1=1260,Y0=-1730,Y1=-KX+640,sc=Math.min((w-24)/(X1-X0),(h-78)/(Y1-Y0)),ox=w/2-(X0+X1)/2*sc,oy=h/2+2-(Y0+Y1)/2*sc,M=(x,y)=>[ox+y*sc,oy-x*sc];MAPHIT=[];
  ctx.fillStyle='#2b6d7c';ctx.fillRect(0,0,w,h);ctx.globalAlpha=.35;for(let i=0;i<40;i++){const x=(i*73)%w,y=((i*131)%(h-40))+20;ln([[x-7,y],[x,y-3],[x+7,y]],700+i,1.8,'#9fc4cc',.8);}ctx.globalAlpha=1;
  const kp=sandPts.map(p=>M(KX+p[0],KY+p[1])),gp=grassPts.map(p=>M(KX+p[0]*.98,KY+p[1]*.98));sketch(kp,true,880,2,'#f3d27a',INK,2);sketch(gp,true,881,2,'#86c25e',INK,1.5);
- const dk=M(KX+DOCK.x0,KY),dk2=M(KX+DOCK.x1,KY);ln([dk,dk2],883,3,'#c98f56',.3);{const [kx,ky]=M(KX,KY);MAPHIT.push({x:kx,y:ky,r:Math.max(26,560*sc),id:'key'});}
- BRIDGES.forEach(B=>{if(B.v)ln([M(B.x,B.y0),M(B.x,B.y1)],899,2.5,'#9a6236',.3);else ln([M(B.x0,B.y),M(B.x1,B.y)],898,2.5,'#9a6236',.3);});
- ISLES.forEach((I,n)=>{const [x,y]=M(I.x,I.y),rx=Math.max(7,I.rx*sc),ry=Math.max(6,I.ry*sc);sketch(islePts(I,1,28).map(p=>M(p[0],p[1])),true,882+n,2,I.sand,INK,1.5);sketch(islePts(I,.84,24).map(p=>M(p[0],p[1])),true,890+n,2,I.ground,null);MAPHIT.push({x,y,r:Math.max(22,Math.max(rx,ry)),id:'sh'+n});});
+ const dk=M(KX+DOCK.x0,KY),dk2=M(KX+DOCK.x1,KY);ln([dk,dk2],883,3,'#c98f56',.3);{const [kx,ky]=M(KX,KY);if(MODE==='test')MAPHIT.push({x:kx,y:ky,r:Math.max(26,560*sc),id:'key'});}
+ if(MODE==='play'){ctx.fillStyle='#24424c';for(const [f,al] of [[1.6,.12],[1.25,.16],[.9,.2]]){ctx.globalAlpha=al;ISLES.forEach(I=>{const [x,y]=M(I.x,I.y);ctx.beginPath();ctx.ellipse(x,y,I.ry*sc*f,I.rx*sc*f,0,0,6.2832);ctx.fill();});}ctx.globalAlpha=1;}
+ else{BRIDGES.forEach(B=>{if(B.v)ln([M(B.x,B.y0),M(B.x,B.y1)],899,2.5,'#9a6236',.3);else ln([M(B.x0,B.y),M(B.x1,B.y)],898,2.5,'#9a6236',.3);});
+ ISLES.forEach((I,n)=>{const [x,y]=M(I.x,I.y),rx=Math.max(7,I.rx*sc),ry=Math.max(6,I.ry*sc);sketch(islePts(I,1,28).map(p=>M(p[0],p[1])),true,882+n,2,I.sand,INK,1.5);sketch(islePts(I,.84,24).map(p=>M(p[0],p[1])),true,890+n,2,I.ground,null);MAPHIT.push({x,y,r:Math.max(22,Math.max(rx,ry)),id:'sh'+n});});}
  /* names on the chart */
  const lab=(t,x,y,s)=>{ctx.font=(s||12)+"px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.lineJoin='round';ctx.strokeStyle='rgba(43,109,124,.9)';ctx.strokeText(t,x,y);ctx.fillStyle='#fffaf0';ctx.fillText(t,x,y);};
  {const [x,y]=M(KX,KY);lab('Driftwood Key',x,y+Math.max(24,600*sc)+6,13);}
- ISLES.forEach((I,n)=>{const [x,y]=M(I.x,I.y),big=I.rx*sc>34;lab(I.name,x,big?y:y+Math.max(6,I.rx*sc)+8,11);});
+ if(MODE==='test')ISLES.forEach((I,n)=>{const [x,y]=M(I.x,I.y),big=I.rx*sc>34;lab(I.name,x,big?y:y+Math.max(6,I.rx*sc)+8,11);});
  {const [x,y]=M(KX+520,KY-1050);lab('The Lantern Sea',x,y,15);}
  const [px,py]=SH.on?M(P.x,P.y):M(KX+P.x,KY+P.y);const pu=1+.15*Math.sin(now*4);dot(px,py,5*pu,INK);dot(px,py,3*pu,'#ff6b6b');lab('you',px,py-11,11);
  ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='left';ctx.fillStyle='rgba(255,250,240,.8)';ctx.fillText('N',8,38);ln([[34,32],[20,32]],884,2,'rgba(255,250,240,.8)',.3);ln([[26,28],[20,32],[26,36]],885,2,'rgba(255,250,240,.8)',.3);
- ctx.font="12px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='right';ctx.fillStyle='rgba(255,250,240,.7)';ctx.fillText('Tap an island to go there. Testing, until there is a way to travel.',w-8,h-8);ctx=k;}
+ if(MODE==='test'){ctx.font="12px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='right';ctx.fillStyle='rgba(255,250,240,.7)';ctx.fillText('Test build: tap an island to go there.',w-8,h-8);}ctx=k;}
 function MAPDEST(){return [{id:'key',name:'Driftwood Key',kind:'home'}].concat(ISLES.map((I,i)=>({id:'sh'+i,name:I.name,kind:I.kind,I})));}
 function mapHTML(){return `<canvas id="mapc" class="mapc" aria-label="Sea chart"></canvas>`;}
-function mapTap(e){const c=$('mapc');if(!c)return;const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let best=null,bd=1e9;for(const h of MAPHIT){const d=Math.hypot(h.x-x,h.y-y);if(d<h.r+8&&d<bd){bd=d;best=h;}}if(best){sfx('whoosh');warpTo(best.id);}}
+function mapTap(e){const c=$('mapc');if(!c||MODE!=='test')return;const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let best=null,bd=1e9;for(const h of MAPHIT){const d=Math.hypot(h.x-x,h.y-y);if(d<h.r+8&&d<bd){bd=d;best=h;}}if(best){sfx('whoosh');warpTo(best.id);}}
 function warpTo(id){if(id==='key'){if(SH.on)shLeave();SW.on=false;P.x=DOCK.x0-60;P.y=0;P.path=[];cam.x=P.x;cam.y=P.y;}
  else{const I=MAPDEST().find(d=>d.id===id).I;SW.on=false;if(!SH.on){SH.on=true;S.isle='shadow';hintEl.classList.remove('on');}const c=shClamp(I.x,I.y+I.ry*.45);P.x=c[0];P.y=c[1];P.path=[];P.task=null;cam.x=P.x;cam.y=P.y;if(!S.journal.shadow)discover('shadow');}
  save();closePanel();}
@@ -88,7 +89,7 @@ document.addEventListener('touchend',e=>{if(!DG)return;const t=e.changedTouches[
 pbody.addEventListener('click',e=>{if(dgSkip){dgSkip=false;e.stopImmediatePropagation();e.preventDefault();}},true);
 
 function infoHTML(){
- if(sel>=0&&S.inv[sel]){const it=S.inv[sel];let a='';if(it.id==='bottle')a+='<button data-a="read">Read it</button>';if(it.id==='flint')a+='<button data-a="craft">Make a hatchet</button>';if(it.id==='hatchet'&&S.eq.weapon!=='hatchet')a+='<button data-a="wield">Take in hand</button>';if(EQUIP[it.id])a+='<button data-a="wear">Wear it</button>';if(it.id==='cook')a+='<button data-a="eat">Eat it</button>';
+ if(sel>=0&&S.inv[sel]){const it=S.inv[sel];let a='';if(it.id==='bottle')a+='<button data-a="read">Read it</button>';if(it.id==='shellblade')a+='<button data-a="craft">Make a hatchet</button>';if(it.id==='hatchet'&&S.eq.weapon!=='hatchet')a+='<button data-a="wield">Take in hand</button>';if(EQUIP[it.id])a+='<button data-a="wear">Wear it</button>';if(it.id==='cook')a+='<button data-a="eat">Eat it</button>';
   if(it.id!=='hatchet')a+='<button data-a="drop">Drop '+((it.n||1)>1?'one':'it')+'</button>';if((FISH[it.id]&&S.inv.filter(x=>x.id===it.id).length>1)||(it.n||1)>1)a+='<button data-a="dropall">Drop all</button>';
   return `<b>${itemName(it)}${(it.n||1)>1?' ×'+it.n:''}</b><p>${itemDesc(it)}</p><div class="acts">${a}</div>`;}
  if(selG==='weapon'){if(S.eq.weapon==='hatchet')return `<b>Stone hatchet, in hand</b><p>Hews and sweeps, and hits everything in reach on that side. Three sweeps in rhythm spin into a swirl. It chops trees from here too. No gentle side: wrapping and binding wait for the scarf.</p><div class="acts"><button data-a="sheathe">Back to the scarf</button></div>`;const a=(S.char||DEFAULT_LOOK).acc;return `<b>Your scarf (${ACCN[a]})</b><p>Everyone out here wears one; yours is the weapon in hand. It reaches ${reach()}, and Dominion stretches it. Tap a thing to slap it, slide at it to trip it, slide from it to you to wrap it, slide back again to bind it. Change the colour at the still pool. A hatchet in the pack can be taken in hand instead.</p>`;}
@@ -111,6 +112,7 @@ function renderPanel(){panel.querySelectorAll('.tab').forEach(b=>b.classList.tog
   h+=`</div><div class="info">${infoHTML()}</div>`;pbody.innerHTML=h;sizePack();return;}
  if(tab==='you'){pbody.innerHTML=youHTML();return;}
  if(tab==='map'){pbody.innerHTML=mapHTML();drawMapTo($('mapc'));return;}
+ if(tab==='test'){pbody.innerHTML=testHTML();return;}
  renderJournal();}
 function entEl(k){const d=document.createElement('div');d.className='ent';d.innerHTML=`<b>${JOURNAL[k][0]}</b><p>${JOURNAL[k][1]}</p>`;return d;}
 function renderJournal(){const keys=Object.keys(S.journal).filter(k=>JOURNAL[k]).sort((a,b)=>S.journal[b]-S.journal[a]),tot=Object.keys(JOURNAL).length;
@@ -128,7 +130,7 @@ pbody.addEventListener('click',e=>{if(e.target.id==='mapc'){mapTap(e);return;}co
  if(a.dataset.a==='off'){if(S.inv.length>=PACK){toast('No room in your pack');return;}S.inv.push({id:S.eq[selG]});S.eq[selG]=null;selG=null;save();renderPanel();return;}
  if(a.dataset.a==='sheathe'){if(S.inv.length>=PACK){toast('No room in your pack');return;}S.inv.push({id:'hatchet'});S.eq.weapon=null;sfx('open');save();renderPanel();return;}
  const it=S.inv[sel];if(!it)return;
- if(a.dataset.a==='craft'){if(!((S.wood||0)>0&&(S.kelp||0)>0)){toast('Needs 1 driftwood and 1 dry kelp');return;}S.wood--;S.kelp--;S.inv.splice(sel,1);S.inv.push({id:'hatchet'});unlockSkill('tinkering');S.owned.hatchet=1;sel=-1;discover('hatchet');toast('New skill: Tinkering');addXP('tinkering',30,'first',[P.x,P.y-30]);save();renderPanel();return;}
+ if(a.dataset.a==='craft'){if(!((S.wood||0)>0&&(S.kelp||0)>0)){toast('Needs 1 driftwood and 1 dry kelp');return;}S.wood--;S.kelp--;takeItem('shellblade');S.inv.push({id:'hatchet'});unlockSkill('tinkering');S.owned.hatchet=1;sel=-1;discover('hatchet');toast('New skill: Tinkering');addXP('tinkering',30,'first',[P.x,P.y-30]);save();renderPanel();return;}
  if(a.dataset.a==='wield'){S.inv.splice(sel,1);S.eq.weapon='hatchet';sel=-1;sfx('chop',.6);toast('Hatchet in hand. The scarf stays on.');save();renderPanel();return;}
  if(a.dataset.a==='eat'){sfx('eat');S.inv.splice(sel,1);const B=BUFF[it.q];if(B){S.buff={q:it.q,until:Date.now()+B.dur*1000,dur:B.dur};toast('Well fed: '+B.txt);}else think(it.q==='charred'?'Crunchy. Regrettable.':'My stomach has filed a complaint.');sel=-1;save();renderPanel();return;}
  if(a.dataset.a==='wear'){const E=EQUIP[it.id],old=S.eq[E.slot];S.inv.splice(sel,1);S.eq[E.slot]=it.id;if(old)S.inv.push({id:old});sel=-1;save();renderPanel();toast('Wearing: '+E.name);return;}

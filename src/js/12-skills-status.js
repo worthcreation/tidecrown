@@ -28,7 +28,7 @@ const SUBS={
   unl:{5:'A second pan by the fire',10:'A third pan by the fire',15:'Kelp flares burn longer',20:'Your golden window widens'}},
  firemaking:{p:'survival',name:'Firemaking',icon:'flame',col:'#ff8a3d',clue:'Feed a fire and it keeps you.',desc:'Build them, feed them, keep them. Some fires leave more than ash.',
   unl:{3:'Wobblewood burns longer in your fires'}},
- tinkering:{p:'invention',name:'Tinkering',icon:'flint',col:'#a8d07e',clue:'Something sharp, something to hold, something to tie them.',desc:'Small things, fitted right. A hatchet first. Then whatever the island needs.',unl:{}},
+ tinkering:{p:'invention',name:'Tinkering',icon:'shellblade',col:'#a8d07e',clue:'Something sharp, something to hold, something to tie them.',desc:'Small things, fitted right. A hatchet first. Then whatever the island needs.',unl:{}},
  shipwright:{p:'invention',name:'Shipwright',clue:'A hull begins with a lot of logs.'},
  swimming:{p:'exploration',name:'Swimming',icon:'wave',col:'#6fd6ff',clue:'People say they have swum between islands.',desc:'Keep the stroke, keep your breath. The sea gives things to the swimmer, and sends a few things to sting.',
   unl:{5:'You sink slower when you rest, and each stroke carries farther',10:'A quicker stroke',15:'Lantern jellies keep their distance'}},

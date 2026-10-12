@@ -1,8 +1,8 @@
 /* ---------- interactions ---------- */
-function routeTo(x,y,then){P.straight=0;if(SH.on)return shRoute(x,y,then);P.task=null;const path=[];const pd=onDock(P.x,P.y)&&!onIsland(P.x,P.y),td=onDock(x,y)&&!onIsland(x,y);
+function routeTo(x,y,then){P.straight=0;GRD=null;if(SH.on)return shRoute(x,y,then);P.task=null;const path=[];const pd=onDock(P.x,P.y)&&!onIsland(P.x,P.y),td=onDock(x,y)&&!onIsland(x,y);
  if(pd!==td)path.push([R0-25,0]);path.push([x,y]);P.path=path;P.then=then||null;P.pathT=0;mark={x,y,t:0};}
 /* a tap in the water: walk straight at it, no detour, and stop where something blocks the way */
-function walkStraight(x,y,then){P.task=null;P.path=[[x,y]];P.then=then||null;P.pathT=0;P.straight=1;mark={x,y,t:0};}
+function walkStraight(x,y,then){P.task=null;GRD=null;P.path=[[x,y]];P.then=then||null;P.pathT=0;P.straight=1;mark={x,y,t:0};}
 function goFish(sp){if(sp.st==='out'){think('The water went still.');return;}const L=lv('fishing');if(L<REQ[sp.type]){think(sp.type==='deep'?'This water is too wild for me yet. (Fishing '+REQ.deep+')':'The pale fish ignore my line. (Fishing '+REQ.moon+')');return;}
  if(S.inv.length>=PACK){think('My satchel is stuffed. Gubbins on the dock might want these.');return;}
  const [ax,ay]=SH.on?shClamp(sp.ax,sp.ay):[sp.ax,sp.ay];routeTo(ax,ay,()=>{if(sp.st==='out'||sp.al<=0){think('The water went still. Look for more bubbles.');return;}startFish(sp);});}
@@ -54,13 +54,11 @@ function lore(){discover('gubbinslore');say('Gubbins','Driftwood Key. Smallest i
 function examineHead(){discover('head');think(dark>.25?'A stone head, half buried. Its eyes are glowing faintly. Its mouth is open.':'A stone head, half buried in the sand. Eyes shut, mouth shut, very old.');}
 function listenHead(){if(dark>.25){discover('headnight');think('It’s humming. Something about the west shore, and the moon.');}else think(pick(['Nothing. Just wind whistling through a stone ear.','I press my ear to it. Silence. It feels like it’s waiting for dark.']));}
 function saluteCrab(){discover('crab');CRAB.hop=.5;S.salutes=(S.salutes||0)+1;
- if(S.salutes>=3&&!S.owned.thimble){if(S.inv.length>=PACK){think('Sir Thimble wants to give me something. My satchel is too full.');return;}
-  S.owned.thimble=1;S.inv.push({id:'thimble'});save();toast('Found: Thimble Helm');think('Sir Thimble takes off his helmet and offers it to me. He has a spare.');return;}
+ if(thimbleSalute())return;
  think(S.salutes>1?pick(['Sir Thimble salutes again. Crisper this time.','We salute. He clicks approvingly.','He salutes with both claws. Showing off.']):'A crab wearing a thimble for a helmet. He salutes. I salute back. Friends now.');}
 
 let objT=-1,objC=null;
 function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if(SH.on){o.push(...shObjects());return o;}
- o.push({x:BOAT_KEY.x,y:BOAT_KEY.y,r:34,name:'Rowboat',key:'rowboat',act:'Row out',onAct:()=>say('Rowboat','A rowboat, tied to the pier. It was not here yesterday, and it is not supposed to be here yet. There is a dark smudge of islands on the horizon.',[{l:'Row to the Shadow Forest',f:()=>{closeDlg();routeTo(DOCK.x1-30,0,shEnter);}},{l:'Not today',f:closeDlg}]),onExamine:()=>{discover('rowboat');think('Two oars. No name on her.');}});
  spots.forEach(sp=>{if(sp.type==='moon'&&dark<.15)return;if(sp.al<.4||sp.st==='out')return;o.push({x:sp.x,y:sp.y,r:42,name:{shallow:'Bubbling water',deep:'Wild water',moon:'Glowing pool'}[sp.type],act:'Fish',onAct:()=>goFish(sp),
   onExamine:()=>think({shallow:'Little fish, busy with little fish business.',deep:'Something heavy is thrashing down there.',moon:'Pale shapes circling slowly. Waiting for something.'}[sp.type])});});
  o.push({x:G.x,y:G.y-20,r:30,name:'Gubbins',key:'gubbins',act:'Talk',onAct:()=>routeTo(G.x-36,6,talkG),onExamine:()=>think('A bucket with opinions.')});
@@ -78,11 +76,11 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  o.push({x:HEAD.x,y:HEAD.y-16,r:34,name:'Stone head',key:'head',act:'Listen',onAct:listenHead,onExamine:examineHead});
  o.push({x:CRAB.x,y:CRAB.y-6,r:22,name:'Thimble crab',key:'crab',act:'Salute',onAct:saluteCrab,onExamine:()=>{discover('crab');think(S.salutes?'Sir Thimble. My crab friend. His helmet is spotless.':'A crab wearing a thimble for a helmet. He’s staring at me like he expects something.');}});
  trees.forEach(t=>o.push({x:t.x+t.lean*t.s,y:t.y-50*t.s,r:34*t.s,name:'Wobble tree',key:'tree',act:treeReady(t)?'Chop':null,onAct:()=>chopTree(t),onExamine:()=>{discover('tree');think('It sways with no wind. I think it just sighed.');}}));
- const flintGone=S.owned.flint||S.owned.hatchet;
  for(const it of (S.shore||[]))if(!underFoam(it))o.push({x:it.x,y:it.y-6,r:20,name:itemName({id:it.id}),key:it.id==='wood'?'driftwood':it.id==='kelp'?'kelp':'wash',act:'Grab',onAct:()=>routeTo(it.x,it.y+4,()=>grabShore(it)),onExamine:()=>think(pick(['The sea dropped it. It wants it back.','Grab it before the next wave does.']))});
  for(const s of SURF)if(s.pile&&s.st==='sparkle')o.push({x:s.x,y:s.y-4,r:14,name:s.name,key:'piling',act:'Scrape salt',onAct:()=>scrapeSalt(s),onExamine:()=>think('Barnacled and briny. Between waves, it sparkles.')});
- rocks.forEach(k=>{const sf=SURF.find(s=>s.x===k.x&&s.y===k.y),sp=sf&&sf.st==='sparkle';o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',key:'rocks',act:sp?'Scrape salt':flintGone?null:'Search',onAct:sp?()=>scrapeSalt(sf):flintGone?null:()=>searchRocks(k),onExamine:()=>{discover('rocks');think('Barnacled rocks. The water past them churns like it’s hiding something big.');}})});
+ rocks.forEach(k=>{const sf=SURF.find(s=>s.x===k.x&&s.y===k.y),sp=sf&&sf.st==='sparkle',ga=grindAct(k);o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',key:'rocks',act:sp?'Scrape salt':ga,onAct:sp?()=>scrapeSalt(sf):ga?()=>startGrind(k):null,more:sp&&ga?[{l:ga,f:()=>startGrind(k)}]:null,onExamine:()=>{discover('rocks');think('Barnacled rocks. The water past them churns like it’s hiding something big.');}})});
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
+ clamObjects(o);thimbleObjects(o);
  return o;}
 function objAt(wx,wy){let best=null,bd=1e9;for(const o of objects()){const d=Math.hypot(o.x-wx,o.y-wy);if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
 function s2w(sx,sy){return[(sx-W/2)/Z+cam.x,(sy-H/2)/Z+cam.y];}
@@ -93,6 +91,7 @@ function tap(sx,sy){
  if(dlgOn){closeDlg();return;}
  if(intro!=null&&intro<2.2)intro=2.2;
  if(C){cookTap(sx,sy);return;}
+ if(GRD){const [px,py]=w2s(P.x,P.y-20);if(Math.hypot(sx-px,sy-py)<160*Z){grindStroke();return;}GRD=null;}
  const T=P.task;
  if(T&&T.chop){const [px,py]=w2s(P.x,P.y-20);if(Math.hypot(sx-px,sy-py)<160*Z){strike();return;}}
  if(T&&!T.chop){if(T.phase==='bite'){hook();return;}

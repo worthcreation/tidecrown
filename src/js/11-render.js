@@ -12,7 +12,6 @@ function drawPool(){const {x,y}=POOL;blob(x,y,44,22,170,'#8fd3dc',3);const ph=(n
  ln([[x-16,y-7],[x-4,y-10]],172,2.5,'rgba(255,255,255,.85)',.5);for(const [ox,h] of [[-46,26],[-40,19],[43,24]])ln([[x+ox,y+4],[x+ox+2,y+4-h]],173+ox,2.5,'#3f7f3a',.6);}
 function drawSign(){const {x,y}=SIGN;shadow(x,y+2,14,5);ln([[x,y],[x+1,y-30]],61,5,INK,.8);ln([[x,y],[x+1,y-30]],61,2.5,'#b07a4a',.8);sketch(rrPts(x-24,y-52,48,26,6),true,62,1.5,'#d9a066',INK,2.8);ln([[x-15,y-44],[x+12,y-45]],63,2,INK,1);ln([[x-15,y-36],[x+6,y-36]],64,2,INK,1);}
 function drawFarIsles(){const bx=FAR_X()+700;[[bx,-120,150,70],[bx+260,120,110,50],[bx+120,340,90,42]].forEach(([x,y,w,h],i)=>{if(Math.abs(x-cam.x)>W/Z/2+w+200)return;sketch(ell(x,y,w,h,18),true,820+i,4,'#2b3a3f',INK,3);sketch(ell(x,y-14,w*.7,h*.6,14),true,824+i,4,'#1f2b24',null);});}
-function drawBoatKey(){const x=BOAT_KEY.x,y=BOAT_KEY.y,b=Math.sin(now*1.3)*2;sketch([[x-30,y-6+b],[x+30,y-6+b],[x+21,y+7+b],[x-21,y+7+b]],true,805,2,'#9a6236',INK,3);ln([[x-26,y-2+b],[x+26,y-2+b]],806,2,'rgba(42,33,64,.3)',.4);ln([[x+4,y-4+b],[x+22,y-26+b]],807,3,INK,.5);ln([[x-6,y-4+b],[x-24,y-24+b]],808,3,INK,.5);}
 function drawHome(){const {x,y}=FIRE;const tx=x-54,ty=y+6;shadow(tx,ty+2,26,8);
  blob(tx,ty-18,24,20,300,'#7fa8c9',2.6);blob(tx,ty-34,10,4,301,'#5d86a8',2.2,.5);dot(tx,ty-37,3.5,'#ffcf3a');
  ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,4,INK,.5);ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,2,'#7fa8c9',.5);
@@ -102,7 +101,7 @@ function render(){
  const vw=W/Z/2+80,vh=H/Z/2+80;
  drawDepthBands();ctx.globalAlpha=.5-far*.2;const wc=mixCol('#ffffff','#9fc4cc',far);for(const w of waves){const x=w.x+Math.sin(now*.6+w.s)*12,y=w.y;if(Math.abs(x-cam.x)>vw||Math.abs(y-cam.y)>vh)continue;ln([[x-10,y],[x,y-4],[x+10,y]],w.seed,2.5,wc,1);}ctx.globalAlpha=1;
  drawIsletLand();
- spots.forEach(drawSpot);drawSwimWorld();drawFarIsles();
+ spots.forEach(drawSpot);drawClams();drawSwimWorld();drawFarIsles();
  drawFoam();drawWet();
  sketch(sandPts,true,1,4,'#f3d27a',tideLevel()>.985?INK:'rgba(42,33,64,.25)',3.5);drawBreaks();
  drawDock();
@@ -111,10 +110,10 @@ function render(){
  drawPickups();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t)]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k)]));d.push([DOCK.y1+40,drawSurf]);
- (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it)]));d.push([BOLLARD.y+4,drawBollard],[BOAT_KEY.y,drawBoatKey],[FIRE.y-20,drawHome],[POOL.y-40,drawPool],[GULL.y,drawGull],[SIGN.y,drawSign],[HEAD.y,drawHead],[CRAB.y,drawCrab],[G.y,drawGubbins],[P.y,drawSwimmer]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t)]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr)]));if(KW.active)d.push([KW.y,drawKindle]);
+ (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it)]));d.push([BOLLARD.y+4,drawBollard],[FIRE.y-20,drawHome],[POOL.y-40,drawPool],[GULL.y,drawGull],[SIGN.y,drawSign],[HEAD.y,drawHead],[CRAB.y,drawCrab],[G.y,drawGubbins],[P.y,drawSwimmer]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t)]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr)]));if(KW.active)d.push([KW.y,drawKindle]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{if(x[1]===drawSwimmer){drawSwimmer();if(!SW.on)drawLine();}else x[1]();});
  }
- drawFly();drawScarfFX();drawChopFX();if(C)drawCook();
+ drawFly();drawScarfFX();drawChopFX();drawGrind();if(C)drawCook();
  if(S.eq.trinket==='blankmap'&&!SH.on){ctx.strokeStyle='#fffbe0';ctx.lineWidth=2.2;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const tw=(Math.sin(now*3+o.x*.05)+1)/2,sx=o.x+o.r*.6,sy=o.y-o.r*.6,r=3+tw*3.5;
   ctx.globalAlpha=.35+tw*.65;ctx.beginPath();ctx.moveTo(sx-r,sy);ctx.lineTo(sx+r,sy);ctx.moveTo(sx,sy-r);ctx.lineTo(sx,sy+r);ctx.stroke();}ctx.globalAlpha=1;}
  ctx.restore();

@@ -16,8 +16,6 @@ function burnOut(fr){const i=(S.fires||[]).indexOf(fr);if(i<0)return;S.fires.spl
  if(R()<Math.min(.6,score/60))items.push('charcoal');if((f.kelp||0)>0&&R()<Math.min(.7,.15*f.kelp+score/200))items.push('seasalt');
  if((f.wobble||0)>0&&R()<Math.min(.4,score/150))items.push('pearl');if(score>80&&R()<Math.min(.25,(score-80)/300))items.push('sunstone');
  addAsh(fr.x,fr.y,Math.min(9,1+Math.floor(mins/6)),items);save();}
-function searchRocks(k){const c=clampLand(k.x+(SH.on?36:0),k.y+(SH.on?10:0));routeTo(c[0],c[1],()=>{discover('rocks');if(!S.owned.flint&&!S.owned.hatchet){if(S.inv.length>=PACK){think('Something sharp is wedged in here, but my satchel is full.');return;}S.owned.flint=1;S.inv.push({id:'flint'});flies.push({id:'misc',img:'flint',x0:k.x,y0:k.y,t:0});discover('flint');think('One of these has a wicked edge. Flint!');save();}
- else think(pick(['Barnacles, and a crab-shaped dent. Nothing else.','Just wet rock. The flint was a one-off.']));});}
 
 function tapFire(fr){if(!fr.main&&!fireLit(fr))return;if(fr.main&&(!hasSkill('cooking')||!rawCount())){routeTo(fr.x-34,fr.y+26,talkWick);return;}
  if(!hasSkill('cooking')){think('A fire. Strange, it seems to know me.');return;}

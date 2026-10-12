@@ -50,7 +50,9 @@ function swimUpdate(dt){
  SW.idle+=dt;const dHere=seaDepth(P.x,P.y);if(SW.idle>.9&&dHere<.85&&SW.sink<.3){swimEnd(false);addXP('swimming',Math.max(1,Math.round(SW.dist/40)),'normal',[P.x,P.y-20]);SW.dist=0;return;}
  if(SW.idle>1.1&&dHere>=.85)SW.sink=Math.min(1,SW.sink+dt*sinkRate());if(SW.t-Math.floor(SW.t)<dt)noteShore();
  if(SW.stun>0)SW.stun-=dt;
- const drag=Math.exp(-dt*1.6);SW.vx*=drag;SW.vy*=drag;SW.vx+=Math.sin(now*.55)*14*dt;SW.vy+=Math.cos(now*.4)*10*dt;
+ const drag=Math.exp(-dt*1.6);SW.vx*=drag;SW.vy*=drag;
+ /* play: past the outer reefs a strong outgoing current sets west, back toward the Key, and stronger the farther you go; you cannot out-swim it, and it says so once */
+ {const c=curK(P.x,P.y);if(c>0){SW.vx-=c*420*dt;if(c>=1&&SW.vx>0)SW.vx*=Math.exp(-dt*6);if(c>.25&&!S.st.curHint){S.st.curHint=1;think('The sea is pulling the wrong way out here.');}}}SW.vx+=Math.sin(now*.55)*14*dt;SW.vy+=Math.cos(now*.4)*10*dt;
  const dx=SW.tx-P.x,dy=SW.ty-P.y,d=Math.hypot(dx,dy);if(d>6&&SW.stun<=0){SW.vx+=dx/d*22*dt;SW.vy+=dy/d*22*dt;}
  const nx=P.x+SW.vx*dt,ny=P.y+SW.vy*dt;const moved=Math.hypot(nx-P.x,ny-P.y);
  if(seaDepth(nx,ny)<.42&&canStep(nx,ny)){P.x=nx;P.y=ny;const tx=SW.tx,ty=SW.ty;swimEnd(false);addXP('swimming',Math.max(1,Math.round(SW.dist/40)),'normal',[P.x,P.y-20]);SW.dist=0;if(seaDepth(tx,ty)<STAND&&canStep(tx,ty)){if(inSea(tx,ty))walkStraight(tx,ty);else routeTo(tx,ty);}return;}
@@ -66,12 +68,19 @@ function swimUpdate(dt){
  if(SW.breath<=0){SW.breath=1;const s=SW.shore;if(s&&s.sh!==(SH.on?1:0)){if(s.sh)shEnter();else shLeave();}
   if(s){const c=SH.on?shClamp(s.x,s.y):walkable(s.x,s.y)?[s.x,s.y]:clampLand(s.x,s.y);P.x=c[0];P.y=c[1];}else if(SH.on){const c=shClamp(P.x,P.y);P.x=c[0];P.y=c[1];}else{const a=Math.atan2(P.y,P.x),e=polar(a,wetR(a)-14);P.x=e[0];P.y=e[1];}
   cam.x=P.x;cam.y=P.y;SW.blk=0;SW.fade=1;bubbles=[];swimEnd(false);sfx('splash');think(s?'I went under. The sea carried me back to '+(s.name==='Driftwood Key'?'the Key':s.name)+'.':pick(['The sea spat me out. Breathe.','I went under. The shore found me.']));save();return;}
- if(!SH.on&&P.x>FAR_X()){seaCross(true);}else if(SH.on&&P.x<SH_WEST){seaCross(false);}}
+ if(!SH.on&&P.x>FAR_X()){if(MODE==='test')seaCross(true);else P.x=FAR_X();}else if(SH.on&&P.x<SH_WEST){seaCross(false);}}
 /* crossing between the Key's water and the forest's: the scene changes under you, still swimming, far out; the islands are approached, never arrived at */
 function seaCross(toShadow){const dx=SW.tx-P.x,dy=SW.ty-P.y;if(toShadow){SH.on=true;S.isle='shadow';P.x=SH_IN[0];P.y=SH_IN[1];hintEl.classList.remove('on');if(!S.journal.swamfar){discover('swamfar');think('The water has gone dark and cold. Land ahead, if I keep going.');}}
  else{SH.on=false;S.isle='key';P.x=FAR_X()-40;P.y=0;think('The water is warming. The Key is that way.');}
  SW.tx=P.x+dx;SW.ty=P.y+dy;cam.x=P.x;cam.y=P.y;floaters=[];jellies=[];save();}
-function drawSwimWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
+/* the current: where it starts, how hard it pulls (0 to 1), and the streaks on the water that show it */
+const CUR0=()=>FAR_X()-1100;
+function curK(x,y){if(MODE!=='play'||SH.on)return 0;return Math.max(0,Math.min(1,(x-CUR0())/700));}
+function drawCurrent(){if(MODE!=='play'||SH.on)return;const vw=W/Z/2+60,vh=H/Z/2+60;if(cam.x+vw<CUR0())return;ctx.save();ctx.lineCap='round';
+ for(let i=0;i<70;i++){const sx=((i*397)%1600)/1600,sy=((i*631)%1000)/1000,len=40+(i%5)*14,sp=60+(i%7)*12;let x=CUR0()+sx*1400-((now*sp+i*90)%400),y=cam.y-vh+sy*vh*2;const k=curK(x,y);if(k<=0||Math.abs(x-cam.x)>vw)continue;
+  ctx.globalAlpha=.18+.32*k;ctx.strokeStyle='#e8f6f8';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x-len/2,y+3*Math.sin(now+i),x-len,y);ctx.stroke();}
+ ctx.restore();}
+function drawSwimWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;drawCurrent();
  for(const f of floaters){if(Math.abs(f.x-cam.x)>vw||Math.abs(f.y-cam.y)>vh)continue;const b=Math.sin(now*1.8+f.seed)*2;ctx.globalAlpha=.4;sketch(ell(f.x,f.y+6,14,5,10),true,900+(f.seed*7|0),1,null,'#fff',1.5);ctx.globalAlpha=1;ctx.drawImage(iconImg(itemIcon({id:f.id})),f.x-11,f.y-14+b,22,22);}
  for(const j of jellies){if(Math.abs(j.x-cam.x)>vw||Math.abs(j.y-cam.y)>vh)continue;const b=Math.sin(now*2.2+j.seed)*2,gl=.5+.5*Math.sin(now*3+j.seed);
   ctx.globalAlpha=.25+dark*.4;dot(j.x,j.y-6+b,22,'#ffd9a8');ctx.globalAlpha=.85;blob(j.x,j.y-6+b,13,10,920+(j.seed*5|0),'#ffe7c2',2,.5);for(let k=0;k<4;k++)ln([[j.x-8+k*5,j.y+2+b],[j.x-9+k*5+Math.sin(now*4+k+j.seed)*3,j.y+16+b]],930+k,1.8,'#ffc98a',.8);

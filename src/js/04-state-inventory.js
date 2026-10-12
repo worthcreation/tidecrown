@@ -1,7 +1,10 @@
 /* ---------- state ---------- */
-const SAVE='driftwood_key_v1';
+/* MODE comes from tools/build.js: 'play' (index.html) or 'test' (test.html). Test keeps its own save so dialing things in never touches a real one. */
+const SAVE=MODE==='test'?'driftwood_key_test':'driftwood_key_v1';
 let S={x:R0-80,y:24,sk:null,inv:[],shells:0,bait:0,journal:{},day:.27,hint:0,bottles:0,catches:0,metG:false,char:null,origin:null,eq:{head:null,body:null,hand:null,trinket:null,weapon:null},owned:{},salutes:0,wobble:0,wood:0,kelp:0,fires:[],st:{},buff:null,metWick:0};
 try{const raw=localStorage.getItem(SAVE);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
+/* play: the dark islands are out of reach for now; a save left there wakes on the Key */
+if(S.isle==='shadow'&&MODE==='play'){S.isle='key';S.x=R0-80;S.y=24;}
 if(S.isle==='shadow')SH.on=true;
 if(!SH.on&&!walkable(S.x,S.y)){const a=Math.atan2(S.y,S.x);if(Math.hypot(S.x,S.y)<iR(a)+900){const e=polar(a,iR(a)-18);S.x=e[0];S.y=e[1];}else{S.x=R0-80;S.y=24;}}
 /* skills: S.sk[id]={xp}. A skill is unlocked when its entry exists. Migrates the build 1-2 fields. */
@@ -27,7 +30,8 @@ function takeItem(id,n){n=n||1;if(cnt(id)<n)return false;for(let j=S.inv.length-
 {const tot={};S.inv.forEach(i=>{if(stackOf(i.id))tot[i.id]=(tot[i.id]||0)+(i.n||1);});for(const id in tot){let left=tot[id];const cap=stackOf(id);S.inv.forEach(i=>{if(i.id!==id)return;const k=Math.min(cap,left);i.n=k;left-=k;});S.inv=S.inv.filter(i=>!(i.id===id&&(i.n||0)<=0));while(left>0&&S.inv.length<PACK){const k=Math.min(cap,left);S.inv.push({id,n:k});left-=k;}}}
 for(const k of ['shells','bait','wood','kelp','ash','wobble']){const v=S[k];delete S[k];if(typeof v==='number'&&v>0)addItem(k,v);
  Object.defineProperty(S,k,{get(){return cnt(k);},set(v){const c=cnt(k);if(v>c)addItem(k,v-c);else if(v<c)takeItem(k,c-v);},enumerable:false,configurable:true});}
-function save(){S.x=P.x;S.y=P.y;try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){}}
+var WIPED=false;
+function save(){if(WIPED)return;S.x=P.x;S.y=P.y;try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){}}
 const P={x:S.x,y:S.y,path:[],then:null,face:-1,moving:false,task:null,pathT:0};
 const cam={x:P.x,y:P.y};
 (S.fires||[]).forEach(f=>{if(!f.until)f.until=Date.now()+90000;if(f.until>Date.now()+8*60000)f.until=Date.now()+90000;if(!f.fuel)f.fuel={wood:3};});
