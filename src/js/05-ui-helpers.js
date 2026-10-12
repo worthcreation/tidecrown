@@ -6,8 +6,8 @@ function hint(t,ms){hintEl.textContent=t;hintEl.classList.add('on');clearTimeout
 const HINTS={0:'Tap anywhere to walk.',1:'See the bubbles in the water? Tap them to fish.',2:'When the bobber dips, tap fast!',3:'Hold your finger on anything to see more options.',4:'Your satchel, bottom right, holds your catch and skills.'};
 function showHint(){if(SH.on)return;if(HINTS[S.hint])hint(HINTS[S.hint],S.hint>=3?7000:0);else hintEl.classList.remove('on');}
 function advanceHint(to){if(S.hint<to){S.hint=to;showHint();if(to===4){bag.classList.remove('pulse');void bag.offsetWidth;bag.classList.add('pulse');}}}
-function toast(t){toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('on'),2600);}
-function discover(k){if(S.journal[k])return;S.journal[k]=Date.now();toast('Journal: '+JOURNAL[k][0]);save();if(k==='fish_koi'||k==='headnight')setTimeout(()=>toast('A new look waits at the still pool'),2900);}
+function toast(t){if(t.startsWith('New skill'))sfx('skill');toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('on'),2600);}
+function discover(k){if(S.journal[k])return;S.journal[k]=Date.now();sfx('journal');toast('Journal: '+JOURNAL[k][0]);save();if(k==='fish_koi'||k==='headnight')setTimeout(()=>toast('A new look waits at the still pool'),2900);}
 function think(t){bub={txt:t,t:0};}
 function pop(t,x,y,col,size){pops.push({txt:t,x,y,t:0,col:col||'#fff',size:size||20});}
 function pick(a){return a[Math.floor(Math.random()*a.length)];}

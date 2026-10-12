@@ -1,6 +1,6 @@
 /* ---------- state ---------- */
 const SAVE='driftwood_key_v1';
-let S={x:R0-80,y:24,sk:null,inv:[],shells:0,bait:0,journal:{},day:.27,hint:0,bottles:0,catches:0,metG:false,char:null,origin:null,eq:{head:null,body:null,hand:null,trinket:null},owned:{},salutes:0,wobble:0,wood:0,kelp:0,fires:[],st:{},buff:null,metWick:0};
+let S={x:R0-80,y:24,sk:null,inv:[],shells:0,bait:0,journal:{},day:.27,hint:0,bottles:0,catches:0,metG:false,char:null,origin:null,eq:{head:null,body:null,hand:null,trinket:null,weapon:null},owned:{},salutes:0,wobble:0,wood:0,kelp:0,fires:[],st:{},buff:null,metWick:0};
 try{const raw=localStorage.getItem(SAVE);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
 if(S.isle==='shadow')SH.on=true;
 if(!SH.on&&!walkable(S.x,S.y)){const a=Math.atan2(S.y,S.x);if(Math.hypot(S.x,S.y)<iR(a)+900){const e=polar(a,iR(a)-18);S.x=e[0];S.y=e[1];}else{S.x=R0-80;S.y=24;}}
@@ -11,11 +11,11 @@ for(const k of ['xp','hx','sx','hearth','shipwright'])delete S[k];
 if(S.sk.hearth){S.sk.cooking=S.sk.hearth;S.sk.firemaking={xp:0};delete S.sk.hearth;}
 if(S.sk.shipwright){S.sk.woodcutting=S.sk.shipwright;S.sk.tinkering={xp:30};delete S.sk.shipwright;}
 S.st=S.st||{};S.st.fires=Math.max(S.st.fires||0,(S.fires||[]).length,S.journal&&S.journal.firstfire?1:0);
-/* k may be a skill (gathering) or a subskill (fishing). A skill is unlocked when any subskill is; its XP sums its subskills plus achievements. */
+/* k may be a skill (gathering) or a subskill (fishing). A skill is unlocked when any subskill is. A skill's XP is 5% of its subskills' XP plus 50 per achievement, on its own 10-level scale (PXP), so it always trails the subskills: 10 comes when they are deep in the 60s and 70s. */
 function hasSkill(k){return SKILLS[k]?SKILLS[k].subs.some(s=>!!S.sk[s]):!!S.sk[k];}
 function unlockSkill(k){if(!S.sk[k])S.sk[k]={xp:0};}
-function xpOf(k){if(SKILLS[k])return SKILLS[k].subs.reduce((a,s)=>a+xpOf(s)+(ACH[s]||[]).filter(x=>x[2]()).length*50,0);return S.sk[k]?S.sk[k].xp:0;}
-function lv(k){return lvl(xpOf(k));}
+function xpOf(k){if(SKILLS[k])return Math.floor(SKILLS[k].subs.reduce((a,s)=>a+xpOf(s)*.05+(ACH[s]||[]).filter(x=>x[2]()).length*50,0));return S.sk[k]?S.sk[k].xp:0;}
+function lv(k){return SKILLS[k]?plvl(xpOf(k)):lvl(xpOf(k));}
 function cnt(id){return S.inv.reduce((a,i)=>a+(i.id===id?(i.n||1):0),0);}
 function canAdd(id,n){n=n||1;const cap=stackOf(id);if(!cap)return S.inv.length+n<=PACK;let room=(PACK-S.inv.length)*cap;for(const i of S.inv)if(i.id===id)room+=cap-(i.n||1);return room>=n;}
 function addItem(id,n){n=n||1;const cap=stackOf(id);let added=0;
@@ -23,7 +23,8 @@ function addItem(id,n){n=n||1;const cap=stackOf(id);let added=0;
  for(const i of S.inv){if(added>=n)break;if(i.id===id&&(i.n||1)<cap){const k=Math.min(cap-(i.n||1),n-added);i.n=(i.n||1)+k;added+=k;}}
  while(added<n&&S.inv.length<PACK){const k=Math.min(cap,n-added);S.inv.push({id,n:k});added+=k;}return added;}
 function takeItem(id,n){n=n||1;if(cnt(id)<n)return false;for(let j=S.inv.length-1;j>=0&&n>0;j--){const i=S.inv[j];if(i.id!==id)continue;const k=Math.min(i.n||1,n);i.n=(i.n||1)-k;n-=k;if(i.n<=0)S.inv.splice(j,1);}return true;}
-{const tot={};S.inv=S.inv.filter(i=>{if(stackOf(i.id)){tot[i.id]=(tot[i.id]||0)+(i.n||1);return false;}return true;});for(const id in tot)addItem(id,tot[id]);}
+/* on load, tidy stacks in place: each stackable kind fills its existing slots to the cap, in the cells it already had, and sheds any empties */
+{const tot={};S.inv.forEach(i=>{if(stackOf(i.id))tot[i.id]=(tot[i.id]||0)+(i.n||1);});for(const id in tot){let left=tot[id];const cap=stackOf(id);S.inv.forEach(i=>{if(i.id!==id)return;const k=Math.min(cap,left);i.n=k;left-=k;});S.inv=S.inv.filter(i=>!(i.id===id&&(i.n||0)<=0));while(left>0&&S.inv.length<PACK){const k=Math.min(cap,left);S.inv.push({id,n:k});left-=k;}}}
 for(const k of ['shells','bait','wood','kelp','ash','wobble']){const v=S[k];delete S[k];if(typeof v==='number'&&v>0)addItem(k,v);
  Object.defineProperty(S,k,{get(){return cnt(k);},set(v){const c=cnt(k);if(v>c)addItem(k,v-c);else if(v<c)takeItem(k,c-v);},enumerable:false,configurable:true});}
 function save(){S.x=P.x;S.y=P.y;try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){}}

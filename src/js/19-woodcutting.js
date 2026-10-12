@@ -6,18 +6,18 @@ function chopPer(){return lv('woodcutting')>=8?1.25:1.05;}
 function chopTree(t){if(!hasHatchet()){discover('tree');think('I’d need a hatchet. Something sharp, something to hold, something to tie them together.');return;}
  if(!treeReady(t)){think(pick(['Still growing back. It’s sighing at me.','Bare as a mast. Give it time.']));return;}
  const side=P.x<t.x?-1:1,c=clampLand(t.x+side*26,t.y+6);routeTo(c[0],c[1],()=>startChop(t));}
-function startChop(t){if(!treeReady(t))return;if(!canAdd('wobble')){think('My pack is full. Nowhere to put a log.');return;}P.task={chop:1,tree:t,t0:now,prog:0,combo:0,miss:0,swing:0};P.face=t.x>P.x?1:-1;
+function startChop(t){if(!treeReady(t))return;const w=t.sh?woodOf(t):'wobble';if(t.sh&&lv('woodcutting')<WOODREQ[w]){think(w==='ironbark'?'The hatchet skips off it. Ironbark. (Woodcutting '+WOODREQ[w]+')':'Too twisted for me yet. The hatchet bounces. (Woodcutting '+WOODREQ[w]+')');return;}if(!canAdd(w)){think('My pack is full. Nowhere to put a log.');return;}P.task={chop:1,tree:t,t0:now,prog:0,combo:0,miss:0,swing:0};P.face=t.x>P.x?1:-1;
  if(!S.chopHint){S.chopHint=1;hint('Tap as the ring closes on the trunk. Keep the rhythm.',7000);}}
 function beatPh(T){return((now-T.t0)/chopPer())%1;}
 function strike(){const T=P.task;T.swing=.22;const ph=beatPh(T),e=Math.min(ph,1-ph)*chopPer(),win=.11+Math.min(.06,lv('woodcutting')*.003),t=T.tree,cx=t.x+t.lean*.4*t.s,cy=t.y-24*t.s;
  const chip=n=>{for(let i=0;i<n;i++)chips.push({x:cx,y:cy,vx:(Math.random()-.5)*120,vy:-60-Math.random()*90,t:0});};
- if(e<win){T.combo++;T.prog+=1+Math.min(T.combo,6)*.15;chip(8);if(T.combo>=10)S.st.groove=1;streak('chop',true,'woodcutting','Streak',2,[cx,cy-30]);}
- else if(e<win*2.2){T.prog+=.5;chip(4);}
- else{streak('chop',false);T.combo=0;T.miss++;T.prog+=.15;pop('thunk',cx,cy-20,'#fff',15);}
- if(T.prog>=6)finishChop();}
-function finishChop(){const T=P.task,t=T.tree;if(!canAdd('wobble')){P.task=null;think('My pack filled up. The tree keeps its log.');return;}S.wobble+=1;S.st.logs=(S.st.logs||0)+1;const first=!S.journal.wobblelog;
- addXP('woodcutting',T.miss?7:9,first?'first':'normal',[t.x,t.y-30]);if(!T.miss)burst('woodcutting','Clean log',10,[t.x,t.y-60]);flies.push({id:'misc',img:'wobble',x0:t.x,y0:t.y-30,t:0});discover('wobblelog');
- if(t.sh){shChop(t);for(let i=0;i<10;i++)leaves.push({x:t.x+(Math.random()-.5)*30*t.s,y:t.y-38*t.s+(Math.random()-.5)*20*t.s,vx:(Math.random()-.5)*40,vy:10+Math.random()*30,t:0,s:Math.random()*6.28});P.task=null;think(pick(['It comes down without a sound.','The trunk was hollow. Something had been in it.']));save();return;}
+ if(e<win){sfx('chopGood');hap(10);T.combo++;T.prog+=1+Math.min(T.combo,6)*.15;chip(8);if(T.combo>=10)S.st.groove=1;streak('chop',true,'woodcutting','Streak',2,[cx,cy-30]);}
+ else if(e<win*2.2){sfx('chop');hap(8);T.prog+=.5;chip(4);}
+ else{sfx('chopMiss');streak('chop',false);T.combo=0;T.miss++;T.prog+=.15;pop('thunk',cx,cy-20,'#fff',15);}
+ if(T.prog>=(T.tree.sh?WOODPROG[woodOf(T.tree)]:6))finishChop();}
+function finishChop(){const T=P.task,t=T.tree,w=t.sh?woodOf(t):'wobble';if(!canAdd(w)){P.task=null;think('My pack filled up. The tree keeps its log.');return;}addItem(w,1);S.st.logs=(S.st.logs||0)+1;const first=!S.journal[w==='wobble'?'wobblelog':w];const xp={wobble:9,blackwood:9,twistwood:18,ironbark:34}[w];
+ addXP('woodcutting',T.miss?Math.round(xp*.75):xp,first?'first':'normal',[t.x,t.y-30]);if(!T.miss)burst('woodcutting','Clean log',w==='ironbark'?30:w==='twistwood'?18:10,[t.x,t.y-60]);flies.push({id:'misc',img:w,x0:t.x,y0:t.y-30,t:0});discover(w==='wobble'?'wobblelog':w);
+ if(t.sh){shChop(t);for(let i=0;i<10;i++)leaves.push({x:t.x+(Math.random()-.5)*30*t.s,y:t.y-38*t.s+(Math.random()-.5)*20*t.s,vx:(Math.random()-.5)*40,vy:10+Math.random()*30,t:0,s:Math.random()*6.28});P.task=null;think(w==='ironbark'?'It took everything I had. The log is heavier than it looks.':w==='twistwood'?'Hard going. The grain twists like rope.':pick(['It comes down without a sound.','The trunk was hollow. Something had been in it.']));save();return;}
  S.treeCut=S.treeCut||{};S.treeCut[t.seed]=Date.now();for(let i=0;i<14;i++)leaves.push({x:t.x+t.lean*t.s+(Math.random()-.5)*44*t.s,y:t.y-52*t.s+(Math.random()-.5)*30*t.s,vx:(Math.random()-.5)*40,vy:10+Math.random()*30,t:0,s:Math.random()*6.28});P.task=null;think(pick(['The tree sighs and lets a log drop. Thanks, tree.','A log falls loose. The tree seems relieved, honestly.','It shudders, then drops a log at my feet.']));save();}
 function drawChopFX(){const T=P.task;if(T&&T.chop){const t=T.tree,cx=t.x+t.lean*.4*t.s+Math.cos(Math.PI*(now-T.t0)/chopPer())*5*t.s,cy=t.y-24*t.s,ph=beatPh(T),r=12+(1-ph)*30;
   const e=Math.min(ph,1-ph)*chopPer(),win=.11+Math.min(.06,lv('woodcutting')*.003),hot=e<win;

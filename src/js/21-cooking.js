@@ -44,8 +44,8 @@ function fuel(k,auto){if(!C)return;if(!((S[k]||0)>0)){if(!auto)pop(k==='wood'?'N
 fwood.onclick=()=>fuel('wood');fkelp.onclick=()=>fuel('kelp');
 function panTap(i){const p=C.pans[i];
  if(!p.f){const idx=S.inv.findIndex(it=>FISH[it.id]);if(idx<0){pop('No raw fish',C.fr.x,C.fr.y+30,'#fff',17);return;}
-  const it=S.inv.splice(idx,1)[0];Object.assign(p,{f:it.id,side:0,d:[0,0],tot:0,fl:0,flipT:0});if(C.pans.filter(q=>q.f).length>=3)S.st.pans3=1;return;}
- if(p.side===0){p.side=1;p.flipT=.35;return;}finishPan(p);}
+  const it=S.inv.splice(idx,1)[0];sfx('flip',.7);Object.assign(p,{f:it.id,side:0,d:[0,0],tot:0,fl:0,flipT:0});if(C.pans.filter(q=>q.f).length>=3)S.st.pans3=1;return;}
+ if(p.side===0){p.side=1;p.flipT=.35;sfx('flip');hap(8);return;}sfx('plate');finishPan(p);}
 function finishPan(p){const a=sideQ(p.d[0]),b=sideQ(p.d[1]);let q=(a==='burnt'||b==='burnt')?'charred':(a==='under'||b==='under')?'under':(a==='perfect'&&b==='perfect')?'perfect':'good';
  const gold=q==='perfect',smoky=(q==='good'||gold)&&p.tot>0&&p.fl/p.tot>.4;if(smoky)q='smoky';
  S.st.cc=S.st.cc||{};const cs=S.st.cc[p.f]=S.st.cc[p.f]||{n:0,g:0,s:0,c:0};cs.n++;if(gold)cs.g++;if(smoky)cs.s++;if(q==='charred')cs.c++;

@@ -32,12 +32,10 @@
 .youname b{font-size:21px}
 .youname small{color:var(--muted);font-size:15px}
 #pbody .grid.g3{grid-template-columns:repeat(3,50px);gap:6px}
+#pbody .grid{touch-action:none}#pbody img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}#pbody .slot{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}#pbody .gearE{background:none;border-style:dashed}#pbody .slot.dgsrc{opacity:.35}#pbody .slot.over{background:var(--sun);border-style:solid;border-color:var(--ink);box-shadow:0 0 0 3px rgba(255,207,58,.6)}
+.dgghost{position:fixed;z-index:30;width:96px;height:96px;margin:-78px 0 0 -48px;pointer-events:none;background:none;border:none;display:grid;place-items:center;filter:drop-shadow(0 4px 0 rgba(42,33,64,.25))}.dgghost img{width:96px;height:96px;opacity:.95}
 #pbody .grid.g3 .slot{width:50px;height:50px}
 .slot.none{border:none;background:none}
 .you .info{margin-top:8px;flex:1;min-height:0;overflow:hidden}
 
-.mapimg{width:100%;height:auto;border:2.5px solid var(--ink);border-radius:14px 8px 12px 9px;flex:none}
-.maplist{display:grid;grid-template-columns:1fr 1fr;gap:6px;overflow-y:auto;min-height:0}
-.mapb{display:flex;flex-direction:column;align-items:flex-start;font-size:17px;padding:5px 8px;background:#fffaf0;border:2px solid var(--ink);border-radius:10px 5px 11px 6px;line-height:1.15}
-.mapb small{color:var(--muted);font-size:13px}
-.mapb.here{background:var(--sun)}
+.mapc{width:100%;flex:1;min-height:0;border:2.5px solid var(--ink);border-radius:14px 8px 12px 9px;touch-action:manipulation}

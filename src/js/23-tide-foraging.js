@@ -47,7 +47,7 @@ function drawBreaks(){for(const w of BREAKS){const t=w.t;ctx.save();
  ctx.globalAlpha=t>2.3?1-(t-2.3)/.7:1;sketch(pts,true,w.seed,3,'rgba(170,225,235,.55)',null);
  const fp=pts.slice(3,N-2);ln(fp,w.seed+1,4+w.size*6,'rgba(255,255,255,.85)',2.2);ln(fp,w.seed+2,2+w.size*1.5,'#fff',3);ctx.restore();}}
 function drawShore(it){if(underFoam(it))return;shadow(it.x,it.y+2,10,3.5);ctx.drawImage(iconImg(itemIcon({id:it.id})),it.x-12,it.y-20+Math.sin(now*2+it.seed)*1.2,24,24);if(it.n>1)otext(String(it.n),it.x+11,it.y-2,12,'#fff');}
-function grabShore(it){const i=(S.shore||[]).indexOf(it);if(i<0||underFoam(it)){think(pick(['The sea took it back.','Too slow. Next wave.']));return;}
+function grabShore(it){const i=(S.shore||[]).indexOf(it);if(i>=0&&!underFoam(it))sfx('grab');if(i<0||underFoam(it)){think(pick(['The sea took it back.','Too slow. Next wave.']));return;}
  const got=addItem(it.id,it.n);if(!got){think('No room in my pack.');return;}if(got<it.n)it.n-=got;else S.shore.splice(i,1);
  flies.push({id:'misc',img:itemIcon({id:it.id}),x0:it.x,y0:it.y,t:0});const xp=WASH.find(x=>x[0]===it.id)[2];
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}discover(it.id==='wood'?'driftwood':it.id==='kelp'?'kelp':'foraging');
@@ -62,7 +62,7 @@ function drawSurf(){drawSplashes();for(const s of SURF){if(s.st==='dry')continue
  if(s.st==='wet'){ctx.globalAlpha=.22;blob(s.x,s.y-s.ry*.3,s.rx*.9,s.ry*.8,s.x,INK,0);ctx.globalAlpha=1;}
  else{for(let i=0;i<4;i++){const tw=.5+.5*Math.sin(now*9+i*1.9+s.x);ctx.globalAlpha=tw;const sx=s.x-s.rx*.6+((i*17+s.x)%(s.rx*1.2)),sy=s.y-s.ry*.6+((i*11)%(s.ry*1.1));dot(sx,sy,5*tw,'rgba(255,255,255,.35)');star(sx,sy,4.2,'#fff');}ctx.globalAlpha=1;}}}
 function scrapeSalt(s){const c=s.pile?[s.x,DOCK.y1-8]:clampLand(s.x+s.rx+10,s.y+8);routeTo(c[0],c[1],()=>{if(s.st!=='sparkle'){think(pick(['Washed off. Wait for the next one.','Gone. The sea keeps its salt.']));return;}
- if(!addItem('seasalt',1)){think('No room in my pack.');return;}s.st='dry';pop('+1 sea salt',s.x,s.y-30,'#fff',17);
+ sfx('scrape');if(!addItem('seasalt',1)){think('No room in my pack.');return;}s.st='dry';pop('+1 sea salt',s.x,s.y-30,'#fff',17);
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}
  S.st.found=S.st.found||{};S.st.found.seasalt=(S.st.found.seasalt||0)+1;S.st.pinches=(S.st.pinches||0)+1;discover('seasalt');
  addXP('foraging',3,first?'first':'normal',[s.x,s.y-20]);save();});}

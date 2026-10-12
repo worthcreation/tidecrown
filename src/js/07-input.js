@@ -3,6 +3,7 @@ let pd=null;
 let fsTried=false;const standalone=matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone;
 function goFull(){if(fsTried||standalone)return;fsTried=true;const el=document.documentElement;if(el.requestFullscreen&&matchMedia('(pointer: coarse)').matches){el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});}}
 cv.addEventListener('pointerdown',goFull,{capture:true});
+document.addEventListener('pointerdown',()=>{if(SND.on){sndInit();if(AC&&AC.state!=='running')AC.resume();}},{capture:true});
 if(/iPhone|iPad/.test(navigator.userAgent)&&!standalone)setTimeout(()=>{if(!S.st.homeHint&&!ccOn){S.st.homeHint=1;save();toast('Add to Home Screen to play full screen');}},75000);
 cv.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;
  const cur={x:e.clientX,y:e.clientY,t:performance.now(),id:e.pointerId,moved:false,lp:false,edge:e.clientX>W-30?'r':(e.clientX<30?'l':null)};pd=cur;

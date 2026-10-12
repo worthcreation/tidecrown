@@ -16,6 +16,8 @@ Full design rules and the story so far: docs/design-rules.md. Read it before any
 - Handoff (end of a chat or when Ross says handoff): update HANDOFF.md and, if they changed, docs/design-rules.md and this file.
 
 ## Working with Ross
+- Always ask before building anything, including small fixes. Design talk first: reflect the idea back as systems, check it against the pillars, flag what fails a rule, pose questions, and wait for Ross to say go.
+- Pick the cheapest model that fits the task when suggesting one: Haiku for numbers, copy and one-line fixes; Sonnet for most builds; Opus only for changes that touch the data or save model.
 - Concise, direct, candid, no AI-sounding language, no em dashes. Sources when facts matter.
 - Setup steps as numbered lists with each command or field value in its own code block; combine commands into one line.
 - PowerShell commands must stop if a cd or path check fails: use cd -ErrorAction Stop or Test-Path in an if block, never a bare cd followed by semicolons.

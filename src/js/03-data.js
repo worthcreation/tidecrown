@@ -24,15 +24,20 @@ const JOURNAL={
  headnight:['The humming','At night the stone head hums. Something about the west shore, and the moon.'],
  wick:['Brimble','A living galley flame, keeping house in a hollow in the dunes. He fed the crew of the Grinning Gull for forty years and floated here in a teapot. Proud, fussy, always hungry.'],
  rowboat:['The rowboat','Tied to the pier one morning with no note. It is not supposed to be here yet.'],
- islet:['The small islands','Three islets ring the forest. One is bridged, two want swimming. A grove, a fallow mudflat with something dead in it, and a clearing that glows at night.'],
+ islet:['The small islands','Each island here has its own shape and temper: a grove to land on, the Tangle and the Thicket thick with twisted trees, two fallow mudflats with something dead in them, a clearing that glows at night, and a far grove of the oldest, most twisted wood.'],
  fallow:['Fallow ground','Grey, bubbling, sour. Parts of the forest have given up growing. Something is draining them.'],
- shadowtree:['Shadow tree','Black bark, hollow heart. The walls of the maze are made of them. Cut the one in the middle of a wall and the wall comes open.'],
- shadow:['The Shadow Forest','A cluster of dark islands past the Key. The big one is all forest, a maze of it, and the trees seem to listen.'],
+ shadowtree:['Shadow tree','Black bark, hollow heart, and canopies that hide what walks under them. Cut one and the way opens; nothing here grows back.'],
+ shadow:['The Shadow Forest','A cluster of dark islands past the Key, each its own shape and mood. The big ones are forest, twisted black trees in clumps with paths between, and the trees seem to listen.'],
+ shallows:['The shallows','The water is not one depth. It shelves out from every shore, slow in some places, all at once in others; the colour says which. Out at sea there are sandbars to stand on, reefs, and little islands nobody has named.'],
+ tinyisle:['A little island','A scrap of land in the open sea, a few trees and nobody. There are more out there. There is no end to them, maybe.'],
+ blackwood:['Black wood','A log from a plain shadow tree. Lighter than it looks and it burns long.'],
+ twistwood:['Twisted wood','The gnarled trees of the forest give hard wood with grain like rope. The more twisted the tree, the harder the log. This is what real projects want.'],
+ ironbark:['Ironbark','The worst-twisted trees give a black wood nearly as hard as stone. Rare, heavy, and worth the fight.'],
  thehollow:['The Hollow','Something the size of a ship lies across the heart of the forest, breathing. Everything keeps its distance. Everything else here is a symptom of it.'],
  hollowmaw:['Hollowmaw','A dead tree until it unfolds. Its heartwood is rotting, so it eats living trees to feel warm. It wants warmth, not me.'],
  mossback:['Mossback','Soft, round, mossy, and starving. It used to eat what the Hollowmaws left. Fed, it follows.'],
  moonlapper:['Moonlapper','Pale, long-necked, eyeless. It laps the moon off the water at night, and the moon thins. It is drinking light because the forest has none.'],
- swimming:['Swimming','I waded in and kept going. There is a rhythm to it, and a rumour that people have swum between islands. Even past the Shadow Forest.'],
+ swimming:['Swimming','I waded in and kept going. There is a rhythm to it: keep stroking and the sea keeps you up; stop and it takes you under and carries you back to the last shore. People say they have swum between islands. Even past the Shadow Forest.'],
  jelly:['Lantern jelly','A glowing bell with trailing threads, drifting where it pleases. Brush one and everything tingles for a while.'],
  swamfar:['The long swim','I swam east off the Key until the dark islands took me in. So the rumour is true.'],
  foraging:['Foraging','The tide gives and the tide takes back. Grab what the waves drop before the backwash, and scrape the salt they leave on rock and piling.'],
@@ -70,6 +75,9 @@ const JOURNAL={
 };
 const XP=[0,0];{let p=0;for(let l=1;l<99;l++){p+=Math.floor(l+300*Math.pow(2,l/7));XP[l+1]=Math.floor(p/12);}}
 function lvl(x){let L=1;while(L<99&&x>=XP[L+1])L++;return L;}
+/* parent skills run 1 to 10 on their own scale: each level needs 2^(1/1.43), about 1.62 times, the XP of the one before. */
+const PXP=[0,0,100];for(let l=3;l<=10;l++)PXP[l]=Math.round(PXP[l-1]*Math.pow(2,1/1.43));
+function plvl(x){let L=1;while(L<10&&x>=PXP[L+1])L++;return L;}
 const PACK=20;
 const KIN={human:{name:'Human',tones:['#ffe0bd','#e8b48a','#b9825a','#7a4f33'],toneN:['Sand','Honey','Cocoa','Umber'],blurb:'Ordinary, which out here is the strangest thing of all.'},
  moss:{name:'Mossling',tones:['#c6e29a','#a8d07e','#8dbb6a','#6f9e58'],toneN:['Sprout','Fern','Moss','Bog'],feat:'leaf',blurb:'A leaf grows from your head. It turns toward the sun on its own.'},
@@ -115,6 +123,9 @@ const ITEMS={
  seasalt:{name:'Sea salt',desc:'Crystals from the sea, scraped off wet rock or left where kelp burned. Brimble’s eyes would light up. Well, more.',stack:10},
  pearl:{name:'Ember pearl',desc:'A warm, glowing bead from the heart of a wobblewood fire. It hums when you hold it.',stack:5},
  sunstone:{name:'Sunstone',desc:'Smooth, and warm all the way through. It remembers being part of the sun. Nobody knows what it does yet.',stack:3},
+ blackwood:{name:'Black wood',desc:'A log from a shadow tree. Light, dark, and it burns longer than driftwood. Stacks five to a slot.',stack:5},
+ twistwood:{name:'Twisted wood',desc:'A log from a twisted tree. Hard as a knuckle, grain like rope. The stuff of real projects. Stacks three to a slot.',stack:3},
+ ironbark:{name:'Ironbark',desc:'From a tree gnarled past reason. Heavy, black, nearly stone. Whatever is built from this will outlast you. Stacks two to a slot.',stack:2},
  deadwood:{name:'Dead wood',desc:'A grey limb off a Hollowmaw, dry as old bones. Burns, sulkily. Stacks five to a slot.',stack:5},
  flint:{name:'Flint shard',desc:'Sharp as a grudge. Lashed to a stick with something stringy, it would make a fine hatchet.'},
  hatchet:{name:'Stone hatchet',desc:'Flint, driftwood and kelp twine. Wobble trees eye it nervously.'},

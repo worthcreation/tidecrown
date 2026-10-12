@@ -11,7 +11,7 @@ function drawRock(k){blob(k.x,k.y,k.rx,k.ry,k.seed,'#a39db6');ln([[k.x-k.rx*.4,k
 function drawPool(){const {x,y}=POOL;blob(x,y,44,22,170,'#8fd3dc',3);const ph=(now*.4)%1;ctx.globalAlpha=.6*(1-ph);sketch(ell(x,y,8+ph*30,(8+ph*30)*.45,12),true,171,1,null,'#fff',2);ctx.globalAlpha=1;
  ln([[x-16,y-7],[x-4,y-10]],172,2.5,'rgba(255,255,255,.85)',.5);for(const [ox,h] of [[-46,26],[-40,19],[43,24]])ln([[x+ox,y+4],[x+ox+2,y+4-h]],173+ox,2.5,'#3f7f3a',.6);}
 function drawSign(){const {x,y}=SIGN;shadow(x,y+2,14,5);ln([[x,y],[x+1,y-30]],61,5,INK,.8);ln([[x,y],[x+1,y-30]],61,2.5,'#b07a4a',.8);sketch(rrPts(x-24,y-52,48,26,6),true,62,1.5,'#d9a066',INK,2.8);ln([[x-15,y-44],[x+12,y-45]],63,2,INK,1);ln([[x-15,y-36],[x+6,y-36]],64,2,INK,1);}
-function drawFarIsles(){const bx=iR(0)+1850;[[bx,-120,150,70],[bx+260,120,110,50],[bx+120,340,90,42]].forEach(([x,y,w,h],i)=>{if(Math.abs(x-cam.x)>W/Z/2+w+200)return;sketch(ell(x,y,w,h,18),true,820+i,4,'#2b3a3f',INK,3);sketch(ell(x,y-14,w*.7,h*.6,14),true,824+i,4,'#1f2b24',null);});}
+function drawFarIsles(){const bx=FAR_X()+700;[[bx,-120,150,70],[bx+260,120,110,50],[bx+120,340,90,42]].forEach(([x,y,w,h],i)=>{if(Math.abs(x-cam.x)>W/Z/2+w+200)return;sketch(ell(x,y,w,h,18),true,820+i,4,'#2b3a3f',INK,3);sketch(ell(x,y-14,w*.7,h*.6,14),true,824+i,4,'#1f2b24',null);});}
 function drawBoatKey(){const x=BOAT_KEY.x,y=BOAT_KEY.y,b=Math.sin(now*1.3)*2;sketch([[x-30,y-6+b],[x+30,y-6+b],[x+21,y+7+b],[x-21,y+7+b]],true,805,2,'#9a6236',INK,3);ln([[x-26,y-2+b],[x+26,y-2+b]],806,2,'rgba(42,33,64,.3)',.4);ln([[x+4,y-4+b],[x+22,y-26+b]],807,3,INK,.5);ln([[x-6,y-4+b],[x-24,y-24+b]],808,3,INK,.5);}
 function drawHome(){const {x,y}=FIRE;const tx=x-54,ty=y+6;shadow(tx,ty+2,26,8);
  blob(tx,ty-18,24,20,300,'#7fa8c9',2.6);blob(tx,ty-34,10,4,301,'#5d86a8',2.2,.5);dot(tx,ty-37,3.5,'#ffcf3a');
@@ -45,7 +45,6 @@ function drawChar(a,eq,x,y,f,mv,fishing){
  if(mv){const s=Math.sin(now*12)*5;ln([[x-5,y-6],[x-5+s,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+5-s,y]],111,3.5,INK,.3);}else{ln([[x-5,y-6],[x-6,y]],110,3.5,INK,.3);ln([[x+5,y-6],[x+6,y]],111,3.5,INK,.3);}
  const by=y-ry-3-b,ny=by-ry+3,hx=x+f*2,hy=ny-9,coat=eq.body==='coat';
  const sp=mv?10:4,w=Math.sin(now*sp)*(mv?2.5:1.2),w2=Math.sin(now*sp+1.3)*(mv?3.2:1.6),kx=x-f*rx*.55,ky=ny+1;
- const [st,tw]=scarfIdle();sketch([[kx,ky-2],[kx-f*9*st,ky+w+tw*.3],[kx-f*17*st,ky-2+w2+tw*.7],[kx-f*13*st,ky+3+w+tw*.5],[kx-f*19*st,ky+8+w2+tw],[kx-f*8*st,ky+7+w+tw*.3],[kx,ky+4]],true,113,.4,acc,INK,2.2);
  blob(x,by,rx,ry,112,coat?'#f2c230':(COLS[a.col]||COLS[0]));
  if(coat){ln([[x+f*1,ny+3],[x+f*2,by+ry-3]],119,2,INK,.5);dot(x+f*5,by,1.6);dot(x+f*5,by+7,1.6);}
  if(K.feat==='fins'){for(const sd of[-1,1])sketch([[hx+sd*8,hy-2],[hx+sd*17,hy-8],[hx+sd*14,hy+3]],true,120+sd,.6,skin,INK,2.2);}
@@ -67,12 +66,13 @@ function drawChar(a,eq,x,y,f,mv,fishing){
  else if(a.mark==='star')star(mx,my-1,2.8,'#ffcf3a');
  else if(a.mark==='moon'){ctx.globalAlpha=.7+.3*Math.sin(now*2);dot(mx,my,1.6,'#dff4ff');dot(mx-2,my+2,1.3,'#dff4ff');dot(hx-f*5,my,1.3,'#dff4ff');ctx.globalAlpha=1;}
  sketch(rrPts(x-rx*.8,ny-3.5,rx*1.6,7.5,3.5),true,115,.5,acc,INK,2.4);
- blob(kx,ky+.5,3.4,3.2,116,acc,2.2,.3);
+ scarfTail(x,ky+1,f,w,w2,acc,mv);blob(x-f*rx*.55,ky+.5,3.4,3.2,116,acc,2.2,.3);
  if(eq.head==='stache')drawStache(hx+f*1.5,hy+3.8,1.1,Math.sin(now*3)*.6);
  if(eq.head==='cap'){blob(hx,hy-7,11.5,6,140,'#9d97b0',2.4);dot(hx-4,hy-9,1.5,'#fff');dot(hx+3,hy-10,1.3,'#fff');dot(hx+6,hy-7,1.2,'#fff');}
  else if(eq.head==='thimble'){sketch([[hx-10,hy-4],[hx-9,hy-12],[hx,hy-16],[hx+9,hy-12],[hx+10,hy-4]],true,141,.5,'#d6d0e2',INK,2.4);dot(hx-3,hy-10,1);dot(hx+2,hy-11,1);dot(hx+5,hy-8,1);dot(hx-6,hy-7,1);}
  if(eq.hand==='gloves')blob(x+f*(rx-1),by+3,4.5,4,142,'#4f9a5a',2);
  else if(fishing)ln([[x-f*1,by-1],[x+f*10,by+1]],143,3,INK,.3);
+ if(eq.weapon==='hatchet'&&!fishing&&!(P.task&&P.task.chop&&!ccOn)&&!SC.fx.some(q=>q.kind==='hew'||q.kind==='sweep'||q.kind==='swirl')){const hx2=x+f*(rx+1),hy2=by+2;ctx.save();ctx.translate(hx2,hy2);ctx.scale(f,1);ctx.rotate(.5);ln([[0,6],[0,-12]],952,3.6,INK,.3);ln([[0,6],[0,-12]],952,1.8,'#d9cdb5',.3);sketch([[-1.5,-15],[6,-13.5],[4.5,-8],[0,-10]],true,953,.3,'#8a8494',INK,1.5);ctx.restore();}
  if(eq.trinket)dot(x-f*(rx*.4),by+ry*.5,2.4,'#ffcf3a');}
 function drawSpot(sp){let a=sp.al;if(sp.type==='moon'){a=Math.min(1,(dark-.1)/.25);}if(a<=.02)return;ctx.save();ctx.globalAlpha=a;
  if(sp.type==='deep')sketch(ell(sp.x,sp.y,36,17,14),true,sp.seed,3,'#2f8ea2',null);
@@ -96,12 +96,12 @@ function drawFly(){for(const f of flies){const k=Math.min(1,f.t/.6),x=f.x0+(P.x-
  if(f.id==='misc'){ctx.drawImage(iconImg(f.img),-14,-14,28,28);}else if(f.id==='bottle')sketch(rrPts(-6,-9,12,18,5),true,4,.6,'#9fd8b4',INK,2.2);else drawFish(f.id,0,0,1.05,P.x>f.x0?1:-1,f.col);ctx.restore();}}
 
 function render(){
- ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#3fa7b8';ctx.fillRect(0,0,W,H);
+ ctx.setTransform(DPR,0,0,DPR,0,0);const far=farness();ctx.fillStyle=waterCol(3);ctx.fillRect(0,0,W,H);
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(Z,Z);ctx.translate(-cam.x,-cam.y);
  if(SH.on)shWorld();else{
  const vw=W/Z/2+80,vh=H/Z/2+80;
- ctx.globalAlpha=.5;for(const w of waves){const x=w.x+Math.sin(now*.6+w.s)*12,y=w.y;if(Math.abs(x-cam.x)>vw||Math.abs(y-cam.y)>vh)continue;ln([[x-10,y],[x,y-4],[x+10,y]],w.seed,2.5,'#fff',1);}ctx.globalAlpha=1;
- sketch(shallowPts,true,3,6,'#5fbecb',null);
+ drawDepthBands();ctx.globalAlpha=.5-far*.2;const wc=mixCol('#ffffff','#9fc4cc',far);for(const w of waves){const x=w.x+Math.sin(now*.6+w.s)*12,y=w.y;if(Math.abs(x-cam.x)>vw||Math.abs(y-cam.y)>vh)continue;ln([[x-10,y],[x,y-4],[x+10,y]],w.seed,2.5,wc,1);}ctx.globalAlpha=1;
+ drawIsletLand();
  spots.forEach(drawSpot);drawSwimWorld();drawFarIsles();
  drawFoam();drawWet();
  sketch(sandPts,true,1,4,'#f3d27a',tideLevel()>.985?INK:'rgba(42,33,64,.25)',3.5);drawBreaks();
@@ -111,7 +111,7 @@ function render(){
  drawPickups();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t)]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k)]));d.push([DOCK.y1+40,drawSurf]);
- (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it)]));d.push([BOLLARD.y+4,drawBollard],[BOAT_KEY.y,drawBoatKey],[FIRE.y-20,drawHome],[POOL.y-40,drawPool],[GULL.y,drawGull],[SIGN.y,drawSign],[HEAD.y,drawHead],[CRAB.y,drawCrab],[G.y,drawGubbins],[P.y,drawSwimmer]);allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr)]));if(KW.active)d.push([KW.y,drawKindle]);
+ (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it)]));d.push([BOLLARD.y+4,drawBollard],[BOAT_KEY.y,drawBoatKey],[FIRE.y-20,drawHome],[POOL.y-40,drawPool],[GULL.y,drawGull],[SIGN.y,drawSign],[HEAD.y,drawHead],[CRAB.y,drawCrab],[G.y,drawGubbins],[P.y,drawSwimmer]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t)]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr)]));if(KW.active)d.push([KW.y,drawKindle]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{if(x[1]===drawSwimmer){drawSwimmer();if(!SW.on)drawLine();}else x[1]();});
  }
  drawFly();drawScarfFX();drawChopFX();if(C)drawCook();
@@ -129,6 +129,7 @@ function render(){
   ctx.globalAlpha=bub.t>3.9?1-(bub.t-3.9)/.5:Math.min(1,bub.t*6);blob(P.x+8,P.y-58,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,P.y-68,6,5,151,'#fffaf0',2,.3);
   sketch(rrPts(bx,by,w,h,12),true,152,2,'#fffaf0',INK,2.6);ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,P.x,by+9+i*lh));ctx.globalAlpha=1;}
  ctx.restore();
+ {const bk=Math.max(SW.on?SW.blk:0,SW.fade);if(bk>0){const g=ctx.createRadialGradient(W/2,H/2,Math.max(20,(1-bk)*W*.5),W/2,H/2,W*.75);g.addColorStop(0,`rgba(5,8,20,${Math.min(1,bk*bk*1.1)})`);g.addColorStop(1,`rgba(5,8,20,${Math.min(1,.4+bk)})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}}
  drawOrbsHUD();
  if(cele){const k=cele.t,sc=k<.25?k/.25*1.1:k<.4?1.1-(k-.25)/.15*.1:1,a=k>2.7?1-(k-2.7)/.5:1;ctx.save();ctx.globalAlpha=Math.max(0,a);ctx.translate(W/2,Math.max(120,H*.24));ctx.scale(sc,sc);
   const pts=[];for(let i=0;i<22;i++){const r=i%2?60:86,t=i/22*6.2832+k*.35;pts.push([Math.cos(t)*r*1.45,Math.sin(t)*r*.72]);}sketch(pts,true,77,5,'#ffcf3a',INK,4);

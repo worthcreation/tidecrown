@@ -14,7 +14,7 @@ const DOCK={x0:R0-40,x1:R0+192,y0:-24,y1:24};
 function onIsland(x,y){return Math.hypot(x,y)<=wetR(Math.atan2(y,x))-10;}
 function onDock(x,y){return x>=DOCK.x0&&x<=DOCK.x1-10&&y>=DOCK.y0+6&&y<=DOCK.y1-6;}
 const SH={on:false};
-function walkable(x,y){if(SH.on)return shWalkable(x,y);return onIsland(x,y)||onDock(x,y);}
+function walkable(x,y){if(SH.on)return shWalkable(x,y);return onIsland(x,y)||onDock(x,y)||!!onIsletK(x,y);}
 function clampLand(x,y){if(SH.on)return shClamp(x,y);if(walkable(x,y))return[x,y];const a=Math.atan2(y,x);return polar(a,wetR(a)-18);}
 
 /* fishing spots roam: a spot fades in, lives a couple of minutes, fades out, and a new one bubbles up somewhere else. The glowing pool is a place and stays put. */
@@ -51,5 +51,5 @@ const trees=[];
   if(avoid.some(p=>Math.hypot(p[0]-x,p[1]-y)<120))continue;if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<90))continue;
   trees.push({x,y,s:.85+r()*.45,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}}
 const tufts=[];{const r=mulberry(11);for(let i=0;i<80;i++){const a=r()*6.2832,d=Math.sqrt(r())*.93;tufts.push({x:Math.cos(a)*gR(a)*d,y:Math.sin(a)*gR(a)*d,f:r()<.18,seed:i+500,c:r()});}}
-const waves=[];{const r=mulberry(23);for(let i=0;i<140;i++){const a=r()*6.2832,d=iR(a)+110+r()*1100;waves.push({x:Math.cos(a)*d,y:Math.sin(a)*d,s:r()*6,seed:i+900});}}
+const waves=[];{const r=mulberry(23);for(let i=0;i<300;i++){const a=r()*6.2832,d=iR(a)+110+r()*(i<140?1100:4300);waves.push({x:Math.cos(a)*d,y:Math.sin(a)*d,s:r()*6,seed:i+900});}}
 

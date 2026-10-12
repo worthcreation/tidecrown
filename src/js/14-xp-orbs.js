@@ -24,7 +24,7 @@ function addXP(k,n,kind,src){const before=xpOf(k),p=SUBS[k].p,pl=lv(p);unlockSki
 /* bursts: base XP is a quiet trickle; the big payouts come from streaks, tempo, stints and marks found by doing. A burst is a named gold shower. */
 let bursts=[];
 function burst(k,name,xp,pos){S.st.bursts=S.st.bursts||{};const key=k+':'+name.replace(/ ×\d+$/,''),first=!S.st.bursts[key];S.st.bursts[key]=(S.st.bursts[key]||0)+1;
- const s=w2s(pos[0],pos[1]),q=bursts.filter(b=>b.t<1.2).length;bursts.push({name,xp,x:Math.max(70,Math.min(W-70,s[0])),y:Math.max(SAT()+90,s[1]-40),t:-q*.55,first});addXP(k,xp,'burst',pos);}
+ const s=w2s(pos[0],pos[1]),q=bursts.filter(b=>b.t<1.2).length;bursts.push({name,xp,x:Math.max(70,Math.min(W-70,s[0])),y:Math.max(SAT()+90,s[1]-40),t:-q*.55,first});setTimeout(()=>sfx('burst'),q*550);addXP(k,xp,'burst',pos);}
 function streak(key,ok,k,name,per,pos){S.st.streaks=S.st.streaks||{};const n=ok?(S.st.streaks[key]||0)+1:0;S.st.streaks[key]=n;
  if(ok&&(n===3||n===5||(n>=10&&n%5===0)))burst(k,name+' ×'+n,Math.round(per*n),pos);return n;}
 function drawBursts(dt){bursts=bursts.filter(b=>(b.t+=dt)<2.1);for(const b of bursts){if(b.t<0)continue;const k=b.t,sc=k<.18?.4+k/.18*.75:k<.3?1.15-(k-.3)*0:1,al=k>1.5?1-(k-1.5)/.6:1,y=b.y-k*22;
@@ -39,7 +39,7 @@ function updOrbs(dt){for(const o of orbs){o.t+=dt;if(o.t<0)continue;const k=Math
  HUD.hold-=dt;HUD.plusT-=dt;if(HUD.plusT<=0)HUD.plus=0;if(HUD.glint>=0){HUD.glint+=dt*2.6;if(HUD.glint>1)HUD.glint=-1;}HUD.bump=Math.max(0,HUD.bump-dt*4);
  const show=HUD.sk&&(orbs.length||HUD.hold>0);HUD.a+=((show?1:0)-HUD.a)*Math.min(1,dt*7);}
 function orbHit(o){if(HUD.sk!==o.sk)return;const L0=lvl(HUD.disp+.001);HUD.disp+=o.v;HUD.glint=0;HUD.plus+=o.v;HUD.plusT=1.4;HUD.hold=2.2;HUD.bump=1;
- const L1=lvl(HUD.disp+.001);if(L1>L0){const D=skd(o.sk);cele={t:0,l:L1,name:D.name,msg:(D.unl||{})[L1]||'You feel a little steadier'};}}
+ const L1=lvl(HUD.disp+.001);if(L1>L0){sfx('level');const D=skd(o.sk);cele={t:0,l:L1,name:D.name,msg:(D.unl||{})[L1]||'You feel a little steadier'};}}
 function drawOrbsHUD(){
  for(const o of orbs){if(o.t<0)continue;const col=o.kind==='burst'?'#ffcf3a':o.kind==='perfect'?'#ffeab0':o.kind==='burnt'?'#8a8494':o.kind==='lead'?'#eaf2ff':o.kind==='smoky'?'#e2c9a8':(o.sk==='hearth'?'#ffd2a1':'#bfeaf6');
   o.trail.forEach((q,i)=>{ctx.globalAlpha=(o.kind==='smoky'?.25:.3)*(1-i/o.trail.length);dot(q[0],q[1],o.kind==='smoky'?5-i*.4:Math.max(.6,3-i*.6),o.kind==='smoky'?'#b8aa9a':col);});

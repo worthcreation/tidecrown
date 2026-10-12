@@ -52,5 +52,5 @@ function renderPreview(){const c=$('pv');if(!c)return;const d=Math.min(2,deviceP
 /* the scarf is alive while you decide: it stretches and twists on its own, and flicks when you change something */
 const SCF={k:0,dir:1};
 function scarfIdle(){if(!ccOn)return [1,0];const st=1+.22*Math.sin(now*.9)+.14*Math.sin(now*2.3+1)+SCF.k*.6,tw=Math.sin(now*1.3)*5+Math.cos(now*.5)*3-SCF.k*8*SCF.dir;return [st,tw];}
-function begin(){intro=RM?null:0;setTimeout(showHint,RM?300:2600);if(!S.journal.washed)setTimeout(()=>discover('washed'),3400);}
+function begin(){sfx('whoosh');intro=RM?null:0;setTimeout(showHint,RM?300:2600);if(!S.journal.washed)setTimeout(()=>discover('washed'),3400);}
 
