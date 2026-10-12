@@ -1,4 +1,4 @@
-# Tidecrown: handoff (build 17, 12 Oct 2026)
+# Tidecrown: handoff (build 18, 12 Oct 2026)
 Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/design-rules.md. Milestones and work order: docs/roadmap.md.
 
 ## Workflow
@@ -22,7 +22,8 @@ Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/de
 - 09-icons: icon(id) cached data URLs, ICV canvases, stackIcon(id,n) and stackTier for count models.
 - 23b-shell: the shell hatchet chain (CLAMS on the three nearest reefs, pryClam needs driftwood, startGrind/grindStroke at rocks, GRIND_N strokes saved in S.grind, flint in old saves becomes shellblade).
 - 23c-thimble: Sir Thimble's quest (S.q.thimble st 0/1/2, KIT palm/fid/twine, kitSpot with visibility by tide, thimbleSalute, S.know.sewing).
-- 28-test (test only): Test tab (levels, gear, items, time via DAYOFF, tide via tideF, wipe via WIPED).
+- 29-weather: wxUpdate (WX: wind angle wa, strength ws, cover, rain, fog, seaFog; all from the clock, nothing saved; WXT is the test override), fogAt/fogR/fogHides (objAt skips what fog hides), CLOUDS on a 3000px tile sliding with the wind, drawWeatherWorld (cloud shade, rare low cloud, fog wisps), drawWeatherScreen (rain, fog veil), wxTick (rain drowns fires, washes salt), waveAlign (spawnBreak sizes waves by wind).
+- 28-test (test only): Test tab (levels, gear, items, time via DAYOFF, tide via tideF, weather and wind via WXT, wipe via WIPED).
 - 08-panel-bank: cntFmt badge; tabs Skills, Pack (true grid, pointer drag and drop: dgMove/dgDrop swap, push-apart insert, drop on a You slot to wear), Journal, You (SLOTS paperdoll, every slot tappable via canFit/wearFrom; Weapon slot holds scarf or hatchet), Map (drawMapTo sea chart; test: names and warps; play: the Key plus an unnamed smudge, no taps), bank.
 - 10-update: movement (wading slows with depth; a walk into deep water turns into a swim), day/dark, Key-only logic guarded by !SH.on.
 - 11-render: skyLights() each frame sets SKY.sun and SKY.moon (tropical path from S.day) and SHF (lit fires); shadow(x,y,rx,ry,h,cr,m) draws a contact patch plus one cast per light, cr for a tree canopy, m for denser shade with sun flecks. dark comes from the day alone. Key world draw (drawDepthBands, drawIsletLand, islet palms); shWorld() replaces it when SH.on.
@@ -41,6 +42,6 @@ Key: creator, Gubbins (fish buyer), Brimble (galley flame, teaches Cooking), Mor
 Shadow Forest (test build only for now): seven islands, reached by map warp or the swim east, long gradual swim with a mid-swim scene change, forests of twisted trees (black wood, twisted wood, ironbark), creatures with tells that Strife and Accord can each set right.
 
 ## Next
-Work order is docs/roadmap.md. Ross approved the pipeline: weather, terrain height, shadow regrowth, in that order (light and day done in 17); each starts on "next" with a short design check. Then Invention design, which gates the fire ladder, glass and the lantern.
-- Tune by play: wave rates, swim feel, depth shelves, jelly density, day and tide lengths, the current's strength, grind stroke count (48).
+Work order is docs/roadmap.md. Ross approved the pipeline: terrain height, then shadow regrowth (light and day done in 17, weather in 18); each starts on "next" with a short design check. Then Invention design, which gates the fire ladder, glass and the lantern.
+- Tune by play: wave rates, swim feel, depth shelves, jelly density, day and tide lengths, the current's strength, grind stroke count (48), squall frequency, fog thickness, cloud shade strength.
 - Open for Ross: the Oilskin Coat's upgrade or take-apart path; at the next handoff, add to the project instructions: attach PROJECT_INSTRUCTIONS.md only when asked, when it changed, or at a handoff; whether to run builds in Claude Code on a branch per build; move the Playwright tests into the repo (tools/tests/).

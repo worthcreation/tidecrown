@@ -5,7 +5,7 @@
    cast per light. h is the caster's height; cr, if given, is a canopy radius cast from the top (trees). */
 let SKY={sun:null,moon:null},SHF=[];
 function skyLights(){const d=S.day,h=(d-.5)*6.2832,e=Math.cos(h)*1.45,mk=(az,el,a)=>{if(el<=.04)return null;const sx=-Math.sin(az),sy=-.1,n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
- SKY.sun=mk(h,e,.24);SKY.moon=mk(h+Math.PI,-e,.09);
+ SKY.sun=mk(h,e,.24*(1-.8*cloudOver(P.x,P.y))*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,-e,.09);
  SHF=[];if(!SH.on){SHF.push({x:FIRE.x,y:FIRE.y-6,a:.26});(S.fires||[]).forEach(f=>{if(fireLit(f))SHF.push({x:f.x,y:f.y-6,a:f.big?.3:.24});});}}
 function castOne(x,y,rx,ry,h,cr,dx,dy,k,a){const L=h*k,ox=dx*L,oy=dy*L*.5,ang=Math.atan2(oy,ox),si=Math.abs(Math.sin(ang));
  ctx.globalAlpha=a;ctx.beginPath();if(cr){const w=cr*(1-si*.55);ctx.ellipse(x+ox,y+oy,cr,cr*.5,0,0,6.3);ctx.fill();ctx.beginPath();ctx.ellipse(x+ox*.5,y+oy*.5,Math.max(3,Math.hypot(ox,oy)*.5),Math.max(2,rx*.25),ang,0,6.3);ctx.fill();}
@@ -16,7 +16,7 @@ function shadow(x,y,rx,ry,h,cr,m){h=h||rx*2.2;m=m||1;ctx.fillStyle='rgb(42,33,64
  if(cr&&m>1&&SKY.sun&&SKY.sun.a>.12){const L=SKY.sun,cx=x+L.dx*h*L.k,cy=y+L.dy*h*L.k*.5;ctx.fillStyle='rgb(255,236,170)';for(let i=0;i<3;i++){const a=i*2.1+now*.05+x,rr=cr*(.25+.2*i);ctx.globalAlpha=.18*L.a/.24;ctx.beginPath();ctx.ellipse(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.5,2.6,1.4,0,0,6.3);ctx.fill();}ctx.fillStyle='rgb(42,33,64)';}
  for(const f of SHF){const ddx=x-f.x,ddy=y-f.y,d=Math.hypot(ddx,ddy);if(d<14||d>260)continue;const fa=f.a*(1-d/260)*(.35+.65*dark/.62);castOne(x,y,rx,ry,h,cr,ddx/d,ddy/d*2,Math.min(4,40/d+.3),fa);}
  ctx.globalAlpha=1;}
-function drawTree(t){const x=t.x,y=t.y,s=t.s;shadow(x,y+2,10*s,4*s,52*s,26*s*(.3+.7*leafOf(t)));const tx=x+t.lean*s,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
+function drawTree(t){const x=t.x,y=t.y,s=t.s,wsw=Math.cos(WX.wa)*WX.ws*(2.5+1.5*Math.sin(now*1.6+t.seed))*s;shadow(x,y+2,10*s,4*s,52*s,26*s*(.3+.7*leafOf(t)));const tx=x+t.lean*s+wsw,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
  ln(pts,t.seed,11*s,INK,1.2);ln(pts,t.seed,6*s,'#b07a4a',1.2);const g=['#4fa14a','#5fb35a','#3f9356'][Math.floor(t.hue*3)];
  const lf=leafOf(t),k=.3+.7*lf,ch=P.task&&P.task.chop&&P.task.tree===t,sw=ch?Math.cos(Math.PI*(now-P.task.t0)/chopPer())*7*s:Math.sin(now*1.3+t.seed)*2*(lf<.7?.3:1);
  if(lf<.95){ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,4*s,INK,.8);ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,2*s,'#b07a4a',.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,4*s,INK,.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,2*s,'#b07a4a',.8);
@@ -132,7 +132,7 @@ function render(){skyLights();
  drawFly();drawScarfFX();drawChopFX();drawGrind();if(C)drawCook();
  if(S.eq.trinket==='blankmap'&&!SH.on){ctx.strokeStyle='#fffbe0';ctx.lineWidth=2.2;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const tw=(Math.sin(now*3+o.x*.05)+1)/2,sx=o.x+o.r*.6,sy=o.y-o.r*.6,r=3+tw*3.5;
   ctx.globalAlpha=.35+tw*.65;ctx.beginPath();ctx.moveTo(sx-r,sy);ctx.lineTo(sx+r,sy);ctx.moveTo(sx,sy-r);ctx.lineTo(sx,sy+r);ctx.stroke();}ctx.globalAlpha=1;}
- ctx.restore();
+ drawWeatherWorld();ctx.restore();drawWeatherScreen();
  if(dark>.01){dctx.setTransform(1,0,0,1,0,0);dctx.globalCompositeOperation='source-over';dctx.clearRect(0,0,dk.width,dk.height);dctx.fillStyle='rgba(22,17,62,'+dark+')';dctx.fillRect(0,0,dk.width,dk.height);
   dctx.globalCompositeOperation='destination-out';const L=SH.on?shLights():[[P.x,P.y-20,120+eff('light')+(S.char&&S.char.kin==='ember'?45:0)],[FIRE.x,FIRE.y-10,180+Math.sin(now*9)*8]];(S.fires||[]).forEach(f=>{if(fireLit(f))L.push([f.x,f.y-10,(f.big?250:160)+Math.sin(now*9+f.x)*6]);});if(dark>.15)L.push([MOON.x,MOON.y,140]);if(dark>.25)L.push([HEAD.x,HEAD.y-18,55]);
   for(const [x,y,r] of L){const [sx,sy]=w2s(x,y),R=r*Z*DPR;const g=dctx.createRadialGradient(sx*DPR,sy*DPR,0,sx*DPR,sy*DPR,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.5,'rgba(0,0,0,.7)');g.addColorStop(1,'rgba(0,0,0,0)');dctx.fillStyle=g;dctx.beginPath();dctx.arc(sx*DPR,sy*DPR,R,0,6.3);dctx.fill();}

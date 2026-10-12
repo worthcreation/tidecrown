@@ -14,7 +14,8 @@ function spawnBreak(){const pa=Math.atan2(P.y,P.x),t=tideLevel();let a0=pa+(Math
  /* the sea comes for its salt: a wave near you aims at a sparkling surface more often than not */
  const salted=SURF.filter(s=>s.st==='sparkle'&&Math.abs(angDiff(Math.atan2(s.y,s.x),pa))<1.1);if(salted.length&&Math.random()<.6){const s=pick(salted);a0=Math.atan2(s.y,s.x)+(Math.random()-.5)*.12;}
  /* size: most waves are small and just break on the shore, rocks and pier. Big ones are rare, run far up the beach and can carry up to three things. */
- const r=Math.random(),size=r<.55?r*.5:r<.86?.4+(r-.55)*1.2:.8+(r-.86)*1.4;let n=0;
+ let r=Math.random();/* wind: the windward shore gets the big ones, the lee gets the small */r*=.55+.5*waveAlign(a0)*(.6+.6*WX.ws);r=Math.min(.999,r);
+ const size=r<.55?r*.5:r<.86?.4+(r-.55)*1.2:.8+(r-.86)*1.4;let n=0;
  if(size<.4){if(Math.random()<.22+.18*t)n=1;}
  else if(size<.8){const p=Math.random();n=p<.35+.3*t?1:0;if(p<.08+.1*t)n=2;}
  else{const p=Math.random();n=p<.9?1:0;if(p<.5)n=2;if(p<.14)n=3;}
@@ -34,7 +35,7 @@ function tideUpdate(dt){tideGeom();if(ccOn||C||SH.on)return;if(tideLevel()<.5&&!
  for(const w of BREAKS){w.t+=dt;if(!w.done&&w.t>=1.6){w.done=true;coverBreak(w);if(w.n&&!S.st.sawWash){S.st.sawWash=1;think('The wave left something behind.');}}}
  for(const w of BREAKS){if(w.t<=0)continue;for(const s of SURF){const a=Math.atan2(s.y,s.x);if(Math.abs(angDiff(a,w.a0))>w.hw)continue;const r=Math.hypot(s.x,s.y),fr=frontR(w,a);
   if(s.hit!==w&&fr<=r+2){s.hit=w;s.had=s.st==='sparkle';s.st='wet';splash(s);}
-  else if(s.hit===w&&w.t>1.6&&fr>r+6&&s.st==='wet'){s.st=Math.random()<(s.had?.18:.45)?'sparkle':'dry';}}}
+  else if(s.hit===w&&w.t>1.6&&fr>r+6&&s.st==='wet'){s.st=WX.rain<.3&&Math.random()<(s.had?.18:.45)?'sparkle':'dry';}}}
  for(let i=BREAKS.length-1;i>=0;i--)if(BREAKS[i].t>3)BREAKS.splice(i,1);
  splashes=splashes.filter(p=>(p.t+=dt)<.7);}
 let splashes=[];function splash(s){for(let i=0;i<7;i++)splashes.push({x:s.x+(Math.random()-.5)*s.rx*1.4,y:s.y-s.ry*.5,vx:(Math.random()-.5)*60,vy:-60-Math.random()*70,t:0});}

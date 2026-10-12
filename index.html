@@ -626,7 +626,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
  clamObjects(o);thimbleObjects(o);
  return o;}
-function objAt(wx,wy){let best=null,bd=1e9;for(const o of objects()){const d=Math.hypot(o.x-wx,o.y-wy);if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
+function objAt(wx,wy){let best=null,bd=1e9;for(const o of objects()){if(fogHides(o.x,o.y))continue;const d=Math.hypot(o.x-wx,o.y-wy);if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
 function s2w(sx,sy){return[(sx-W/2)/Z+cam.x,(sy-H/2)/Z+cam.y];}
 function w2s(x,y){return[(x-cam.x)*Z+W/2,(y-cam.y)*Z+H/2];}
 
@@ -887,7 +887,7 @@ function stackIcon(id,n){const t=stackTier(n);if(t===1)return icon(id);const k=i
 
 /* ---------- update ---------- */
 function update(dt){
- {const q=(Date.now()+DAYOFF)/DAY_PERIOD;S.day=q%1;S.dayN=Math.floor(q);}const light=.5-.5*Math.cos(S.day*6.2832);dark=Math.min(1,Math.max(0,(.42-light)/.3))*.62;/* the sky alone sets the light: no fixed floor anywhere, no dimming for distance */
+ {const q=(Date.now()+DAYOFF)/DAY_PERIOD;S.day=q%1;S.dayN=Math.floor(q);}const light=.5-.5*Math.cos(S.day*6.2832);dark=Math.min(1,Math.max(0,(.42-light)/.3))*.62;dark=Math.min(.75,dark+.18*WX.rain);/* the sky alone sets the light: no fixed floor anywhere, no dimming for distance */
  if(intro!=null){intro+=dt;if(intro>3.2)intro=null;}
  if(!SW.on&&P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const wd=inSea(P.x,P.y)?seaDepth(P.x,P.y):0;const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),sp=175*dt*(1-.68*Math.min(1,wd));
   /* wading: the deeper, the slower; the first time past the knee, a word */
@@ -924,7 +924,7 @@ function update(dt){
  if(mark&&(mark.t+=dt)>.6)mark=null;
  if(cele&&(cele.t+=dt)>3.2)cele=null;
  const k=Math.min(1,dt*5),tx=C?C.fr.x:P.x,ty=C?C.fr.y-50:P.y;cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;const zt=C?cookZoom():(P.task&&P.task.chop?1.25:SW.on?swimZoom():1);camZ+=(zt-camZ)*Math.min(1,dt*(SW.on||zt===1&&camZ<1?1.4:4));Z=ZB*camZ;
- if(C)cookUpdate(dt);tideUpdate(dt);spotsUpdate(dt);if(SH.on)shUpdate(dt);swimUpdate(dt);updOrbs(dt);guideT-=dt;if(guideT<=0&&!SH.on){guideT=1;hearthGuide();}buffT-=dt;if(buffT<=0){buffT=.5;buffUI();kindleTick();if(S.ground&&S.ground.length){const T=Date.now(),n0=S.ground.length;S.ground=S.ground.filter(g=>g.exp>T);if(S.ground.length!==n0)save();}(S.fires||[]).slice().forEach(fr=>{if(!fireLit(fr)&&!(C&&C.fr===fr))burnOut(fr);});}
+ wxTick(dt);if(C)cookUpdate(dt);tideUpdate(dt);spotsUpdate(dt);if(SH.on)shUpdate(dt);swimUpdate(dt);updOrbs(dt);guideT-=dt;if(guideT<=0&&!SH.on){guideT=1;hearthGuide();}buffT-=dt;if(buffT<=0){buffT=.5;buffUI();kindleTick();if(S.ground&&S.ground.length){const T=Date.now(),n0=S.ground.length;S.ground=S.ground.filter(g=>g.exp>T);if(S.ground.length!==n0)save();}(S.fires||[]).slice().forEach(fr=>{if(!fireLit(fr)&&!(C&&C.fr===fr))burnOut(fr);});}
 }
 
 /* ---------- draw ---------- */
@@ -934,7 +934,7 @@ function update(dt){
    cast per light. h is the caster's height; cr, if given, is a canopy radius cast from the top (trees). */
 let SKY={sun:null,moon:null},SHF=[];
 function skyLights(){const d=S.day,h=(d-.5)*6.2832,e=Math.cos(h)*1.45,mk=(az,el,a)=>{if(el<=.04)return null;const sx=-Math.sin(az),sy=-.1,n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
- SKY.sun=mk(h,e,.24);SKY.moon=mk(h+Math.PI,-e,.09);
+ SKY.sun=mk(h,e,.24*(1-.8*cloudOver(P.x,P.y))*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,-e,.09);
  SHF=[];if(!SH.on){SHF.push({x:FIRE.x,y:FIRE.y-6,a:.26});(S.fires||[]).forEach(f=>{if(fireLit(f))SHF.push({x:f.x,y:f.y-6,a:f.big?.3:.24});});}}
 function castOne(x,y,rx,ry,h,cr,dx,dy,k,a){const L=h*k,ox=dx*L,oy=dy*L*.5,ang=Math.atan2(oy,ox),si=Math.abs(Math.sin(ang));
  ctx.globalAlpha=a;ctx.beginPath();if(cr){const w=cr*(1-si*.55);ctx.ellipse(x+ox,y+oy,cr,cr*.5,0,0,6.3);ctx.fill();ctx.beginPath();ctx.ellipse(x+ox*.5,y+oy*.5,Math.max(3,Math.hypot(ox,oy)*.5),Math.max(2,rx*.25),ang,0,6.3);ctx.fill();}
@@ -945,7 +945,7 @@ function shadow(x,y,rx,ry,h,cr,m){h=h||rx*2.2;m=m||1;ctx.fillStyle='rgb(42,33,64
  if(cr&&m>1&&SKY.sun&&SKY.sun.a>.12){const L=SKY.sun,cx=x+L.dx*h*L.k,cy=y+L.dy*h*L.k*.5;ctx.fillStyle='rgb(255,236,170)';for(let i=0;i<3;i++){const a=i*2.1+now*.05+x,rr=cr*(.25+.2*i);ctx.globalAlpha=.18*L.a/.24;ctx.beginPath();ctx.ellipse(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.5,2.6,1.4,0,0,6.3);ctx.fill();}ctx.fillStyle='rgb(42,33,64)';}
  for(const f of SHF){const ddx=x-f.x,ddy=y-f.y,d=Math.hypot(ddx,ddy);if(d<14||d>260)continue;const fa=f.a*(1-d/260)*(.35+.65*dark/.62);castOne(x,y,rx,ry,h,cr,ddx/d,ddy/d*2,Math.min(4,40/d+.3),fa);}
  ctx.globalAlpha=1;}
-function drawTree(t){const x=t.x,y=t.y,s=t.s;shadow(x,y+2,10*s,4*s,52*s,26*s*(.3+.7*leafOf(t)));const tx=x+t.lean*s,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
+function drawTree(t){const x=t.x,y=t.y,s=t.s,wsw=Math.cos(WX.wa)*WX.ws*(2.5+1.5*Math.sin(now*1.6+t.seed))*s;shadow(x,y+2,10*s,4*s,52*s,26*s*(.3+.7*leafOf(t)));const tx=x+t.lean*s+wsw,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
  ln(pts,t.seed,11*s,INK,1.2);ln(pts,t.seed,6*s,'#b07a4a',1.2);const g=['#4fa14a','#5fb35a','#3f9356'][Math.floor(t.hue*3)];
  const lf=leafOf(t),k=.3+.7*lf,ch=P.task&&P.task.chop&&P.task.tree===t,sw=ch?Math.cos(Math.PI*(now-P.task.t0)/chopPer())*7*s:Math.sin(now*1.3+t.seed)*2*(lf<.7?.3:1);
  if(lf<.95){ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,4*s,INK,.8);ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,2*s,'#b07a4a',.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,4*s,INK,.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,2*s,'#b07a4a',.8);
@@ -1061,7 +1061,7 @@ function render(){skyLights();
  drawFly();drawScarfFX();drawChopFX();drawGrind();if(C)drawCook();
  if(S.eq.trinket==='blankmap'&&!SH.on){ctx.strokeStyle='#fffbe0';ctx.lineWidth=2.2;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const tw=(Math.sin(now*3+o.x*.05)+1)/2,sx=o.x+o.r*.6,sy=o.y-o.r*.6,r=3+tw*3.5;
   ctx.globalAlpha=.35+tw*.65;ctx.beginPath();ctx.moveTo(sx-r,sy);ctx.lineTo(sx+r,sy);ctx.moveTo(sx,sy-r);ctx.lineTo(sx,sy+r);ctx.stroke();}ctx.globalAlpha=1;}
- ctx.restore();
+ drawWeatherWorld();ctx.restore();drawWeatherScreen();
  if(dark>.01){dctx.setTransform(1,0,0,1,0,0);dctx.globalCompositeOperation='source-over';dctx.clearRect(0,0,dk.width,dk.height);dctx.fillStyle='rgba(22,17,62,'+dark+')';dctx.fillRect(0,0,dk.width,dk.height);
   dctx.globalCompositeOperation='destination-out';const L=SH.on?shLights():[[P.x,P.y-20,120+eff('light')+(S.char&&S.char.kin==='ember'?45:0)],[FIRE.x,FIRE.y-10,180+Math.sin(now*9)*8]];(S.fires||[]).forEach(f=>{if(fireLit(f))L.push([f.x,f.y-10,(f.big?250:160)+Math.sin(now*9+f.x)*6]);});if(dark>.15)L.push([MOON.x,MOON.y,140]);if(dark>.25)L.push([HEAD.x,HEAD.y-18,55]);
   for(const [x,y,r] of L){const [sx,sy]=w2s(x,y),R=r*Z*DPR;const g=dctx.createRadialGradient(sx*DPR,sy*DPR,0,sx*DPR,sy*DPR,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.5,'rgba(0,0,0,.7)');g.addColorStop(1,'rgba(0,0,0,0)');dctx.fillStyle=g;dctx.beginPath();dctx.arc(sx*DPR,sy*DPR,R,0,6.3);dctx.fill();}
@@ -1483,7 +1483,7 @@ function drawCook(){const {x,y}=C.fr,n=C.pans.length,h=C.heat;
   else{ctx.globalAlpha=.55+.3*Math.sin(now*3);otext(rawCount()?'+':'-',px,py+1,22,'#fffaf0');ctx.globalAlpha=1;}});
  ctx.lineCap='round';
  sparks=sparks.filter(s=>(s.t+=fdt)<(s.smoke?1.4:s.steam?.9:.8));
- for(const s of sparks){s.x+=s.vx*fdt;s.y+=s.vy*fdt;const life=s.smoke?1.4:s.steam?.9:.8;ctx.globalAlpha=(1-s.t/life)*(s.steam?.6:1);dot(s.x,s.y,s.smoke?3+s.t*5:s.steam?2+s.t*3:1.8,s.smoke?'#5a5266':s.steam?'#fff':'#ffcf3a');}ctx.globalAlpha=1;
+ for(const s of sparks){s.x+=s.vx*fdt+(s.smoke?Math.cos(WX.wa)*WX.ws*30*fdt:0);s.y+=s.vy*fdt;const life=s.smoke?1.4:s.steam?.9:.8;ctx.globalAlpha=(1-s.t/life)*(s.steam?.6:1);dot(s.x,s.y,s.smoke?3+s.t*5:s.steam?2+s.t*3:1.8,s.smoke?'#5a5266':s.steam?'#fff':'#ffcf3a');}ctx.globalAlpha=1;
  if(C.fr.main&&C.sayT>0){ctx.font="16px 'Patrick Hand','Comic Sans MS',cursive";const w=ctx.measureText(C.say).width+22,bx=x-w/2,by=y-176;ctx.globalAlpha=Math.min(1,C.sayT*3);
   sketch(rrPts(bx,by,w,27,10),true,870,1.5,'#fffaf0',INK,2.4);ln([[x-5,by+26],[x,by+34],[x+6,by+26]],871,2.2,INK,.3);ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(C.say,bx+w/2,by+14);ctx.globalAlpha=1;}}
 /* ---------- character creation ---------- */
@@ -1558,7 +1558,8 @@ function spawnBreak(){const pa=Math.atan2(P.y,P.x),t=tideLevel();let a0=pa+(Math
  /* the sea comes for its salt: a wave near you aims at a sparkling surface more often than not */
  const salted=SURF.filter(s=>s.st==='sparkle'&&Math.abs(angDiff(Math.atan2(s.y,s.x),pa))<1.1);if(salted.length&&Math.random()<.6){const s=pick(salted);a0=Math.atan2(s.y,s.x)+(Math.random()-.5)*.12;}
  /* size: most waves are small and just break on the shore, rocks and pier. Big ones are rare, run far up the beach and can carry up to three things. */
- const r=Math.random(),size=r<.55?r*.5:r<.86?.4+(r-.55)*1.2:.8+(r-.86)*1.4;let n=0;
+ let r=Math.random();/* wind: the windward shore gets the big ones, the lee gets the small */r*=.55+.5*waveAlign(a0)*(.6+.6*WX.ws);r=Math.min(.999,r);
+ const size=r<.55?r*.5:r<.86?.4+(r-.55)*1.2:.8+(r-.86)*1.4;let n=0;
  if(size<.4){if(Math.random()<.22+.18*t)n=1;}
  else if(size<.8){const p=Math.random();n=p<.35+.3*t?1:0;if(p<.08+.1*t)n=2;}
  else{const p=Math.random();n=p<.9?1:0;if(p<.5)n=2;if(p<.14)n=3;}
@@ -1578,7 +1579,7 @@ function tideUpdate(dt){tideGeom();if(ccOn||C||SH.on)return;if(tideLevel()<.5&&!
  for(const w of BREAKS){w.t+=dt;if(!w.done&&w.t>=1.6){w.done=true;coverBreak(w);if(w.n&&!S.st.sawWash){S.st.sawWash=1;think('The wave left something behind.');}}}
  for(const w of BREAKS){if(w.t<=0)continue;for(const s of SURF){const a=Math.atan2(s.y,s.x);if(Math.abs(angDiff(a,w.a0))>w.hw)continue;const r=Math.hypot(s.x,s.y),fr=frontR(w,a);
   if(s.hit!==w&&fr<=r+2){s.hit=w;s.had=s.st==='sparkle';s.st='wet';splash(s);}
-  else if(s.hit===w&&w.t>1.6&&fr>r+6&&s.st==='wet'){s.st=Math.random()<(s.had?.18:.45)?'sparkle':'dry';}}}
+  else if(s.hit===w&&w.t>1.6&&fr>r+6&&s.st==='wet'){s.st=WX.rain<.3&&Math.random()<(s.had?.18:.45)?'sparkle':'dry';}}}
  for(let i=BREAKS.length-1;i>=0;i--)if(BREAKS[i].t>3)BREAKS.splice(i,1);
  splashes=splashes.filter(p=>(p.t+=dt)<.7);}
 let splashes=[];function splash(s){for(let i=0;i<7;i++)splashes.push({x:s.x+(Math.random()-.5)*s.rx*1.4,y:s.y-s.ry*.5,vx:(Math.random()-.5)*60,vy:-60-Math.random()*70,t:0});}
@@ -1916,7 +1917,7 @@ function drawDepthBands(){const vw=W/Z/2+80,vh=H/Z/2+80;
 /* islet land, drawn over the bands */
 function drawIsletLand(){const vw=W/Z/2+80,vh=H/Z/2+80;for(const f of SH.on?SHFEAT:KFEAT){if(f.kind!=='islet'||!inView(f.x,f.y,f.reach,vw,vh))continue;sketch(fPts(f,0,36),true,7100+(f.seed*10|0),2.5,SH.on?'#7a6f58':'#f3d27a',INK,3);sketch(fPts(f,-Math.min(f.rx,f.ry)*.32,30),true,7200+(f.seed*10|0),2.5,SH.on?'#3a4a33':'#86c25e',INK,2.2);}}
 /* a small sea palm for the Key's islets */
-function drawPalm(t){const x=t.x,y=t.y,s=t.s,sw=Math.sin(now*1.2+t.seed)*2;shadow(x,y+2,5*s,2*s,40*s,16*s);const top=[x+8*s+sw,y-38*s];ln([[x,y],[x+3*s,y-18*s],top],t.seed,6*s,INK,.5);ln([[x,y],[x+3*s,y-18*s],top],t.seed,3.4*s,'#b08452',.5);
+function drawPalm(t){const x=t.x,y=t.y,s=t.s,sw=Math.sin(now*1.2+t.seed)*(2+WX.ws*2)+Math.cos(WX.wa)*WX.ws*4;shadow(x,y+2,5*s,2*s,40*s,16*s);const top=[x+8*s+sw,y-38*s];ln([[x,y],[x+3*s,y-18*s],top],t.seed,6*s,INK,.5);ln([[x,y],[x+3*s,y-18*s],top],t.seed,3.4*s,'#b08452',.5);
  for(let i=0;i<5;i++){const a=-2.6+i*.55+Math.sin(now*1.5+i+t.seed)*.08,e=[top[0]+Math.cos(a)*20*s,top[1]+Math.sin(a)*12*s+8*s];ln([top,[(top[0]+e[0])/2,top[1]+Math.sin(a)*6*s-3],e],t.seed+i,4.5*s,INK,.5);ln([top,[(top[0]+e[0])/2,top[1]+Math.sin(a)*6*s-3],e],t.seed+i,2.6*s,'#5fae4a',.5);}}
 /* swimming: the first way off the Key. Tap the water to wade in, then tap in rhythm or slide to stroke toward where you tapped. There is no clock on a swim: as long as you keep stroking you keep going. Stop attending and you sink, the breath bar drains, and the sea carries you back to the last shore you left or passed. Lantern jellies drift and sting; floating things are yours if you swim through them. Swim far enough east and the dark islands take you in. */
 const SW={on:false,vx:0,vy:0,tx:0,ty:0,breath:1,beat:0,stun:0,streak:0,t:0,dist:0,idle:0,sink:0,shore:null,blk:0,fade:0};let bubbles=[];
@@ -2119,7 +2120,7 @@ function drawBollard(){const b=BOLLARD,x=b.x,y=b.y;shadow(x,y+3,13,4);ctx.save()
 /* the tail drifts from one side of the player to the other, hanging down the chest as it passes, and streams behind while walking */
 const SCD={d:-1};
 function scarfTail(kx,ky,f,w,w2,acc,mv){const [st,tw]=scarfIdle();const fx=ccOn?null:SC.fx.find(x=>x.kind==='slap'||x.kind==='trip'||x.kind==='wrap'||x.kind==='bind');
- if(!fx){const wind=Math.sin(now*(ccOn?1.1:.6))*1.1+Math.sin(now*(ccOn?2.7:1.3)+1)*.25,want=mv?-f:Math.max(-1,Math.min(1,wind));SCD.d+=(want-SCD.d)*Math.min(1,fdt*(mv?6:1.6));const d=SCD.d,ad=Math.abs(d),sag=(1-ad)*12,th=(1-ad)*3.2;
+ if(!fx){const wind=Math.sin(now*(ccOn?1.1:.6))*1.1+Math.sin(now*(ccOn?2.7:1.3)+1)*.25+(ccOn?0:Math.cos(WX.wa)*WX.ws*.9),want=mv?-f:Math.max(-1,Math.min(1,wind));SCD.d+=(want-SCD.d)*Math.min(1,fdt*(mv?6:1.6));const d=SCD.d,ad=Math.abs(d),sag=(1-ad)*12,th=(1-ad)*3.2;
   const P2=[[0,-2,0,1],[9,w+tw*.3,.3,1],[17,-2+w2+tw*.7,.6,1],[13,3+w+tw*.5,.75,1],[19,8+w2+tw,1,0],[8,7+w+tw*.3,.6,-1],[0,4,0,-1]];
   sketch(P2.map(([ox,oy,u,sd])=>[kx-ox*d*st+sd*th*(1-u*.6),ky+oy+sag*u*st]),true,113,.4,acc,INK,2.2);return;}
  const k=fx.t,isW=fx.kind==='wrap'||fx.kind==='bind',e=isW?Math.min(1,k/.3):Math.sin(Math.min(1,k/.42)*Math.PI);
@@ -2234,12 +2235,64 @@ function sfx(k,v){if(!AC||!SND.on||AC.state!=='running')return;v=v==null?1:v;con
  case 'whoosh':noise(.5,.25*v,{bp:700,bpTo:180,q:.8,a:.06});break;
  case 'open':noise(.05,.12*v,{hp:1500});break;
  case 'talk':tone(NOTE(74),'triangle',.07,.08*v);tone(NOTE(76),'triangle',.07,.08*v,{at:t+.07});break;}}
-const BUILD=17;
+/* ---------- weather ----------
+   Two layers, both pure functions of time and place, nothing saved: everyone sees the same sky.
+   Base: a trade wind from the east that wanders, cloud that travels with it, squalls now and then, dawn fog.
+   Terrain modifiers: open sand burns fog off fast, grass slower, the sea holds it, the cold dark water over the
+   current holds a sea fog that rarely clears, dense forest holds fog longest, clearings clear first, the Fallow worst.
+   WXT is the test build's override. */
+const WXT={force:null,turn:0};
+let WX={wa:Math.PI,ws:.4,cover:.3,rain:0,fog:0,seaFog:0};
+function hash1(n){const s=Math.sin(n*127.1+311.7)*43758.5453;return s-Math.floor(s);}
+function wxUpdate(){const t=Date.now()/1000,sm=x=>Math.max(0,Math.min(1,x));
+ /* squalls: a 15 minute slot holds one about one time in seven; rain swells, peaks and passes in about five minutes */
+ const slot=Math.floor(t/900),ph=(t%900)/900;let rain=hash1(slot)<.14?sm(1-Math.abs(ph-.45)/.17):0;rain=Math.pow(rain,.7);
+ let cover=sm(.28+.22*Math.sin(t/1100)+.14*Math.sin(t/333+1)+rain*.8);
+ /* dawn radiation fog: some mornings none, some thick; builds before sunrise, burns off by late morning */
+ const amt=hash1(S.dayN*3.7+1),a=amt<.35?0:(amt-.35)/.65,d=S.day;let fog=0;
+ if(d>.16&&d<.42)fog=a*(d<.23?(d-.16)/.07:d<.29?1:1-(d-.29)/.13);
+ let seaFog=sm(.35+.3*Math.sin(t/1500+2)+.5*fog);
+ let wa=Math.PI+.55*Math.sin(t/1900+1)+.25*Math.sin(t/640),ws=sm(.32+.22*Math.sin(t/1300)+.12*Math.sin(t/410+2)+rain*.45);
+ const F=WXT.force;if(F==='clear'){cover=.05;rain=0;fog=0;seaFog=0;}else if(F==='cloudy'){cover=.85;rain=0;}else if(F==='fog'){fog=1;seaFog=1;}else if(F==='squall'){rain=1;cover=1;ws=.85;}
+ wa+=WXT.turn;WX={wa,ws,cover,rain,fog,seaFog};}
+/* how much fog sits at a place, 0 to 1 */
+function fogAt(x,y){if(SH.on){const I=ISLES.find(I=>isleK(I,x,y)<=1.05),n=I?I.name:'';const k=n==='The Clearing'?.55:n==='The Fallow'?1.4:n==='The Tangle'?1.25:n==='Landing'?1:1.15;return Math.min(1,Math.max(WX.fog*k,WX.seaFog*.6));}
+ const r=Math.hypot(x,y),a=Math.atan2(y,x);let k;if(walkable(x,y))k=r>gR(a)?.5:.8;else k=1;
+ const sea=curK(x,y)>0||x>CUR0()-400?WX.seaFog*Math.min(1,(x-CUR0()+400)/500):0;return Math.min(1,Math.max(WX.fog*k,sea));}
+function fogR(){const f=fogAt(P.x,P.y);return f<.04?1e9:120+(1-f)*900;}
+function fogHides(x,y){const R=fogR();return R<1e8&&Math.hypot(x-P.x,y-P.y)>R*.95;}
+/* clouds: puffs on a 3000px tile that slides with the wind; low cumulus casts crisp shade, high cirrus faint */
+const CLOUDS=[];{const r=mulberry(77);for(let i=0;i<16;i++)CLOUDS.push({x:r()*3000,y:r()*3000,rx:120+r()*200,ry:60+r()*90,low:r()<.6,h:r(),seed:600+i});}
+function cloudPos(c){const t=Date.now()/1000,sp=14,ox=Math.cos(WX.wa)*sp*t,oy=Math.sin(WX.wa)*sp*t;const m=v=>((v%3000)+3000)%3000;
+ let x=m(c.x+ox),y=m(c.y+oy);x+=Math.floor((cam.x-x+1500)/3000)*3000;y+=Math.floor((cam.y-y+1500)/3000)*3000;return [x,y];}
+function cloudOn(c){return c.h<WX.cover;}
+function cloudOver(x,y){let v=0;for(const c of CLOUDS){if(!cloudOn(c))continue;const [cx,cy]=cloudPos(c),u=((x-cx)/c.rx)**2+((y-cy)/c.ry)**2;if(u<1)v=Math.max(v,(c.low?.85:.35)*(1-u*.4));}return v;}
+function drawWeatherWorld(){const sun=SKY.sun,sa=sun?Math.min(1,sun.a/.24):0;ctx.fillStyle='rgb(42,33,64)';
+ if(sa>0)for(const c of CLOUDS){if(!cloudOn(c))continue;const [x,y]=cloudPos(c);ctx.globalAlpha=(c.low?.13:.05)*sa*(1-WX.rain*.5);sketch(ell(x,y,c.rx,c.ry,16),true,c.seed,c.low?12:20,'rgb(42,33,64)',null);}
+ /* the odd low cloud passes below the view: soft white, not often */
+ for(const c of CLOUDS){if(!cloudOn(c)||!c.low||c.h>.12+WX.rain*.2)continue;const [x,y]=cloudPos(c);ctx.globalAlpha=.32*(.4+.6*sa);sketch(ell(x-80,y-120,c.rx*.8,c.ry*.8,16),true,c.seed+3,14,'#f4f6f8',null);}
+ /* fog wisps drifting with the wind */
+ const f=fogAt(P.x,P.y);if(f>.05){const t=Date.now()/1000;for(let i=0;i<8;i++){const px=P.x+((i*431+Math.cos(WX.wa)*t*10)%900+900)%900-450,py=P.y+((i*277+Math.sin(WX.wa)*t*10)%700+700)%700-350;ctx.globalAlpha=.16*f;blob(px,py,140,50,700+i,'#eef2f4',0,8);}}
+ ctx.globalAlpha=1;}
+function drawWeatherScreen(){const r=WX.rain;
+ if(r>.02){const t=now,n=Math.floor(170*r),wx=Math.cos(WX.wa)*WX.ws*9;ctx.strokeStyle='rgba(220,232,245,.55)';ctx.lineWidth=1.3;ctx.beginPath();
+  for(let i=0;i<n;i++){const sx=((i*97.3+t*(60+wx*20))%(W+80))-40,sy=((i*53.7+t*620*(.8+(i%5)*.1))%(H+60))-30;ctx.moveTo(sx,sy);ctx.lineTo(sx+wx,sy+14);}ctx.stroke();
+  ctx.fillStyle='rgba(60,70,90,'+(.12*r)+')';ctx.fillRect(0,0,W,H);}
+ const f=fogAt(P.x,P.y);if(f>.04){const [sx,sy]=w2s(P.x,P.y-20),R=fogR()*Z;const g=ctx.createRadialGradient(sx,sy,R*.25,sx,sy,R);g.addColorStop(0,'rgba(232,238,242,0)');g.addColorStop(1,'rgba(232,238,242,'+(.92*f)+')');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}}
+/* rain on the world: small fires drown, big ones burn down faster, Brimble keeps his hearth; drying salt washes off */
+let rainSaid=0;
+function wxTick(dt){wxUpdate();const r=WX.rain;if(r<.3)return;
+ if(!SH.on){for(const f of S.fires||[]){if(f.main||!fireLit(f))continue;f.until-=dt*1000*r*(f.big?2:7);if(!fireLit(f)&&!rainSaid){rainSaid=1;think('The rain put my fire out.');}}
+  for(const s of SURF)if(s.st==='sparkle')s.st='dry';}
+ if(r>.6&&!S.st.rainHint){S.st.rainHint=1;think('Rain. Squalls blow through here fast. Fires will not like it.');}}
+/* waves: they still come at every shore, but the big ones come from where the wind blows */
+function waveAlign(a0){return .5+.5*Math.cos(angDiff(a0,WX.wa+Math.PI));}
+const BUILD=18;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 sndUI();if(S.char)begin();else openCreator('new');
-if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},fn:{thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
+if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},WXT,fogR,fn:{thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
 })();
 </script>
 </body>

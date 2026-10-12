@@ -6,11 +6,11 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - 1 Two versions (build 16): play (index.html, Key only, a current turns back the swim east) and test (test.html, open world, map warps, Test tab, own save); both rowboats removed; the shell hatchet chain replaces flint.
 - 2 Given-things cleanup, first part (build 16): Sir Thimble's helm is now a quest reward (the sailmaker's kit) with sewing knowledge; the earned/bought/source rules written into design-rules.
 - 3 Light and day (build 17): the sky alone sets the light, no darkness floor anywhere; tropical sun, moon and fire shadows on everything; canopy shade with sun flecks.
+- 4 Weather (build 18): wandering trade wind that moves trees, scarf, smoke and rain; cloud shade; rare low clouds; squalls that drown small fires and wash off salt; dawn fog and sea fog that hide what is out of sight; big waves from the windward side.
 
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |
 |---|---|---|
-| 4 | Weather | Moving cloud and shadow, dawn fog, terrain modifiers; regional calls tuned by play |
 | 5 | Terrain height | Height fields, contour shading, slope speed on a hiking-pace basis |
 | 6 | Shadow regrowth | Slow regrowth of shadow trees (test build until the Shadow Forest opens) |
 

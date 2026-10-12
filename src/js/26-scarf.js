@@ -89,7 +89,7 @@ function drawBollard(){const b=BOLLARD,x=b.x,y=b.y;shadow(x,y+3,13,4);ctx.save()
 /* the tail drifts from one side of the player to the other, hanging down the chest as it passes, and streams behind while walking */
 const SCD={d:-1};
 function scarfTail(kx,ky,f,w,w2,acc,mv){const [st,tw]=scarfIdle();const fx=ccOn?null:SC.fx.find(x=>x.kind==='slap'||x.kind==='trip'||x.kind==='wrap'||x.kind==='bind');
- if(!fx){const wind=Math.sin(now*(ccOn?1.1:.6))*1.1+Math.sin(now*(ccOn?2.7:1.3)+1)*.25,want=mv?-f:Math.max(-1,Math.min(1,wind));SCD.d+=(want-SCD.d)*Math.min(1,fdt*(mv?6:1.6));const d=SCD.d,ad=Math.abs(d),sag=(1-ad)*12,th=(1-ad)*3.2;
+ if(!fx){const wind=Math.sin(now*(ccOn?1.1:.6))*1.1+Math.sin(now*(ccOn?2.7:1.3)+1)*.25+(ccOn?0:Math.cos(WX.wa)*WX.ws*.9),want=mv?-f:Math.max(-1,Math.min(1,wind));SCD.d+=(want-SCD.d)*Math.min(1,fdt*(mv?6:1.6));const d=SCD.d,ad=Math.abs(d),sag=(1-ad)*12,th=(1-ad)*3.2;
   const P2=[[0,-2,0,1],[9,w+tw*.3,.3,1],[17,-2+w2+tw*.7,.6,1],[13,3+w+tw*.5,.75,1],[19,8+w2+tw,1,0],[8,7+w+tw*.3,.6,-1],[0,4,0,-1]];
   sketch(P2.map(([ox,oy,u,sd])=>[kx-ox*d*st+sd*th*(1-u*.6),ky+oy+sag*u*st]),true,113,.4,acc,INK,2.2);return;}
  const k=fx.t,isW=fx.kind==='wrap'||fx.kind==='bind',e=isW?Math.min(1,k/.3):Math.sin(Math.min(1,k/.42)*Math.PI);
