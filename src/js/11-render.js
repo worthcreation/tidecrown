@@ -148,15 +148,15 @@ function render(){skyLights();
  drawIsletLand();
  spots.forEach(drawSpot);drawClams();drawSwimWorld();drawFarIsles();
  drawFoam();drawWet();
- sketch(sandPts,true,1,4,'#f3d27a',tideLevel()>.985?INK:'rgba(42,33,64,.25)',3.5);drawBreaks();
+ drawLandKey(tideLevel()>.985?INK:'rgba(42,33,64,.25)');drawBreaks();
  drawDock();
- sketch(grassLifted(),true,2,4,'#86c25e',INK,3);drawTerrain(vw,vh);drawShadowLayers();
+ drawTerrain(vw,vh);drawShadowLayers();
  for(const t of tufts){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;if(t.f){dot(t.x,t.y,3.2,t.c>.5?'#ff8fb1':'#fff6a8');dot(t.x,t.y,1.2,'#ffcf3a');}else ln([[t.x-5,t.y-6],[t.x,t.y],[t.x+5,t.y-7]],t.seed,2,'#5a9a3f',.6);}
- drawPickups();
+ drawPickups();drawKit();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y-liftAt(mark.x,mark.y),10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t),t.x]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k),k.x]));d.push([DOCK.y1+40,drawSurf]);
  (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);
- d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const L=x[2]!=null?liftAt(x[2],x[0]):0;if(L){ctx.save();ctx.translate(0,-L);}if(x[1]===drawSwimmer){drawSwimmer();if(!SW.on)drawLine();}else x[1]();if(L)ctx.restore();});
+ d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  }
  drawFly();{const L=liftAt(P.x,P.y);ctx.save();ctx.translate(0,-L);drawScarfFX();drawChopFX();drawGrind();ctx.restore();}if(C){ctx.save();ctx.translate(0,-liftAt(C.fr.x,C.fr.y));drawCook();ctx.restore();}
  if(S.eq.trinket==='blankmap'&&!SH.on){ctx.strokeStyle='#fffbe0';ctx.lineWidth=2.2;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const tw=(Math.sin(now*3+o.x*.05)+1)/2,sx=o.x+o.r*.6,sy=o.y-liftAt(o.x,o.y)-o.r*.6,r=3+tw*3.5;

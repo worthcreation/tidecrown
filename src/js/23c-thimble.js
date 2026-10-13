@@ -26,4 +26,4 @@ function thimbleSalute(){const q=tq();
    discover('sewing');toast('Quest done: The sailmaker\u2019s kit');sfx('burst');think('He lays out the palm, the fid and the twine like old friends. Then he hands me his spare helm, and shows me, very slowly, how a seam holds.');save();return true;}
   const left=KIT.filter(k=>!(cnt(k)>0)).map(k=>kitSpot(k).where);think('He waits. Still missing: '+left.join('; ')+'.');return true;}
  return false;}
-function drawKit(){if(SH.on||tq().st!==1)return;for(const id of KIT){if(!kitOut(id))continue;const s=kitSpot(id);if(!s.vis())continue;ctx.drawImage(iconImg(id),s.p[0]-11,s.p[1]-14,22,22);}}
+function drawKit(){if(SH.on||tq().st!==1)return;for(const id of KIT){if(!kitOut(id))continue;const s=kitSpot(id);if(!s.vis())continue;drawOcc(s.p[0],s.p[1],()=>ctx.drawImage(iconImg(id),s.p[0]-11,s.p[1]-14,22,22),true);}}

@@ -82,7 +82,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
  clamObjects(o);thimbleObjects(o);
  return o;}
-function objAt(wx,wy){let best=null,bd=1e9;for(const o of objects()){if(fogHides(o.x,o.y))continue;const d=Math.hypot(o.x-wx,o.y-wy);if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
+function objAt(wx,wy){let best=null,bd=1e9;const [tx,ty]=w2s(wx,wy);for(const o of objects()){if(fogHides(o.x,o.y))continue;const [ox,oy]=w2s(o.x,o.y),d=Math.hypot(ox-tx,oy-ty)/Z;if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
 /* screen and world, through the height lift (30-terrain): a world point is drawn its lift higher; a tap is mapped back down to the ground under it */
 function s2w(sx,sy){const x=(sx-W/2)/Z+cam.x;return[x,unlift(x,(sy-H/2)/Z+cam.y)];}
 function w2s(x,y){return[(x-cam.x)*Z+W/2,(y-liftAt(x,y)-cam.y)*Z+H/2];}

@@ -637,7 +637,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
  clamObjects(o);thimbleObjects(o);
  return o;}
-function objAt(wx,wy){let best=null,bd=1e9;for(const o of objects()){if(fogHides(o.x,o.y))continue;const d=Math.hypot(o.x-wx,o.y-wy);if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
+function objAt(wx,wy){let best=null,bd=1e9;const [tx,ty]=w2s(wx,wy);for(const o of objects()){if(fogHides(o.x,o.y))continue;const [ox,oy]=w2s(o.x,o.y),d=Math.hypot(ox-tx,oy-ty)/Z;if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
 /* screen and world, through the height lift (30-terrain): a world point is drawn its lift higher; a tap is mapped back down to the ground under it */
 function s2w(sx,sy){const x=(sx-W/2)/Z+cam.x;return[x,unlift(x,(sy-H/2)/Z+cam.y)];}
 function w2s(x,y){return[(x-cam.x)*Z+W/2,(y-liftAt(x,y)-cam.y)*Z+H/2];}
@@ -1095,15 +1095,15 @@ function render(){skyLights();
  drawIsletLand();
  spots.forEach(drawSpot);drawClams();drawSwimWorld();drawFarIsles();
  drawFoam();drawWet();
- sketch(sandPts,true,1,4,'#f3d27a',tideLevel()>.985?INK:'rgba(42,33,64,.25)',3.5);drawBreaks();
+ drawLandKey(tideLevel()>.985?INK:'rgba(42,33,64,.25)');drawBreaks();
  drawDock();
- sketch(grassLifted(),true,2,4,'#86c25e',INK,3);drawTerrain(vw,vh);drawShadowLayers();
+ drawTerrain(vw,vh);drawShadowLayers();
  for(const t of tufts){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;if(t.f){dot(t.x,t.y,3.2,t.c>.5?'#ff8fb1':'#fff6a8');dot(t.x,t.y,1.2,'#ffcf3a');}else ln([[t.x-5,t.y-6],[t.x,t.y],[t.x+5,t.y-7]],t.seed,2,'#5a9a3f',.6);}
- drawPickups();
+ drawPickups();drawKit();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y-liftAt(mark.x,mark.y),10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t),t.x]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k),k.x]));d.push([DOCK.y1+40,drawSurf]);
  (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);
- d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const L=x[2]!=null?liftAt(x[2],x[0]):0;if(L){ctx.save();ctx.translate(0,-L);}if(x[1]===drawSwimmer){drawSwimmer();if(!SW.on)drawLine();}else x[1]();if(L)ctx.restore();});
+ d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  }
  drawFly();{const L=liftAt(P.x,P.y);ctx.save();ctx.translate(0,-L);drawScarfFX();drawChopFX();drawGrind();ctx.restore();}if(C){ctx.save();ctx.translate(0,-liftAt(C.fr.x,C.fr.y));drawCook();ctx.restore();}
  if(S.eq.trinket==='blankmap'&&!SH.on){ctx.strokeStyle='#fffbe0';ctx.lineWidth=2.2;for(const o of objects()){if(!o.key||S.journal[o.key])continue;const tw=(Math.sin(now*3+o.x*.05)+1)/2,sx=o.x+o.r*.6,sy=o.y-liftAt(o.x,o.y)-o.r*.6,r=3+tw*3.5;
@@ -1309,7 +1309,7 @@ function drawOrbsHUD(){
 /* hearth: fires, fuel, Brimble */
 const MAINFIRE={x:FIRE.x,y:FIRE.y,main:true,seed:0};
 function allFires(){return [MAINFIRE].concat((S.fires||[]).map((f,i)=>{if(!f.seed)f.seed=10+i;return f;}));}
-function drawAsh(){for(const a of (S.ashp||[])){ctx.save();ctx.translate(0,-liftAt(a.x,a.y));drawAshOne(a);ctx.restore();}}
+function drawAsh(){for(const a of (S.ashp||[])){drawOcc(a.x,a.y,()=>drawAshOne(a),true);}}
 function drawAshOne(a){{if(Math.abs(a.x-cam.x)>W/Z/2+60||Math.abs(a.y-cam.y)>H/Z/2+60)return;const r=10+a.n*2;
  blob(a.x,a.y,r,r*.5,980+a.n,'#b8b2c4',2.4,.8);blob(a.x-2,a.y-2,r*.55,r*.25,981,'#cdc8d6',0,.5);for(let i=0;i<a.n+2;i++)dot(a.x-r*.6+((i*37)%(r*1.2)),a.y-1+((i*13)%5)-2,1.3,'#5a5266');
  (a.items||[]).forEach((id,j)=>{const gx=a.x-5+j*7,gy=a.y-4,tw=.5+.5*Math.sin(now*4+j);if(id==='sunstone'){ctx.globalAlpha=.6+.4*tw;dot(gx,gy,6,'rgba(255,207,58,.45)');dot(gx,gy,3,'#ffcf3a');ctx.globalAlpha=1;}else if(id==='charcoal')dot(gx,gy,3,'#2a2430');else if(id==='seasalt'){ctx.globalAlpha=.6+.4*tw;star(gx,gy,3.4,'#ffffff');ctx.globalAlpha=1;}else{ctx.globalAlpha=.6+.4*tw;dot(gx,gy,4.5,'rgba(255,180,90,.5)');dot(gx,gy,2.6,'#ffb347');ctx.globalAlpha=1;}});}}
@@ -1319,7 +1319,7 @@ function pickGround(g){const i=(S.ground||[]).indexOf(g);if(i<0)return;const it=
  if(stackOf(it.id)){const got=addItem(it.id,n);if(!got){think('No room in my pack.');return;}if(got<n){it.n=n-got;think('My pack only fit some of it.');}else S.ground.splice(i,1);}
  else{if(S.inv.length>=PACK){think('No room in my pack.');return;}const c=Object.assign({},it);delete c.n;S.inv.push(c);S.ground.splice(i,1);}
  flies.push({id:'misc',img:itemIcon(it),x0:g.x,y0:g.y,t:0});save();}
-function drawGround(){const T=Date.now();for(const g of (S.ground||[])){if(Math.abs(g.x-cam.x)>W/Z/2+60||Math.abs(g.y-cam.y)>H/Z/2+60)continue;ctx.save();ctx.translate(0,-liftAt(g.x,g.y));drawGroundOne(g,T);ctx.restore();}}
+function drawGround(){const T=Date.now();for(const g of (S.ground||[])){if(Math.abs(g.x-cam.x)>W/Z/2+60||Math.abs(g.y-cam.y)>H/Z/2+60)continue;drawOcc(g.x,g.y,()=>drawGroundOne(g,T),true);}}
 function drawGroundOne(g,T){{const left=g.exp-T;if(left<20000&&Math.floor(now*5)%2)return;
  shadow(g.x,g.y+2,10,3.5);ctx.drawImage(iconImg(itemIcon(g.it)),g.x-12,g.y-20+Math.sin(now*2+g.x)*1.2,24,24);if((g.it.n||1)>1)otext(String(g.it.n),g.x+11,g.y-2,12,'#fff');}}
 function drawGull(){const {x,y}=GULL,b=Math.sin(now*2.2)*1.2,talk=(dlgOn&&curWho==='Mortimer Gull')||bankOpen;
@@ -1693,7 +1693,7 @@ function drawGrind(){grindDust=grindDust.filter(d=>(d.t+=1/60)<.5);for(const d o
  if(!GRD)return;GRD.rock=Math.max(0,GRD.rock-.08);const k=GRD.k,x=k.x+Math.sin(now*14)*3*GRD.rock,y=k.y-k.ry*.4;ctx.drawImage(iconImg('clamshell'),x-12,y-14,24,24);
  const p=(S.grind||0)/GRIND_N;if(p>0)ln([[x-8,y-6],[x-8+16*p,y-6]],990,2,'#fffaf0',.2);}
 /* clams on the reefs, drawn half sunk */
-function drawClams(){drawKit();if(SH.on)return;for(const c of clams()){if(!clamHere(c))continue;const b=Math.sin(now*1.1+c.i)*1;drawClamShell(c.x,c.y+b,.8,c.seed);ctx.globalAlpha=.35;sketch(ell(c.x,c.y+8,20,5,10),true,c.seed+5,1,null,'#fff',1.4);ctx.globalAlpha=1;}}
+function drawClams(){if(SH.on)return;for(const c of clams()){if(!clamHere(c))continue;const b=Math.sin(now*1.1+c.i)*1;drawClamShell(c.x,c.y+b,.8,c.seed);ctx.globalAlpha=.35;sketch(ell(c.x,c.y+8,20,5,10),true,c.seed+5,1,null,'#fff',1.4);ctx.globalAlpha=1;}}
 function drawClamShell(x,y,s,seed){const pts=[];for(let i=0;i<=10;i++){const a=Math.PI+i/10*Math.PI,w=i%2?1:.9;pts.push([x+Math.cos(a)*22*s*w,y+Math.sin(a)*15*s*w]);}pts.push([x+6*s,y+4*s],[x-6*s,y+4*s]);
  sketch(pts,true,seed,.6,'#efe6d2',INK,2.2);for(let i=1;i<5;i++){const a=Math.PI+i/5*Math.PI;ln([[x,y+2*s],[x+Math.cos(a)*19*s,y+Math.sin(a)*13*s]],seed+i,1.4,'rgba(42,33,64,.45)',.3);}ln([[x-12*s,y-2*s],[x+12*s,y-2*s]],seed+9,1.2,'rgba(150,120,170,.5)',.4);}
 /* ---------- Sir Thimble's quest: the sailmaker's kit ----------
@@ -1724,7 +1724,7 @@ function thimbleSalute(){const q=tq();
    discover('sewing');toast('Quest done: The sailmaker\u2019s kit');sfx('burst');think('He lays out the palm, the fid and the twine like old friends. Then he hands me his spare helm, and shows me, very slowly, how a seam holds.');save();return true;}
   const left=KIT.filter(k=>!(cnt(k)>0)).map(k=>kitSpot(k).where);think('He waits. Still missing: '+left.join('; ')+'.');return true;}
  return false;}
-function drawKit(){if(SH.on||tq().st!==1)return;for(const id of KIT){if(!kitOut(id))continue;const s=kitSpot(id);if(!s.vis())continue;ctx.drawImage(iconImg(id),s.p[0]-11,s.p[1]-14,22,22);}}
+function drawKit(){if(SH.on||tq().st!==1)return;for(const id of KIT){if(!kitOut(id))continue;const s=kitSpot(id);if(!s.vis())continue;drawOcc(s.p[0],s.p[1],()=>ctx.drawImage(iconImg(id),s.p[0]-11,s.p[1]-14,22,22),true);}}
 /* The Shadow Forest: a collection of islands past the Key, each its own shape and kind, some bridged, most reached by swimming. Its own scene and coordinates; the Key's code is untouched. The big ones are forests, not mazes: twisted black trees in clumps and corridors, with canopies that hide what is under them. The more twisted a tree, the harder its wood. */
 const ISLES=[
  {x:0,y:920,rx:430,ry:320,kind:'grove',name:'Landing',landing:1,seed:11,k:[.08,.05,.03],ground:'#3f4d35',sand:'#8d7f63',dens:.22,twist:.2,anchors:[-1.57]},
@@ -1897,7 +1897,7 @@ function shWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
  const d=[];for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;d.push([t.y,()=>drawShTree(t),t.x]);}
  const near=o=>Math.abs(o.x-cam.x)<vw&&Math.abs(o.y-cam.y)<vh;
  MAWS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});DEAD.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});PLANTED.forEach(p=>{if(near(p))d.push([p.y,()=>drawPlanted(p),p.x]);});MOSS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMoss(m),m.x]);});LAPPERS.forEach(l=>{if(near(l))d.push([l.y,()=>drawLapper(l),l.x]);});d.push([HOLLOW.y+40,drawHollow,HOLLOW.x],[P.y,drawSwimmer,P.x]);
- d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const L=x[2]!=null?liftAt(x[2],x[0]):0;if(L){ctx.save();ctx.translate(0,-L);}if(x[1]===drawSwimmer){drawSwimmer();if(!SW.on)drawLine();}else x[1]();if(L)ctx.restore();});
+ d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  /* canopies last, over everything under them: the forest hides what it covers */
  for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;const under=Math.hypot(t.x-P.x,t.y-(P.y+30))<30*t.s;ctx.globalAlpha=under?.8:1;const L=liftAt(t.x,t.y);ctx.save();ctx.translate(0,-L);drawShCanopy(t);ctx.restore();}ctx.globalAlpha=1;drawFlies(vw,vh);}
 function shLights(){const L=[[P.x,P.y-20,95+eff('light')]];MAWS.forEach(m=>{if(m.st==='open'||m.st==='lunge')L.push([m.x,m.y-46,40]);});PLANTED.forEach(p=>L.push([p.x,p.y-16,55+15*Math.min(1,p.t/8)]));L.push([HOLLOW.x-150,HOLLOW.y,70]);
@@ -2435,17 +2435,17 @@ function hShadow(x,y){let best=null,bk=9;for(const I of ISLES){const k=isleK(I,x
  return h*f;}
 function terrH(x,y){return SH.on?hShadow(x,y):hKey(x,y);}
 /* the height lift: things on high ground are drawn higher on screen by their height, exaggerated to suit the
-   world's sideways compression, but never so much that a slope folds over itself (lift changes slower than
-   distance everywhere), so nothing is hidden behind a ridge and every tap lands on what it shows. The
+   world's sideways compression, (the foredune lifts about a character's height,
+   the knoll about two). Where a ridge folds over the ground behind it, 30b-occlusion draws what is really seen. The
    ground's own edges, its shading, contours, shadows, objects and you all lift together; taps are mapped back
    down so a tap lands where you see it. LK is the exaggeration per scene. */
-function LKs(){return SH.on?1.3:1.4;}
+function LKs(){return SH.on?1.3:2.4;}
 function liftAt(x,y){return terrH(x,y)*LKs();}
 /* screen-lifted y back to the ground y under it: solve y - lift(x,y) = ys */
 /* the viewer looks from the south, so where the lifted ground folds over a ridge the nearest (southmost) surface is
    the one seen: scan down from the highest possible lift for the first ground at or above this screen line, then
    refine. Simple iteration fails on steep faces (it oscillates into stripes). */
-function maxLift(){return SH.on?140:80;}
+function maxLift(){return SH.on?140:120;}
 function unlift(x,ys){const f=y=>y-liftAt(x,y)-ys;let hi=ys+maxLift(),fh=f(hi);if(fh<=0)return hi;
  for(let y=hi-8;y>=ys-2;y-=8){const fy=f(y);if(fy<=0){let a=y,b=y+8;for(let i=0;i<5;i++){const m=(a+b)/2;if(f(m)<=0)a=m;else b=m;}return (a+b)/2;}}return ys;}
 function liftPts(pts){return pts.map(p=>[p[0],p[1]-liftAt(p[0],p[1])]);}
@@ -2457,7 +2457,7 @@ function tgrid(){const key=SH.on?'sh':'key';if(TCACHE[key])return TCACHE[key];
  let x0,x1,y0,y1;if(SH.on){x0=1e9;y0=1e9;x1=-1e9;y1=-1e9;for(const I of ISLES){x0=Math.min(x0,I.x-I.rx*1.2);x1=Math.max(x1,I.x+I.rx*1.2);y0=Math.min(y0,I.y-I.ry*1.2);y1=Math.max(y1,I.y+I.ry*1.2);}}else{x0=y0=-720;x1=y1=720;}
  x0=Math.floor(x0/TG)*TG;y0=Math.floor(y0/TG)*TG;const nx=Math.ceil((x1-x0)/TG)+1,ny=Math.ceil((y1-y0)/TG)+1,h=new Float32Array(nx*ny);
  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)h[j*nx+i]=SH.on?hShadow(x0+i*TG,y0+j*TG):hKey(x0+i*TG,y0+j*TG);
- const CI=SH.on?10:4,seg=[new Map(),new Map()],add=(m,ax,ay,bx,by)=>{ay-=liftAt(ax,ay);by-=liftAt(bx,by);const k=Math.floor(ax/400)+','+Math.floor(ay/400);let a=m.get(k);if(!a)m.set(k,a=[]);a.push(ax,ay,bx,by);};
+ const CI=SH.on?10:4,seg=[new Map(),new Map()],add=(m,ax,ay,bx,by)=>{const sa=ay-liftAt(ax,ay),sb=by-liftAt(bx,by);if(Math.abs(unlift(ax,sa)-ay)>4||Math.abs(unlift(bx,sb)-by)>4)return;ay=sa;by=sb;const k=Math.floor(ax/400)+','+Math.floor(ay/400);let a=m.get(k);if(!a)m.set(k,a=[]);a.push(ax,ay,bx,by);};
  for(let n=-8;n<=20;n++){const L=n*CI;if(L===0)continue;const m=seg[n%5===0?1:0];for(let j=0;j<ny-1;j++)for(let i=0;i<nx-1;i++){const a=h[j*nx+i],b=h[j*nx+i+1],c=h[(j+1)*nx+i+1],d=h[(j+1)*nx+i];
   const pts=[],X=x0+i*TG,Y=y0+j*TG,e=(p,q)=>(L-p)/(q-p);
   if((a<L)!==(b<L))pts.push([X+e(a,b)*TG,Y]);if((b<L)!==(c<L))pts.push([X+TG,Y+e(b,c)*TG]);if((d<L)!==(c<L))pts.push([X+e(d,c)*TG,Y+TG]);if((a<L)!==(d<L))pts.push([X,Y+e(a,d)*TG]);
@@ -2503,12 +2503,66 @@ function walkFeel(ux,uy,dt){const s=(terrH(P.x+ux*8,P.y+uy*8)-terrH(P.x,P.y))/8;
  if(!SH.on&&s<-.06&&Math.random()<dt*14){const r=Math.hypot(P.x,P.y),a=Math.atan2(P.y,P.x);if(r>gR(a))for(let i=0;i<2;i++)grindDust.push({x:P.x+(Math.random()-.5)*10,y:P.y+2,vx:ux*30+(Math.random()-.5)*30,vy:-12-Math.random()*16,t:0});}}
 function leanNow(dt){const tgt=P.moving?Math.max(-.14,Math.min(.14,(P.slope||0)*1.6)):0;P.lean=(P.lean||0)+(tgt-(P.lean||0))*Math.min(1,dt*6);return P.lean;}
 function hillZoom(){return 1/(1+Math.max(0,terrH(P.x,P.y))/520);}
-const BUILD=23;
+/* ---------- occlusion: land in front hides what is behind it ----------
+   With the height lift tall enough to read, a ridge near you can stand in front of ground, water and things
+   behind it. This file draws the Key's land as it really stands (column by column, back to front), puts ink on
+   every edge where land hides land, clips objects at the ground in front of them, shows a soft outline of you and
+   of anything you can use when a ridge hides it, and lets a tap on that outline reach it.
+   The dark islands' slopes are gentle enough that nothing folds there, so only the Key needs the land pass. */
+let LANDK=null;
+function landKey(){if(LANDK)return LANDK;const C=[],step=6;
+ for(let x=-760;x<=760;x+=step){let ly1=null,ly2=null,gy1=null,gy2=null;
+  for(let y=-760;y<=760;y+=2){const r=Math.hypot(x,y),a=Math.atan2(y,x);if(r<=iR(a)){if(ly1===null)ly1=y;ly2=y;if(r<=gR(a)){if(gy1===null)gy1=y;gy2=y;}}}
+  if(ly1===null)continue;const s=y=>y-liftAt(x,y),span=(a,b)=>{let t=1e9,u=-1e9;for(let y=a;y<=b;y+=2){const v=s(y);if(v<t)t=v;if(v>u)u=v;}return [t,u];};
+  const c={x,top:span(ly1,ly2)[0],bot:span(ly1,ly2)[1]};
+  if(gy1!==null){c.n=span(ly1,gy1);c.g=span(gy1,gy2);c.s=gy2<ly2?span(gy2,ly2):null;}else c.n=span(ly1,ly2);
+  /* crests that hide ground behind them: scan front to back, note where the view drops behind a crest and later reappears above it */
+  c.crests=[];let m=1e9,hid=false,cr=null;for(let y=ly2;y>=ly1;y-=2){const v=s(y);if(v<m-.5){if(hid&&cr!==null)c.crests.push(cr);m=v;hid=false;}else if(v>m+1.5&&!hid){hid=true;cr=m;}}
+  C.push(c);}
+ /* runs of columns with each band, as polygons */
+ const poly=(k)=>{const runs=[];let cur=null;for(const c of C){const b=c[k];if(!b){cur=null;continue;}if(!cur){cur=[];runs.push(cur);}cur.push([c.x,b[0],b[1]]);}
+  return runs.filter(r=>r.length>1).map(r=>r.map(p=>[p[0],p[1]]).concat(r.slice().reverse().map(p=>[p[0],p[2]])));};
+ const edge=(f)=>{const runs=[];let cur=null;for(const c of C){const v=f(c);if(v==null){cur=null;continue;}if(!cur){cur=[];runs.push(cur);}cur.push([c.x,v]);}return runs.filter(r=>r.length>1);};
+ const crests=[];{let prev=[];for(const c of C){const now2=[];for(const y of c.crests){const p=prev.find(q=>Math.abs(q.y-y)<9);const run=p?p.run:[];run.push([c.x,y]);if(!p)crests.push(run);now2.push({y,run});}prev=now2;}}
+ LANDK={north:poly('n'),grass:poly('g'),south:poly('s'),top:edge(c=>c.top),bot:edge(c=>c.bot),
+  grassTop:edge(c=>c.g?c.g[0]:null),grassBot:edge(c=>c.g&&!(c.s&&c.s[0]<c.g[1]-1)?c.g[1]:null),southTop:edge(c=>c.g&&c.s&&c.s[0]<c.g[1]-1?c.s[0]:null),
+  crests:crests.filter(r=>r.length>=6)};
+ /* the whole land silhouette as one closed outline (top edge, then the bottom edge back) */
+ LANDK.sil=LANDK.top.map((t,i)=>t.concat(LANDK.bot[i].slice().reverse()));return LANDK;}
+/* the Key's land, back to front: the north sand, the grass, the south sand; ink on the silhouette, the grass edge where seen, the crests */
+function drawLandKey(outline){const L=landKey(),fillP=(ps,f,st,lw)=>{for(const p of ps)sketch(p,true,p.length,st?1.5:0,f,st||null,lw);};
+ const ink=(runs,col,lw)=>{for(const r of runs)sketch(r,false,r.length+3,1.5,null,col,lw);};
+ fillP(L.north,'#f3d27a');
+ /* the grass with its whole outline; any of it the south dune hides is painted over next */
+ fillP(L.grass,'#86c25e',INK,3);
+ fillP(L.south,'#f3d27a');ink(L.southTop,INK,3);
+ for(const p of L.sil)sketch(p,true,p.length+7,1.5,null,outline,3.5);
+ ctx.globalAlpha=.55;ink(L.crests,INK,2.2);ctx.globalAlpha=1;}
+/* the ground in front of a world point, in lifted screen-world y: anything of the point drawn below this is hidden */
+function horizonAt(x,y){let m=1e9;const ml=maxLift();for(let d=3;d<=ml+6;d+=3){const v=y+d-liftAt(x,y+d);if(v<m)m=v;}return m;}
+function occludedBy(x,y){const base=y-liftAt(x,y),h=Math.min(horizonAt(x-8,y),horizonAt(x,y),horizonAt(x+8,y));return h<base-2?h:null;}
+/* drawing a thing with occlusion: the part above the ground in front draws normally; with soft=true the hidden part
+   shows as a faint ink silhouette with a soft outline, drawn from an offscreen copy */
+const OC=document.createElement('canvas'),ocx=OC.getContext('2d'),OC2=document.createElement('canvas'),oc2=OC2.getContext('2d');
+function drawOcc(x,y,fn,soft){const L=liftAt(x,y);if(SH.on){if(L){ctx.save();ctx.translate(0,-L);fn();ctx.restore();}else fn();return;}
+ const hz=occludedBy(x,y);if(hz===null){if(L){ctx.save();ctx.translate(0,-L);fn();ctx.restore();}else fn();return;}
+ /* visible part: clip above the horizon (in the translated space the horizon sits L lower) */
+ ctx.save();ctx.translate(0,-L);ctx.beginPath();ctx.rect(x-400,hz+L-2000,800,2000);ctx.clip();fn();ctx.restore();
+ if(!soft)return;
+ /* hidden part as a soft silhouette: draw the thing offscreen with the same transform, tint it, outline it */
+ if(OC.width!==cv.width||OC.height!==cv.height){OC.width=OC2.width=cv.width;OC.height=OC2.height=cv.height;}
+ const T=ctx.getTransform(),keep=ctx;ocx.setTransform(1,0,0,1,0,0);ocx.clearRect(0,0,OC.width,OC.height);ocx.setTransform(T);ocx.translate(0,-L);ctx=ocx;try{fn();}finally{ctx=keep;}
+ ocx.setTransform(1,0,0,1,0,0);ocx.globalCompositeOperation='source-in';ocx.fillStyle='rgb(42,33,64)';ocx.fillRect(0,0,OC.width,OC.height);ocx.globalCompositeOperation='source-over';
+ oc2.setTransform(1,0,0,1,0,0);oc2.clearRect(0,0,OC2.width,OC2.height);const o=2*DPR;for(const [dx,dy] of [[o,0],[-o,0],[0,o],[0,-o]])oc2.drawImage(OC,dx,dy);oc2.globalCompositeOperation='destination-out';oc2.drawImage(OC,0,0);oc2.globalCompositeOperation='source-over';
+ const sy=(hz-cam.y)*Z+H/2;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,sy*DPR,cv.width,cv.height);ctx.clip();ctx.globalAlpha=.14;ctx.drawImage(OC,0,0);ctx.globalAlpha=.6;ctx.drawImage(OC2,0,0);ctx.restore();}
+/* which draw-list things get a soft outline when hidden: you, creatures, people, things to pick up */
+function softFn(fn){return fn===drawSwimmer||fn===drawCrab||fn===drawGull||fn===drawGubbins||fn===drawKindle;}
+const BUILD=24;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 sndUI();if(S.char)begin();else openCreator('new');
-if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},tstage,harvestObj,harvestFinish,harvestReady,terrH,tgrid,WXT,fogR,fn:{objAt,thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
+if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,landKey,occludedBy,liftAt,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},tstage,harvestObj,harvestFinish,harvestReady,terrH,tgrid,WXT,fogR,fn:{objAt,thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
 })();
 </script>
 </body>

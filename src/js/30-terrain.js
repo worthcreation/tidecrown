@@ -26,17 +26,17 @@ function hShadow(x,y){let best=null,bk=9;for(const I of ISLES){const k=isleK(I,x
  return h*f;}
 function terrH(x,y){return SH.on?hShadow(x,y):hKey(x,y);}
 /* the height lift: things on high ground are drawn higher on screen by their height, exaggerated to suit the
-   world's sideways compression, but never so much that a slope folds over itself (lift changes slower than
-   distance everywhere), so nothing is hidden behind a ridge and every tap lands on what it shows. The
+   world's sideways compression, (the foredune lifts about a character's height,
+   the knoll about two). Where a ridge folds over the ground behind it, 30b-occlusion draws what is really seen. The
    ground's own edges, its shading, contours, shadows, objects and you all lift together; taps are mapped back
    down so a tap lands where you see it. LK is the exaggeration per scene. */
-function LKs(){return SH.on?1.3:1.4;}
+function LKs(){return SH.on?1.3:2.4;}
 function liftAt(x,y){return terrH(x,y)*LKs();}
 /* screen-lifted y back to the ground y under it: solve y - lift(x,y) = ys */
 /* the viewer looks from the south, so where the lifted ground folds over a ridge the nearest (southmost) surface is
    the one seen: scan down from the highest possible lift for the first ground at or above this screen line, then
    refine. Simple iteration fails on steep faces (it oscillates into stripes). */
-function maxLift(){return SH.on?140:80;}
+function maxLift(){return SH.on?140:120;}
 function unlift(x,ys){const f=y=>y-liftAt(x,y)-ys;let hi=ys+maxLift(),fh=f(hi);if(fh<=0)return hi;
  for(let y=hi-8;y>=ys-2;y-=8){const fy=f(y);if(fy<=0){let a=y,b=y+8;for(let i=0;i<5;i++){const m=(a+b)/2;if(f(m)<=0)a=m;else b=m;}return (a+b)/2;}}return ys;}
 function liftPts(pts){return pts.map(p=>[p[0],p[1]-liftAt(p[0],p[1])]);}
@@ -48,7 +48,7 @@ function tgrid(){const key=SH.on?'sh':'key';if(TCACHE[key])return TCACHE[key];
  let x0,x1,y0,y1;if(SH.on){x0=1e9;y0=1e9;x1=-1e9;y1=-1e9;for(const I of ISLES){x0=Math.min(x0,I.x-I.rx*1.2);x1=Math.max(x1,I.x+I.rx*1.2);y0=Math.min(y0,I.y-I.ry*1.2);y1=Math.max(y1,I.y+I.ry*1.2);}}else{x0=y0=-720;x1=y1=720;}
  x0=Math.floor(x0/TG)*TG;y0=Math.floor(y0/TG)*TG;const nx=Math.ceil((x1-x0)/TG)+1,ny=Math.ceil((y1-y0)/TG)+1,h=new Float32Array(nx*ny);
  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++)h[j*nx+i]=SH.on?hShadow(x0+i*TG,y0+j*TG):hKey(x0+i*TG,y0+j*TG);
- const CI=SH.on?10:4,seg=[new Map(),new Map()],add=(m,ax,ay,bx,by)=>{ay-=liftAt(ax,ay);by-=liftAt(bx,by);const k=Math.floor(ax/400)+','+Math.floor(ay/400);let a=m.get(k);if(!a)m.set(k,a=[]);a.push(ax,ay,bx,by);};
+ const CI=SH.on?10:4,seg=[new Map(),new Map()],add=(m,ax,ay,bx,by)=>{const sa=ay-liftAt(ax,ay),sb=by-liftAt(bx,by);if(Math.abs(unlift(ax,sa)-ay)>4||Math.abs(unlift(bx,sb)-by)>4)return;ay=sa;by=sb;const k=Math.floor(ax/400)+','+Math.floor(ay/400);let a=m.get(k);if(!a)m.set(k,a=[]);a.push(ax,ay,bx,by);};
  for(let n=-8;n<=20;n++){const L=n*CI;if(L===0)continue;const m=seg[n%5===0?1:0];for(let j=0;j<ny-1;j++)for(let i=0;i<nx-1;i++){const a=h[j*nx+i],b=h[j*nx+i+1],c=h[(j+1)*nx+i+1],d=h[(j+1)*nx+i];
   const pts=[],X=x0+i*TG,Y=y0+j*TG,e=(p,q)=>(L-p)/(q-p);
   if((a<L)!==(b<L))pts.push([X+e(a,b)*TG,Y]);if((b<L)!==(c<L))pts.push([X+TG,Y+e(b,c)*TG]);if((d<L)!==(c<L))pts.push([X+e(d,c)*TG,Y+TG]);if((a<L)!==(d<L))pts.push([X,Y+e(a,d)*TG]);

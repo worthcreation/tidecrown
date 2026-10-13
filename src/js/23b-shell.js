@@ -31,6 +31,6 @@ function drawGrind(){grindDust=grindDust.filter(d=>(d.t+=1/60)<.5);for(const d o
  if(!GRD)return;GRD.rock=Math.max(0,GRD.rock-.08);const k=GRD.k,x=k.x+Math.sin(now*14)*3*GRD.rock,y=k.y-k.ry*.4;ctx.drawImage(iconImg('clamshell'),x-12,y-14,24,24);
  const p=(S.grind||0)/GRIND_N;if(p>0)ln([[x-8,y-6],[x-8+16*p,y-6]],990,2,'#fffaf0',.2);}
 /* clams on the reefs, drawn half sunk */
-function drawClams(){drawKit();if(SH.on)return;for(const c of clams()){if(!clamHere(c))continue;const b=Math.sin(now*1.1+c.i)*1;drawClamShell(c.x,c.y+b,.8,c.seed);ctx.globalAlpha=.35;sketch(ell(c.x,c.y+8,20,5,10),true,c.seed+5,1,null,'#fff',1.4);ctx.globalAlpha=1;}}
+function drawClams(){if(SH.on)return;for(const c of clams()){if(!clamHere(c))continue;const b=Math.sin(now*1.1+c.i)*1;drawClamShell(c.x,c.y+b,.8,c.seed);ctx.globalAlpha=.35;sketch(ell(c.x,c.y+8,20,5,10),true,c.seed+5,1,null,'#fff',1.4);ctx.globalAlpha=1;}}
 function drawClamShell(x,y,s,seed){const pts=[];for(let i=0;i<=10;i++){const a=Math.PI+i/10*Math.PI,w=i%2?1:.9;pts.push([x+Math.cos(a)*22*s*w,y+Math.sin(a)*15*s*w]);}pts.push([x+6*s,y+4*s],[x-6*s,y+4*s]);
  sketch(pts,true,seed,.6,'#efe6d2',INK,2.2);for(let i=1;i<5;i++){const a=Math.PI+i/5*Math.PI;ln([[x,y+2*s],[x+Math.cos(a)*19*s,y+Math.sin(a)*13*s]],seed+i,1.4,'rgba(42,33,64,.45)',.3);}ln([[x-12*s,y-2*s],[x+12*s,y-2*s]],seed+9,1.2,'rgba(150,120,170,.5)',.4);}
