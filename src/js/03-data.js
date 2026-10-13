@@ -51,6 +51,8 @@ const JOURNAL={
  stache:['The Ash Mustache','Brimble braided ten scoops of ash into a mustache, exactly like the one the Gull’s head cook wore. It is ridiculous. It is magnificent. Gubbins pays extra to anyone wearing it.'],
  thimblekit:['The sailmaker’s kit','Sir Thimble’s helmet was the Grinning Gull’s sailmaker’s thimble. He wants the rest of the kit: a palm, a fid and waxed twine, all somewhere the sea put them.'],
  sewing:['How a seam holds','Sir Thimble showed me: the palm pushes, the fid opens, the twine is waxed so it bites. I could sew canvas, given a needle. I do not have one. Yet.'],
+ teapot:['Brimble’s teapot','He cooks in it, hung on a driftwood tripod beside his fire. It has never once made tea, and he is proud of that.'],
+ palm:['Palms','They grow on the sand, leaning the way the trade wind pushes them. Up the hill it is too cool and foggy for them; the wobble trees have that.'],
  cairn:['The cairn','Someone stacked stones on the very top of the Key. From there every shore shows, and the sea all round. Brimble says he watches for ships from just below it.'],
  stumpcache:['Something the forest swallowed','A rotted pouch tangled in the roots of a stump, still holding shells. Somebody lost it here long before me.'],
  clam:['A giant clam shell','Old, empty, wedged into the reef nearest the Key. A driftwood stick levers it out. The hinge is the thickest shell I have ever held.'],

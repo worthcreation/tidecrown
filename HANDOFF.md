@@ -1,4 +1,4 @@
-# Tidecrown: handoff (build 33, 12 Oct 2026)
+# Tidecrown: handoff (build 34, 12 Oct 2026)
 Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/design-rules.md. Milestones and work order: docs/roadmap.md.
 
 ## Workflow
@@ -50,6 +50,6 @@ Key: creator, Gubbins (fish buyer), Brimble (galley flame, teaches Cooking), Mor
 Shadow Forest (test build only for now): seven islands, reached by map warp or the swim east, long gradual swim with a mid-swim scene change, forests of twisted trees (black wood, twisted wood, ironbark), creatures with tells that Strife and Accord can each set right.
 
 ## Next
-Work order is docs/roadmap.md. Next: storms and windfall (roadmap 6b, build 34; the design check is written and waiting on Ross's answers: storm frequency, Brimble warning, storm wash-ups), then Invention design; each starts on "next" with a short design check. Then Invention design, which gates the fire ladder, glass and the lantern.
+Work order is docs/roadmap.md. Next: storms and windfall (roadmap 6b, build 35; the design check is written and waiting on Ross's answers: storm frequency, Brimble warning, storm wash-ups), then Invention design; each starts on "next" with a short design check. Then Invention design, which gates the fire ladder, glass and the lantern.
 - Tune by play: wave rates, swim feel, depth shelves, jelly density, day and tide lengths, the current's strength, grind stroke count (48), squall frequency, fog thickness, cloud shade strength, slope strength and hill heights.
 - Open for Ross: cliffs and scree (none yet; when Climbing exists, each needs a way around); the Oilskin Coat's upgrade or take-apart path; at the next handoff, add to the project instructions: attach PROJECT_INSTRUCTIONS.md only when asked, when it changed, or at a handoff; whether to run builds in Claude Code on a branch per build; move the Playwright tests into the repo (tools/tests/).

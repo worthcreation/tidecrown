@@ -1,5 +1,6 @@
 # Tidecrown history (newest first)
 
+- Build 34 (12 Oct 2026): Brimble's teapot can be examined (and, when you have fish to cook, tapping it cooks, like tapping Brimble), and so can the palms. Both have journal entries.
 - Build 33 (12 Oct 2026): thought bubbles are clearly see-through now (the bubble at 60%, the words solid; 85% read as solid). Listening to the stone head walks you up to it first instead of hearing it from across the island, and its daytime line no longer mentions a stone ear it does not have.
 - Build 32 (12 Oct 2026): the last spokes are gone. The foredune's height varies around the coast, and half of it was carrying on inland all the way to the island's centre, where the differences met in a starburst of shading. The dune is now a bump that returns to nothing behind it.
 - Build 31 (12 Oct 2026): dawn and dusk follow the sun. The light used to run on its own clock, so it was full daylight for most of an hour before the sun came up, and the only shadows then came from the setting moon, pointing east. Now it stays dark until a short twilight just before sunrise, the first shadows come with the sun and point west, and the moon only throws shadows in full dark. Dusk works the same way in reverse.

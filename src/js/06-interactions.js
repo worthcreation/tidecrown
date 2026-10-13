@@ -82,6 +82,10 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  for(const s of SURF)if(s.pile&&s.st==='sparkle')o.push({x:s.x,y:s.y-4,r:14,name:s.name,key:'piling',act:'Scrape salt',onAct:()=>scrapeSalt(s),onExamine:()=>think('Barnacled and briny. Between waves, it sparkles.')});
  rocks.forEach(k=>{const sf=SURF.find(s=>s.x===k.x&&s.y===k.y),sp=sf&&sf.st==='sparkle',ga=grindAct(k);o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',key:'rocks',act:sp?'Scrape salt':ga,onAct:sp?()=>scrapeSalt(sf):ga?()=>startGrind(k):null,more:sp&&ga?[{l:ga,f:()=>startGrind(k)}]:null,onExamine:()=>{discover('rocks');think(k.camp?'A shoulder of rock between the camp and the wind. Brimble picked his spot well.':'Barnacled rocks. The water past them churns like it’s hiding something big.');}})});
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
+ /* Brimble's teapot on its tripod: he cooks in it */
+ o.push({x:FIRE.x+52,y:FIRE.y-14,r:16,name:'Teapot',key:'teapot',act:S.metWick&&hasSkill('hearth')&&rawCount()?'Cook':null,onAct:S.metWick&&hasSkill('hearth')&&rawCount()?()=>tapFire(MAINFIRE):null,onExamine:()=>{discover('teapot');think(pick(['Brimble’s teapot. He cooks everything in it. It has never once made tea.','A blue teapot on a driftwood tripod, dented in three places. Brimble calls it the kitchen.']));}});
+ /* palms on the sand */
+ for(const t of KPALMS)if(Math.hypot(t.x-P.x,t.y-P.y)<300)o.push({x:t.x,y:t.y-30*t.s,r:16,name:'Palm',key:'palm',onExamine:()=>{discover('palm');think(pick(['A palm, leaning the way the wind has pushed it all its life.','Palms grow on the sand here and nowhere else. The hill is too high for them.']));}});
  o.push({x:HILL.x,y:HILL.y-18,r:22,name:'Cairn',key:'cairn',onExamine:()=>{discover('cairn');think('Stones stacked to mark the top. From here you can see every shore of the Key, and the sea all round.');}});
  clamObjects(o);thimbleObjects(o);
  return o;}
