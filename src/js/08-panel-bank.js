@@ -30,12 +30,12 @@ const SLOTLAB={head:'Head',body:'Body',hand:'Hands',trinket:'Charm',back:'Back',
 /* the map: a sea chart, nothing else on the tab. Test: every island drawn with its name, the bridges, you, and a tap on an island goes there. Play: the Key, you, and the dark islands only as an unnamed smudge on the horizon; no taps. */
 let MAPHIT=[];
 function drawMapTo(c){const w=c.clientWidth||300,h=c.clientHeight||300,d=Math.min(2,devicePixelRatio||1);c.width=Math.round(w*d);c.height=Math.round(h*d);const k=ctx;ctx=c.getContext('2d');ctx.setTransform(d,0,0,d,0,0);
- /* the chart is turned so east is up: the Key at the bottom, the dark islands above it, the sea between them shortened */
- const KX=-2350,KY=0,X0=-1560,X1=1260,Y0=-1730,Y1=-KX+640,sc=Math.min((w-24)/(X1-X0),(h-78)/(Y1-Y0)),ox=w/2-(X0+X1)/2*sc,oy=h/2+2-(Y0+Y1)/2*sc,M=(x,y)=>[ox+y*sc,oy-x*sc];MAPHIT=[];
+ /* the chart has north up, like the game: the Key on the left, the dark islands to its east */
+ const KX=-2350,KY=0,X0=KX-640,X1=1730,Y0=-1560,Y1=1260,sc=Math.min((w-24)/(X1-X0),(h-78)/(Y1-Y0)),ox=w/2-(X0+X1)/2*sc,oy=h/2+2-(Y0+Y1)/2*sc,M=(x,y)=>[ox+x*sc,oy+y*sc];MAPHIT=[];
  ctx.fillStyle='#2b6d7c';ctx.fillRect(0,0,w,h);ctx.globalAlpha=.35;for(let i=0;i<40;i++){const x=(i*73)%w,y=((i*131)%(h-40))+20;ln([[x-7,y],[x,y-3],[x+7,y]],700+i,1.8,'#9fc4cc',.8);}ctx.globalAlpha=1;
  const kp=sandPts.map(p=>M(KX+p[0],KY+p[1])),gp=grassPts.map(p=>M(KX+p[0]*.98,KY+p[1]*.98));sketch(kp,true,880,2,'#f3d27a',INK,2);sketch(gp,true,881,2,'#86c25e',INK,1.5);
  const dk=M(KX+DOCK.x0,KY),dk2=M(KX+DOCK.x1,KY);ln([dk,dk2],883,3,'#c98f56',.3);{const [kx,ky]=M(KX,KY);if(MODE==='test')MAPHIT.push({x:kx,y:ky,r:Math.max(26,560*sc),id:'key'});}
- if(MODE==='play'){ctx.fillStyle='#24424c';for(const [f,al] of [[1.6,.12],[1.25,.16],[.9,.2]]){ctx.globalAlpha=al;ISLES.forEach(I=>{const [x,y]=M(I.x,I.y);ctx.beginPath();ctx.ellipse(x,y,I.ry*sc*f,I.rx*sc*f,0,0,6.2832);ctx.fill();});}ctx.globalAlpha=1;}
+ if(MODE==='play'){ctx.fillStyle='#24424c';for(const [f,al] of [[1.6,.12],[1.25,.16],[.9,.2]]){ctx.globalAlpha=al;ISLES.forEach(I=>{const [x,y]=M(I.x,I.y);ctx.beginPath();ctx.ellipse(x,y,I.rx*sc*f,I.ry*sc*f,0,0,6.2832);ctx.fill();});}ctx.globalAlpha=1;}
  else{BRIDGES.forEach(B=>{if(B.v)ln([M(B.x,B.y0),M(B.x,B.y1)],899,2.5,'#9a6236',.3);else ln([M(B.x0,B.y),M(B.x1,B.y)],898,2.5,'#9a6236',.3);});
  ISLES.forEach((I,n)=>{const [x,y]=M(I.x,I.y),rx=Math.max(7,I.rx*sc),ry=Math.max(6,I.ry*sc);sketch(islePts(I,1,28).map(p=>M(p[0],p[1])),true,882+n,2,I.sand,INK,1.5);sketch(islePts(I,.84,24).map(p=>M(p[0],p[1])),true,890+n,2,I.ground,null);MAPHIT.push({x,y,r:Math.max(22,Math.max(rx,ry)),id:'sh'+n});});}
  /* names on the chart */
@@ -44,7 +44,7 @@ function drawMapTo(c){const w=c.clientWidth||300,h=c.clientHeight||300,d=Math.mi
  if(MODE==='test')ISLES.forEach((I,n)=>{const [x,y]=M(I.x,I.y),big=I.rx*sc>34;lab(I.name,x,big?y:y+Math.max(6,I.rx*sc)+8,11);});
  {const [x,y]=M(KX+520,KY-1050);lab('The Lantern Sea',x,y,15);}
  const [px,py]=SH.on?M(P.x,P.y):M(KX+P.x,KY+P.y);const pu=1+.15*Math.sin(now*4);dot(px,py,5*pu,INK);dot(px,py,3*pu,'#ff6b6b');lab('you',px,py-11,11);
- ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='left';ctx.fillStyle='rgba(255,250,240,.8)';ctx.fillText('N',8,38);ln([[34,32],[20,32]],884,2,'rgba(255,250,240,.8)',.3);ln([[26,28],[20,32],[26,36]],885,2,'rgba(255,250,240,.8)',.3);
+ ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='left';ctx.fillStyle='rgba(255,250,240,.8)';ctx.fillText('N',12,48);ln([[17,30],[17,14]],884,2,'rgba(255,250,240,.8)',.3);ln([[12,20],[17,14],[22,20]],885,2,'rgba(255,250,240,.8)',.3);
  if(MODE==='test'){ctx.font="12px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='right';ctx.fillStyle='rgba(255,250,240,.7)';ctx.fillText('Test build: tap an island to go there.',w-8,h-8);}ctx=k;}
 function MAPDEST(){return [{id:'key',name:'Driftwood Key',kind:'home'}].concat(ISLES.map((I,i)=>({id:'sh'+i,name:I.name,kind:I.kind,I})));}
 function mapHTML(){return `<canvas id="mapc" class="mapc" aria-label="Sea chart"></canvas>`;}

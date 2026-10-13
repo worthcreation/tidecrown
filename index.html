@@ -308,7 +308,11 @@ const REQ={shallow:1,deep:10,moon:20};
 
 const G={x:R0+170,y:-2,talk:false};
 const SIGN={x:R0-95,y:-58};
-const FIRE=(()=>{const p=polar(-.95,iR(-.95)-42);return{x:Math.round(p[0]),y:Math.round(p[1])};})();
+/* Brimble's camp: a flat shelf on the lee (west) shoulder of the hill near the middle of the Key, just below its
+   crown: out of the east wind and spray, a few steps from a lookout over the whole horizon (HILL in 30-terrain) */
+const OLDFIRE=(()=>{const p=polar(-.95,iR(-.95)-42);return{x:Math.round(p[0]),y:Math.round(p[1])};})();
+const HILL={x:50,y:-70};
+const FIRE={x:-25,y:-55};
 const HEAD=(()=>{const a=Math.PI-.45,p=polar(a,iR(a)-70);return{x:p[0],y:p[1]};})();
 const POOL=(()=>{const p=polar(2.05,250);return{x:p[0],y:p[1]};})();
 const GULL={x:R0-150,y:-34};
@@ -316,12 +320,17 @@ const crabHome=polar(1.6,iR(1.6)-60);
 const CRAB={x:crabHome[0],y:crabHome[1],tx:crabHome[0],ty:crabHome[1],wait:1,hop:0};
 const rocks=[];
 [-1.85,-2.35].forEach((a,j)=>{[-.09,-.03,.05,.1].forEach((d,i)=>{const p=polar(a+d,iR(a+d)+(i%2?2:-8));rocks.push({x:p[0],y:p[1],rx:14+((i*7+j*3)%9),ry:10+((i*5)%6),seed:200+j*10+i});});});
+/* a low outcrop on the windward (east) edge of Brimble's shelf */
+[[62,-8,16,11],[70,16,13,9],[52,34,11,8]].forEach(([dx,dy,rx,ry],i)=>rocks.push({x:FIRE.x+dx,y:FIRE.y+dy,rx,ry,seed:260+i,camp:1}));
 
 const trees=[];
-{const r=mulberry(7);let tries=0;const avoid=[[GULL.x,GULL.y],[POOL.x,POOL.y],[R0-80,24],[FIRE.x,FIRE.y],[SIGN.x,SIGN.y],[HEAD.x,HEAD.y],[R0-25,0],crabHome,...spots.map(s=>[s.ax,s.ay])];
+{const r=mulberry(7);let tries=0;const avoid=[[GULL.x,GULL.y],[POOL.x,POOL.y],[R0-80,24],[OLDFIRE.x,OLDFIRE.y],[SIGN.x,SIGN.y],[HEAD.x,HEAD.y],[R0-25,0],crabHome,...spots.map(s=>[s.ax,s.ay])];
  while(trees.length<18&&tries<800){tries++;const a=r()*6.2832,d=Math.sqrt(r())*.74;const x=Math.cos(a)*gR(a)*d,y=Math.sin(a)*gR(a)*d;
   if(avoid.some(p=>Math.hypot(p[0]-x,p[1]-y)<120))continue;if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<90))continue;
-  trees.push({x,y,s:.85+r()*.45,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}}
+  trees.push({x,y,s:.85+r()*.45,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}
+ /* the island keeps its old trees, except where the camp now sits; a small stand on the camp's north side shades it and breaks the wind */
+ for(let i=trees.length-1;i>=0;i--)if(Math.hypot(trees[i].x-FIRE.x,trees[i].y-FIRE.y)<95||Math.hypot(trees[i].x-HILL.x,trees[i].y-HILL.y)<55)trees.splice(i,1);
+ [[-60,-140,1.05],[5,-150,.95],[-115,-110,1.1]].forEach(([dx,dy,s],i)=>trees.push({x:FIRE.x+dx,y:FIRE.y+dy,s,seed:900+i*31,lean:(i-1)*6,hue:.3+i*.2}));}
 const tufts=[];{const r=mulberry(11);for(let i=0;i<80;i++){const a=r()*6.2832,d=Math.sqrt(r())*.93;tufts.push({x:Math.cos(a)*gR(a)*d,y:Math.sin(a)*gR(a)*d,f:r()<.18,seed:i+500,c:r()});}}
 const waves=[];{const r=mulberry(23);for(let i=0;i<300;i++){const a=r()*6.2832,d=iR(a)+110+r()*(i<140?1100:4300);waves.push({x:Math.cos(a)*d,y:Math.sin(a)*d,s:r()*6,seed:i+900});}}
 
@@ -633,7 +642,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  trees.forEach(t=>o.push({x:t.x+t.lean*t.s,y:t.y-50*t.s,r:34*t.s,name:'Wobble tree',key:'tree',act:treeReady(t)?'Chop':null,onAct:()=>chopTree(t),onExamine:()=>{discover('tree');think('It sways with no wind. I think it just sighed.');}}));
  for(const it of (S.shore||[]))if(!underFoam(it))o.push({x:it.x,y:it.y-6,r:20,name:itemName({id:it.id}),key:it.id==='wood'?'driftwood':it.id==='kelp'?'kelp':'wash',act:'Grab',onAct:()=>routeTo(it.x,it.y+4,()=>grabShore(it)),onExamine:()=>think(pick(['The sea dropped it. It wants it back.','Grab it before the next wave does.']))});
  for(const s of SURF)if(s.pile&&s.st==='sparkle')o.push({x:s.x,y:s.y-4,r:14,name:s.name,key:'piling',act:'Scrape salt',onAct:()=>scrapeSalt(s),onExamine:()=>think('Barnacled and briny. Between waves, it sparkles.')});
- rocks.forEach(k=>{const sf=SURF.find(s=>s.x===k.x&&s.y===k.y),sp=sf&&sf.st==='sparkle',ga=grindAct(k);o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',key:'rocks',act:sp?'Scrape salt':ga,onAct:sp?()=>scrapeSalt(sf):ga?()=>startGrind(k):null,more:sp&&ga?[{l:ga,f:()=>startGrind(k)}]:null,onExamine:()=>{discover('rocks');think('Barnacled rocks. The water past them churns like it’s hiding something big.');}})});
+ rocks.forEach(k=>{const sf=SURF.find(s=>s.x===k.x&&s.y===k.y),sp=sf&&sf.st==='sparkle',ga=grindAct(k);o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',key:'rocks',act:sp?'Scrape salt':ga,onAct:sp?()=>scrapeSalt(sf):ga?()=>startGrind(k):null,more:sp&&ga?[{l:ga,f:()=>startGrind(k)}]:null,onExamine:()=>{discover('rocks');think(k.camp?'A shoulder of rock between the camp and the wind. Brimble picked his spot well.':'Barnacled rocks. The water past them churns like it’s hiding something big.');}})});
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
  clamObjects(o);thimbleObjects(o);
  return o;}
@@ -664,9 +673,9 @@ function swipe(x0,y0,x1,y1,ms){if(C||ccOn||dlgOn)return;const dx=x1-x0,dy=y1-y0,
  scarfSlide(s2w(x0,y0),s2w(x1,y1));}
 function longPress(sx,sy){if(C||SW.on)return;const [wx,wy]=s2w(sx,sy);const o=objAt(wx,wy);const items=[];let title;
  hap(12);sfx('open',.6);
- if(o){title=o.name;if(o.act)items.push({l:o.act,f:o.onAct});if(o.more)o.more.forEach(m=>items.push(m));const tg=scarfAt(wx,wy);if(tg&&tg.kind!=='dead')items.push({l:'Slap',f:()=>scarfMove('slap',tg)},{l:'Trip',f:()=>scarfMove('trip',tg)},{l:'Wrap',f:()=>scarfMove('wrap',tg)});items.push({l:'Examine',f:o.onExamine});}
+ if(o){title=o.name;if(o.act)items.push({l:o.act,f:o.onAct});if(o.more)o.more.forEach(m=>items.push(m));const tg=scarfAt(wx,wy);if(tg&&tg.kind!=='dead')items.push({l:'Slap',f:()=>scarfMove('slap',tg)},{l:'Trip',f:()=>scarfMove('trip',tg)},{l:'Wrap',f:()=>scarfMove('wrap',tg)});items.push({l:'Walk here',f:()=>inSea(wx,wy)?walkStraight(wx,wy):routeTo(wx,wy)});items.push({l:'Examine',f:o.onExamine});}
  else if(walkable(wx,wy)){title='Ground';items.push({l:'Walk here',f:()=>routeTo(wx,wy)});if(lv('survival')>=3){items.push({l:'Build a campfire (3 driftwood)',f:()=>buildFire(wx,wy,false)});if((S.wobble||0)>=2)items.push({l:'Build a bonfire (2 wobblewood, 2 driftwood)',f:()=>buildFire(wx,wy,true)});}items.push({l:'Examine',f:()=>think(pick(['Sand. Warm. Slightly judgmental.','Tiny footprints here. Not mine. Not the crab\u2019s either.','The grass is softer than it has any right to be.']))});}
- else{title='The sea';if(S.eq.trinket==='spyglass')items.push({l:'Look through spyglass',f:spyglass});items.push({l:'Walk to shore',f:()=>{const c=clampLand(wx,wy);routeTo(c[0],c[1]);}});items.push({l:'Examine',f:()=>think(pick(['The Lantern Sea. Somewhere out there is the Far Light.','Big. Wet. Full of fish and secrets.','I can\u2019t swim that far. Yet.']))});}
+ else{title='The sea';if(S.eq.trinket==='spyglass')items.push({l:'Look through spyglass',f:spyglass});items.push({l:'Walk here',f:()=>walkStraight(wx,wy)});items.push({l:'Walk to shore',f:()=>{const c=clampLand(wx,wy);routeTo(c[0],c[1]);}});items.push({l:'Examine',f:()=>think(pick(['The Lantern Sea. Somewhere out there is the Far Light.','Big. Wet. Full of fish and secrets.','I can\u2019t swim that far. Yet.']))});}
  showCtx(sx,sy,title,items);if(S.hint===3)advanceHint(4);}
 
 /* ---------- input ---------- */
@@ -719,12 +728,12 @@ const SLOTLAB={head:'Head',body:'Body',hand:'Hands',trinket:'Charm',back:'Back',
 /* the map: a sea chart, nothing else on the tab. Test: every island drawn with its name, the bridges, you, and a tap on an island goes there. Play: the Key, you, and the dark islands only as an unnamed smudge on the horizon; no taps. */
 let MAPHIT=[];
 function drawMapTo(c){const w=c.clientWidth||300,h=c.clientHeight||300,d=Math.min(2,devicePixelRatio||1);c.width=Math.round(w*d);c.height=Math.round(h*d);const k=ctx;ctx=c.getContext('2d');ctx.setTransform(d,0,0,d,0,0);
- /* the chart is turned so east is up: the Key at the bottom, the dark islands above it, the sea between them shortened */
- const KX=-2350,KY=0,X0=-1560,X1=1260,Y0=-1730,Y1=-KX+640,sc=Math.min((w-24)/(X1-X0),(h-78)/(Y1-Y0)),ox=w/2-(X0+X1)/2*sc,oy=h/2+2-(Y0+Y1)/2*sc,M=(x,y)=>[ox+y*sc,oy-x*sc];MAPHIT=[];
+ /* the chart has north up, like the game: the Key on the left, the dark islands to its east */
+ const KX=-2350,KY=0,X0=KX-640,X1=1730,Y0=-1560,Y1=1260,sc=Math.min((w-24)/(X1-X0),(h-78)/(Y1-Y0)),ox=w/2-(X0+X1)/2*sc,oy=h/2+2-(Y0+Y1)/2*sc,M=(x,y)=>[ox+x*sc,oy+y*sc];MAPHIT=[];
  ctx.fillStyle='#2b6d7c';ctx.fillRect(0,0,w,h);ctx.globalAlpha=.35;for(let i=0;i<40;i++){const x=(i*73)%w,y=((i*131)%(h-40))+20;ln([[x-7,y],[x,y-3],[x+7,y]],700+i,1.8,'#9fc4cc',.8);}ctx.globalAlpha=1;
  const kp=sandPts.map(p=>M(KX+p[0],KY+p[1])),gp=grassPts.map(p=>M(KX+p[0]*.98,KY+p[1]*.98));sketch(kp,true,880,2,'#f3d27a',INK,2);sketch(gp,true,881,2,'#86c25e',INK,1.5);
  const dk=M(KX+DOCK.x0,KY),dk2=M(KX+DOCK.x1,KY);ln([dk,dk2],883,3,'#c98f56',.3);{const [kx,ky]=M(KX,KY);if(MODE==='test')MAPHIT.push({x:kx,y:ky,r:Math.max(26,560*sc),id:'key'});}
- if(MODE==='play'){ctx.fillStyle='#24424c';for(const [f,al] of [[1.6,.12],[1.25,.16],[.9,.2]]){ctx.globalAlpha=al;ISLES.forEach(I=>{const [x,y]=M(I.x,I.y);ctx.beginPath();ctx.ellipse(x,y,I.ry*sc*f,I.rx*sc*f,0,0,6.2832);ctx.fill();});}ctx.globalAlpha=1;}
+ if(MODE==='play'){ctx.fillStyle='#24424c';for(const [f,al] of [[1.6,.12],[1.25,.16],[.9,.2]]){ctx.globalAlpha=al;ISLES.forEach(I=>{const [x,y]=M(I.x,I.y);ctx.beginPath();ctx.ellipse(x,y,I.rx*sc*f,I.ry*sc*f,0,0,6.2832);ctx.fill();});}ctx.globalAlpha=1;}
  else{BRIDGES.forEach(B=>{if(B.v)ln([M(B.x,B.y0),M(B.x,B.y1)],899,2.5,'#9a6236',.3);else ln([M(B.x0,B.y),M(B.x1,B.y)],898,2.5,'#9a6236',.3);});
  ISLES.forEach((I,n)=>{const [x,y]=M(I.x,I.y),rx=Math.max(7,I.rx*sc),ry=Math.max(6,I.ry*sc);sketch(islePts(I,1,28).map(p=>M(p[0],p[1])),true,882+n,2,I.sand,INK,1.5);sketch(islePts(I,.84,24).map(p=>M(p[0],p[1])),true,890+n,2,I.ground,null);MAPHIT.push({x,y,r:Math.max(22,Math.max(rx,ry)),id:'sh'+n});});}
  /* names on the chart */
@@ -733,7 +742,7 @@ function drawMapTo(c){const w=c.clientWidth||300,h=c.clientHeight||300,d=Math.mi
  if(MODE==='test')ISLES.forEach((I,n)=>{const [x,y]=M(I.x,I.y),big=I.rx*sc>34;lab(I.name,x,big?y:y+Math.max(6,I.rx*sc)+8,11);});
  {const [x,y]=M(KX+520,KY-1050);lab('The Lantern Sea',x,y,15);}
  const [px,py]=SH.on?M(P.x,P.y):M(KX+P.x,KY+P.y);const pu=1+.15*Math.sin(now*4);dot(px,py,5*pu,INK);dot(px,py,3*pu,'#ff6b6b');lab('you',px,py-11,11);
- ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='left';ctx.fillStyle='rgba(255,250,240,.8)';ctx.fillText('N',8,38);ln([[34,32],[20,32]],884,2,'rgba(255,250,240,.8)',.3);ln([[26,28],[20,32],[26,36]],885,2,'rgba(255,250,240,.8)',.3);
+ ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='left';ctx.fillStyle='rgba(255,250,240,.8)';ctx.fillText('N',12,48);ln([[17,30],[17,14]],884,2,'rgba(255,250,240,.8)',.3);ln([[12,20],[17,14],[22,20]],885,2,'rgba(255,250,240,.8)',.3);
  if(MODE==='test'){ctx.font="12px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='right';ctx.fillStyle='rgba(255,250,240,.7)';ctx.fillText('Test build: tap an island to go there.',w-8,h-8);}ctx=k;}
 function MAPDEST(){return [{id:'key',name:'Driftwood Key',kind:'home'}].concat(ISLES.map((I,i)=>({id:'sh'+i,name:I.name,kind:I.kind,I})));}
 function mapHTML(){return `<canvas id="mapc" class="mapc" aria-label="Sea chart"></canvas>`;}
@@ -1004,16 +1013,17 @@ function drawPool(){const {x,y}=POOL;blob(x,y,44,22,170,'#8fd3dc',3);const ph=(n
  ln([[x-16,y-7],[x-4,y-10]],172,2.5,'rgba(255,255,255,.85)',.5);for(const [ox,h] of [[-46,26],[-40,19],[43,24]])ln([[x+ox,y+4],[x+ox+2,y+4-h]],173+ox,2.5,'#3f7f3a',.6);}
 function drawSign(){const {x,y}=SIGN;shadow(x,y+2,14,5);ln([[x,y],[x+1,y-30]],61,5,INK,.8);ln([[x,y],[x+1,y-30]],61,2.5,'#b07a4a',.8);sketch(rrPts(x-24,y-52,48,26,6),true,62,1.5,'#d9a066',INK,2.8);ln([[x-15,y-44],[x+12,y-45]],63,2,INK,1);ln([[x-15,y-36],[x+6,y-36]],64,2,INK,1);}
 function drawFarIsles(){const bx=FAR_X()+700;[[bx,-120,150,70],[bx+260,120,110,50],[bx+120,340,90,42]].forEach(([x,y,w,h],i)=>{if(Math.abs(x-cam.x)>W/Z/2+w+200)return;sketch(ell(x,y,w,h,18),true,820+i,4,'#2b3a3f',INK,3);sketch(ell(x,y-14,w*.7,h*.6,14),true,824+i,4,'#1f2b24',null);});}
-function drawHome(){const {x,y}=FIRE;const tx=x-36,ty=y+6;shadow(tx,ty+2,11,3.5);
- /* the teapot, at 40% of its old size */ctx.save();ctx.translate(tx,ty);ctx.scale(.4,.4);ctx.translate(-tx,-ty);
+function drawHome(){const {x,y}=FIRE;
+ const px=x+52,py=y+4;shadow(px,py+2,20,6,46);ln([[px-16,py],[px,py-46],[px+16,py]],305,3.5,'#9a6236',.8);ln([[px-16,py],[px,py-46],[px+16,py]],305,1.8,'#c98f56',.8);
+ /* Brimble's teapot, hung on the tripod: he cooks in it */
+ ln([[px,py-44],[px,py-34]],306,1.5,INK,.3);drawTeapot(px,py-14,.4);
+ for(let i=0;i<3;i++){const sx=x+24+i*14,sy=y+30;blob(sx,sy-5,5,4.5,310+i,['#d6d0e2','#b9b3c9','#d9a066'][i],2,.4);}}
+function drawTeapot(tx,ty,k){ctx.save();ctx.translate(tx,ty);ctx.scale(k,k);ctx.translate(-tx,-ty);
  blob(tx,ty-18,24,20,300,'#7fa8c9',2.6);blob(tx,ty-34,10,4,301,'#5d86a8',2.2,.5);dot(tx,ty-37,3.5,'#ffcf3a');
  ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,4,INK,.5);ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,2,'#7fa8c9',.5);
  ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,4,INK,.5);ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,2,'#7fa8c9',.5);
  ln([[tx-8,ty-14],[tx+8,ty-14]],304,2,'rgba(42,33,64,.3)',.5);
- if(hasSkill('cooking')){const st=(now*.6)%1;ctx.globalAlpha=.5*(1-st);dot(tx-2+Math.sin(now*2)*3,ty-44-st*18,3+st*3,'#fff');ctx.globalAlpha=1;}ctx.restore();
- const px=x+52,py=y+4;shadow(px,py+2,20,6);ln([[px-16,py],[px,py-46],[px+16,py]],305,3.5,'#9a6236',.8);ln([[px-16,py],[px,py-46],[px+16,py]],305,1.8,'#c98f56',.8);
- ln([[px,py-44],[px,py-26]],306,1.5,INK,.3);blob(px,py-18,11,8,307,'#4a3a3a',2.4,.5);blob(px,py-26,9,3,308,'#5a4a4a',2,.4);
- for(let i=0;i<3;i++){const sx=x+24+i*14,sy=y+30;blob(sx,sy-5,5,4.5,310+i,['#d6d0e2','#b9b3c9','#d9a066'][i],2,.4);}}
+ if(hasSkill('cooking')){const st=(now*.6)%1;ctx.globalAlpha=.5*(1-st);dot(tx+34+Math.sin(now*2)*3,ty-44-st*18,3+st*3,'#fff');ctx.globalAlpha=1;}ctx.restore();}
 function drawHead(){const {x,y}=HEAD;blob(x,y-16,27,24,80,'#b9b3c9');ln([[x-2,y-34],[x+3,y-30]],81,2,'rgba(42,33,64,.4)',.5);
  if(dark>.25){blob(x-9,y-19,3.5,3.5,82,'#ffe58a',1.5,.3);blob(x+9,y-19,3.5,3.5,83,'#ffe58a',1.5,.3);blob(x,y-8,3,4,84,INK,0);
   const ph=(now*.5)%1;ctx.globalAlpha=1-ph;otext('\u266A',x+18+ph*14,y-40-ph*30,18,'#ffe58a');ctx.globalAlpha=1;}
@@ -2421,18 +2431,19 @@ const gs=(x,y,cx,cy,r,h)=>h*Math.exp(-((x-cx)**2+(y-cy)**2)/(2*r*r));
    blowout where the wind has scooped a gap. One smooth knoll inland, under the stone head. No steps anywhere. */
 const ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 /* the whole Key has shape: the dune ring on the shore; a gentle spine of higher ground running east to west across
-   the middle; the knoll under the stone head as its high point; the still pool in a real hollow; Brimble's camp on a
-   flat shelf inside a ring of dunes that shelters it from the sea wind, open on the inland side. */
-const CAMP=(()=>{const a=Math.atan2(FIRE.y,FIRE.x),r=Math.hypot(FIRE.x,FIRE.y)-14;return {x:Math.cos(a)*r,y:Math.sin(a)*r,in:a+Math.PI};})();
+   the middle, rising into a hill near the centre; the knoll under the stone head as its high point; the still pool
+   in a real hollow; Brimble's camp on a flat shelf on the hill's lee (west) shoulder, below the crown. */
 function hKey(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
  const crestH=11+4*Math.sin(a*3+.7)+2*Math.sin(a*7+2),blow=1-.75*Math.exp(-((angDiff(a,.9))**2)/.012),Hc=crestH*blow;
  let h=Hc*ss(12,52,d)-(Hc-2)*ss(48,96,d)+3*ss(90,150,d);
  const cy=-40+60*Math.sin(x/260);h+=14*Math.exp(-((y-cy)**2)/(2*110*110))*ss(60,200,d);
  h+=gs(x,y,HEAD.x,HEAD.y,190,34)*ss(0,70,d);
  h-=12*Math.exp(-((x-POOL.x)**2+(y-POOL.y)**2)/(2*80*80));
- const cx=x-CAMP.x,cz=y-CAMP.y,cr=Math.hypot(cx,cz),k=1-ss(70,92,cr);h=h*(1-k)+4*k;
- const gap=1-.9*Math.exp(-(angDiff(Math.atan2(cz,cx),CAMP.in)**2)/.2);h+=13*Math.exp(-((cr-108)**2)/(2*22*22))*gap*ss(4,24,d);
+ h+=gs(x,y,HILL.x,HILL.y,150,17)*ss(60,200,d);
+ /* Brimble's shelf: flattened to the height the hillside has at the camp */
+ const cr=Math.hypot(x-FIRE.x,y-FIRE.y);if(cr<85){const k=1-ss(55,85,cr);h=h*(1-k)+shelfH()*k;}
  return h;}
+let SHELF=null;function shelfH(){if(SHELF===null){SHELF=0;const x=FIRE.x,y=FIRE.y,r=Math.hypot(x,y),a=Math.atan2(y,x),d=iR(a)-r;SHELF=3*ss(90,150,d)+14*Math.exp(-((y-(-40+60*Math.sin(x/260)))**2)/(2*110*110))*ss(60,200,d)+gs(x,y,HILL.x,HILL.y,150,17)*ss(60,200,d);}return SHELF;}
 function hShadow(x,y){let best=null,bk=9;for(const I of ISLES){const k=isleK(I,x,y);if(k<bk){bk=k;best=I;}}if(!best||bk>1)return 0;
  const I=best,f=Math.min(1,(1-bk)/.25),n=I.name,cx=I.x,cy=I.y,m=Math.min(I.rx,I.ry);let h;
  if(n==='The Thicket')h=18+gs(x,y,cx-I.rx*.35,cy-I.ry*.2,m*.32,34)+gs(x,y,cx+I.rx*.3,cy+I.ry*.15,m*.28,30)+gs(x,y,cx,cy+I.ry*.4,m*.25,22);
@@ -2569,7 +2580,7 @@ function drawOcc(x,y,fn,soft){const L=liftAt(x,y),hz=occludedBy(x,y);
  const sy=((hz-cam.y)*Z+H/2)*DPR;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,sy,cv.width,cv.height-sy);ctx.clip();
  ctx.globalAlpha=.3;ctx.drawImage(OC,0,0);const o=1.5*DPR;ctx.globalAlpha=.22;for(const [dx,dy] of [[o,0],[-o,0],[0,o],[0,-o]])ctx.drawImage(OC,dx,dy);ctx.restore();}
 function softFn(fn){return fn===drawSwimmer||fn===drawCrab||fn===drawGull||fn===drawGubbins||fn===drawKindle;}
-const BUILD=25;
+const BUILD=26;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);

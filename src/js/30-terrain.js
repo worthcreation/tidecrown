@@ -11,18 +11,19 @@ const gs=(x,y,cx,cy,r,h)=>h*Math.exp(-((x-cx)**2+(y-cy)**2)/(2*r*r));
    blowout where the wind has scooped a gap. One smooth knoll inland, under the stone head. No steps anywhere. */
 const ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 /* the whole Key has shape: the dune ring on the shore; a gentle spine of higher ground running east to west across
-   the middle; the knoll under the stone head as its high point; the still pool in a real hollow; Brimble's camp on a
-   flat shelf inside a ring of dunes that shelters it from the sea wind, open on the inland side. */
-const CAMP=(()=>{const a=Math.atan2(FIRE.y,FIRE.x),r=Math.hypot(FIRE.x,FIRE.y)-14;return {x:Math.cos(a)*r,y:Math.sin(a)*r,in:a+Math.PI};})();
+   the middle, rising into a hill near the centre; the knoll under the stone head as its high point; the still pool
+   in a real hollow; Brimble's camp on a flat shelf on the hill's lee (west) shoulder, below the crown. */
 function hKey(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
  const crestH=11+4*Math.sin(a*3+.7)+2*Math.sin(a*7+2),blow=1-.75*Math.exp(-((angDiff(a,.9))**2)/.012),Hc=crestH*blow;
  let h=Hc*ss(12,52,d)-(Hc-2)*ss(48,96,d)+3*ss(90,150,d);
  const cy=-40+60*Math.sin(x/260);h+=14*Math.exp(-((y-cy)**2)/(2*110*110))*ss(60,200,d);
  h+=gs(x,y,HEAD.x,HEAD.y,190,34)*ss(0,70,d);
  h-=12*Math.exp(-((x-POOL.x)**2+(y-POOL.y)**2)/(2*80*80));
- const cx=x-CAMP.x,cz=y-CAMP.y,cr=Math.hypot(cx,cz),k=1-ss(70,92,cr);h=h*(1-k)+4*k;
- const gap=1-.9*Math.exp(-(angDiff(Math.atan2(cz,cx),CAMP.in)**2)/.2);h+=13*Math.exp(-((cr-108)**2)/(2*22*22))*gap*ss(4,24,d);
+ h+=gs(x,y,HILL.x,HILL.y,150,17)*ss(60,200,d);
+ /* Brimble's shelf: flattened to the height the hillside has at the camp */
+ const cr=Math.hypot(x-FIRE.x,y-FIRE.y);if(cr<85){const k=1-ss(55,85,cr);h=h*(1-k)+shelfH()*k;}
  return h;}
+let SHELF=null;function shelfH(){if(SHELF===null){SHELF=0;const x=FIRE.x,y=FIRE.y,r=Math.hypot(x,y),a=Math.atan2(y,x),d=iR(a)-r;SHELF=3*ss(90,150,d)+14*Math.exp(-((y-(-40+60*Math.sin(x/260)))**2)/(2*110*110))*ss(60,200,d)+gs(x,y,HILL.x,HILL.y,150,17)*ss(60,200,d);}return SHELF;}
 function hShadow(x,y){let best=null,bk=9;for(const I of ISLES){const k=isleK(I,x,y);if(k<bk){bk=k;best=I;}}if(!best||bk>1)return 0;
  const I=best,f=Math.min(1,(1-bk)/.25),n=I.name,cx=I.x,cy=I.y,m=Math.min(I.rx,I.ry);let h;
  if(n==='The Thicket')h=18+gs(x,y,cx-I.rx*.35,cy-I.ry*.2,m*.32,34)+gs(x,y,cx+I.rx*.3,cy+I.ry*.15,m*.28,30)+gs(x,y,cx,cy+I.ry*.4,m*.25,22);

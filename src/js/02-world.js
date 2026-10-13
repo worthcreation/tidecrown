@@ -37,7 +37,11 @@ const REQ={shallow:1,deep:10,moon:20};
 
 const G={x:R0+170,y:-2,talk:false};
 const SIGN={x:R0-95,y:-58};
-const FIRE=(()=>{const p=polar(-.95,iR(-.95)-42);return{x:Math.round(p[0]),y:Math.round(p[1])};})();
+/* Brimble's camp: a flat shelf on the lee (west) shoulder of the hill near the middle of the Key, just below its
+   crown: out of the east wind and spray, a few steps from a lookout over the whole horizon (HILL in 30-terrain) */
+const OLDFIRE=(()=>{const p=polar(-.95,iR(-.95)-42);return{x:Math.round(p[0]),y:Math.round(p[1])};})();
+const HILL={x:50,y:-70};
+const FIRE={x:-25,y:-55};
 const HEAD=(()=>{const a=Math.PI-.45,p=polar(a,iR(a)-70);return{x:p[0],y:p[1]};})();
 const POOL=(()=>{const p=polar(2.05,250);return{x:p[0],y:p[1]};})();
 const GULL={x:R0-150,y:-34};
@@ -45,12 +49,17 @@ const crabHome=polar(1.6,iR(1.6)-60);
 const CRAB={x:crabHome[0],y:crabHome[1],tx:crabHome[0],ty:crabHome[1],wait:1,hop:0};
 const rocks=[];
 [-1.85,-2.35].forEach((a,j)=>{[-.09,-.03,.05,.1].forEach((d,i)=>{const p=polar(a+d,iR(a+d)+(i%2?2:-8));rocks.push({x:p[0],y:p[1],rx:14+((i*7+j*3)%9),ry:10+((i*5)%6),seed:200+j*10+i});});});
+/* a low outcrop on the windward (east) edge of Brimble's shelf */
+[[62,-8,16,11],[70,16,13,9],[52,34,11,8]].forEach(([dx,dy,rx,ry],i)=>rocks.push({x:FIRE.x+dx,y:FIRE.y+dy,rx,ry,seed:260+i,camp:1}));
 
 const trees=[];
-{const r=mulberry(7);let tries=0;const avoid=[[GULL.x,GULL.y],[POOL.x,POOL.y],[R0-80,24],[FIRE.x,FIRE.y],[SIGN.x,SIGN.y],[HEAD.x,HEAD.y],[R0-25,0],crabHome,...spots.map(s=>[s.ax,s.ay])];
+{const r=mulberry(7);let tries=0;const avoid=[[GULL.x,GULL.y],[POOL.x,POOL.y],[R0-80,24],[OLDFIRE.x,OLDFIRE.y],[SIGN.x,SIGN.y],[HEAD.x,HEAD.y],[R0-25,0],crabHome,...spots.map(s=>[s.ax,s.ay])];
  while(trees.length<18&&tries<800){tries++;const a=r()*6.2832,d=Math.sqrt(r())*.74;const x=Math.cos(a)*gR(a)*d,y=Math.sin(a)*gR(a)*d;
   if(avoid.some(p=>Math.hypot(p[0]-x,p[1]-y)<120))continue;if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<90))continue;
-  trees.push({x,y,s:.85+r()*.45,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}}
+  trees.push({x,y,s:.85+r()*.45,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}
+ /* the island keeps its old trees, except where the camp now sits; a small stand on the camp's north side shades it and breaks the wind */
+ for(let i=trees.length-1;i>=0;i--)if(Math.hypot(trees[i].x-FIRE.x,trees[i].y-FIRE.y)<95||Math.hypot(trees[i].x-HILL.x,trees[i].y-HILL.y)<55)trees.splice(i,1);
+ [[-60,-140,1.05],[5,-150,.95],[-115,-110,1.1]].forEach(([dx,dy,s],i)=>trees.push({x:FIRE.x+dx,y:FIRE.y+dy,s,seed:900+i*31,lean:(i-1)*6,hue:.3+i*.2}));}
 const tufts=[];{const r=mulberry(11);for(let i=0;i<80;i++){const a=r()*6.2832,d=Math.sqrt(r())*.93;tufts.push({x:Math.cos(a)*gR(a)*d,y:Math.sin(a)*gR(a)*d,f:r()<.18,seed:i+500,c:r()});}}
 const waves=[];{const r=mulberry(23);for(let i=0;i<300;i++){const a=r()*6.2832,d=iR(a)+110+r()*(i<140?1100:4300);waves.push({x:Math.cos(a)*d,y:Math.sin(a)*d,s:r()*6,seed:i+900});}}
 
