@@ -10,10 +10,19 @@ const gs=(x,y,cx,cy,r,h)=>h*Math.exp(-((x-cx)**2+(y-cy)**2)/(2*r*r));
    slope), a low swale behind it, then the grass plain; the ridge's height wanders along the shore and drops to a
    blowout where the wind has scooped a gap. One smooth knoll inland, under the stone head. No steps anywhere. */
 const ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+/* the whole Key has shape: the dune ring on the shore; a gentle spine of higher ground running east to west across
+   the middle; the knoll under the stone head as its high point; the still pool in a real hollow; Brimble's camp on a
+   flat shelf inside a ring of dunes that shelters it from the sea wind, open on the inland side. */
+const CAMP=(()=>{const a=Math.atan2(FIRE.y,FIRE.x),r=Math.hypot(FIRE.x,FIRE.y)-14;return {x:Math.cos(a)*r,y:Math.sin(a)*r,in:a+Math.PI};})();
 function hKey(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
  const crestH=11+4*Math.sin(a*3+.7)+2*Math.sin(a*7+2),blow=1-.75*Math.exp(-((angDiff(a,.9))**2)/.012),Hc=crestH*blow;
  let h=Hc*ss(12,52,d)-(Hc-2)*ss(48,96,d)+3*ss(90,150,d);
- return h+gs(x,y,HEAD.x,HEAD.y,190,34)*ss(0,70,d);}
+ const cy=-40+60*Math.sin(x/260);h+=14*Math.exp(-((y-cy)**2)/(2*110*110))*ss(60,200,d);
+ h+=gs(x,y,HEAD.x,HEAD.y,190,34)*ss(0,70,d);
+ h-=12*Math.exp(-((x-POOL.x)**2+(y-POOL.y)**2)/(2*80*80));
+ const cx=x-CAMP.x,cz=y-CAMP.y,cr=Math.hypot(cx,cz),k=1-ss(70,92,cr);h=h*(1-k)+4*k;
+ const gap=1-.9*Math.exp(-(angDiff(Math.atan2(cz,cx),CAMP.in)**2)/.2);h+=13*Math.exp(-((cr-108)**2)/(2*22*22))*gap*ss(4,24,d);
+ return h;}
 function hShadow(x,y){let best=null,bk=9;for(const I of ISLES){const k=isleK(I,x,y);if(k<bk){bk=k;best=I;}}if(!best||bk>1)return 0;
  const I=best,f=Math.min(1,(1-bk)/.25),n=I.name,cx=I.x,cy=I.y,m=Math.min(I.rx,I.ry);let h;
  if(n==='The Thicket')h=18+gs(x,y,cx-I.rx*.35,cy-I.ry*.2,m*.32,34)+gs(x,y,cx+I.rx*.3,cy+I.ry*.15,m*.28,30)+gs(x,y,cx,cy+I.ry*.4,m*.25,22);
@@ -36,8 +45,8 @@ function liftAt(x,y){return terrH(x,y)*LKs();}
 /* the viewer looks from the south, so where the lifted ground folds over a ridge the nearest (southmost) surface is
    the one seen: scan down from the highest possible lift for the first ground at or above this screen line, then
    refine. Simple iteration fails on steep faces (it oscillates into stripes). */
-function maxLift(){return SH.on?140:120;}
-function unlift(x,ys){const f=y=>y-liftAt(x,y)-ys;let hi=ys+maxLift(),fh=f(hi);if(fh<=0)return hi;
+function maxLift(){return SH.on?140:140;}
+function unlift(x,ys){if(!SH.on&&typeof KS!=='undefined'&&KS.ink){const f=ksFront(x,ys);return f==null?ys:f;}const f=y=>y-liftAt(x,y)-ys;let hi=ys+maxLift(),fh=f(hi);if(fh<=0)return hi;
  for(let y=hi-8;y>=ys-2;y-=8){const fy=f(y);if(fy<=0){let a=y,b=y+8;for(let i=0;i<5;i++){const m=(a+b)/2;if(f(m)<=0)a=m;else b=m;}return (a+b)/2;}}return ys;}
 function liftPts(pts){return pts.map(p=>[p[0],p[1]-liftAt(p[0],p[1])]);}
 let GRASS_L=null;function grassLifted(){return GRASS_L||(GRASS_L=liftPts(grassPts));}

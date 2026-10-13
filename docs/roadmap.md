@@ -12,7 +12,8 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - Fix (build 21): clouds no longer jump (their drift now builds up frame by frame), cumulus silhouettes drift slowly, and shadows are non-stacking layers per light with cloud cutouts.
 - Terrain rework (build 22): real dunes on the Key, smooth cached shading (sky light, sun, hill shadows, height tint), subtler contours, leaning on slopes, sand slides. 
 - Height lift (build 23): a 3/4 read of the land, with the shoreline cliff near the stone head fixed and contours made barely visible.
-- Occlusion (build 24): land in front hides what is behind, soft outlines for hidden people, creatures and items, taps that reach them, taller lift on the Key.
+- Occlusion (build 24, replaced in 25): column bands broke on north-south coasts.
+- Whole-map ground (build 25): landforms across the whole Key, the ground drawn as one lifted surface with traced ink, occlusion from that surface, Brimble's camp sheltered in dunes, a smaller teapot. Next for this: the same surface for the dark islands.
 
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |

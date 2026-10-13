@@ -57,12 +57,13 @@ function drawPool(){const {x,y}=POOL;blob(x,y,44,22,170,'#8fd3dc',3);const ph=(n
  ln([[x-16,y-7],[x-4,y-10]],172,2.5,'rgba(255,255,255,.85)',.5);for(const [ox,h] of [[-46,26],[-40,19],[43,24]])ln([[x+ox,y+4],[x+ox+2,y+4-h]],173+ox,2.5,'#3f7f3a',.6);}
 function drawSign(){const {x,y}=SIGN;shadow(x,y+2,14,5);ln([[x,y],[x+1,y-30]],61,5,INK,.8);ln([[x,y],[x+1,y-30]],61,2.5,'#b07a4a',.8);sketch(rrPts(x-24,y-52,48,26,6),true,62,1.5,'#d9a066',INK,2.8);ln([[x-15,y-44],[x+12,y-45]],63,2,INK,1);ln([[x-15,y-36],[x+6,y-36]],64,2,INK,1);}
 function drawFarIsles(){const bx=FAR_X()+700;[[bx,-120,150,70],[bx+260,120,110,50],[bx+120,340,90,42]].forEach(([x,y,w,h],i)=>{if(Math.abs(x-cam.x)>W/Z/2+w+200)return;sketch(ell(x,y,w,h,18),true,820+i,4,'#2b3a3f',INK,3);sketch(ell(x,y-14,w*.7,h*.6,14),true,824+i,4,'#1f2b24',null);});}
-function drawHome(){const {x,y}=FIRE;const tx=x-54,ty=y+6;shadow(tx,ty+2,26,8);
+function drawHome(){const {x,y}=FIRE;const tx=x-36,ty=y+6;shadow(tx,ty+2,11,3.5);
+ /* the teapot, at 40% of its old size */ctx.save();ctx.translate(tx,ty);ctx.scale(.4,.4);ctx.translate(-tx,-ty);
  blob(tx,ty-18,24,20,300,'#7fa8c9',2.6);blob(tx,ty-34,10,4,301,'#5d86a8',2.2,.5);dot(tx,ty-37,3.5,'#ffcf3a');
  ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,4,INK,.5);ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,2,'#7fa8c9',.5);
  ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,4,INK,.5);ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,2,'#7fa8c9',.5);
  ln([[tx-8,ty-14],[tx+8,ty-14]],304,2,'rgba(42,33,64,.3)',.5);
- if(hasSkill('cooking')){const st=(now*.6)%1;ctx.globalAlpha=.5*(1-st);dot(tx-2+Math.sin(now*2)*3,ty-44-st*18,3+st*3,'#fff');ctx.globalAlpha=1;}
+ if(hasSkill('cooking')){const st=(now*.6)%1;ctx.globalAlpha=.5*(1-st);dot(tx-2+Math.sin(now*2)*3,ty-44-st*18,3+st*3,'#fff');ctx.globalAlpha=1;}ctx.restore();
  const px=x+52,py=y+4;shadow(px,py+2,20,6);ln([[px-16,py],[px,py-46],[px+16,py]],305,3.5,'#9a6236',.8);ln([[px-16,py],[px,py-46],[px+16,py]],305,1.8,'#c98f56',.8);
  ln([[px,py-44],[px,py-26]],306,1.5,INK,.3);blob(px,py-18,11,8,307,'#4a3a3a',2.4,.5);blob(px,py-26,9,3,308,'#5a4a4a',2,.4);
  for(let i=0;i<3;i++){const sx=x+24+i*14,sy=y+30;blob(sx,sy-5,5,4.5,310+i,['#d6d0e2','#b9b3c9','#d9a066'][i],2,.4);}}
