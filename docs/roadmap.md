@@ -8,11 +8,12 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - 3 Light and day (build 17): the sky alone sets the light, no darkness floor anywhere; tropical sun, moon and fire shadows on everything; canopy shade with sun flecks.
 - 4 Weather (build 18): wandering trade wind that moves trees, scarf, smoke and rain; cloud shade; rare low clouds; squalls that drown small fires and wash off salt; dawn fog and sea fog that hide what is out of sight; big waves from the windward side.
 - 5 Terrain height (build 19): dunes and a rise on the Key, a landform per dark island, contours and sun hillshade, Tobler walking speed, fog pooling in valleys, wider view from high ground.
+- 6 Shadow harvest and regrowth (build 20): branches, limbs and trunk by Woodcutting level, yields that include the lower layers, per-layer regrowth paced by wood, stumps that keep their size, stump digging, sapling poles, a seeded forest age mix with snags.
 
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |
 |---|---|---|
-| 6 | Shadow regrowth | Slow regrowth of shadow trees (test build until the Shadow Forest opens) |
+| 6b | Storms and windfall | Rare storms stronger than squalls fell old trees; fallen trunks and branches to gather; downed trees block paths until chopped, gone around or climbed; on the Key, branches and maybe one tree |
 
 After the pipeline: design Invention, then the made-things milestones it unlocks.
 
@@ -23,7 +24,7 @@ After the pipeline: design Invention, then the made-things milestones it unlocks
 | 8 | Fire ladder | Waits on Invention: fire ring, real charcoal clamp, hearth with grate, smoking rack, clay oven |
 | 9 | Glass and containers | Waits on Invention: sea glass and cullet, furnace, annealing, bottles and jars |
 | 10 | Jelly oil and lantern | Waits on Invention: jelly trap, raw and rendered oil, wick, frame, pane, lantern posts |
-| 11 | The opening | Scenarios, trait axes, four starting areas, earned keepsakes |
+| 11 | The opening | Scenarios, trait axes, four starting areas, earned keepsakes; idea: arrival on a stormy evening, trees crashing down |
 | 12 | Shipwright and Sailing | Boat materials, building, sailing; likely what opens the Shadow Forest in play |
 | 13 | Climbing | Rope, knots and grip gear chains |
 | 14 | Salvage ladder | Diving, grapnel, dredge (dredging needs a boat) |
@@ -31,6 +32,9 @@ After the pipeline: design Invention, then the made-things milestones it unlocks
 | 16 | The Hollow | Its answer is unwritten |
 | 17 | Delving | Underground, untouched |
 | Open | Salt's second route | Salt has one way to get it today |
+
+## Audit to do: work that earns nothing
+Every task should have at least a chance of reward. Check a missed fishing strike, a cancelled grind, a fire that drowned in the rain and similar, and give each something small (xp, a scrap, knowledge).
 
 ## Given today (audit)
 Judged against the rules: equippables earned behind a task; bought things never dead ends; each item keeps its own source.

@@ -378,6 +378,7 @@ const JOURNAL={
  stache:['The Ash Mustache','Brimble braided ten scoops of ash into a mustache, exactly like the one the Gull’s head cook wore. It is ridiculous. It is magnificent. Gubbins pays extra to anyone wearing it.'],
  thimblekit:['The sailmaker’s kit','Sir Thimble’s helmet was the Grinning Gull’s sailmaker’s thimble. He wants the rest of the kit: a palm, a fid and waxed twine, all somewhere the sea put them.'],
  sewing:['How a seam holds','Sir Thimble showed me: the palm pushes, the fid opens, the twine is waxed so it bites. I could sew canvas, given a needle. I do not have one. Yet.'],
+ stumpcache:['Something the forest swallowed','A rotted pouch tangled in the roots of a stump, still holding shells. Somebody lost it here long before me.'],
  clam:['A giant clam shell','Old, empty, wedged into the reef nearest the Key. A driftwood stick levers it out. The hinge is the thickest shell I have ever held.'],
  shellblade:['A shell blade','Ground out of a clam hinge on the north rocks, wet sand doing the cutting. Islanders with no stone did exactly this.'],
  hatchet:['A hatchet','A shell blade, driftwood and kelp twine. Ugly, but it bites. The wobble trees went very quiet when I made it.'],
@@ -452,6 +453,16 @@ const ITEMS={
  seasalt:{name:'Sea salt',desc:'Crystals from the sea, scraped off wet rock or left where kelp burned. Brimble’s eyes would light up. Well, more.',stack:10},
  pearl:{name:'Ember pearl',desc:'A warm, glowing bead from the heart of a wobblewood fire. It hums when you hold it.',stack:5},
  sunstone:{name:'Sunstone',desc:'Smooth, and warm all the way through. It remembers being part of the sun. Nobody knows what it does yet.',stack:3},
+ br_blackwood:{name:'Black wood branches',desc:'Branches from a shadow tree. Kindling, stakes, small work. Stacks ten.',stack:10},
+ lb_blackwood:{name:'Black wood limb',desc:'A limb off a shadow tree. Smaller than a log, same wood. Stacks five.',stack:5},
+ br_twistwood:{name:'Twisted wood branches',desc:'Branches from a twisted tree. Kindling, stakes, small work. Stacks ten.',stack:10},
+ lb_twistwood:{name:'Twisted wood limb',desc:'A limb off a twisted tree. Smaller than a log, same wood. Stacks five.',stack:5},
+ br_ironbark:{name:'Ironbark branches',desc:'Branches from a gnarled tree. Kindling, stakes, small work. Stacks ten.',stack:10},
+ lb_ironbark:{name:'Ironbark limb',desc:'A limb off a gnarled tree. Smaller than a log, same wood. Stacks five.',stack:5},
+ pole:{name:'Pole',desc:'A sapling cut straight. Handles, frames, a raft one day. Stacks five.',stack:5},
+ rootwood:{name:'Root wood',desc:'Knotted root dug out with a stump. Tough and oddly shaped, good for things that need a crook. Stacks five.',stack:5},
+ fatwood:{name:'Fatwood',desc:'Resin-soaked heartwood from an old stump. It lights even damp, and burns hot. Stacks ten.',stack:10},
+ burl:{name:'Burl',desc:'A knob of swirled grain from the root crown. Fine work wants it.'},
  blackwood:{name:'Black wood',desc:'A log from a shadow tree. Light, dark, and it burns longer than driftwood. Stacks five to a slot.',stack:5},
  twistwood:{name:'Twisted wood',desc:'A log from a twisted tree. Hard as a knuckle, grain like rope. The stuff of real projects. Stacks three to a slot.',stack:3},
  ironbark:{name:'Ironbark',desc:'From a tree gnarled past reason. Heavy, black, nearly stone. Whatever is built from this will outlast you. Stacks two to a slot.',stack:2},
@@ -853,6 +864,12 @@ function icon(id){if(icache[id])return icache[id];const c=document.createElement
  else if(id==='palm'){sketch([[12,26],[52,22],[54,40],[14,44]],true,520,1,'#a8743f',INK,2.6);blob(34,33,7,6,521,'#b9b4c4',2,.4);dot(32,31,1.2);dot(36,34,1.2);}
  else if(id==='fid'){sketch([[14,50],[18,44],[50,12],[22,50]],true,522,.6,'#f1e7cf',INK,2.6);ln([[22,44],[44,20]],523,1.2,'rgba(42,33,64,.3)',.3);}
  else if(id==='twine'){for(let i=0;i<4;i++)sketch(ell(32,34,18-i*4,10-i*2,14),true,524+i,.5,i?null:'#d9c98f',INK,2);ln([[48,34],[56,44]],529,2,INK,.3);}
+ else if(/^br_/.test(id)){const c={br_blackwood:'#3a3344',br_twistwood:'#4a3650',br_ironbark:'#1e1a24'}[id];for(let i=0;i<3;i++){ln([[14,46-i*5],[52,22+i*4]],600+i,6,INK,1);ln([[14,46-i*5],[52,22+i*4]],600+i,3,c,1);}ln([[22,40],[30,36],[27,30]],604,2,INK,.4);}
+ else if(/^lb_/.test(id)){const c={lb_blackwood:'#3a3344',lb_twistwood:'#4a3650',lb_ironbark:'#1e1a24'}[id];ln([[16,42],[48,26]],606,10,INK,1);ln([[16,42],[48,26]],606,6,c,1);blob(48,26,5,5,607,'#8a7a92',1.8,.3);}
+ else if(id==='pole'){ln([[10,52],[54,12]],608,7,INK,.6);ln([[10,52],[54,12]],608,3.5,'#5a4a3a',.6);}
+ else if(id==='rootwood'){ln([[14,24],[26,34],[40,30],[52,44]],610,8,INK,1.4);ln([[14,24],[26,34],[40,30],[52,44]],610,4,'#6a5040',1.4);ln([[26,34],[24,48]],611,5,INK,1);ln([[40,30],[46,16]],612,5,INK,1);}
+ else if(id==='fatwood'){ln([[16,46],[48,20]],614,10,INK,1);ln([[16,46],[48,20]],614,6,'#c9873a',1);ln([[22,40],[42,24]],615,2,'#ffd47a',.4);}
+ else if(id==='burl'){blob(32,34,18,14,616,'#7a5a44',2.6,1.4);for(let i=0;i<4;i++)sketch(ell(32,34,14-i*3,10-i*2.2,12),true,617+i,.6,null,'rgba(42,33,64,.4)',1.2);}
  else if(id==='clamshell')drawClamShell(32,38,1.25,475);
  else if(id==='shellblade'){sketch([[14,44],[22,20],[46,14],[52,26],[30,48]],true,475,1,'#efe6d2',INK,2.6);ln([[24,22],[46,16]],476,2,'#fffaf0',.3);ln([[20,36],[40,30]],477,1.2,'rgba(150,120,170,.5)',.3);}
  else if(id==='hatchet'){ln([[16,52],[40,16]],477,7,INK,.6);ln([[16,52],[40,16]],477,4,'#d9cdb5',.6);sketch([[34,10],[52,14],[48,30],[38,22]],true,478,.6,'#efe6d2',INK,2.4);ln([[34,24],[42,26]],479,2.4,'#5f6b3a',.3);}
@@ -1344,10 +1361,10 @@ let chips=[],leaves=[];const REGROW=3*60000;
 function leafOf(t){const c=(S.treeCut||{})[t.seed];if(!c)return 1;return Math.min(1,.12+.88*(Date.now()-c)/REGROW);}
 function treeReady(t){return t.sh?true:leafOf(t)>=.7;}
 function chopPer(){return lv('woodcutting')>=8?1.25:1.05;}
-function chopTree(t){if(!hasHatchet()){discover('tree');think('I’d need a hatchet. Something sharp, something to hold, something to tie them together.');return;}
+function chopTree(t,layer){if(!hasHatchet()){discover('tree');think('I’d need a hatchet. Something sharp, something to hold, something to tie them together.');return;}
  if(!treeReady(t)){think(pick(['Still growing back. It’s sighing at me.','Bare as a mast. Give it time.']));return;}
- const side=P.x<t.x?-1:1,c=clampLand(t.x+side*26,t.y+6);routeTo(c[0],c[1],()=>startChop(t));}
-function startChop(t){if(!treeReady(t))return;const w=t.sh?woodOf(t):'wobble';if(t.sh&&lv('woodcutting')<WOODREQ[w]){think(w==='ironbark'?'The hatchet skips off it. Ironbark. (Woodcutting '+WOODREQ[w]+')':'Too twisted for me yet. The hatchet bounces. (Woodcutting '+WOODREQ[w]+')');return;}if(!canAdd(w)){think('My pack is full. Nowhere to put a log.');return;}P.task={chop:1,tree:t,t0:now,prog:0,combo:0,miss:0,swing:0};P.face=t.x>P.x?1:-1;
+ const side=P.x<t.x?-1:1,c=clampLand(t.x+side*26,t.y+6);routeTo(c[0],c[1],()=>startChop(t,layer));}
+function startChop(t,layer){if(!treeReady(t))return;const w=t.sh?woodOf(t):'wobble';if(t.sh&&!harvestReady(t,layer))return;if(!t.sh&&!canAdd(w)){think('My pack is full. Nowhere to put a log.');return;}P.task={chop:1,tree:t,layer,t0:now,prog:0,combo:0,miss:0,swing:0};P.face=t.x>P.x?1:-1;
  if(!S.chopHint){S.chopHint=1;hint('Tap as the ring closes on the trunk. Keep the rhythm.',7000);}}
 function beatPh(T){return((now-T.t0)/chopPer())%1;}
 function strike(){const T=P.task;T.swing=.22;const ph=beatPh(T),e=Math.min(ph,1-ph)*chopPer(),win=.11+Math.min(.06,lv('woodcutting')*.003),t=T.tree,cx=t.x+t.lean*.4*t.s,cy=t.y-24*t.s;
@@ -1355,8 +1372,8 @@ function strike(){const T=P.task;T.swing=.22;const ph=beatPh(T),e=Math.min(ph,1-
  if(e<win){sfx('chopGood');hap(10);T.combo++;T.prog+=1+Math.min(T.combo,6)*.15;chip(8);if(T.combo>=10)S.st.groove=1;streak('chop',true,'woodcutting','Streak',2,[cx,cy-30]);}
  else if(e<win*2.2){sfx('chop');hap(8);T.prog+=.5;chip(4);}
  else{sfx('chopMiss');streak('chop',false);T.combo=0;T.miss++;T.prog+=.15;pop('thunk',cx,cy-20,'#fff',15);}
- if(T.prog>=(T.tree.sh?WOODPROG[woodOf(T.tree)]:6))finishChop();}
-function finishChop(){const T=P.task,t=T.tree,w=t.sh?woodOf(t):'wobble';if(!canAdd(w)){P.task=null;think('My pack filled up. The tree keeps its log.');return;}addItem(w,1);S.st.logs=(S.st.logs||0)+1;const first=!S.journal[w==='wobble'?'wobblelog':w];const xp={wobble:9,blackwood:9,twistwood:18,ironbark:34}[w];
+ if(T.prog>=(T.tree.sh?WOODPROG[woodOf(T.tree)]*(LAYK[T.layer]||1):6))finishChop();}
+function finishChop(){const T=P.task,t=T.tree,w=t.sh?woodOf(t):'wobble';if(t.sh)return harvestFinish(T);if(!canAdd(w)){P.task=null;think('My pack filled up. The tree keeps its log.');return;}addItem(w,1);S.st.logs=(S.st.logs||0)+1;const first=!S.journal[w==='wobble'?'wobblelog':w];const xp={wobble:9,blackwood:9,twistwood:18,ironbark:34}[w];
  addXP('woodcutting',T.miss?Math.round(xp*.75):xp,first?'first':'normal',[t.x,t.y-30]);if(!T.miss)burst('woodcutting','Clean log',w==='ironbark'?30:w==='twistwood'?18:10,[t.x,t.y-60]);flies.push({id:'misc',img:w,x0:t.x,y0:t.y-30,t:0});discover(w==='wobble'?'wobblelog':w);
  if(t.sh){shChop(t);for(let i=0;i<10;i++)leaves.push({x:t.x+(Math.random()-.5)*30*t.s,y:t.y-38*t.s+(Math.random()-.5)*20*t.s,vx:(Math.random()-.5)*40,vy:10+Math.random()*30,t:0,s:Math.random()*6.28});P.task=null;think(w==='ironbark'?'It took everything I had. The log is heavier than it looks.':w==='twistwood'?'Hard going. The grain twists like rope.':pick(['It comes down without a sound.','The trunk was hollow. Something had been in it.']));save();return;}
  S.treeCut=S.treeCut||{};S.treeCut[t.seed]=Date.now();for(let i=0;i<14;i++)leaves.push({x:t.x+t.lean*t.s+(Math.random()-.5)*44*t.s,y:t.y-52*t.s+(Math.random()-.5)*30*t.s,vx:(Math.random()-.5)*40,vy:10+Math.random()*30,t:0,s:Math.random()*6.28});P.task=null;think(pick(['The tree sighs and lets a log drop. Thanks, tree.','A log falls loose. The tree seems relieved, honestly.','It shudders, then drops a log at my feet.']));save();}
@@ -1710,7 +1727,7 @@ const shTrees=[],TBUCK=new Map(),TB=120;
 function tbKey(x,y){return Math.floor(x/TB)+','+Math.floor(y/TB);}
 function tbAdd(t){const k=tbKey(t.x,t.y);let a=TBUCK.get(k);if(!a){a=[];TBUCK.set(k,a);}a.push(t);}
 function tbDel(t){const a=TBUCK.get(tbKey(t.x,t.y));if(a){const i=a.indexOf(t);if(i>=0)a.splice(i,1);}}
-function treeNear(x,y,r){const i0=Math.floor((x-r)/TB),i1=Math.floor((x+r)/TB),j0=Math.floor((y-r)/TB),j1=Math.floor((y+r)/TB);for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const a=TBUCK.get(i+','+j);if(!a)continue;for(const t of a)if(Math.hypot(t.x-x,t.y-y)<r)return t;}return null;}
+function treeNear(x,y,r){const i0=Math.floor((x-r)/TB),i1=Math.floor((x+r)/TB),j0=Math.floor((y-r)/TB),j1=Math.floor((y+r)/TB);for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const a=TBUCK.get(i+','+j);if(!a)continue;for(const t of a)if(Math.hypot(t.x-x,t.y-y)<r&&treeSolid(t))return t;}return null;}
 {const r=mulberry(78);ISLES.forEach((I,n)=>{const want=Math.round(I.rx*I.ry/4200*I.dens*4);let tries=0,made=0;
  while(made<want&&tries<want*30){tries++;const a=r()*6.2832,d=Math.sqrt(r())*.88;const x=I.x+Math.cos(a)*I.rx*d*isleR(I,a),y=I.y+Math.sin(a)*I.ry*d*isleR(I,a);
   const f=.5+.5*Math.sin(x*.017+I.seed)*Math.sin(y*.021+I.seed*1.7);if(r()>f*.85+.15)continue;if(treeNear(x,y,I.kind==='tangle'?34:46))continue;if(Math.hypot(x-HOLLOW.x,y-HOLLOW.y)<260||Math.hypot(x-SHROCK.x,y-SHROCK.y)<80||onBridge(x,y)||Math.abs(y-336)<50&&x>400&&x<860||Math.abs(x)<50&&y>440&&y<680)continue;
@@ -1734,8 +1751,6 @@ const SH_LAND={x:ISLES[0].x,y:ISLES[0].y+ISLES[0].ry*.75};
 /* wood by twist: a Hollowmaw’s dead wood aside, the forest gives black wood from plain trees, twisted wood from the gnarled ones, and ironbark from the worst of them. Harder wood takes more chops and more Woodcutting. */
 function woodOf(t){return t.tw>.8?'ironbark':t.tw>.45?'twistwood':'blackwood';}
 const WOODREQ={blackwood:1,twistwood:10,ironbark:20},WOODPROG={blackwood:6,twistwood:9,ironbark:13};
-function shChop(t){const i=shTrees.indexOf(t);if(i<0)return;S.shCut=S.shCut||{};S.shCut[t.seed]=1;shTrees.splice(i,1);tbDel(t);grid=null;}
-{const cut=S.shCut||{};for(let i=shTrees.length-1;i>=0;i--){const t=shTrees[i];if(cut[t.seed]){shTrees.splice(i,1);tbDel(t);}}}
 
 /* the shore: fishing, a grinding rock, forage. What you need is found near you. */
 
@@ -1765,7 +1780,7 @@ function shObjects(){const o=[];
  {const ga=grindAct(SHROCK);o.push({x:SHROCK.x,y:SHROCK.y,r:34,name:'Rocks',key:'rocks',act:ga,onAct:ga?()=>startGrind(SHROCK):null,onExamine:()=>think('Black rock, wet all over. Flat enough to grind on.')});}
  for(const f of SHFORAGE){if(f.taken>Date.now())continue;o.push({x:f.x,y:f.y-6,r:20,name:itemName({id:f.id}),key:f.id==='wood'?'driftwood':f.id==='kelp'?'kelp':'wash',act:'Grab',onAct:()=>{const c=shClamp(f.x,f.y+6);routeTo(c[0],c[1],()=>{if(f.taken>Date.now())return;const got=addItem(f.id,f.id==='shells'?2:1);if(!got){think('No room in my pack.');return;}f.taken=Date.now()+90000;flies.push({id:'misc',img:itemIcon({id:f.id}),x0:f.x,y0:f.y,t:0});const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}addXP('foraging',3,first?'first':'normal',[f.x,f.y-20]);save();});},onExamine:()=>think('The dark water left it. It will leave more.')});}
  o.push({x:HOLLOW.x,y:HOLLOW.y,r:HOLLOW.r,name:'The Hollow',key:'thehollow',act:null,onExamine:()=>{discover('thehollow');think(pick(['It’s breathing.','Everything here keeps its distance from it.','I don’t think it’s asleep. I think it’s waiting.']));}});
- for(const t of shTrees){if(Math.hypot(t.x-P.x,t.y-P.y)>260)continue;const w=woodOf(t);o.push({x:t.x,y:t.y-30*t.s,r:22*t.s,name:w==='ironbark'?'Gnarled tree':w==='twistwood'?'Twisted tree':'Shadow tree',key:'shadowtree',act:'Chop',onAct:()=>chopTree(t),onExamine:()=>{discover('shadowtree');if(w!=='blackwood')discover(w);think(treeTwistTxt(t));}});}
+ for(const t of shTrees){if(Math.hypot(t.x-P.x,t.y-P.y)>260)continue;const ob=harvestObj(t);if(ob)o.push(ob);}
  const deadTxt=()=>pick(['A dead tree. Bark hanging off it like skin.','Dead. Probably dead.','It is not moving. I am going to assume that is good.']);
  for(const m of MAWS)o.push({x:m.x,y:m.y-20,r:30,name:m.st==='still'?'Dead tree':'Hollowmaw',key:m.st==='still'?null:'hollowmaw',act:null,onExamine:()=>think(m.st==='still'?deadTxt():m.st==='down'?'Flat on its roots, rocking. It will get up.':m.st==='calm'?'Held still, chest open. The hollow inside is black and cold. It is waiting for something warm.':'Its chest is creaking open. Back away.')});
  for(const p of PLANTED)o.push({x:p.x,y:p.y-24,r:26,name:'Planted Hollowmaw',key:'planted',act:null,onExamine:()=>think('A tree again. The pearl glows low in the trunk, and the bark is warm.')});
@@ -1797,13 +1812,13 @@ function shUpdate(dt){if(!SW.on&&!P.path.length&&!shWalkable(P.x,P.y)&&shDepth(P
  for(const l of LAPPERS){l.t+=dt;const d=Math.hypot(P.x-l.x,P.y-l.y);if(l.st==='lap'&&d<120){l.st='still';l.t=0;}else if(l.st==='still'&&l.t>1.1){l.st='gone';l.t=0;}else if(l.st==='gone'&&l.t>25&&d>240)l.st='lap';}
  const I=onIsle(P.x,P.y);if(I&&!I.landing&&!S.journal.islet)discover('islet');if(I&&I!==SH.isle){SH.isle=I;if(I.name&&!SH.said){toast(I.name);}}}
 
-function drawShTree(t){const s=t.s,x=t.x,y=t.y,tw=t.tw,h=34*s+tw*14*s,r=mulberry(t.seed);shadow(x,y+2,10*s,3.5*s,h,24*s*(1+tw*.6),1.9);
+function drawShTree(t0){const T=tstage(t0);if(T.st==='stump'||T.st==='hole')return drawStump(t0,T.g,T.st==='hole');if(T.st==='sapling')return drawSapling(t0,T.g);const t=vtree(t0,T.g),cc=T.c;const s=t.s,x=t.x,y=t.y,tw=t.tw,h=34*s+tw*14*s,r=mulberry(t.seed);shadow(x,y+2,10*s,3.5*s,h,cc>0?24*s*(1+tw*.6)*(.4+.6*cc):0,1.9);
  const pts=[[x,y]];const n=3+Math.round(tw*3);for(let i=1;i<=n;i++){const u=i/n;pts.push([x+t.lean*u+Math.sin(u*6+t.seed)*tw*14*s,y-h*u]);}
  ln(pts,t.seed,7*s+tw*3,INK,.6);ln(pts,t.seed,3.5*s+tw*1.5,tw>.6?'#241a2a':'#2b2433',.6);
  if(tw>.3){const bx=pts[Math.max(1,n-1)];ln([bx,[bx[0]+(r()-.5)*40*s,bx[1]-10-r()*14]],t.seed+9,3.5*s,INK,.8);}
  if(tw>.7){ln([[x-4*s,y-6*s],[x-12*s,y+2]],t.seed+10,4*s,INK,.5);ln([[x+4*s,y-6*s],[x+13*s,y+3]],t.seed+11,4*s,INK,.5);}}
-function drawShCanopy(t){const s=t.s,tw=t.tw,h=34*s+tw*14*s,top=[t.x+t.lean+Math.sin(6+t.seed)*tw*14*s,t.y-h],c=tw>.6?'#1c1f28':tw>.3?'#1f2b24':'#243429',spread=1+tw*.6;
- blob(top[0]-10*s*spread,top[1]+2*s,13*s*spread,10*s,t.seed+1,c,2.4,.7);blob(top[0]+10*s*spread,top[1],13*s*spread,10*s,t.seed+2,c,2.4,.7);blob(top[0],top[1]-10*s,15*s*spread,11*s,t.seed+3,tw>.6?'#242833':'#2a3c2e',2.4,.7);}
+function drawShCanopy(t0){const T=tstage(t0);if(T.c<=0)return;const t=vtree(t0,T.g),cs=.45+.55*T.c;const s=t.s*1,tw=t.tw,h=34*s+tw*14*s,top=[t.x+t.lean+Math.sin(6+t.seed)*tw*14*s,t.y-h],c=tw>.6?'#1c1f28':tw>.3?'#1f2b24':'#243429',spread=1+tw*.6;
+ blob(top[0]-10*s*spread*cs,top[1]+2*s,13*s*spread*cs,10*s*cs,t.seed+1,c,2.4,.7);blob(top[0]+10*s*spread*cs,top[1],13*s*spread*cs,10*s*cs,t.seed+2,c,2.4,.7);if(T.c>.5)blob(top[0],top[1]-10*s,15*s*spread*cs,11*s*cs,t.seed+3,tw>.6?'#242833':'#2a3c2e',2.4,.7);}
 function treeTwistTxt(t){return t.tw>.8?'Gnarled past reason. Ironbark, if I could get through it.':t.tw>.45?'Twisted hard. The wood in there would hold a hull.':pick(['Black bark. It leans in when I’m not looking.','Dead, or close to it. Something has been eating at the roots.']);}
 /* dead trees and Hollowmaws share one drawing, shaped by seed, in the forest's palette. A real one shows only a seam down the chest and, rarely, the faintest warm fleck in it. */
 function drawMaw(m){const x=m.x,y=m.y,real=!('creak' in m),open=m.st==='open'||m.st==='lunge',creak=real&&m.st==='creak',sway=!real&&m.st==='creak',down=m.st==='down',calm=m.st==='calm';
@@ -1889,7 +1904,7 @@ var SHFEAT=(()=>{const r=mulberry(93);const ok=f=>ISLES.every(I=>isleK(I,f.x,f.y
 function onIsletK(x,y){if(!KFEAT)return null;for(const f of KFEAT)if(f.kind==='islet'&&fDepth(f,x,y)<0&&fLocal(f,x,y)<-4)return f;return null;}
 function onIsletS(x,y){if(!SHFEAT)return null;for(const f of SHFEAT)if(f.kind==='islet'&&fDepth(f,x,y)<0&&fLocal(f,x,y)<-4)return f;return null;}
 /* islet trees: on the dark side they are shadow trees like any other (choppable, twisted, the wood by twist); on the Key's side, small sea palms */
-{const cut=S.shCut||{};SHFEAT.forEach((f,n)=>{if(f.kind!=='islet')return;f.trees.forEach((q,j)=>{const seed=20000+n*10+j;if(cut[seed])return;const t={x:q.x,y:q.y,s:q.s,seed,lean:(q.tw-.5)*16,sh:1,tw:Math.min(1,.2+q.tw*.8),isle:-1};shTrees.push(t);tbAdd(t);});});}
+{const cut=S.shCut||{};SHFEAT.forEach((f,n)=>{if(f.kind!=='islet')return;f.trees.forEach((q,j)=>{const seed=20000+n*10+j;const t={x:q.x,y:q.y,s:q.s,seed,lean:(q.tw-.5)*16,sh:1,tw:Math.min(1,.2+q.tw*.8),isle:-1};shTrees.push(t);tbAdd(t);});});}
 /* ---- per-island shelves on the dark side ---- */
 function isleShelf(I,t){return [20+180*Math.pow(nz(I.seed*1.3,t),1.5),20+220*nz(I.seed*2.1+1,t)];}
 function isleDepth(I,x,y){if(Math.abs(x-I.x)>I.rx*1.3+700||Math.abs(y-I.y)>I.ry*1.3+700)return 9;const u=(x-I.x)/I.rx,v=(y-I.y)/I.ry,t=Math.atan2(v,u),R=isleR(I,t),s=Math.hypot(x-I.x,y-I.y)-Math.hypot(Math.cos(t)*I.rx*R,Math.sin(t)*I.ry*R);if(s<=0)return 0;const [L,D]=isleShelf(I,t);return prof(s,L,D);}
@@ -1919,6 +1934,68 @@ function drawIsletLand(){const vw=W/Z/2+80,vh=H/Z/2+80;for(const f of SH.on?SHFE
 /* a small sea palm for the Key's islets */
 function drawPalm(t){const x=t.x,y=t.y,s=t.s,sw=Math.sin(now*1.2+t.seed)*(2+WX.ws*2)+Math.cos(WX.wa)*WX.ws*4;shadow(x,y+2,5*s,2*s,40*s,16*s);const top=[x+8*s+sw,y-38*s];ln([[x,y],[x+3*s,y-18*s],top],t.seed,6*s,INK,.5);ln([[x,y],[x+3*s,y-18*s],top],t.seed,3.4*s,'#b08452',.5);
  for(let i=0;i<5;i++){const a=-2.6+i*.55+Math.sin(now*1.5+i+t.seed)*.08,e=[top[0]+Math.cos(a)*20*s,top[1]+Math.sin(a)*12*s+8*s];ln([top,[(top[0]+e[0])/2,top[1]+Math.sin(a)*6*s-3],e],t.seed+i,4.5*s,INK,.5);ln([top,[(top[0]+e[0])/2,top[1]+Math.sin(a)*6*s-3],e],t.seed+i,2.6*s,'#5fae4a',.5);}}
+/* ---------- shadow tree harvest and regrowth ----------
+   Every shadow tree has three layers: branches, limbs, trunk. Woodcutting level sets the deepest layer you may take
+   on each wood (branches always; limbs at LIMREQ; the trunk at WOODREQ). Each harvest also yields the layers below
+   it, in lesser amounts, and a branches-only harvest gives the most branches. The tree loses only what you took:
+   branches regrow fast, limbs slower, a felled trunk goes stump, sapling, young tree, full. Pace is by wood, in
+   elapsed real time: black wood a day, twisted wood two, ironbark three. Stumps keep the size the tree had reached.
+   Digging a stump always gives root wood, with a chance of fatwood, a burl, grubs, or rarely something lost; the
+   spot then sits bare a while before a sapling shows, so digging slows regrowth and never stops it.
+   S.shTree[seed] = {cut, ss, br, lim, dug}: times of each harvest and the stump's size. Nothing else is saved:
+   a forest's starting mix of saplings, young trees, giants and dead snags comes from the seeds. */
+var H24=3600000*24,FULLT={blackwood:H24,twistwood:H24*2,ironbark:H24*3},LIMREQ={blackwood:1,twistwood:5,ironbark:12},BRF=.05,LIMF=.25,LAYK={br:.45,lim:.7,trunk:1,snag:.6,stump:.8,sap:.3};
+S.shTree=S.shTree||{};/* var above: tstage runs during load, before this file */
+/* older saves: a felled tree (S.shCut) becomes a fresh stump at load, so it grows back from today */
+{const c=S.shCut||{},t0=Date.now();for(const k in c)if(!S.shTree[k])S.shTree[k]={cut:t0,ss:1};delete S.shCut;}
+function natural(t){const h=hash1(t.seed*.37+.11);return h<.06?'sapling':h<.14?'young':h>.96?'snag':null;}
+function tstage(t){if(!FULLT)return {st:"full",g:1,br:1,lim:1,c:1};const w=woodOf(t),F=FULLT[w],r=(S.shTree||{})[t.seed],n=Date.now(),fr=(k,f)=>r&&r[k]?Math.min(1,(n-r[k])/(f*F)):1;
+ const br=fr('br',BRF),lim=fr('lim',LIMF);
+ if(r&&r.cut){const base=r.dug?r.dug+.1*F:r.cut,e=(n-base)/F;
+  if(e<.1)return {st:r.dug?'hole':'stump',g:r.ss||1,br:0,lim:0,c:0};
+  if(e<.33)return {st:'sapling',g:.15+.3*(e-.1)/.23,br,lim,c:.3};
+  if(e<1)return {st:'young',g:.45+.55*(e-.33)/.67,br,lim,c:(.35+.65*lim)*(.7+.3*br)};}
+ const nat=r&&r.cut?null:natural(t);
+ if(nat==='sapling')return {st:'sapling',g:.3,br,lim,c:.3};if(nat==='young')return {st:'young',g:.62,br,lim,c:(.35+.65*lim)*(.7+.3*br)};if(nat==='snag')return {st:'snag',g:1,br:0,lim:0,c:0};
+ return {st:'full',g:1,br,lim,c:(.35+.65*lim)*(.7+.3*br)};}
+function treeSolid(t){const s=tstage(t).st;return s!=='hole'&&s!=='sapling';}
+/* the drawn tree: a scaled copy for growth */
+function vtree(t,g){return g>=1?t:{x:t.x,y:t.y,s:t.s*g,tw:t.tw,lean:t.lean*g,seed:t.seed,sh:1,isle:t.isle};}
+function drawStump(t,g,dug){const s=t.s*g,x=t.x,y=t.y;if(dug){ctx.globalAlpha=.35;blob(x,y+2,12*s,4*s,t.seed+40,'#2a2230',0,1);ctx.globalAlpha=1;return;}shadow(x,y+2,10*s,3.5*s,8*s);
+ blob(x,y-2*s,8*s,5*s,t.seed+41,t.tw>.6?'#241a2a':'#2b2433',2.2,.5);ctx.globalAlpha=.6;sketch(ell(x,y-3*s,5*s,3*s,10),true,t.seed+42,.4,null,'#a89bb3',1.2);ctx.globalAlpha=1;}
+function drawSapling(t,g){const s=t.s*g,x=t.x,y=t.y,h=34*s;shadow(x,y+2,3,1.2,h,8*s);ln([[x,y],[x+t.lean*g*.5,y-h]],t.seed,2.2,INK,.4);
+ for(let i=0;i<3;i++)blob(x+t.lean*g*.5+(i-1)*6*s,y-h-(i%2)*5*s,6*s+2,4*s+1,t.seed+50+i,'#2a3c2e',1.6,.4);}
+/* actions on a tree, by stage and level */
+function harvestObj(t){const w=woodOf(t),T=tstage(t),L=lv('woodcutting'),nm=w==='ironbark'?'Gnarled tree':w==='twistwood'?'Twisted tree':'Shadow tree';
+ const base={x:t.x,y:t.y-30*t.s*T.g,r:Math.max(14,22*t.s*T.g),key:'shadowtree'};
+ if(T.st==='hole')return null;
+ if(T.st==='stump')return Object.assign(base,{y:t.y-6,r:16,name:'Stump',act:'Dig it out',onAct:()=>chopTree(t,'stump'),onExamine:()=>think(T.g>.9?'A big stump. The roots will go deep.':'A stump. It was only young.')});
+ if(T.st==='sapling')return Object.assign(base,{name:'Sapling',act:'Cut a pole',onAct:()=>chopTree(t,'sap'),onExamine:()=>think('A sapling, straight as a rule. It would make a good pole, or a tree, given time.')});
+ if(T.st==='snag')return Object.assign(base,{name:'Dead snag',act:L>=WOODREQ[w]?'Fell it':null,onAct:()=>chopTree(t,'snag'),onExamine:()=>{think(L>=WOODREQ[w]?'Dead and standing. Dry wood all the way through.':'Dead and standing. Too hard for me yet. (Woodcutting '+WOODREQ[w]+')');}});
+ const ops=[];if(L>=WOODREQ[w])ops.push({l:'Fell it',k:'trunk'});if(T.st==='full'&&T.lim>=.95&&L>=LIMREQ[w])ops.push({l:'Take limbs',k:'lim'});if(T.br>=.95)ops.push({l:'Take branches',k:'br'});
+ const nmS=T.st==='young'?'Young '+nm.toLowerCase():nm;
+ return Object.assign(base,{name:nmS,act:ops.length?ops[0].l:null,onAct:ops.length?()=>chopTree(t,ops[0].k):null,more:ops.slice(1).map(o=>({l:o.l,f:()=>chopTree(t,o.k)})),
+  onExamine:()=>{discover('shadowtree');think(ops.length?treeTwistTxt(t):'Stripped bare. The branches will come back.');if(L<WOODREQ[w])setTimeout(()=>think('I can take '+(L>=LIMREQ[w]?'branches and limbs':'branches')+' from it. Felling it needs Woodcutting '+WOODREQ[w]+'.'),1600);}});}
+function harvestReady(t,k){const T=tstage(t),w=woodOf(t),L=lv('woodcutting');
+ if(k==='stump')return T.st==='stump';if(k==='sap')return T.st==='sapling';if(k==='snag')return T.st==='snag'&&L>=WOODREQ[w];
+ if(T.st!=='full'&&T.st!=='young')return false;if(k==='br')return T.br>=.95;if(k==='lim')return T.st==='full'&&T.lim>=.95&&L>=LIMREQ[w];return L>=WOODREQ[w];}
+function give(id,n,x,y){if(n<=0)return 0;let lost=0;for(let i=0;i<n;i++){if(canAdd(id))addItem(id,1);else{dropGround({id});lost++;}}if(n-lost>0)flies.push({id:'misc',img:id,x0:x,y0:y,t:0});return lost;}
+/* the end of a harvest: yields, xp, and what the tree loses */
+function harvestFinish(T){const t=T.tree,k=T.layer,w=woodOf(t),L=lv('woodcutting'),st=tstage(t),x=t.x,y=t.y-30*t.s*st.g,n=Date.now(),R=S.shTree[t.seed]=S.shTree[t.seed]||{};
+ const BR='br_'+w,LB='lb_'+w,xpW={blackwood:9,twistwood:18,ironbark:34}[w],ov=Math.max(0,L-WOODREQ[w]);let lost=0,xp=0,say='';
+ if(k==='br'){lost+=give(BR,4+Math.floor(L/15),x,y);R.br=n;xp=xpW*.3;say=pick(['An armful of branches. The tree hardly noticed.','Branches down. It still stands.']);}
+ else if(k==='lim'){lost+=give(LB,2+Math.floor((L-LIMREQ[w])/15),x,y);lost+=give(BR,Math.round(2*st.br),x,y);R.lim=n;R.br=n;xp=xpW*.6;say='Limbs off. More light gets in now.';}
+ else if(k==='trunk'||k==='snag'){const logs=st.st==='young'&&st.g<.75?1:1+Math.min(2,Math.floor(ov/15));lost+=give(w,logs,x,y);if(k==='trunk'){lost+=give(LB,Math.round(st.lim),x,y);lost+=give(BR,Math.round(st.br),x,y);}
+  S.shTree[t.seed]={cut:n,ss:st.g};xp=xpW*(k==='snag'?.8:1)+(logs-1)*xpW*.3;S.st.logs=(S.st.logs||0)+1;discover(w);
+  for(let i=0;i<10;i++)leaves.push({x:t.x+(Math.random()-.5)*30*t.s,y:t.y-38*t.s+(Math.random()-.5)*20*t.s,vx:(Math.random()-.5)*40,vy:10+Math.random()*30,t:0,s:Math.random()*6.28});
+  say=k==='snag'?'Dry right through. It came down in one piece.':w==='ironbark'?'It took everything I had. The log is heavier than it looks.':w==='twistwood'?'Hard going. The grain twists like rope.':pick(['It comes down without a sound.','The trunk was hollow. Something had been in it.']);}
+ else if(k==='sap'){lost+=give('pole',1,x,y);lost+=give(BR,1,x,y);S.shTree[t.seed]={cut:n,ss:st.g};xp=xpW*.25;say='A straight pole. The spot will try again.';}
+ else if(k==='stump'){const r=Math.random;lost+=give('rootwood',1+(r()<.5?1:0),t.x,t.y);let found=[];
+  if(r()<.35){lost+=give('fatwood',1+(r()<.4?1:0),t.x,t.y);found.push('fatwood');}if(r()<.12+t.tw*.15){lost+=give('burl',1,t.x,t.y);found.push('a burl');}
+  if(r()<.4){lost+=give('bait',2+(r()<.5?1:0),t.x,t.y);found.push('grubs');}
+  if(r()<.03){lost+=give('shells',12,t.x,t.y);discover('stumpcache');found.push('a rotted pouch of shells');}
+  R.dug=n;xp=xpW*.5*st.g;say=found.length?'Roots, and '+found.join(', ')+'.':'Roots. Just roots. Good wood all the same.';}
+ grid=null;if(xp)addXP('woodcutting',Math.round(T.miss?xp*.75:xp),'normal',[x,y]);if(lost)setTimeout(()=>think('My pack is full. The rest is on the ground.'),1400);P.task=null;think(say);save();}
 /* swimming: the first way off the Key. Tap the water to wade in, then tap in rhythm or slide to stroke toward where you tapped. There is no clock on a swim: as long as you keep stroking you keep going. Stop attending and you sink, the breath bar drains, and the sea carries you back to the last shore you left or passed. Lantern jellies drift and sting; floating things are yours if you swim through them. Swim far enough east and the dark islands take you in. */
 const SW={on:false,vx:0,vy:0,tx:0,ty:0,breath:1,beat:0,stun:0,streak:0,t:0,dist:0,idle:0,sink:0,shore:null,blk:0,fade:0};let bubbles=[];
 const WADE=1;
@@ -2340,12 +2417,12 @@ function drawTerrain(vw,vw2){const G=tgrid(),vh=vw2;const i0=Math.max(0,Math.flo
 /* Tobler: speed = 6 exp(-3.5 |slope + 0.05|) km/h, fastest on a gentle downhill; scaled so flat ground is 1 */
 function slopeK(x,y,ux,uy){const s=(terrH(x+ux*6,y+uy*6)-terrH(x,y))/6;return Math.max(.35,Math.min(1.2,Math.exp(-3.5*Math.abs(s+.05))/Math.exp(-.175)));}
 function hillZoom(){return 1/(1+Math.max(0,terrH(P.x,P.y))/520);}
-const BUILD=19;
+const BUILD=20;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 sndUI();if(S.char)begin();else openCreator('new');
-if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},terrH,tgrid,WXT,fogR,fn:{thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
+if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},tstage,harvestObj,harvestFinish,harvestReady,terrH,tgrid,WXT,fogR,fn:{thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
 })();
 </script>
 </body>

@@ -32,7 +32,7 @@ const shTrees=[],TBUCK=new Map(),TB=120;
 function tbKey(x,y){return Math.floor(x/TB)+','+Math.floor(y/TB);}
 function tbAdd(t){const k=tbKey(t.x,t.y);let a=TBUCK.get(k);if(!a){a=[];TBUCK.set(k,a);}a.push(t);}
 function tbDel(t){const a=TBUCK.get(tbKey(t.x,t.y));if(a){const i=a.indexOf(t);if(i>=0)a.splice(i,1);}}
-function treeNear(x,y,r){const i0=Math.floor((x-r)/TB),i1=Math.floor((x+r)/TB),j0=Math.floor((y-r)/TB),j1=Math.floor((y+r)/TB);for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const a=TBUCK.get(i+','+j);if(!a)continue;for(const t of a)if(Math.hypot(t.x-x,t.y-y)<r)return t;}return null;}
+function treeNear(x,y,r){const i0=Math.floor((x-r)/TB),i1=Math.floor((x+r)/TB),j0=Math.floor((y-r)/TB),j1=Math.floor((y+r)/TB);for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const a=TBUCK.get(i+','+j);if(!a)continue;for(const t of a)if(Math.hypot(t.x-x,t.y-y)<r&&treeSolid(t))return t;}return null;}
 {const r=mulberry(78);ISLES.forEach((I,n)=>{const want=Math.round(I.rx*I.ry/4200*I.dens*4);let tries=0,made=0;
  while(made<want&&tries<want*30){tries++;const a=r()*6.2832,d=Math.sqrt(r())*.88;const x=I.x+Math.cos(a)*I.rx*d*isleR(I,a),y=I.y+Math.sin(a)*I.ry*d*isleR(I,a);
   const f=.5+.5*Math.sin(x*.017+I.seed)*Math.sin(y*.021+I.seed*1.7);if(r()>f*.85+.15)continue;if(treeNear(x,y,I.kind==='tangle'?34:46))continue;if(Math.hypot(x-HOLLOW.x,y-HOLLOW.y)<260||Math.hypot(x-SHROCK.x,y-SHROCK.y)<80||onBridge(x,y)||Math.abs(y-336)<50&&x>400&&x<860||Math.abs(x)<50&&y>440&&y<680)continue;
@@ -56,8 +56,6 @@ const SH_LAND={x:ISLES[0].x,y:ISLES[0].y+ISLES[0].ry*.75};
 /* wood by twist: a Hollowmaw’s dead wood aside, the forest gives black wood from plain trees, twisted wood from the gnarled ones, and ironbark from the worst of them. Harder wood takes more chops and more Woodcutting. */
 function woodOf(t){return t.tw>.8?'ironbark':t.tw>.45?'twistwood':'blackwood';}
 const WOODREQ={blackwood:1,twistwood:10,ironbark:20},WOODPROG={blackwood:6,twistwood:9,ironbark:13};
-function shChop(t){const i=shTrees.indexOf(t);if(i<0)return;S.shCut=S.shCut||{};S.shCut[t.seed]=1;shTrees.splice(i,1);tbDel(t);grid=null;}
-{const cut=S.shCut||{};for(let i=shTrees.length-1;i>=0;i--){const t=shTrees[i];if(cut[t.seed]){shTrees.splice(i,1);tbDel(t);}}}
 
 /* the shore: fishing, a grinding rock, forage. What you need is found near you. */
 
@@ -87,7 +85,7 @@ function shObjects(){const o=[];
  {const ga=grindAct(SHROCK);o.push({x:SHROCK.x,y:SHROCK.y,r:34,name:'Rocks',key:'rocks',act:ga,onAct:ga?()=>startGrind(SHROCK):null,onExamine:()=>think('Black rock, wet all over. Flat enough to grind on.')});}
  for(const f of SHFORAGE){if(f.taken>Date.now())continue;o.push({x:f.x,y:f.y-6,r:20,name:itemName({id:f.id}),key:f.id==='wood'?'driftwood':f.id==='kelp'?'kelp':'wash',act:'Grab',onAct:()=>{const c=shClamp(f.x,f.y+6);routeTo(c[0],c[1],()=>{if(f.taken>Date.now())return;const got=addItem(f.id,f.id==='shells'?2:1);if(!got){think('No room in my pack.');return;}f.taken=Date.now()+90000;flies.push({id:'misc',img:itemIcon({id:f.id}),x0:f.x,y0:f.y,t:0});const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}addXP('foraging',3,first?'first':'normal',[f.x,f.y-20]);save();});},onExamine:()=>think('The dark water left it. It will leave more.')});}
  o.push({x:HOLLOW.x,y:HOLLOW.y,r:HOLLOW.r,name:'The Hollow',key:'thehollow',act:null,onExamine:()=>{discover('thehollow');think(pick(['It’s breathing.','Everything here keeps its distance from it.','I don’t think it’s asleep. I think it’s waiting.']));}});
- for(const t of shTrees){if(Math.hypot(t.x-P.x,t.y-P.y)>260)continue;const w=woodOf(t);o.push({x:t.x,y:t.y-30*t.s,r:22*t.s,name:w==='ironbark'?'Gnarled tree':w==='twistwood'?'Twisted tree':'Shadow tree',key:'shadowtree',act:'Chop',onAct:()=>chopTree(t),onExamine:()=>{discover('shadowtree');if(w!=='blackwood')discover(w);think(treeTwistTxt(t));}});}
+ for(const t of shTrees){if(Math.hypot(t.x-P.x,t.y-P.y)>260)continue;const ob=harvestObj(t);if(ob)o.push(ob);}
  const deadTxt=()=>pick(['A dead tree. Bark hanging off it like skin.','Dead. Probably dead.','It is not moving. I am going to assume that is good.']);
  for(const m of MAWS)o.push({x:m.x,y:m.y-20,r:30,name:m.st==='still'?'Dead tree':'Hollowmaw',key:m.st==='still'?null:'hollowmaw',act:null,onExamine:()=>think(m.st==='still'?deadTxt():m.st==='down'?'Flat on its roots, rocking. It will get up.':m.st==='calm'?'Held still, chest open. The hollow inside is black and cold. It is waiting for something warm.':'Its chest is creaking open. Back away.')});
  for(const p of PLANTED)o.push({x:p.x,y:p.y-24,r:26,name:'Planted Hollowmaw',key:'planted',act:null,onExamine:()=>think('A tree again. The pearl glows low in the trunk, and the bark is warm.')});
@@ -119,13 +117,13 @@ function shUpdate(dt){if(!SW.on&&!P.path.length&&!shWalkable(P.x,P.y)&&shDepth(P
  for(const l of LAPPERS){l.t+=dt;const d=Math.hypot(P.x-l.x,P.y-l.y);if(l.st==='lap'&&d<120){l.st='still';l.t=0;}else if(l.st==='still'&&l.t>1.1){l.st='gone';l.t=0;}else if(l.st==='gone'&&l.t>25&&d>240)l.st='lap';}
  const I=onIsle(P.x,P.y);if(I&&!I.landing&&!S.journal.islet)discover('islet');if(I&&I!==SH.isle){SH.isle=I;if(I.name&&!SH.said){toast(I.name);}}}
 
-function drawShTree(t){const s=t.s,x=t.x,y=t.y,tw=t.tw,h=34*s+tw*14*s,r=mulberry(t.seed);shadow(x,y+2,10*s,3.5*s,h,24*s*(1+tw*.6),1.9);
+function drawShTree(t0){const T=tstage(t0);if(T.st==='stump'||T.st==='hole')return drawStump(t0,T.g,T.st==='hole');if(T.st==='sapling')return drawSapling(t0,T.g);const t=vtree(t0,T.g),cc=T.c;const s=t.s,x=t.x,y=t.y,tw=t.tw,h=34*s+tw*14*s,r=mulberry(t.seed);shadow(x,y+2,10*s,3.5*s,h,cc>0?24*s*(1+tw*.6)*(.4+.6*cc):0,1.9);
  const pts=[[x,y]];const n=3+Math.round(tw*3);for(let i=1;i<=n;i++){const u=i/n;pts.push([x+t.lean*u+Math.sin(u*6+t.seed)*tw*14*s,y-h*u]);}
  ln(pts,t.seed,7*s+tw*3,INK,.6);ln(pts,t.seed,3.5*s+tw*1.5,tw>.6?'#241a2a':'#2b2433',.6);
  if(tw>.3){const bx=pts[Math.max(1,n-1)];ln([bx,[bx[0]+(r()-.5)*40*s,bx[1]-10-r()*14]],t.seed+9,3.5*s,INK,.8);}
  if(tw>.7){ln([[x-4*s,y-6*s],[x-12*s,y+2]],t.seed+10,4*s,INK,.5);ln([[x+4*s,y-6*s],[x+13*s,y+3]],t.seed+11,4*s,INK,.5);}}
-function drawShCanopy(t){const s=t.s,tw=t.tw,h=34*s+tw*14*s,top=[t.x+t.lean+Math.sin(6+t.seed)*tw*14*s,t.y-h],c=tw>.6?'#1c1f28':tw>.3?'#1f2b24':'#243429',spread=1+tw*.6;
- blob(top[0]-10*s*spread,top[1]+2*s,13*s*spread,10*s,t.seed+1,c,2.4,.7);blob(top[0]+10*s*spread,top[1],13*s*spread,10*s,t.seed+2,c,2.4,.7);blob(top[0],top[1]-10*s,15*s*spread,11*s,t.seed+3,tw>.6?'#242833':'#2a3c2e',2.4,.7);}
+function drawShCanopy(t0){const T=tstage(t0);if(T.c<=0)return;const t=vtree(t0,T.g),cs=.45+.55*T.c;const s=t.s*1,tw=t.tw,h=34*s+tw*14*s,top=[t.x+t.lean+Math.sin(6+t.seed)*tw*14*s,t.y-h],c=tw>.6?'#1c1f28':tw>.3?'#1f2b24':'#243429',spread=1+tw*.6;
+ blob(top[0]-10*s*spread*cs,top[1]+2*s,13*s*spread*cs,10*s*cs,t.seed+1,c,2.4,.7);blob(top[0]+10*s*spread*cs,top[1],13*s*spread*cs,10*s*cs,t.seed+2,c,2.4,.7);if(T.c>.5)blob(top[0],top[1]-10*s,15*s*spread*cs,11*s*cs,t.seed+3,tw>.6?'#242833':'#2a3c2e',2.4,.7);}
 function treeTwistTxt(t){return t.tw>.8?'Gnarled past reason. Ironbark, if I could get through it.':t.tw>.45?'Twisted hard. The wood in there would hold a hull.':pick(['Black bark. It leans in when I’m not looking.','Dead, or close to it. Something has been eating at the roots.']);}
 /* dead trees and Hollowmaws share one drawing, shaped by seed, in the forest's palette. A real one shows only a seam down the chest and, rarely, the faintest warm fleck in it. */
 function drawMaw(m){const x=m.x,y=m.y,real=!('creak' in m),open=m.st==='open'||m.st==='lunge',creak=real&&m.st==='creak',sway=!real&&m.st==='creak',down=m.st==='down',calm=m.st==='calm';

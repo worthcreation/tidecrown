@@ -32,7 +32,7 @@ var SHFEAT=(()=>{const r=mulberry(93);const ok=f=>ISLES.every(I=>isleK(I,f.x,f.y
 function onIsletK(x,y){if(!KFEAT)return null;for(const f of KFEAT)if(f.kind==='islet'&&fDepth(f,x,y)<0&&fLocal(f,x,y)<-4)return f;return null;}
 function onIsletS(x,y){if(!SHFEAT)return null;for(const f of SHFEAT)if(f.kind==='islet'&&fDepth(f,x,y)<0&&fLocal(f,x,y)<-4)return f;return null;}
 /* islet trees: on the dark side they are shadow trees like any other (choppable, twisted, the wood by twist); on the Key's side, small sea palms */
-{const cut=S.shCut||{};SHFEAT.forEach((f,n)=>{if(f.kind!=='islet')return;f.trees.forEach((q,j)=>{const seed=20000+n*10+j;if(cut[seed])return;const t={x:q.x,y:q.y,s:q.s,seed,lean:(q.tw-.5)*16,sh:1,tw:Math.min(1,.2+q.tw*.8),isle:-1};shTrees.push(t);tbAdd(t);});});}
+{const cut=S.shCut||{};SHFEAT.forEach((f,n)=>{if(f.kind!=='islet')return;f.trees.forEach((q,j)=>{const seed=20000+n*10+j;const t={x:q.x,y:q.y,s:q.s,seed,lean:(q.tw-.5)*16,sh:1,tw:Math.min(1,.2+q.tw*.8),isle:-1};shTrees.push(t);tbAdd(t);});});}
 /* ---- per-island shelves on the dark side ---- */
 function isleShelf(I,t){return [20+180*Math.pow(nz(I.seed*1.3,t),1.5),20+220*nz(I.seed*2.1+1,t)];}
 function isleDepth(I,x,y){if(Math.abs(x-I.x)>I.rx*1.3+700||Math.abs(y-I.y)>I.ry*1.3+700)return 9;const u=(x-I.x)/I.rx,v=(y-I.y)/I.ry,t=Math.atan2(v,u),R=isleR(I,t),s=Math.hypot(x-I.x,y-I.y)-Math.hypot(Math.cos(t)*I.rx*R,Math.sin(t)*I.ry*R);if(s<=0)return 0;const [L,D]=isleShelf(I,t);return prof(s,L,D);}
