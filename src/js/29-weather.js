@@ -33,7 +33,7 @@ function fogHides(x,y){const R=fogR();return R<1e8&&Math.hypot(x-P.x,y-P.y)>R*.9
 /* clouds: fair-weather cumulus, each a silhouette of overlapping lobes with a flatter base, on a 3000px tile.
    They drift slowly with the wind: the drift builds up frame by frame (CLOFF), so a wandering wind bends their
    path instead of moving them all at once. Speed is a slow walk, well under yours. */
-const CLOUDS=[],CL_SP=38;{const r=mulberry(77);for(let i=0;i<16;i++){const rx=110+r()*190,ry=55+r()*70,lobes=[],n=4+Math.floor(r()*4);
+const CLOUDS=[],CL_SP=16;{const r=mulberry(77);for(let i=0;i<16;i++){const rx=110+r()*190,ry=55+r()*70,lobes=[],n=4+Math.floor(r()*4);
  for(let k=0;k<n;k++){const u=(k+.5)/n*2-1,lr=ry*(.55+r()*.5)*(1-Math.abs(u)*.35);lobes.push([u*rx*.75,-lr*.35-r()*ry*.25,lr]);}
  lobes.push([0,ry*.15,rx*.8,ry*.35]);CLOUDS.push({x:r()*3000,y:r()*3000,rx,ry,lobes,low:r()<.6,h:r(),seed:600+i});}}
 let CLOFF=null;
@@ -47,12 +47,12 @@ function cloudShapes(){const out=[];for(const c of CLOUDS){const k=cloudK(c);if(
 function cloudOver(x,y){for(const c of CLOUDS){if(cloudK(c)<.5)continue;const [cx,cy]=cloudPos(c);if(((x-cx)/c.rx)**2+((y-cy)/c.ry)**2<1)return 1;}return 0;}
 function drawWeatherWorld(){const sun=SKY.sun,sa=sun?Math.min(1,sun.a/.24):0;
  /* the cap on the summit, seen from below: soft white over the hilltop */
- if(!SH.on){const c=capAmt();if(c>.05){const L=liftAt(HILL.x,HILL.y),sh=[];for(let i=0;i<7;i++){const a=i/7*6.2832+Date.now()/90000,rr=60+30*Math.sin(i*1.7);sh.push([HILL.x+Math.cos(a)*rr,HILL.y-L-30+Math.sin(a)*rr*.45,70+20*Math.sin(i*2.3),38,0]);}layer(sh,.42*c,'#f4f6f8');}}
+ if(!SH.on){const c=capAmt();if(c>.05){const L=liftAt(HILL.x,HILL.y),sh=[];for(let i=0;i<9;i++){const a=i/9*6.2832+Date.now()/90000,rr=(60+30*Math.sin(i*1.7))*KSC;sh.push([HILL.x+Math.cos(a)*rr,HILL.y-L-40+Math.sin(a)*rr*.45,(70+20*Math.sin(i*2.3))*KSC,40*KSC,0]);}layer(sh,.42*c,'#f4f6f8');}}
  /* the odd low cloud passes below the view: a soft white cumulus, not often */
  const low=[];for(const c of CLOUDS){const k=cloudK(c)*Math.max(0,Math.min(1,(.1+WX.rain*.2-c.h)/.03));if(k<.03||!c.low)continue;const [x,y]=cloudPos(c);for(const L of c.lobes)low.push(L.length===4?[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[3]*.85*k,0]:[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[2]*.55*k,0]);}
  if(low.length)layer(low,.3*(.4+.6*sa),'#f4f6f8');
  /* fog wisps drifting with the wind */
- const f=fogAt(P.x,P.y);if(f>.05){const t=Date.now()/1000;for(let i=0;i<8;i++){const px=P.x+((i*431+Math.cos(WX.wa)*t*10)%900+900)%900-450,py=P.y+((i*277+Math.sin(WX.wa)*t*10)%700+700)%700-350;ctx.globalAlpha=.16*f;blob(px,py,140,50,700+i,'#eef2f4',0,8);}}
+ {const o=CLOFF||{x:0,y:0},T=900,m=v=>((v%T)+T)%T;for(let i=0;i<14;i++){let px=m(i*431+o.x*.5),py=m(i*277+i*i*13+o.y*.5);px+=Math.floor((cam.x-px+T/2)/T)*T;py+=Math.floor((cam.y-py+T/2)/T)*T;const f=fogAt(px,py);if(f<.05)continue;ctx.globalAlpha=.16*f;blob(px,py-liftAt(px,py),150,52,700+i,'#eef2f4',0,8);}}
  ctx.globalAlpha=1;}
 function drawWeatherScreen(){const r=WX.rain;
  if(r>.02){const t=now,n=Math.floor(170*r),wx=Math.cos(WX.wa)*WX.ws*9;ctx.strokeStyle='rgba(220,232,245,.55)';ctx.lineWidth=1.3;ctx.beginPath();

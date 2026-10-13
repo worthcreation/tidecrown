@@ -25,7 +25,7 @@ function frontR(w,a){const u=Math.abs(angDiff(a,w.a0))/w.hw;if(u>=1)return wetR(
  return wetR(a)+70*(1-k)-w.reach*prof*k;}
 function coverBreak(w){S.shore=S.shore||[];const inArc=it=>Math.abs(angDiff(it.a,w.a0))<w.hw*.95;
  for(let i=S.shore.length-1;i>=0;i--){const it=S.shore[i];if(!inArc(it))continue;const fr=frontR(w,it.a);if(it.r>=fr-4&&Math.random()<.5)S.shore.splice(i,1);}
- for(let i=0;i<w.n;i++){const a=w.a0+(Math.random()-.5)*w.hw*1.4,r=wetR(a)-6-Math.random()*(w.reach-10),x=Math.cos(a)*r,y=Math.sin(a)*r;
+ for(let i=0;i<w.n;i++){const a=w.a0+(Math.random()-.5)*w.hw*1.4,r=Math.max(iR(a)-6,wetR(a)-6-Math.random()*(w.reach-10)),x=Math.cos(a)*r,y=Math.sin(a)*r;
   if(!walkable(x,y)||onDock(x,y)||Math.abs(x-R0)<60&&Math.abs(y)<60)continue;if(S.shore.some(q=>Math.hypot(q.x-x,q.y-y)<22))continue;
   const id=rollWash();S.shore.push({a,r,x,y,id,n:id==='shells'?1+Math.floor(Math.random()*3):1,seed:Math.floor(Math.random()*999)});}
  while(S.shore.length>SHORE_MAX)S.shore.shift();save();}
@@ -67,3 +67,6 @@ function scrapeSalt(s){const c=s.pile?[s.x,DOCK.y1-8]:clampLand(s.x+s.rx+10,s.y+
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}
  S.st.found=S.st.found||{};S.st.found.seasalt=(S.st.found.seasalt||0)+1;S.st.pinches=(S.st.pinches||0)+1;discover('seasalt');
  addXP('foraging',3,first?'first':'normal',[s.x,s.y-20]);save();});}
+
+/* wash-ups from before the Key grew (build 28) were left inland: move them down to the strand line at the same bearing */
+for(const it of (S.shore||[])){const a=it.a!=null?it.a:Math.atan2(it.y,it.x),r=Math.hypot(it.x,it.y);if(r<iR(a)-12){it.a=a;it.r=iR(a)-4-Math.random()*6;it.x=Math.cos(a)*it.r;it.y=Math.sin(a)*it.r;}}

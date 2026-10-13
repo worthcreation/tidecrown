@@ -547,7 +547,7 @@ const cam={x:P.x,y:P.y};
 (S.fires||[]).forEach(f=>{if(!f.until)f.until=Date.now()+90000;if(f.until>Date.now()+8*60000)f.until=Date.now()+90000;if(!f.fuel)f.fuel={wood:3};});
 setInterval(save,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
 
-const BUBPAGE=2.8;let flies=[],pops=[],bub=null,cele=null,fly=null,mark=null,intro=null,dark=0;
+const BUBPAGE=3.6;let flies=[],pops=[],bub=null,cele=null,fly=null,mark=null,intro=null,dark=0;
 
 /* ---------- UI helpers ---------- */
 const $=id=>document.getElementById(id);
@@ -982,8 +982,12 @@ function update(dt){
 let SKY={sun:null,moon:null},SHF=[];
 const SQ={sun:[],moon:[],fire:[],ao:[],can:[],fleck:[]};let SQP=null;
 const SM=document.createElement('canvas'),smx=SM.getContext('2d');
-function skyLights(){const d=S.day,h=(d-.5)*6.2832,e=Math.cos(h)*1.45,mk=(az,el,a)=>{if(el<=.04)return null;const sx=-Math.sin(az),sy=-.1,n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
- SKY.sun=mk(h,e,.24*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,-e,.09*Math.min(1,dark/.35));/* moonlight only shows when it is dark: at dawn the setting moon must not throw shadows */
+/* the sun as it really moves at about 17 degrees north: rising in the east, passing a little south of overhead at
+   noon (so noon shadows point a short way north and swing round gradually), setting in the west. The moon takes
+   the opposite path. */
+const LAT=.3;
+function skyLights(){const d=S.day,h=(d-.5)*6.2832,mk=(hh,a)=>{const up=Math.cos(hh)*Math.cos(LAT);if(up<=.04)return null;const el=Math.asin(up),sx=-Math.sin(hh),sy=Math.cos(hh)*Math.sin(LAT),n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
+ SKY.sun=mk(h,.24*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,.09*Math.min(1,dark/.35));/* moonlight only shows when it is dark: at dawn the setting moon must not throw shadows */
  SHF=[];if(!SH.on){SHF.push({x:FIRE.x,y:FIRE.y-6,a:.26});(S.fires||[]).forEach(f=>{if(fireLit(f))SHF.push({x:f.x,y:f.y-6,a:f.big?.3:.24});});}}
 /* one cast: a stretched ellipse from the base along the light, plus the canopy blob at the far end for trees */
 function castShape(q,x,y,rx,ry,h,cr,dx,dy,k){const L=h*k,ox=dx*L,oy=dy*L*.5,ang=Math.atan2(oy,ox),si=Math.abs(Math.sin(ang));
@@ -1146,8 +1150,8 @@ function render(){skyLights();
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(Z,Z);ctx.translate(-cam.x,-cam.y);
  if(P.task&&P.task.phase==='bite'){const s=1+Math.sin(now*20)*.12;ctx.save();ctx.translate(P.x,P.y-82-liftAt(P.x,P.y));ctx.scale(s,s);otext('!',0,0,40,'#ffcf3a');ctx.restore();}
  for(const p of pops){ctx.globalAlpha=p.t>1?1-(p.t-1)/.5:1;otext(p.txt,p.x,p.y-liftAt(p.x,p.y)-p.t*30,p.size,p.col);}ctx.globalAlpha=1;
- /* thought bubble: above your raised head, a little see-through, at most two lines at a time (longer thoughts page on) */
- if(bub){ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";const all=wrap(bub.txt,210),pages=Math.ceil(all.length/2),pg=Math.min(pages-1,Math.floor(bub.t/BUBPAGE)),lines=all.slice(pg*2,pg*2+2);bub.dur=Math.max(4.4,pages*BUBPAGE+.6);
+ /* thought bubble: above your raised head, a little see-through, at most three lines at a time (longer thoughts page on) */
+ if(bub){ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";const all=wrap(bub.txt,250),pages=Math.ceil(all.length/3),pg=Math.min(pages-1,Math.floor(bub.t/BUBPAGE)),lines=all.slice(pg*3,pg*3+3);bub.dur=Math.max(4.4,pages*BUBPAGE+.6);
   const lh=21,w=Math.max(...lines.map(l=>ctx.measureText(l).width))+26,h=lines.length*lh+16,Py=P.y-liftAt(P.x,P.y),bx=P.x-w/2,by=Py-86-h,fa=bub.t>bub.dur-.5?1-(bub.t-bub.dur+.5)/.5:Math.min(1,bub.t*6);
   ctx.globalAlpha=.85*fa;blob(P.x+8,Py-62,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,Py-73,6,5,151,'#fffaf0',2,.3);
   sketch(rrPts(bx,by,w,h,12),true,152,2,'#fffaf0',INK,2.6);ctx.globalAlpha=fa;ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,P.x,by+9+i*lh));if(pages>1){ctx.globalAlpha=.5*fa;ctx.font="13px 'Patrick Hand','Comic Sans MS',cursive";ctx.fillText((pg+1)+'/'+pages,bx+w-14,by+h-15);}ctx.globalAlpha=1;}
@@ -1650,7 +1654,7 @@ function frontR(w,a){const u=Math.abs(angDiff(a,w.a0))/w.hw;if(u>=1)return wetR(
  return wetR(a)+70*(1-k)-w.reach*prof*k;}
 function coverBreak(w){S.shore=S.shore||[];const inArc=it=>Math.abs(angDiff(it.a,w.a0))<w.hw*.95;
  for(let i=S.shore.length-1;i>=0;i--){const it=S.shore[i];if(!inArc(it))continue;const fr=frontR(w,it.a);if(it.r>=fr-4&&Math.random()<.5)S.shore.splice(i,1);}
- for(let i=0;i<w.n;i++){const a=w.a0+(Math.random()-.5)*w.hw*1.4,r=wetR(a)-6-Math.random()*(w.reach-10),x=Math.cos(a)*r,y=Math.sin(a)*r;
+ for(let i=0;i<w.n;i++){const a=w.a0+(Math.random()-.5)*w.hw*1.4,r=Math.max(iR(a)-6,wetR(a)-6-Math.random()*(w.reach-10)),x=Math.cos(a)*r,y=Math.sin(a)*r;
   if(!walkable(x,y)||onDock(x,y)||Math.abs(x-R0)<60&&Math.abs(y)<60)continue;if(S.shore.some(q=>Math.hypot(q.x-x,q.y-y)<22))continue;
   const id=rollWash();S.shore.push({a,r,x,y,id,n:id==='shells'?1+Math.floor(Math.random()*3):1,seed:Math.floor(Math.random()*999)});}
  while(S.shore.length>SHORE_MAX)S.shore.shift();save();}
@@ -1692,6 +1696,9 @@ function scrapeSalt(s){const c=s.pile?[s.x,DOCK.y1-8]:clampLand(s.x+s.rx+10,s.y+
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}
  S.st.found=S.st.found||{};S.st.found.seasalt=(S.st.found.seasalt||0)+1;S.st.pinches=(S.st.pinches||0)+1;discover('seasalt');
  addXP('foraging',3,first?'first':'normal',[s.x,s.y-20]);save();});}
+
+/* wash-ups from before the Key grew (build 28) were left inland: move them down to the strand line at the same bearing */
+for(const it of (S.shore||[])){const a=it.a!=null?it.a:Math.atan2(it.y,it.x),r=Math.hypot(it.x,it.y);if(r<iR(a)-12){it.a=a;it.r=iR(a)-4-Math.random()*6;it.x=Math.cos(a)*it.r;it.y=Math.sin(a)*it.r;}}
 /* ---------- the shell hatchet ----------
    The Key is sand: no flint, almost no stone. Islanders on low sandy atolls made adze blades from giant clam shell,
    the thick hinge ground down on rock with sand and seawater. Here: pry an empty giant clam shell off a reef with a
@@ -2438,7 +2445,7 @@ function fogHides(x,y){const R=fogR();return R<1e8&&Math.hypot(x-P.x,y-P.y)>R*.9
 /* clouds: fair-weather cumulus, each a silhouette of overlapping lobes with a flatter base, on a 3000px tile.
    They drift slowly with the wind: the drift builds up frame by frame (CLOFF), so a wandering wind bends their
    path instead of moving them all at once. Speed is a slow walk, well under yours. */
-const CLOUDS=[],CL_SP=38;{const r=mulberry(77);for(let i=0;i<16;i++){const rx=110+r()*190,ry=55+r()*70,lobes=[],n=4+Math.floor(r()*4);
+const CLOUDS=[],CL_SP=16;{const r=mulberry(77);for(let i=0;i<16;i++){const rx=110+r()*190,ry=55+r()*70,lobes=[],n=4+Math.floor(r()*4);
  for(let k=0;k<n;k++){const u=(k+.5)/n*2-1,lr=ry*(.55+r()*.5)*(1-Math.abs(u)*.35);lobes.push([u*rx*.75,-lr*.35-r()*ry*.25,lr]);}
  lobes.push([0,ry*.15,rx*.8,ry*.35]);CLOUDS.push({x:r()*3000,y:r()*3000,rx,ry,lobes,low:r()<.6,h:r(),seed:600+i});}}
 let CLOFF=null;
@@ -2452,12 +2459,12 @@ function cloudShapes(){const out=[];for(const c of CLOUDS){const k=cloudK(c);if(
 function cloudOver(x,y){for(const c of CLOUDS){if(cloudK(c)<.5)continue;const [cx,cy]=cloudPos(c);if(((x-cx)/c.rx)**2+((y-cy)/c.ry)**2<1)return 1;}return 0;}
 function drawWeatherWorld(){const sun=SKY.sun,sa=sun?Math.min(1,sun.a/.24):0;
  /* the cap on the summit, seen from below: soft white over the hilltop */
- if(!SH.on){const c=capAmt();if(c>.05){const L=liftAt(HILL.x,HILL.y),sh=[];for(let i=0;i<7;i++){const a=i/7*6.2832+Date.now()/90000,rr=60+30*Math.sin(i*1.7);sh.push([HILL.x+Math.cos(a)*rr,HILL.y-L-30+Math.sin(a)*rr*.45,70+20*Math.sin(i*2.3),38,0]);}layer(sh,.42*c,'#f4f6f8');}}
+ if(!SH.on){const c=capAmt();if(c>.05){const L=liftAt(HILL.x,HILL.y),sh=[];for(let i=0;i<9;i++){const a=i/9*6.2832+Date.now()/90000,rr=(60+30*Math.sin(i*1.7))*KSC;sh.push([HILL.x+Math.cos(a)*rr,HILL.y-L-40+Math.sin(a)*rr*.45,(70+20*Math.sin(i*2.3))*KSC,40*KSC,0]);}layer(sh,.42*c,'#f4f6f8');}}
  /* the odd low cloud passes below the view: a soft white cumulus, not often */
  const low=[];for(const c of CLOUDS){const k=cloudK(c)*Math.max(0,Math.min(1,(.1+WX.rain*.2-c.h)/.03));if(k<.03||!c.low)continue;const [x,y]=cloudPos(c);for(const L of c.lobes)low.push(L.length===4?[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[3]*.85*k,0]:[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[2]*.55*k,0]);}
  if(low.length)layer(low,.3*(.4+.6*sa),'#f4f6f8');
  /* fog wisps drifting with the wind */
- const f=fogAt(P.x,P.y);if(f>.05){const t=Date.now()/1000;for(let i=0;i<8;i++){const px=P.x+((i*431+Math.cos(WX.wa)*t*10)%900+900)%900-450,py=P.y+((i*277+Math.sin(WX.wa)*t*10)%700+700)%700-350;ctx.globalAlpha=.16*f;blob(px,py,140,50,700+i,'#eef2f4',0,8);}}
+ {const o=CLOFF||{x:0,y:0},T=900,m=v=>((v%T)+T)%T;for(let i=0;i<14;i++){let px=m(i*431+o.x*.5),py=m(i*277+i*i*13+o.y*.5);px+=Math.floor((cam.x-px+T/2)/T)*T;py+=Math.floor((cam.y-py+T/2)/T)*T;const f=fogAt(px,py);if(f<.05)continue;ctx.globalAlpha=.16*f;blob(px,py-liftAt(px,py),150,52,700+i,'#eef2f4',0,8);}}
  ctx.globalAlpha=1;}
 function drawWeatherScreen(){const r=WX.rain;
  if(r>.02){const t=now,n=Math.floor(170*r),wx=Math.cos(WX.wa)*WX.ws*9;ctx.strokeStyle='rgba(220,232,245,.55)';ctx.lineWidth=1.3;ctx.beginPath();
@@ -2514,8 +2521,11 @@ const KPALMS=[];{const r=mulberry(91);let tries=0;const avoid=[[DOCK.x0,0],[SIGN
 for(let i=tufts.length-1;i>=0;i--){const t=tufts[i];if(keyMat(t.x,t.y,hKey(t.x,t.y))===1)tufts.splice(i,1);}
 /* what grows where, by distance from the sea and by height: wide sand (widest on the lee), a scrub belt, grass on
    the slopes, the cloud-forest floor in the fog belt, open rock at the very top */
-function keyMat(x,y,h){const r=Math.hypot(x,y),a=Math.atan2(y,x),d=iR(a)-r,sw=105+90*Math.max(0,-Math.cos(a))+12*Math.sin(a*5);
- if(d<sw||h<10)return 1;if(d<sw+40||h<20)return 3;if(h>=CHI)return 5;if(h>=CLO)return 4;return 2;}
+function smax(a,b,k){return k*Math.log(Math.exp(a/k)+Math.exp(b/k));}
+function keyMat(x,y,h){const r=Math.hypot(x,y),a=Math.atan2(y,x),wob=9*Math.sin(x/37+y/53)+6*Math.sin(x/19-y/23),d=iR(a)-r+wob,sw=105+90*Math.max(0,-Math.cos(a))+12*Math.sin(a*5);
+ /* sand where it is near the sea or low; the two rules blend into curves instead of meeting in corners */
+ const sand=smax(sw-d,(10-h)*7,14),scrub=smax(sw+40-d,(20-h)*7,14);
+ if(sand>0)return 1;if(scrub>0)return 3;if(h>=CHI)return 5;if(h>=CLO)return 4;return 2;}
 function hShadow(x,y){let best=null,bk=9;for(const I of ISLES){const k=isleK(I,x,y);if(k<bk){bk=k;best=I;}}if(!best||bk>1)return 0;
  const I=best,f=Math.min(1,(1-bk)/.25),n=I.name,cx=I.x,cy=I.y,m=Math.min(I.rx,I.ry);let h;
  if(n==='The Thicket')h=18+gs(x,y,cx-I.rx*.35,cy-I.ry*.2,m*.32,34)+gs(x,y,cx+I.rx*.3,cy+I.ry*.15,m*.28,30)+gs(x,y,cx,cy+I.ry*.4,m*.25,22);
@@ -2657,7 +2667,7 @@ function drawOcc(x,y,fn,soft){const L=liftAt(x,y),hz=occludedBy(x,y);
  const sy=((hz-cam.y)*Z+H/2)*DPR;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,sy,cv.width,cv.height-sy);ctx.clip();
  ctx.globalAlpha=.3;ctx.drawImage(OC,0,0);const o=1.5*DPR;ctx.globalAlpha=.22;for(const [dx,dy] of [[o,0],[-o,0],[0,o],[0,-o]])ctx.drawImage(OC,dx,dy);ctx.restore();}
 function softFn(fn){return fn===drawSwimmer||fn===drawCrab||fn===drawGull||fn===drawGubbins||fn===drawKindle;}
-const BUILD=28;
+const BUILD=29;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);

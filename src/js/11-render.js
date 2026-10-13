@@ -13,8 +13,12 @@
 let SKY={sun:null,moon:null},SHF=[];
 const SQ={sun:[],moon:[],fire:[],ao:[],can:[],fleck:[]};let SQP=null;
 const SM=document.createElement('canvas'),smx=SM.getContext('2d');
-function skyLights(){const d=S.day,h=(d-.5)*6.2832,e=Math.cos(h)*1.45,mk=(az,el,a)=>{if(el<=.04)return null;const sx=-Math.sin(az),sy=-.1,n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
- SKY.sun=mk(h,e,.24*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,-e,.09*Math.min(1,dark/.35));/* moonlight only shows when it is dark: at dawn the setting moon must not throw shadows */
+/* the sun as it really moves at about 17 degrees north: rising in the east, passing a little south of overhead at
+   noon (so noon shadows point a short way north and swing round gradually), setting in the west. The moon takes
+   the opposite path. */
+const LAT=.3;
+function skyLights(){const d=S.day,h=(d-.5)*6.2832,mk=(hh,a)=>{const up=Math.cos(hh)*Math.cos(LAT);if(up<=.04)return null;const el=Math.asin(up),sx=-Math.sin(hh),sy=Math.cos(hh)*Math.sin(LAT),n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
+ SKY.sun=mk(h,.24*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,.09*Math.min(1,dark/.35));/* moonlight only shows when it is dark: at dawn the setting moon must not throw shadows */
  SHF=[];if(!SH.on){SHF.push({x:FIRE.x,y:FIRE.y-6,a:.26});(S.fires||[]).forEach(f=>{if(fireLit(f))SHF.push({x:f.x,y:f.y-6,a:f.big?.3:.24});});}}
 /* one cast: a stretched ellipse from the base along the light, plus the canopy blob at the far end for trees */
 function castShape(q,x,y,rx,ry,h,cr,dx,dy,k){const L=h*k,ox=dx*L,oy=dy*L*.5,ang=Math.atan2(oy,ox),si=Math.abs(Math.sin(ang));
@@ -177,8 +181,8 @@ function render(){skyLights();
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(Z,Z);ctx.translate(-cam.x,-cam.y);
  if(P.task&&P.task.phase==='bite'){const s=1+Math.sin(now*20)*.12;ctx.save();ctx.translate(P.x,P.y-82-liftAt(P.x,P.y));ctx.scale(s,s);otext('!',0,0,40,'#ffcf3a');ctx.restore();}
  for(const p of pops){ctx.globalAlpha=p.t>1?1-(p.t-1)/.5:1;otext(p.txt,p.x,p.y-liftAt(p.x,p.y)-p.t*30,p.size,p.col);}ctx.globalAlpha=1;
- /* thought bubble: above your raised head, a little see-through, at most two lines at a time (longer thoughts page on) */
- if(bub){ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";const all=wrap(bub.txt,210),pages=Math.ceil(all.length/2),pg=Math.min(pages-1,Math.floor(bub.t/BUBPAGE)),lines=all.slice(pg*2,pg*2+2);bub.dur=Math.max(4.4,pages*BUBPAGE+.6);
+ /* thought bubble: above your raised head, a little see-through, at most three lines at a time (longer thoughts page on) */
+ if(bub){ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";const all=wrap(bub.txt,250),pages=Math.ceil(all.length/3),pg=Math.min(pages-1,Math.floor(bub.t/BUBPAGE)),lines=all.slice(pg*3,pg*3+3);bub.dur=Math.max(4.4,pages*BUBPAGE+.6);
   const lh=21,w=Math.max(...lines.map(l=>ctx.measureText(l).width))+26,h=lines.length*lh+16,Py=P.y-liftAt(P.x,P.y),bx=P.x-w/2,by=Py-86-h,fa=bub.t>bub.dur-.5?1-(bub.t-bub.dur+.5)/.5:Math.min(1,bub.t*6);
   ctx.globalAlpha=.85*fa;blob(P.x+8,Py-62,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,Py-73,6,5,151,'#fffaf0',2,.3);
   sketch(rrPts(bx,by,w,h,12),true,152,2,'#fffaf0',INK,2.6);ctx.globalAlpha=fa;ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,P.x,by+9+i*lh));if(pages>1){ctx.globalAlpha=.5*fa;ctx.font="13px 'Patrick Hand','Comic Sans MS',cursive";ctx.fillText((pg+1)+'/'+pages,bx+w-14,by+h-15);}ctx.globalAlpha=1;}

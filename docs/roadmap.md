@@ -17,6 +17,7 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - Camp move (build 26): Brimble's camp on a sheltered shelf below a central hill, his teapot on the tripod, Walk here in every menu, the Map tab north up.
 - High island (build 27): the Key reshaped as a real high island with a summit, windward and lee sides, height zones (sand and palms, scrub, grass, cloud-forest belt of wobble trees, summit rock) and a summit cloud cap. Tune by play: summit height.
 - Fixes and scale (build 28): the Key 67% larger with a summit about seven characters up, more trees and palms, dawn moon shadows gone, tighter tap areas, no-hatchet taps walk, bubbles lifted, see-through and paged, long lines shortened, a hearth ring for Brimble, outcrop behind the tripod, softer ground colour edges.
+- Fixes (build 29): real sun path (no noon flip), longer bubbles (three lines a page), slower clouds, world-fixed fog wisps, summit cap sized to the island, wash-ups kept to the beach (old ones moved down), curved vegetation edges.
 
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |
