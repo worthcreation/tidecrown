@@ -83,8 +83,9 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  clamObjects(o);thimbleObjects(o);
  return o;}
 function objAt(wx,wy){let best=null,bd=1e9;for(const o of objects()){if(fogHides(o.x,o.y))continue;const d=Math.hypot(o.x-wx,o.y-wy);if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
-function s2w(sx,sy){return[(sx-W/2)/Z+cam.x,(sy-H/2)/Z+cam.y];}
-function w2s(x,y){return[(x-cam.x)*Z+W/2,(y-cam.y)*Z+H/2];}
+/* screen and world, through the height lift (30-terrain): a world point is drawn its lift higher; a tap is mapped back down to the ground under it */
+function s2w(sx,sy){const x=(sx-W/2)/Z+cam.x;return[x,unlift(x,(sy-H/2)/Z+cam.y)];}
+function w2s(x,y){return[(x-cam.x)*Z+W/2,(y-liftAt(x,y)-cam.y)*Z+H/2];}
 
 function tap(sx,sy){
  if(ctxOpen){closeCtx();return;}
