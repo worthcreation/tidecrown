@@ -15,6 +15,7 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - Occlusion (build 24, replaced in 25): column bands broke on north-south coasts.
 - Whole-map ground (build 25): landforms across the whole Key, the ground drawn as one lifted surface with traced ink, occlusion from that surface, Brimble's camp sheltered in dunes, a smaller teapot. Next for this: the same surface for the dark islands.
 - Camp move (build 26): Brimble's camp on a sheltered shelf below a central hill, his teapot on the tripod, Walk here in every menu, the Map tab north up.
+- High island (build 27): the Key reshaped as a real high island with a summit, windward and lee sides, height zones (sand and palms, scrub, grass, cloud-forest belt of wobble trees, summit rock) and a summit cloud cap. Tune by play: summit height (four characters for now).
 
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |

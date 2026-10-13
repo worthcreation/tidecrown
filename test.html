@@ -322,7 +322,7 @@ const SIGN={x:R0-95,y:-58};
    crown: out of the east wind and spray, a few steps from a lookout over the whole horizon (HILL in 30-terrain) */
 const OLDFIRE=(()=>{const p=polar(-.95,iR(-.95)-42);return{x:Math.round(p[0]),y:Math.round(p[1])};})();
 const HILL={x:50,y:-70};
-const FIRE={x:-25,y:-55};
+const FIRE={x:-135,y:-62};
 const HEAD=(()=>{const a=Math.PI-.45,p=polar(a,iR(a)-70);return{x:p[0],y:p[1]};})();
 const POOL=(()=>{const p=polar(2.05,250);return{x:p[0],y:p[1]};})();
 const GULL={x:R0-150,y:-34};
@@ -330,6 +330,8 @@ const crabHome=polar(1.6,iR(1.6)-60);
 const CRAB={x:crabHome[0],y:crabHome[1],tx:crabHome[0],ty:crabHome[1],wait:1,hop:0};
 const rocks=[];
 [-1.85,-2.35].forEach((a,j)=>{[-.09,-.03,.05,.1].forEach((d,i)=>{const p=polar(a+d,iR(a+d)+(i%2?2:-8));rocks.push({x:p[0],y:p[1],rx:14+((i*7+j*3)%9),ry:10+((i*5)%6),seed:200+j*10+i});});});
+/* the windward east shore is rockier */
+[-.62,-.45,-.3,.32,.48,.66].forEach((a,i)=>{const p=polar(a,iR(a)-4);rocks.push({x:p[0],y:p[1],rx:13+(i*5)%8,ry:9+(i*3)%5,seed:240+i});});
 /* a low outcrop on the windward (east) edge of Brimble's shelf */
 [[62,-8,16,11],[70,16,13,9],[52,34,11,8]].forEach(([dx,dy,rx,ry],i)=>rocks.push({x:FIRE.x+dx,y:FIRE.y+dy,rx,ry,seed:260+i,camp:1}));
 
@@ -338,9 +340,7 @@ const trees=[];
  while(trees.length<18&&tries<800){tries++;const a=r()*6.2832,d=Math.sqrt(r())*.74;const x=Math.cos(a)*gR(a)*d,y=Math.sin(a)*gR(a)*d;
   if(avoid.some(p=>Math.hypot(p[0]-x,p[1]-y)<120))continue;if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<90))continue;
   trees.push({x,y,s:.85+r()*.45,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}
- /* the island keeps its old trees, except where the camp now sits; a small stand on the camp's north side shades it and breaks the wind */
- for(let i=trees.length-1;i>=0;i--)if(Math.hypot(trees[i].x-FIRE.x,trees[i].y-FIRE.y)<95||Math.hypot(trees[i].x-HILL.x,trees[i].y-HILL.y)<55)trees.splice(i,1);
- [[-60,-140,1.05],[5,-150,.95],[-115,-110,1.1]].forEach(([dx,dy,s],i)=>trees.push({x:FIRE.x+dx,y:FIRE.y+dy,s,seed:900+i*31,lean:(i-1)*6,hue:.3+i*.2}));}
+}
 const tufts=[];{const r=mulberry(11);for(let i=0;i<80;i++){const a=r()*6.2832,d=Math.sqrt(r())*.93;tufts.push({x:Math.cos(a)*gR(a)*d,y:Math.sin(a)*gR(a)*d,f:r()<.18,seed:i+500,c:r()});}}
 const waves=[];{const r=mulberry(23);for(let i=0;i<300;i++){const a=r()*6.2832,d=iR(a)+110+r()*(i<140?1100:4300);waves.push({x:Math.cos(a)*d,y:Math.sin(a)*d,s:r()*6,seed:i+900});}}
 
@@ -1123,7 +1123,7 @@ function render(){skyLights();
  drawPickups();drawKit();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y-liftAt(mark.x,mark.y),10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t),t.x]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k),k.x]));d.push([DOCK.y1+40,drawSurf]);
- (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);
+ (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  }
  drawFly();{const L=liftAt(P.x,P.y);ctx.save();ctx.translate(0,-L);drawScarfFX();drawChopFX();drawGrind();ctx.restore();}if(C){ctx.save();ctx.translate(0,-liftAt(C.fr.x,C.fr.y));drawCook();ctx.restore();}
@@ -2414,10 +2414,14 @@ function wxUpdate(){const t=Date.now()/1000,sm=x=>Math.max(0,Math.min(1,x));
  wa+=WXT.turn;WX={wa,ws,cover,rain,fog,seaFog};}
 /* how much fog sits at a place, 0 to 1 */
 /* valleys hold fog, high ground sheds it */
-function fogAt(x,y){const th=terrH(x,y),tk=(1+Math.min(1,Math.max(0,-th/30))*.6)*(1-Math.min(1,Math.max(0,th/80))*.5);return Math.min(1,fogAt0(x,y)*tk);}
+function fogAt(x,y){const cap=capAt(x,y)*.85,th=terrH(x,y),tk=(1+Math.min(1,Math.max(0,-th/30))*.6)*(1-Math.min(1,Math.max(0,th/80))*.5);return Math.min(1,Math.max(cap,fogAt0(x,y)*tk));}
 function fogAt0(x,y){if(SH.on){const I=ISLES.find(I=>isleK(I,x,y)<=1.05),n=I?I.name:'';const k=n==='The Clearing'?.55:n==='The Fallow'?1.4:n==='The Tangle'?1.25:n==='Landing'?1:1.15;return Math.min(1,Math.max(WX.fog*k,WX.seaFog*.6));}
  const r=Math.hypot(x,y),a=Math.atan2(y,x);let k;if(walkable(x,y))k=r>gR(a)?.5:.8;else k=1;
  const sea=curK(x,y)>0||x>CUR0()-400?WX.seaFog*Math.min(1,(x-CUR0()+400)/500):0;return Math.min(1,Math.max(WX.fog*k,sea));}
+/* the Key's summit cloud cap: a cloud that sits on the hilltop most of the time, thickest in the morning, thinner
+   in the afternoon, gone when the sky is forced clear. It is what keeps the wobble trees' fog belt wet. */
+function capAmt(){if(WXT.force==='clear')return 0;const d=S.day,morn=d>.15&&d<.45?Math.sin((d-.15)/.3*Math.PI):0;return Math.max(0,Math.min(1,.35+.45*morn+.2*Math.sin(Date.now()/1700000)+.3*WX.rain));}
+function capAt(x,y){if(SH.on)return 0;const h=hKey(x,y);return h<CLO-6?0:Math.min(1,(h-CLO+6)/(KPEAK-CLO))*capAmt();}
 function fogR(){const f=fogAt(P.x,P.y);return f<.04?1e9:(120+(1-f)*900)*(1+Math.max(0,terrH(P.x,P.y))/50);}
 function fogHides(x,y){const R=fogR();return R<1e8&&Math.hypot(x-P.x,y-P.y)>R*.95;}
 /* clouds: fair-weather cumulus, each a silhouette of overlapping lobes with a flatter base, on a 3000px tile.
@@ -2436,6 +2440,8 @@ function cloudShapes(){const out=[];for(const c of CLOUDS){const k=cloudK(c);if(
  for(const L of c.lobes)out.push(L.length===4?[x+L[0]*k,y+L[1]*k,L[2]*k,L[3]*k,0]:[x+L[0]*k,y+L[1]*k,L[2]*k,L[2]*.62*k,0]);}return out;}
 function cloudOver(x,y){for(const c of CLOUDS){if(cloudK(c)<.5)continue;const [cx,cy]=cloudPos(c);if(((x-cx)/c.rx)**2+((y-cy)/c.ry)**2<1)return 1;}return 0;}
 function drawWeatherWorld(){const sun=SKY.sun,sa=sun?Math.min(1,sun.a/.24):0;
+ /* the cap on the summit, seen from below: soft white over the hilltop */
+ if(!SH.on){const c=capAmt();if(c>.05){const L=liftAt(HILL.x,HILL.y),sh=[];for(let i=0;i<7;i++){const a=i/7*6.2832+Date.now()/90000,rr=60+30*Math.sin(i*1.7);sh.push([HILL.x+Math.cos(a)*rr,HILL.y-L-30+Math.sin(a)*rr*.45,70+20*Math.sin(i*2.3),38,0]);}layer(sh,.42*c,'#f4f6f8');}}
  /* the odd low cloud passes below the view: a soft white cumulus, not often */
  const low=[];for(const c of CLOUDS){const k=cloudK(c)*Math.max(0,Math.min(1,(.1+WX.rain*.2-c.h)/.03));if(k<.03||!c.low)continue;const [x,y]=cloudPos(c);for(const L of c.lobes)low.push(L.length===4?[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[3]*.85*k,0]:[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[2]*.55*k,0]);}
  if(low.length)layer(low,.3*(.4+.6*sa),'#f4f6f8');
@@ -2467,20 +2473,38 @@ const gs=(x,y,cx,cy,r,h)=>h*Math.exp(-((x-cx)**2+(y-cy)**2)/(2*r*r));
    slope), a low swale behind it, then the grass plain; the ridge's height wanders along the shore and drops to a
    blowout where the wind has scooped a gap. One smooth knoll inland, under the stone head. No steps anywhere. */
 const ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
-/* the whole Key has shape: the dune ring on the shore; a gentle spine of higher ground running east to west across
-   the middle, rising into a hill near the centre; the knoll under the stone head as its high point; the still pool
-   in a real hollow; Brimble's camp on a flat shelf on the hill's lee (west) shoulder, below the crown. */
-function hKey(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
- const crestH=11+4*Math.sin(a*3+.7)+2*Math.sin(a*7+2),blow=1-.75*Math.exp(-((angDiff(a,.9))**2)/.012),Hc=crestH*blow;
- let h=Hc*ss(12,52,d)-(Hc-2)*ss(48,96,d)+3*ss(90,150,d);
- const cy=-40+60*Math.sin(x/260);h+=14*Math.exp(-((y-cy)**2)/(2*110*110))*ss(60,200,d);
- h+=gs(x,y,HEAD.x,HEAD.y,190,34)*ss(0,70,d);
- h-=12*Math.exp(-((x-POOL.x)**2+(y-POOL.y)**2)/(2*80*80));
- h+=gs(x,y,HILL.x,HILL.y,150,17)*ss(60,200,d);
- /* Brimble's shelf: flattened to the height the hillside has at the camp */
- const cr=Math.hypot(x-FIRE.x,y-FIRE.y);if(cr<85){const k=1-ss(55,85,cr);h=h*(1-k)+shelfH()*k;}
+/* the Key is a small high island: a beach and a modest foredune, then land climbing steadily to a summit about
+   four character heights up (HILL), steeper on the windward east, gentler and wider on the lee west; the stone
+   head on a smaller western shoulder; a spring-fed pool on a level patch of the slope; Brimble's camp on a level
+   shelf on the upper lee shoulder, just under the cloud belt where the wobble trees grow. */
+const KPEAK=66,CLO=34,CHI=62;
+function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
+ const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012));
+ let h=Hc*ss(10,34,d)-Hc*.5*ss(34,60,d);
+ const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=Math.max(120,iR(as)-Math.cos(as)*HILL.x*0-0)+30,q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
+ h+=KPEAK*Math.pow(1-q,e)*ss(6,60,d);
+ h+=gs(x,y,HEAD.x,HEAD.y,120,12)*ss(0,60,d);
  return h;}
-let SHELF=null;function shelfH(){if(SHELF===null){SHELF=0;const x=FIRE.x,y=FIRE.y,r=Math.hypot(x,y),a=Math.atan2(y,x),d=iR(a)-r;SHELF=3*ss(90,150,d)+14*Math.exp(-((y-(-40+60*Math.sin(x/260)))**2)/(2*110*110))*ss(60,200,d)+gs(x,y,HILL.x,HILL.y,150,17)*ss(60,200,d);}return SHELF;}
+const flatAt=(x,y,cx,cy,r0,r1,H)=>{const cr=Math.hypot(x-cx,y-cy);return cr<r1?1-ss(r0,r1,cr):0;};
+let SHELF=null,POOLH=null;
+function hKey(x,y){let h=hKeyBase(x,y);if(h===0)return 0;
+ if(SHELF===null){SHELF=hKeyBase(FIRE.x,FIRE.y);POOLH=hKeyBase(POOL.x,POOL.y)-3;}
+ let k=flatAt(x,y,FIRE.x,FIRE.y,50,80);if(k)h=h*(1-k)+SHELF*k;
+ k=flatAt(x,y,POOL.x,POOL.y,45,75);if(k)h=h*(1-k)+POOLH*k;
+ return h;}
+/* the wobble trees live only in the fog belt on the upper slopes (a little cloud forest where the summit's cloud
+   cap touches); palms grow on the sand, thickest on the lee; grass tufts only where there is grass */
+{const r=mulberry(77);trees.length=0;let tries=0;while(trees.length<18&&tries<4000){tries++;const a=r()*6.2832,d=Math.sqrt(r())*220,x=HILL.x+Math.cos(a)*d,y=HILL.y+Math.sin(a)*d,h=hKey(x,y);
+  if(h<CLO+2||h>CHI-1)continue;if(Math.hypot(x-FIRE.x,y-FIRE.y)<85)continue;if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<62))continue;
+  trees.push({x,y,s:.8+r()*.4,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}}
+const KPALMS=[];{const r=mulberry(91);let tries=0;const avoid=[[DOCK.x0,0],[SIGN.x,SIGN.y],[GULL.x,GULL.y],[BOLLARD.x,BOLLARD.y],[G.x,G.y],[HEAD.x,HEAD.y],[R0-80,24]];
+ while(KPALMS.length<16&&tries<3000){tries++;const a=r()*6.2832,i=iR(a),west=Math.max(0,-Math.cos(a));if(r()>.35+.65*west)continue;const d=18+r()*(50+40*west),x=Math.cos(a)*(i-d),y=Math.sin(a)*(i-d);
+  if(keyMat(x,y,hKey(x,y))!==1)continue;if(avoid.some(p=>Math.hypot(p[0]-x,p[1]-y)<70)||KPALMS.some(p=>Math.hypot(p.x-x,p.y-y)<55))continue;KPALMS.push({x,y,s:.9+r()*.35,seed:700+KPALMS.length*13});}}
+for(let i=tufts.length-1;i>=0;i--){const t=tufts[i];if(keyMat(t.x,t.y,hKey(t.x,t.y))===1)tufts.splice(i,1);}
+/* what grows where, by distance from the sea and by height: wide sand (widest on the lee), a scrub belt, grass on
+   the slopes, the cloud-forest floor in the fog belt, open rock at the very top */
+function keyMat(x,y,h){const r=Math.hypot(x,y),a=Math.atan2(y,x),d=iR(a)-r,sw=80+70*Math.max(0,-Math.cos(a))+10*Math.sin(a*5);
+ if(d<sw||h<7)return 1;if(d<sw+30||h<13)return 3;if(h>=CHI)return 5;if(h>=CLO)return 4;return 2;}
 function hShadow(x,y){let best=null,bk=9;for(const I of ISLES){const k=isleK(I,x,y);if(k<bk){bk=k;best=I;}}if(!best||bk>1)return 0;
  const I=best,f=Math.min(1,(1-bk)/.25),n=I.name,cx=I.x,cy=I.y,m=Math.min(I.rx,I.ry);let h;
  if(n==='The Thicket')h=18+gs(x,y,cx-I.rx*.35,cy-I.ry*.2,m*.32,34)+gs(x,y,cx+I.rx*.3,cy+I.ry*.15,m*.28,30)+gs(x,y,cx,cy+I.ry*.4,m*.25,22);
@@ -2503,7 +2527,7 @@ function liftAt(x,y){return terrH(x,y)*LKs();}
 /* the viewer looks from the south, so where the lifted ground folds over a ridge the nearest (southmost) surface is
    the one seen: scan down from the highest possible lift for the first ground at or above this screen line, then
    refine. Simple iteration fails on steep faces (it oscillates into stripes). */
-function maxLift(){return SH.on?140:140;}
+function maxLift(){return SH.on?140:175;}
 function unlift(x,ys){if(!SH.on&&typeof KS!=='undefined'&&KS.ink){const f=ksFront(x,ys);return f==null?ys:f;}const f=y=>y-liftAt(x,y)-ys;let hi=ys+maxLift(),fh=f(hi);if(fh<=0)return hi;
  for(let y=hi-8;y>=ys-2;y-=8){const fy=f(y);if(fy<=0){let a=y,b=y+8;for(let i=0;i<5;i++){const m=(a+b)/2;if(f(m)<=0)a=m;else b=m;}return (a+b)/2;}}return ys;}
 function liftPts(pts){return pts.map(p=>[p[0],p[1]-liftAt(p[0],p[1])]);}
@@ -2568,15 +2592,17 @@ function hillZoom(){return 1/(1+Math.max(0,terrH(P.x,P.y))/520);}
    answers "what is in front" for taps, shading and occlusion. Ink lines (the coast, the grass edge, crests that
    hide ground) are traced from the image as smooth vector lines, so they stay crisp at any coast shape. Until the
    image is built (a few columns a frame, nearest first) the old flat outlines stand in. Forest islands come later. */
-const KS={x0:-720,y0:-870,res:2,w:720,h:810,done:0,cols:null,fy:null,mat:null,cv:null,ink:null,order:null};
+const KS={x0:-720,y0:-900,res:2,w:720,h:820,done:0,cols:null,fy:null,mat:null,cv:null,ink:null,order:null};
 function ksInit(){KS.fy=new Float32Array(KS.w*KS.h).fill(NaN);KS.mat=new Uint8Array(KS.w*KS.h);KS.cv=document.createElement('canvas');KS.cv.width=KS.w;KS.cv.height=KS.h;KS.im=KS.cv.getContext('2d').createImageData(KS.w,KS.h);
  const cx=Math.round((P.x-KS.x0)/KS.res),o=[];for(let i=0;i<KS.w;i++)o.push(i);o.sort((a,b)=>Math.abs(a-cx)-Math.abs(b-cx));KS.order=o;KS.done=0;}
 function ksColumn(i){const R=KS.res,x=KS.x0+i*R+R/2,W2=KS.w,D=KS.im.data;let prev=null;
  for(let y=-720;y<=720;y+=1){const r=Math.hypot(x,y),a=Math.atan2(y,x);if(r>iR(a)){prev=null;continue;}
-  const m=r<=gR(a)?2:1,s=y-liftAt(x,y),row=(s-KS.y0)/R,pr=prev===null?row:prev,py=prev===null?y:y-1;prev=row;
+  const L=liftAt(x,y),m=keyMat(x,y,L/LKs()),s=y-L,row=(s-KS.y0)/R,pr=prev===null?row:prev,py=prev===null?y:y-1;prev=row;
   /* fill every image row between the last sample and this one, with the ground y interpolated across them */
   const r0=Math.min(pr,row),r1=Math.max(pr,row);
-  for(let j=Math.max(0,Math.floor(r0));j<=Math.min(KS.h-1,Math.ceil(r1));j++){const k=j*W2+i,t=r1>r0?(j+.5-pr)/(row-pr):1;KS.fy[k]=Math.max(py,Math.min(y,py+(y-py)*t));KS.mat[k]=m;const o=k*4;if(m===2){D[o]=134;D[o+1]=194;D[o+2]=94;}else{D[o]=243;D[o+1]=210;D[o+2]=122;}D[o+3]=255;}}}
+  for(let j=Math.max(0,Math.floor(r0));j<=Math.min(KS.h-1,Math.ceil(r1));j++){const k=j*W2+i,t=r1>r0?(j+.5-pr)/(row-pr):1;KS.fy[k]=Math.max(py,Math.min(y,py+(y-py)*t));KS.mat[k]=m;const o=k*4,c=KCOL[m];D[o]=c[0];D[o+1]=c[1];D[o+2]=c[2];D[o+3]=255;}}}
+/* sand, grass, scrub, cloud-forest floor, summit rock */
+const KCOL=[null,[243,210,122],[134,194,94],[168,182,102],[96,148,94],[184,177,156]];
 function ksBuild(budgetMs){if(!KS.fy)ksInit();if(KS.done>=KS.w)return true;const t0=performance.now();
  while(KS.done<KS.w&&performance.now()-t0<budgetMs){ksColumn(KS.order[KS.done]);KS.done++;}
  if(KS.done>=KS.w){KS.cv.getContext('2d').putImageData(KS.im,0,0);KS.ink=ksTrace();KS.im=null;return true;}return false;}
@@ -2587,7 +2613,7 @@ function ksTrace(){const W2=KS.w,H2=KS.h,R=KS.res,X=i=>KS.x0+i*R+R/2,Y=j=>KS.y0+
  const iso=f=>{const segs=[];for(let j=0;j<H2-1;j++)for(let i=0;i<W2-1;i++){const a=f(i,j),b=f(i+1,j),c=f(i+1,j+1),d=f(i,j+1),n=a+b*2+c*4+d*8;if(n===0||n===15)continue;
    const T=[X(i)+R/2,Y(j)],Rr=[X(i+1),Y(j)+R/2],B=[X(i)+R/2,Y(j+1)],L=[X(i),Y(j)+R/2],tab={1:[[L,T]],2:[[T,Rr]],3:[[L,Rr]],4:[[Rr,B]],5:[[L,T],[Rr,B]],6:[[T,B]],7:[[L,B]],8:[[B,L]],9:[[B,T]],10:[[T,Rr],[B,L]],11:[[B,Rr]],12:[[Rr,L]],13:[[Rr,T]],14:[[T,L]]}[n];for(const q of tab)segs.push(q);}
   return chain(segs);};
- const land=(i,j)=>KS.mat[j*W2+i]>0?1:0,grass=(i,j)=>KS.mat[j*W2+i]===2?1:0;
+ const land=(i,j)=>KS.mat[j*W2+i]>0?1:0,grass=(i,j)=>KS.mat[j*W2+i]>=2?1:0;
  const crestPts=[];for(let i=0;i<W2;i+=2)for(let j=1;j<H2;j++){const u=KS.fy[(j-1)*W2+i],v=KS.fy[j*W2+i];if(!isNaN(u)&&!isNaN(v)&&u<v-10)crestPts.push([X(i),Y(j)]);}
  const crests=[];{const byX=new Map();for(const p of crestPts){const k=p[0];if(!byX.has(k))byX.set(k,[]);byX.get(k).push(p[1]);}let prev=[];for(const x of [...byX.keys()].sort((a,b)=>a-b)){const now2=[];for(const y of byX.get(x)){const p=prev.find(q=>Math.abs(q.y-y)<8&&x-q.x<=8);const run=p?p.run:[];run.push([x,y]);if(!p)crests.push(run);now2.push({x,y,run});}prev=now2;}}
  return {coast:iso(land),grass:iso(grass),crests:crests.filter(r=>r.length>=5)};}
@@ -2617,12 +2643,12 @@ function drawOcc(x,y,fn,soft){const L=liftAt(x,y),hz=occludedBy(x,y);
  const sy=((hz-cam.y)*Z+H/2)*DPR;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,sy,cv.width,cv.height-sy);ctx.clip();
  ctx.globalAlpha=.3;ctx.drawImage(OC,0,0);const o=1.5*DPR;ctx.globalAlpha=.22;for(const [dx,dy] of [[o,0],[-o,0],[0,o],[0,-o]])ctx.drawImage(OC,dx,dy);ctx.restore();}
 function softFn(fn){return fn===drawSwimmer||fn===drawCrab||fn===drawGull||fn===drawGubbins||fn===drawKindle;}
-const BUILD=26;
+const BUILD=27;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 sndUI();if(S.char)begin();else openCreator('new');
-if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,KS,ksFront,occludedBy,liftAt,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},tstage,harvestObj,harvestFinish,harvestReady,terrH,tgrid,WXT,fogR,fn:{objAt,thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
+if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,KS,ksFront,occludedBy,liftAt,trees,KPALMS,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},tstage,harvestObj,harvestFinish,harvestReady,terrH,tgrid,WXT,fogR,fn:{objAt,thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
 })();
 </script>
 </body>

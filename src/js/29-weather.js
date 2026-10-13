@@ -20,10 +20,14 @@ function wxUpdate(){const t=Date.now()/1000,sm=x=>Math.max(0,Math.min(1,x));
  wa+=WXT.turn;WX={wa,ws,cover,rain,fog,seaFog};}
 /* how much fog sits at a place, 0 to 1 */
 /* valleys hold fog, high ground sheds it */
-function fogAt(x,y){const th=terrH(x,y),tk=(1+Math.min(1,Math.max(0,-th/30))*.6)*(1-Math.min(1,Math.max(0,th/80))*.5);return Math.min(1,fogAt0(x,y)*tk);}
+function fogAt(x,y){const cap=capAt(x,y)*.85,th=terrH(x,y),tk=(1+Math.min(1,Math.max(0,-th/30))*.6)*(1-Math.min(1,Math.max(0,th/80))*.5);return Math.min(1,Math.max(cap,fogAt0(x,y)*tk));}
 function fogAt0(x,y){if(SH.on){const I=ISLES.find(I=>isleK(I,x,y)<=1.05),n=I?I.name:'';const k=n==='The Clearing'?.55:n==='The Fallow'?1.4:n==='The Tangle'?1.25:n==='Landing'?1:1.15;return Math.min(1,Math.max(WX.fog*k,WX.seaFog*.6));}
  const r=Math.hypot(x,y),a=Math.atan2(y,x);let k;if(walkable(x,y))k=r>gR(a)?.5:.8;else k=1;
  const sea=curK(x,y)>0||x>CUR0()-400?WX.seaFog*Math.min(1,(x-CUR0()+400)/500):0;return Math.min(1,Math.max(WX.fog*k,sea));}
+/* the Key's summit cloud cap: a cloud that sits on the hilltop most of the time, thickest in the morning, thinner
+   in the afternoon, gone when the sky is forced clear. It is what keeps the wobble trees' fog belt wet. */
+function capAmt(){if(WXT.force==='clear')return 0;const d=S.day,morn=d>.15&&d<.45?Math.sin((d-.15)/.3*Math.PI):0;return Math.max(0,Math.min(1,.35+.45*morn+.2*Math.sin(Date.now()/1700000)+.3*WX.rain));}
+function capAt(x,y){if(SH.on)return 0;const h=hKey(x,y);return h<CLO-6?0:Math.min(1,(h-CLO+6)/(KPEAK-CLO))*capAmt();}
 function fogR(){const f=fogAt(P.x,P.y);return f<.04?1e9:(120+(1-f)*900)*(1+Math.max(0,terrH(P.x,P.y))/50);}
 function fogHides(x,y){const R=fogR();return R<1e8&&Math.hypot(x-P.x,y-P.y)>R*.95;}
 /* clouds: fair-weather cumulus, each a silhouette of overlapping lobes with a flatter base, on a 3000px tile.
@@ -42,6 +46,8 @@ function cloudShapes(){const out=[];for(const c of CLOUDS){const k=cloudK(c);if(
  for(const L of c.lobes)out.push(L.length===4?[x+L[0]*k,y+L[1]*k,L[2]*k,L[3]*k,0]:[x+L[0]*k,y+L[1]*k,L[2]*k,L[2]*.62*k,0]);}return out;}
 function cloudOver(x,y){for(const c of CLOUDS){if(cloudK(c)<.5)continue;const [cx,cy]=cloudPos(c);if(((x-cx)/c.rx)**2+((y-cy)/c.ry)**2<1)return 1;}return 0;}
 function drawWeatherWorld(){const sun=SKY.sun,sa=sun?Math.min(1,sun.a/.24):0;
+ /* the cap on the summit, seen from below: soft white over the hilltop */
+ if(!SH.on){const c=capAmt();if(c>.05){const L=liftAt(HILL.x,HILL.y),sh=[];for(let i=0;i<7;i++){const a=i/7*6.2832+Date.now()/90000,rr=60+30*Math.sin(i*1.7);sh.push([HILL.x+Math.cos(a)*rr,HILL.y-L-30+Math.sin(a)*rr*.45,70+20*Math.sin(i*2.3),38,0]);}layer(sh,.42*c,'#f4f6f8');}}
  /* the odd low cloud passes below the view: a soft white cumulus, not often */
  const low=[];for(const c of CLOUDS){const k=cloudK(c)*Math.max(0,Math.min(1,(.1+WX.rain*.2-c.h)/.03));if(k<.03||!c.low)continue;const [x,y]=cloudPos(c);for(const L of c.lobes)low.push(L.length===4?[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[3]*.85*k,0]:[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[2]*.55*k,0]);}
  if(low.length)layer(low,.3*(.4+.6*sa),'#f4f6f8');
