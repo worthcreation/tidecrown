@@ -80,6 +80,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  for(const s of SURF)if(s.pile&&s.st==='sparkle')o.push({x:s.x,y:s.y-4,r:14,name:s.name,key:'piling',act:'Scrape salt',onAct:()=>scrapeSalt(s),onExamine:()=>think('Barnacled and briny. Between waves, it sparkles.')});
  rocks.forEach(k=>{const sf=SURF.find(s=>s.x===k.x&&s.y===k.y),sp=sf&&sf.st==='sparkle',ga=grindAct(k);o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',key:'rocks',act:sp?'Scrape salt':ga,onAct:sp?()=>scrapeSalt(sf):ga?()=>startGrind(k):null,more:sp&&ga?[{l:ga,f:()=>startGrind(k)}]:null,onExamine:()=>{discover('rocks');think(k.camp?'A shoulder of rock between the camp and the wind. Brimble picked his spot well.':'Barnacled rocks. The water past them churns like it’s hiding something big.');}})});
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
+ o.push({x:HILL.x,y:HILL.y-18,r:22,name:'Cairn',key:'cairn',onExamine:()=>{discover('cairn');think('Stones stacked to mark the top. From here you can see every shore of the Key, and the sea all round.');}});
  clamObjects(o);thimbleObjects(o);
  return o;}
 function objAt(wx,wy){let best=null,bd=1e9;const [tx,ty]=w2s(wx,wy);for(const o of objects()){if(fogHides(o.x,o.y))continue;const [ox,oy]=w2s(o.x,o.y),d=Math.hypot(ox-tx,oy-ty)/Z;if(d<o.r+(o.key==='tree'||o.key==='shadowtree'?2:10)&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
@@ -99,7 +100,8 @@ function tap(sx,sy){
   const [px,py]=w2s(P.x,P.y-20);const near=Math.hypot(sx-px,sy-py)<110*Z;
   if(near){if(T.phase==='wait')tooEarly();return;}}
  const [wx,wy]=s2w(sx,sy);if(SW.on){swimTo(wx,wy);return;}const tg=scarfAt(wx,wy);if(tg){scarfMove('slap',tg);return;}const o=objAt(wx,wy);
- if(o){(o.onAct||o.onExamine)();return;}
+ /* a tap acts if it can; with nothing to do it walks you to the thing. Either way, only new lines show */
+ if(o){if(o.onAct)quietly(o.onAct);else{const c=clampLand(o.x,o.y+20);routeTo(c[0],c[1]);quietly(o.onExamine);}return;}
  if(inSea(wx,wy)){P.swimTo=null;walkStraight(wx,wy);return;}
  const c=clampLand(wx,wy);routeTo(c[0],c[1]);}
 /* a slide: direction and speed. Swimming uses it now; the scarf and projectiles will. */

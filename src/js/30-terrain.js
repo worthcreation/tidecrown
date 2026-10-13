@@ -18,8 +18,9 @@ const KPEAK=117,CLO=KPEAK*.52,CHI=KPEAK*.93;
 function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
  const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012));
  let h=Hc*ss(10,34,d)-Hc*.5*ss(34,60,d);
- const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=Math.max(200,iR(as))+30,q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
- h+=KPEAK*Math.pow(1-q,e)*ss(6,60,d);
+ const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=KSC*(520+60*Math.sin(3*as+1))+30,/* only the coast's broad shape: its small wiggles made radial creases */q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
+ /* a rounded top: a cone's point shades into spokes, so the summit is a gentle dome */
+ const qd=(Math.sqrt(q*q+.0144)-.12)/(Math.sqrt(1.0144)-.12);h+=KPEAK*Math.pow(1-qd,e)*ss(6,60,d);
  h+=gs(x,y,HEAD.x,HEAD.y,180,22)*ss(0,60,d);
  return h;}
 const flatAt=(x,y,cx,cy,r0,r1,H)=>{const cr=Math.hypot(x-cx,y-cy);return cr<r1?1-ss(r0,r1,cr):0;};
@@ -32,7 +33,8 @@ function hKey(x,y){let h=hKeyBase(x,y);if(h===0)return 0;
 /* the wobble trees live only in the fog belt on the upper slopes (a little cloud forest where the summit's cloud
    cap touches); palms grow on the sand, thickest on the lee; grass tufts only where there is grass */
 {const r=mulberry(77);trees.length=0;let tries=0;while(trees.length<30&&tries<6000){tries++;const a=r()*6.2832,d=Math.sqrt(r())*220*KSC,x=HILL.x+Math.cos(a)*d,y=HILL.y+Math.sin(a)*d,h=hKey(x,y);
-  if(h<CLO+2||h>CHI-1)continue;if(Math.hypot(x-FIRE.x,y-FIRE.y)<130)continue;if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<62))continue;
+  if(h<CLO+2||h>CHI-1)continue;/* keep the camp clear: no tree beside it, and none standing in front of it (south, nearer the viewer) */
+  {const dx=x-FIRE.x,dy=y-FIRE.y;if(Math.hypot(dx,dy)<200||dy>0&&dy<320&&Math.abs(dx)<190)continue;}if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<62))continue;
   trees.push({x,y,s:.8+r()*.4,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}}
 const KPALMS=[];{const r=mulberry(91);let tries=0;const avoid=[[DOCK.x0,0],[SIGN.x,SIGN.y],[GULL.x,GULL.y],[BOLLARD.x,BOLLARD.y],[G.x,G.y],[HEAD.x,HEAD.y],[R0-80,24]];
  while(KPALMS.length<28&&tries<5000){tries++;const a=r()*6.2832,i=iR(a),west=Math.max(0,-Math.cos(a));if(r()>.35+.65*west)continue;const d=18+r()*(80+60*west),x=Math.cos(a)*(i-d),y=Math.sin(a)*(i-d);
@@ -105,7 +107,7 @@ function tileFor(ti,tj){const scn=SH.on?'s':'k',k=scn+ti+','+tj;let T=TTILES[k];
   const gx=(hE-hW)/(2*R)*E,gy=(hS-hN)/(2*R)*E,nl=Math.hypot(gx,gy,1),cav=(hE+hW+hN+hS)/4-h0;
   let v=-Math.max(0,cav)*.06-(1-1/nl)*.25;
   if(sun){v+=((-gx*lx-gy*ly+se)/nl-se)*str*.9;
-   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el);for(let s=12;s<=96;s+=12){if(terrH(wx+ddx*s,wy+ddy*s)>h0+s*tn){v-=.14*str;break;}}}}
+   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el);let sh=0;for(let s=8;s<=96;s+=8){const over=terrH(wx+ddx*s,wy+ddy*s)-(h0+s*tn);if(over>0){sh=Math.max(sh,Math.min(1,over/6));}}v-=.14*str*sh;}}
   v+=Math.max(-1,Math.min(1,h0/40))*.05;
   const o=(j*TN+i)*4;if(v<0){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.34,-v)*255;}else{D[o]=255;D[o+1]=244;D[o+2]=210;D[o+3]=Math.min(.2,v)*255;}}
  g.putImageData(im,0,0);return T;}

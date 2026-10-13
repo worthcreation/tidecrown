@@ -78,6 +78,8 @@ function drawTeapot(tx,ty,k){ctx.save();ctx.translate(tx,ty);ctx.scale(k,k);ctx.
  ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,4,INK,.5);ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,2,'#7fa8c9',.5);
  ln([[tx-8,ty-14],[tx+8,ty-14]],304,2,'rgba(42,33,64,.3)',.5);
  if(hasSkill('cooking')){const st=(now*.6)%1;ctx.globalAlpha=.5*(1-st);dot(tx+34+Math.sin(now*2)*3,ty-44-st*18,3+st*3,'#fff');ctx.globalAlpha=1;}ctx.restore();}
+/* the summit cairn: stacked stones marking the top, a lookout over every shore */
+function drawCairn(){const x=HILL.x,y=HILL.y;shadow(x,y+2,16,5,40);const st=[[0,0,16,8],[-3,-11,13,7],[2,-21,11,6],[-1,-30,8,5],[1,-37,5,3.5]];st.forEach(([dx,dy,rx,ry],i)=>{blob(x+dx,y+dy,rx,ry,350+i,['#b9b3c9','#a39db4','#c8c2d6'][i%3],2.4,.5);ln([[x+dx-rx*.4,y+dy-ry*.35],[x+dx+rx*.2,y+dy-ry*.5]],356+i,1.2,'rgba(255,255,255,.35)',.3);});}
 function drawHead(){const {x,y}=HEAD;blob(x,y-16,27,24,80,'#b9b3c9');ln([[x-2,y-34],[x+3,y-30]],81,2,'rgba(42,33,64,.4)',.5);
  if(dark>.25){blob(x-9,y-19,3.5,3.5,82,'#ffe58a',1.5,.3);blob(x+9,y-19,3.5,3.5,83,'#ffe58a',1.5,.3);blob(x,y-8,3,4,84,INK,0);
   const ph=(now*.5)%1;ctx.globalAlpha=1-ph;otext('\u266A',x+18+ph*14,y-40-ph*30,18,'#ffe58a');ctx.globalAlpha=1;}
@@ -147,7 +149,7 @@ function drawLine(){const T=P.task;if(!T||T.chop)return;const f=P.face,tip=[P.x+
  if(T.phase!=='reel'){blob(bx,by-3,4.5,4.5,131,'#fff',2,.3);ctx.save();ctx.beginPath();ctx.rect(bx-8,by-10,16,8);ctx.clip();blob(bx,by-3,4.5,4.5,131,'#ff6b6b',2,.3);ctx.restore();}
  if(T.phase==='wait'&&S.eq.trinket==='whisper'&&T.t>T.wait-.5){const ph=(now*4)%1;for(let i=0;i<4;i++){const a=i*1.57+now*3;dot(bx+Math.cos(a)*(10+ph*6),by-3+Math.sin(a)*(5+ph*3),2,'#ffe58a');}}
  if(bite){const ph=(T.t*3)%1;ctx.globalAlpha=1-ph;sketch(ell(bx,by,8+ph*22,(8+ph*22)*.45,10),true,132,1.2,null,'#fff',2.5);ctx.globalAlpha=1;}}
-function drawFly(){for(const f of flies){const k=Math.min(1,f.t/.6),x=f.x0+(P.x-f.x0)*k,y=f.y0+(P.y-34-f.y0)*k-Math.sin(k*Math.PI)*80,sc=k<1?1:1-(f.t-.6)/.15;if(sc<=0)continue;
+function drawFly(){const pl=P.y-liftAt(P.x,P.y);for(const f of flies){const k=Math.min(1,f.t/.6),y0=f.y0-liftAt(f.x0,f.y0),x=f.x0+(P.x-f.x0)*k,y=y0+(pl-34-y0)*k-Math.sin(k*Math.PI)*80,sc=k<1?1:1-(f.t-.6)/.15;if(sc<=0)continue;
  ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(k<1?Math.sin(now*22)*.35:0);
  if(f.id==='misc'){ctx.drawImage(iconImg(f.img),-14,-14,28,28);}else if(f.id==='bottle')sketch(rrPts(-6,-9,12,18,5),true,4,.6,'#9fd8b4',INK,2.2);else drawFish(f.id,0,0,1.05,P.x>f.x0?1:-1,f.col);ctx.restore();}}
 
@@ -167,7 +169,7 @@ function render(){skyLights();
  drawPickups();drawKit();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y-liftAt(mark.x,mark.y),10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t),t.x]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k),k.x]));d.push([DOCK.y1+40,drawSurf]);
- (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[FIRE.y+16,drawHearthFront,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
+ (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[HILL.y,drawCairn,HILL.x],[FIRE.y+16,drawHearthFront,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  }
  drawFly();{const L=liftAt(P.x,P.y);ctx.save();ctx.translate(0,-L);drawScarfFX();drawChopFX();drawGrind();ctx.restore();}if(C){ctx.save();ctx.translate(0,-liftAt(C.fr.x,C.fr.y));drawCook();ctx.restore();}

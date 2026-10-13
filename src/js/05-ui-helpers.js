@@ -8,7 +8,11 @@ function showHint(){if(SH.on)return;if(HINTS[S.hint])hint(HINTS[S.hint],S.hint>=
 function advanceHint(to){if(S.hint<to){S.hint=to;showHint();if(to===4){bag.classList.remove('pulse');void bag.offsetWidth;bag.classList.add('pulse');}}}
 function toast(t){if(t.startsWith('New skill'))sfx('skill');toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('on'),2600);}
 function discover(k){if(S.journal[k])return;S.journal[k]=Date.now();sfx('journal');toast('Journal: '+JOURNAL[k][0]);save();if(k==='fish_koi'||k==='headnight')setTimeout(()=>toast('A new look waits at the still pool'),2900);}
-function think(t){bub={txt:t,t:0};}
+/* a tap only shows a line the player has not seen yet; Examine (hold menu) always shows it. Lines about a full pack
+   always show, because they are feedback the player needs every time. S.seen keeps every line already shown. */
+let THINKQ=false;
+function think(t){S.seen=S.seen||{};if(THINKQ&&S.seen[t]&&!/full|No room/.test(t))return;S.seen[t]=1;bub={txt:t,t:0};}
+function quietly(f){THINKQ=true;try{f();}finally{THINKQ=false;}}
 function pop(t,x,y,col,size){pops.push({txt:t,x,y,t:0,col:col||'#fff',size:size||20});}
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 

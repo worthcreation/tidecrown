@@ -45,6 +45,7 @@ function drawMapTo(c){const w=c.clientWidth||300,h=c.clientHeight||300,d=Math.mi
  {const [x,y]=M(KX+520,KY-1050);lab('The Lantern Sea',x,y,15);}
  const [px,py]=SH.on?M(P.x,P.y):M(KX+P.x,KY+P.y);const pu=1+.15*Math.sin(now*4);dot(px,py,5*pu,INK);dot(px,py,3*pu,'#ff6b6b');lab('you',px,py-11,11);
  ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='left';ctx.fillStyle='rgba(255,250,240,.8)';ctx.fillText('N',12,48);ln([[17,30],[17,14]],884,2,'rgba(255,250,240,.8)',.3);ln([[12,20],[17,14],[22,20]],885,2,'rgba(255,250,240,.8)',.3);
+ for(const p of questMarks()){const [mx,my]=M(KX+p[0],KY+p[1]);ctx.strokeStyle='#ffcf3a';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(mx-4,my-4);ctx.lineTo(mx+4,my+4);ctx.moveTo(mx+4,my-4);ctx.lineTo(mx-4,my+4);ctx.stroke();}
  if(MODE==='test'){ctx.font="12px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='right';ctx.fillStyle='rgba(255,250,240,.7)';ctx.fillText('Test build: tap an island to go there.',w-8,h-8);}ctx=k;}
 function MAPDEST(){return [{id:'key',name:'Driftwood Key',kind:'home'}].concat(ISLES.map((I,i)=>({id:'sh'+i,name:I.name,kind:I.kind,I})));}
 function mapHTML(){return `<canvas id="mapc" class="mapc" aria-label="Sea chart"></canvas>`;}
@@ -115,8 +116,8 @@ function renderPanel(){panel.querySelectorAll('.tab').forEach(b=>b.classList.tog
  if(tab==='test'){pbody.innerHTML=testHTML();return;}
  renderJournal();}
 function entEl(k){const d=document.createElement('div');d.className='ent';d.innerHTML=`<b>${JOURNAL[k][0]}</b><p>${JOURNAL[k][1]}</p>`;return d;}
-function renderJournal(){const keys=Object.keys(S.journal).filter(k=>JOURNAL[k]).sort((a,b)=>S.journal[b]-S.journal[a]),tot=Object.keys(JOURNAL).length;
- pbody.innerHTML=`<p class="muted jhead">${keys.length} of ${tot} discovered on Driftwood Key</p><div class="jlist" id="jlist"></div><div class="pager" id="jpager"><button data-p="-1" aria-label="Previous page">‹</button><span id="jpn"></span><button data-p="1" aria-label="Next page">›</button></div>`;
+function renderJournal(){if(jView==='quests'){pbody.innerHTML=journalSwitch()+'<div class="qlist">'+questsHTML()+'</div>';return;}const keys=Object.keys(S.journal).filter(k=>JOURNAL[k]).sort((a,b)=>S.journal[b]-S.journal[a]),tot=Object.keys(JOURNAL).length;
+ pbody.innerHTML=journalSwitch()+`<p class="muted jhead">${keys.length} of ${tot} discovered on Driftwood Key</p><div class="jlist" id="jlist"></div><div class="pager" id="jpager"><button data-p="-1" aria-label="Previous page">‹</button><span id="jpn"></span><button data-p="1" aria-label="Next page">›</button></div>`;
  const list=$('jlist');jPages=[];let cur=[];
  for(const k of keys){const el=entEl(k);list.appendChild(el);if(list.scrollHeight>list.clientHeight+1&&cur.length){jPages.push(cur);cur=[];list.innerHTML='';list.appendChild(el);}cur.push(k);}
  if(cur.length)jPages.push(cur);showJPage();}

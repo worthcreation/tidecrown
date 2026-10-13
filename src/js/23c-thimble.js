@@ -10,9 +10,9 @@ if(S.owned.thimble&&!S.q.thimble){S.q.thimble={st:2};S.know.sewing=1;}
 function tq(){return S.q.thimble||{st:0};}
 const KIT=['palm','fid','twine'];
 /* where each piece lies, and when it can be seen */
-function kitSpot(id){if(id==='palm'){const a=2.75;return {p:polar(a,iR(a)+30),vis:()=>walkable(...polar(a,iR(a)+30)),where:'the west beach, under the low tide'};}
- if(id==='fid'){const c=clams()[1]||clams()[0];return {p:[c.x-40,c.y+14],vis:()=>true,where:'a reef'};}
- const k=rocks[2];return {p:[k.x*1.04,k.y*1.04],vis:()=>tideLevel()<.4,where:'a crevice in the north rocks, at low tide'};}
+function kitSpot(id){if(id==='palm'){const a=2.75;return {p:polar(a,iR(a)+30),vis:()=>walkable(...polar(a,iR(a)+30)),where:'on the '+compass(...polar(a,1))+' beach, uncovered at low tide'};}
+ if(id==='fid'){const c=clams()[1]||clams()[0];return {p:[c.x-40,c.y+14],vis:()=>true,where:'on the reef off the '+compass(c.x,c.y)+' shore, a swim out past the shallows'};}
+ const k=rocks[2];return {p:[k.x*1.04,k.y*1.04],vis:()=>tideLevel()<.4,where:'in a crevice of the '+compass(k.x,k.y)+' rocks, at low tide'};}
 function kitOut(id){const q=tq();return q.st===1&&!(q.got||{})[id]&&!(cnt(id)>0);}
 function thimbleObjects(o){if(SH.on||tq().st!==1)return;for(const id of KIT){if(!kitOut(id))continue;const s=kitSpot(id);if(!s.vis())continue;
  o.push({x:s.p[0],y:s.p[1]-4,r:18,name:itemName({id}),key:'kit',act:'Pick up',onAct:()=>{const go=id==='fid'?walkStraight:routeTo;go(s.p[0]-14,s.p[1]+6,()=>takeKit(id,s));},onExamine:()=>think(itemDesc({id}))});}}
@@ -24,6 +24,6 @@ function thimbleSalute(){const q=tq();
  if(q.st===0&&S.salutes>=3){S.q.thimble={st:1,got:{}};discover('thimblekit');toast('Quest: The sailmaker\u2019s kit');think('He taps his helmet, mimes a strap, a spike, a coil, then points at the sea.');save();return true;}
  if(q.st===1){if(KIT.every(k=>cnt(k)>0)){if(!canAdd('thimble')){think('He has something for me. My pack is too full.');return true;}KIT.forEach(k=>takeItem(k));S.q.thimble={st:2};S.owned.thimble=1;S.know.sewing=1;addItem('thimble');
    discover('sewing');toast('Quest done: The sailmaker\u2019s kit');sfx('burst');think('He lays out the kit like old friends, hands me his spare helm, and shows me how a seam holds.');save();return true;}
-  const left=KIT.filter(k=>!(cnt(k)>0)).map(k=>kitSpot(k).where);think('He waits. Still missing: '+left.join('; ')+'.');return true;}
+  const left=KIT.filter(k=>!(cnt(k)>0)).map(k=>itemName({id:k})+', '+kitSpot(k).where);think('He waits. Still missing: '+left.join('. ')+'.');return true;}
  return false;}
 function drawKit(){if(SH.on||tq().st!==1)return;for(const id of KIT){if(!kitOut(id))continue;const s=kitSpot(id);if(!s.vis())continue;drawOcc(s.p[0],s.p[1],()=>ctx.drawImage(iconImg(id),s.p[0]-11,s.p[1]-14,22,22),true);}}

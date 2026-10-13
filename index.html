@@ -161,6 +161,16 @@ button{font:inherit;color:inherit;cursor:pointer}
 .you .info{margin-top:8px;flex:1;min-height:0;overflow:hidden}
 
 .mapc{width:100%;flex:1;min-height:0;border:2.5px solid var(--ink);border-radius:14px 8px 12px 9px;touch-action:manipulation}
+/* quests: Journal switch, quest cards, the tracker line */
+.jsw{display:flex;gap:6px;margin:0 0 6px;flex:none}.jsw button{flex:1;font-size:17px;padding:3px 0}.jsw button.on{background:#ffcf3a}
+.qlist{flex:1;min-height:0;overflow:hidden}
+.quest{border:2px solid var(--ink);border-radius:12px;padding:6px 9px;margin-bottom:6px;background:#fffaf0}
+.quest .qh{display:flex;justify-content:space-between;align-items:center;gap:6px}.quest .qh b{font-size:18px}.quest .qh button{font-size:14px;padding:1px 8px}.quest .qh button.on{background:#ffcf3a}
+.qwhy{font-size:15px;margin:3px 0;color:#5e5670}
+.quest ul{list-style:none;margin:2px 0 0;padding:0;font-size:16px}.quest li{margin:2px 0}.quest li.ok{color:#6f8f5a;text-decoration:line-through}.quest li.nx{font-weight:bold}.quest li i{display:block;font-style:normal;font-weight:normal;font-size:14px;color:#6a6080;margin-left:18px}
+.qdone{font-size:15px}
+#qtrack{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 58px);max-width:min(62vw,300px);text-align:left;font-size:14px;line-height:1.2;padding:5px 9px;display:none;flex-direction:column;opacity:.92;z-index:5}
+#qtrack.on{display:flex}#qtrack b{font-size:15px}
 #cookbar{position:fixed;left:calc(env(safe-area-inset-left,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:none;justify-content:space-between;align-items:flex-end;z-index:5;pointer-events:none}
 #cookbar>*{pointer-events:auto}
 .fuel{position:relative;width:76px;height:76px;padding:0;display:grid;place-items:center;border-radius:50% 46% 52% 48%!important;transition:transform .12s}
@@ -390,6 +400,7 @@ const JOURNAL={
  stache:['The Ash Mustache','Brimble braided ten scoops of ash into a mustache, exactly like the one the Gull’s head cook wore. It is ridiculous. It is magnificent. Gubbins pays extra to anyone wearing it.'],
  thimblekit:['The sailmaker’s kit','Sir Thimble’s helmet was the Grinning Gull’s sailmaker’s thimble. He wants the rest of the kit: a palm, a fid and waxed twine, all somewhere the sea put them.'],
  sewing:['How a seam holds','Sir Thimble showed me: the palm pushes, the fid opens, the twine is waxed so it bites. I could sew canvas, given a needle. I do not have one. Yet.'],
+ cairn:['The cairn','Someone stacked stones on the very top of the Key. From there every shore shows, and the sea all round. Brimble says he watches for ships from just below it.'],
  stumpcache:['Something the forest swallowed','A rotted pouch tangled in the roots of a stump, still holding shells. Somebody lost it here long before me.'],
  clam:['A giant clam shell','Old, empty, wedged into the reef nearest the Key. A driftwood stick levers it out. The hinge is the thickest shell I have ever held.'],
  shellblade:['A shell blade','Ground out of a clam hinge on the north rocks, wet sand doing the cutting. Islanders with no stone did exactly this.'],
@@ -549,7 +560,11 @@ function showHint(){if(SH.on)return;if(HINTS[S.hint])hint(HINTS[S.hint],S.hint>=
 function advanceHint(to){if(S.hint<to){S.hint=to;showHint();if(to===4){bag.classList.remove('pulse');void bag.offsetWidth;bag.classList.add('pulse');}}}
 function toast(t){if(t.startsWith('New skill'))sfx('skill');toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('on'),2600);}
 function discover(k){if(S.journal[k])return;S.journal[k]=Date.now();sfx('journal');toast('Journal: '+JOURNAL[k][0]);save();if(k==='fish_koi'||k==='headnight')setTimeout(()=>toast('A new look waits at the still pool'),2900);}
-function think(t){bub={txt:t,t:0};}
+/* a tap only shows a line the player has not seen yet; Examine (hold menu) always shows it. Lines about a full pack
+   always show, because they are feedback the player needs every time. S.seen keeps every line already shown. */
+let THINKQ=false;
+function think(t){S.seen=S.seen||{};if(THINKQ&&S.seen[t]&&!/full|No room/.test(t))return;S.seen[t]=1;bub={txt:t,t:0};}
+function quietly(f){THINKQ=true;try{f();}finally{THINKQ=false;}}
 function pop(t,x,y,col,size){pops.push({txt:t,x,y,t:0,col:col||'#fff',size:size||20});}
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 
@@ -647,6 +662,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  for(const s of SURF)if(s.pile&&s.st==='sparkle')o.push({x:s.x,y:s.y-4,r:14,name:s.name,key:'piling',act:'Scrape salt',onAct:()=>scrapeSalt(s),onExamine:()=>think('Barnacled and briny. Between waves, it sparkles.')});
  rocks.forEach(k=>{const sf=SURF.find(s=>s.x===k.x&&s.y===k.y),sp=sf&&sf.st==='sparkle',ga=grindAct(k);o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',key:'rocks',act:sp?'Scrape salt':ga,onAct:sp?()=>scrapeSalt(sf):ga?()=>startGrind(k):null,more:sp&&ga?[{l:ga,f:()=>startGrind(k)}]:null,onExamine:()=>{discover('rocks');think(k.camp?'A shoulder of rock between the camp and the wind. Brimble picked his spot well.':'Barnacled rocks. The water past them churns like it’s hiding something big.');}})});
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
+ o.push({x:HILL.x,y:HILL.y-18,r:22,name:'Cairn',key:'cairn',onExamine:()=>{discover('cairn');think('Stones stacked to mark the top. From here you can see every shore of the Key, and the sea all round.');}});
  clamObjects(o);thimbleObjects(o);
  return o;}
 function objAt(wx,wy){let best=null,bd=1e9;const [tx,ty]=w2s(wx,wy);for(const o of objects()){if(fogHides(o.x,o.y))continue;const [ox,oy]=w2s(o.x,o.y),d=Math.hypot(ox-tx,oy-ty)/Z;if(d<o.r+(o.key==='tree'||o.key==='shadowtree'?2:10)&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
@@ -666,7 +682,8 @@ function tap(sx,sy){
   const [px,py]=w2s(P.x,P.y-20);const near=Math.hypot(sx-px,sy-py)<110*Z;
   if(near){if(T.phase==='wait')tooEarly();return;}}
  const [wx,wy]=s2w(sx,sy);if(SW.on){swimTo(wx,wy);return;}const tg=scarfAt(wx,wy);if(tg){scarfMove('slap',tg);return;}const o=objAt(wx,wy);
- if(o){(o.onAct||o.onExamine)();return;}
+ /* a tap acts if it can; with nothing to do it walks you to the thing. Either way, only new lines show */
+ if(o){if(o.onAct)quietly(o.onAct);else{const c=clampLand(o.x,o.y+20);routeTo(c[0],c[1]);quietly(o.onExamine);}return;}
  if(inSea(wx,wy)){P.swimTo=null;walkStraight(wx,wy);return;}
  const c=clampLand(wx,wy);routeTo(c[0],c[1]);}
 /* a slide: direction and speed. Swimming uses it now; the scarf and projectiles will. */
@@ -746,6 +763,7 @@ function drawMapTo(c){const w=c.clientWidth||300,h=c.clientHeight||300,d=Math.mi
  {const [x,y]=M(KX+520,KY-1050);lab('The Lantern Sea',x,y,15);}
  const [px,py]=SH.on?M(P.x,P.y):M(KX+P.x,KY+P.y);const pu=1+.15*Math.sin(now*4);dot(px,py,5*pu,INK);dot(px,py,3*pu,'#ff6b6b');lab('you',px,py-11,11);
  ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='left';ctx.fillStyle='rgba(255,250,240,.8)';ctx.fillText('N',12,48);ln([[17,30],[17,14]],884,2,'rgba(255,250,240,.8)',.3);ln([[12,20],[17,14],[22,20]],885,2,'rgba(255,250,240,.8)',.3);
+ for(const p of questMarks()){const [mx,my]=M(KX+p[0],KY+p[1]);ctx.strokeStyle='#ffcf3a';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(mx-4,my-4);ctx.lineTo(mx+4,my+4);ctx.moveTo(mx+4,my-4);ctx.lineTo(mx-4,my+4);ctx.stroke();}
  if(MODE==='test'){ctx.font="12px 'Patrick Hand','Comic Sans MS',cursive";ctx.textAlign='right';ctx.fillStyle='rgba(255,250,240,.7)';ctx.fillText('Test build: tap an island to go there.',w-8,h-8);}ctx=k;}
 function MAPDEST(){return [{id:'key',name:'Driftwood Key',kind:'home'}].concat(ISLES.map((I,i)=>({id:'sh'+i,name:I.name,kind:I.kind,I})));}
 function mapHTML(){return `<canvas id="mapc" class="mapc" aria-label="Sea chart"></canvas>`;}
@@ -816,8 +834,8 @@ function renderPanel(){panel.querySelectorAll('.tab').forEach(b=>b.classList.tog
  if(tab==='test'){pbody.innerHTML=testHTML();return;}
  renderJournal();}
 function entEl(k){const d=document.createElement('div');d.className='ent';d.innerHTML=`<b>${JOURNAL[k][0]}</b><p>${JOURNAL[k][1]}</p>`;return d;}
-function renderJournal(){const keys=Object.keys(S.journal).filter(k=>JOURNAL[k]).sort((a,b)=>S.journal[b]-S.journal[a]),tot=Object.keys(JOURNAL).length;
- pbody.innerHTML=`<p class="muted jhead">${keys.length} of ${tot} discovered on Driftwood Key</p><div class="jlist" id="jlist"></div><div class="pager" id="jpager"><button data-p="-1" aria-label="Previous page">‹</button><span id="jpn"></span><button data-p="1" aria-label="Next page">›</button></div>`;
+function renderJournal(){if(jView==='quests'){pbody.innerHTML=journalSwitch()+'<div class="qlist">'+questsHTML()+'</div>';return;}const keys=Object.keys(S.journal).filter(k=>JOURNAL[k]).sort((a,b)=>S.journal[b]-S.journal[a]),tot=Object.keys(JOURNAL).length;
+ pbody.innerHTML=journalSwitch()+`<p class="muted jhead">${keys.length} of ${tot} discovered on Driftwood Key</p><div class="jlist" id="jlist"></div><div class="pager" id="jpager"><button data-p="-1" aria-label="Previous page">‹</button><span id="jpn"></span><button data-p="1" aria-label="Next page">›</button></div>`;
  const list=$('jlist');jPages=[];let cur=[];
  for(const k of keys){const el=entEl(k);list.appendChild(el);if(list.scrollHeight>list.clientHeight+1&&cur.length){jPages.push(cur);cur=[];list.innerHTML='';list.appendChild(el);}cur.push(k);}
  if(cur.length)jPages.push(cur);showJPage();}
@@ -954,7 +972,7 @@ function update(dt){
  if(mark&&(mark.t+=dt)>.6)mark=null;
  if(cele&&(cele.t+=dt)>3.2)cele=null;
  const k=Math.min(1,dt*5),tx=C?C.fr.x:P.x,ty=C?C.fr.y-50-liftAt(C.fr.x,C.fr.y):P.y-liftAt(P.x,P.y);cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;const zt=C?cookZoom():(P.task&&P.task.chop?1.25:SW.on?swimZoom():hillZoom());camZ+=(zt-camZ)*Math.min(1,dt*(SW.on||zt===1&&camZ<1?1.4:4));Z=ZB*camZ;
- wxTick(dt);if(C)cookUpdate(dt);tideUpdate(dt);spotsUpdate(dt);if(SH.on)shUpdate(dt);swimUpdate(dt);updOrbs(dt);guideT-=dt;if(guideT<=0&&!SH.on){guideT=1;hearthGuide();}buffT-=dt;if(buffT<=0){buffT=.5;buffUI();kindleTick();if(S.ground&&S.ground.length){const T=Date.now(),n0=S.ground.length;S.ground=S.ground.filter(g=>g.exp>T);if(S.ground.length!==n0)save();}(S.fires||[]).slice().forEach(fr=>{if(!fireLit(fr)&&!(C&&C.fr===fr))burnOut(fr);});}
+ wxTick(dt);questTick(dt);if(C)cookUpdate(dt);tideUpdate(dt);spotsUpdate(dt);if(SH.on)shUpdate(dt);swimUpdate(dt);updOrbs(dt);guideT-=dt;if(guideT<=0&&!SH.on){guideT=1;hearthGuide();}buffT-=dt;if(buffT<=0){buffT=.5;buffUI();kindleTick();if(S.ground&&S.ground.length){const T=Date.now(),n0=S.ground.length;S.ground=S.ground.filter(g=>g.exp>T);if(S.ground.length!==n0)save();}(S.fires||[]).slice().forEach(fr=>{if(!fireLit(fr)&&!(C&&C.fr===fr))burnOut(fr);});}
 }
 
 /* ---------- draw ---------- */
@@ -1037,6 +1055,8 @@ function drawTeapot(tx,ty,k){ctx.save();ctx.translate(tx,ty);ctx.scale(k,k);ctx.
  ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,4,INK,.5);ln([[tx-22,ty-26],[tx-34,ty-18],[tx-24,ty-8]],303,2,'#7fa8c9',.5);
  ln([[tx-8,ty-14],[tx+8,ty-14]],304,2,'rgba(42,33,64,.3)',.5);
  if(hasSkill('cooking')){const st=(now*.6)%1;ctx.globalAlpha=.5*(1-st);dot(tx+34+Math.sin(now*2)*3,ty-44-st*18,3+st*3,'#fff');ctx.globalAlpha=1;}ctx.restore();}
+/* the summit cairn: stacked stones marking the top, a lookout over every shore */
+function drawCairn(){const x=HILL.x,y=HILL.y;shadow(x,y+2,16,5,40);const st=[[0,0,16,8],[-3,-11,13,7],[2,-21,11,6],[-1,-30,8,5],[1,-37,5,3.5]];st.forEach(([dx,dy,rx,ry],i)=>{blob(x+dx,y+dy,rx,ry,350+i,['#b9b3c9','#a39db4','#c8c2d6'][i%3],2.4,.5);ln([[x+dx-rx*.4,y+dy-ry*.35],[x+dx+rx*.2,y+dy-ry*.5]],356+i,1.2,'rgba(255,255,255,.35)',.3);});}
 function drawHead(){const {x,y}=HEAD;blob(x,y-16,27,24,80,'#b9b3c9');ln([[x-2,y-34],[x+3,y-30]],81,2,'rgba(42,33,64,.4)',.5);
  if(dark>.25){blob(x-9,y-19,3.5,3.5,82,'#ffe58a',1.5,.3);blob(x+9,y-19,3.5,3.5,83,'#ffe58a',1.5,.3);blob(x,y-8,3,4,84,INK,0);
   const ph=(now*.5)%1;ctx.globalAlpha=1-ph;otext('\u266A',x+18+ph*14,y-40-ph*30,18,'#ffe58a');ctx.globalAlpha=1;}
@@ -1106,7 +1126,7 @@ function drawLine(){const T=P.task;if(!T||T.chop)return;const f=P.face,tip=[P.x+
  if(T.phase!=='reel'){blob(bx,by-3,4.5,4.5,131,'#fff',2,.3);ctx.save();ctx.beginPath();ctx.rect(bx-8,by-10,16,8);ctx.clip();blob(bx,by-3,4.5,4.5,131,'#ff6b6b',2,.3);ctx.restore();}
  if(T.phase==='wait'&&S.eq.trinket==='whisper'&&T.t>T.wait-.5){const ph=(now*4)%1;for(let i=0;i<4;i++){const a=i*1.57+now*3;dot(bx+Math.cos(a)*(10+ph*6),by-3+Math.sin(a)*(5+ph*3),2,'#ffe58a');}}
  if(bite){const ph=(T.t*3)%1;ctx.globalAlpha=1-ph;sketch(ell(bx,by,8+ph*22,(8+ph*22)*.45,10),true,132,1.2,null,'#fff',2.5);ctx.globalAlpha=1;}}
-function drawFly(){for(const f of flies){const k=Math.min(1,f.t/.6),x=f.x0+(P.x-f.x0)*k,y=f.y0+(P.y-34-f.y0)*k-Math.sin(k*Math.PI)*80,sc=k<1?1:1-(f.t-.6)/.15;if(sc<=0)continue;
+function drawFly(){const pl=P.y-liftAt(P.x,P.y);for(const f of flies){const k=Math.min(1,f.t/.6),y0=f.y0-liftAt(f.x0,f.y0),x=f.x0+(P.x-f.x0)*k,y=y0+(pl-34-y0)*k-Math.sin(k*Math.PI)*80,sc=k<1?1:1-(f.t-.6)/.15;if(sc<=0)continue;
  ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(k<1?Math.sin(now*22)*.35:0);
  if(f.id==='misc'){ctx.drawImage(iconImg(f.img),-14,-14,28,28);}else if(f.id==='bottle')sketch(rrPts(-6,-9,12,18,5),true,4,.6,'#9fd8b4',INK,2.2);else drawFish(f.id,0,0,1.05,P.x>f.x0?1:-1,f.col);ctx.restore();}}
 
@@ -1126,7 +1146,7 @@ function render(){skyLights();
  drawPickups();drawKit();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y-liftAt(mark.x,mark.y),10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t),t.x]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k),k.x]));d.push([DOCK.y1+40,drawSurf]);
- (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[FIRE.y+16,drawHearthFront,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
+ (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[HILL.y,drawCairn,HILL.x],[FIRE.y+16,drawHearthFront,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  }
  drawFly();{const L=liftAt(P.x,P.y);ctx.save();ctx.translate(0,-L);drawScarfFX();drawChopFX();drawGrind();ctx.restore();}if(C){ctx.save();ctx.translate(0,-liftAt(C.fr.x,C.fr.y));drawCook();ctx.restore();}
@@ -1419,7 +1439,7 @@ let chips=[],leaves=[];const REGROW=3*60000;
 function leafOf(t){const c=(S.treeCut||{})[t.seed];if(!c)return 1;return Math.min(1,.12+.88*(Date.now()-c)/REGROW);}
 function treeReady(t){return t.sh?true:leafOf(t)>=.7;}
 function chopPer(){return lv('woodcutting')>=8?1.25:1.05;}
-function chopTree(t,layer){if(!hasHatchet()){discover('tree');const c=clampLand(t.x+(P.x<t.x?-30:30)*t.s,t.y+10);routeTo(c[0],c[1]);if(!S.st.noHatchet){S.st.noHatchet=1;think('I’d need a hatchet. Something sharp, something to hold, something to tie.');}return;}
+function chopTree(t,layer){if(!hasHatchet()){discover('tree');const c=clampLand(t.x+(P.x<t.x?-30:30)*t.s,t.y+10);routeTo(c[0],c[1]);think('I’d need a hatchet. Something sharp, something to hold, something to tie.');return;}
  if(!treeReady(t)){think(pick(['Still growing back. It’s sighing at me.','Bare as a mast. Give it time.']));return;}
  const side=P.x<t.x?-1:1,c=clampLand(t.x+side*26,t.y+6);routeTo(c[0],c[1],()=>startChop(t,layer));}
 function startChop(t,layer){if(!treeReady(t))return;const w=t.sh?woodOf(t):'wobble';if(t.sh&&!harvestReady(t,layer))return;if(!t.sh&&!canAdd(w)){think('My pack is full. Nowhere to put a log.');return;}P.task={chop:1,tree:t,layer,t0:now,prog:0,combo:0,miss:0,swing:0};P.face=t.x>P.x?1:-1;
@@ -1737,9 +1757,9 @@ if(S.owned.thimble&&!S.q.thimble){S.q.thimble={st:2};S.know.sewing=1;}
 function tq(){return S.q.thimble||{st:0};}
 const KIT=['palm','fid','twine'];
 /* where each piece lies, and when it can be seen */
-function kitSpot(id){if(id==='palm'){const a=2.75;return {p:polar(a,iR(a)+30),vis:()=>walkable(...polar(a,iR(a)+30)),where:'the west beach, under the low tide'};}
- if(id==='fid'){const c=clams()[1]||clams()[0];return {p:[c.x-40,c.y+14],vis:()=>true,where:'a reef'};}
- const k=rocks[2];return {p:[k.x*1.04,k.y*1.04],vis:()=>tideLevel()<.4,where:'a crevice in the north rocks, at low tide'};}
+function kitSpot(id){if(id==='palm'){const a=2.75;return {p:polar(a,iR(a)+30),vis:()=>walkable(...polar(a,iR(a)+30)),where:'on the '+compass(...polar(a,1))+' beach, uncovered at low tide'};}
+ if(id==='fid'){const c=clams()[1]||clams()[0];return {p:[c.x-40,c.y+14],vis:()=>true,where:'on the reef off the '+compass(c.x,c.y)+' shore, a swim out past the shallows'};}
+ const k=rocks[2];return {p:[k.x*1.04,k.y*1.04],vis:()=>tideLevel()<.4,where:'in a crevice of the '+compass(k.x,k.y)+' rocks, at low tide'};}
 function kitOut(id){const q=tq();return q.st===1&&!(q.got||{})[id]&&!(cnt(id)>0);}
 function thimbleObjects(o){if(SH.on||tq().st!==1)return;for(const id of KIT){if(!kitOut(id))continue;const s=kitSpot(id);if(!s.vis())continue;
  o.push({x:s.p[0],y:s.p[1]-4,r:18,name:itemName({id}),key:'kit',act:'Pick up',onAct:()=>{const go=id==='fid'?walkStraight:routeTo;go(s.p[0]-14,s.p[1]+6,()=>takeKit(id,s));},onExamine:()=>think(itemDesc({id}))});}}
@@ -1751,9 +1771,41 @@ function thimbleSalute(){const q=tq();
  if(q.st===0&&S.salutes>=3){S.q.thimble={st:1,got:{}};discover('thimblekit');toast('Quest: The sailmaker\u2019s kit');think('He taps his helmet, mimes a strap, a spike, a coil, then points at the sea.');save();return true;}
  if(q.st===1){if(KIT.every(k=>cnt(k)>0)){if(!canAdd('thimble')){think('He has something for me. My pack is too full.');return true;}KIT.forEach(k=>takeItem(k));S.q.thimble={st:2};S.owned.thimble=1;S.know.sewing=1;addItem('thimble');
    discover('sewing');toast('Quest done: The sailmaker\u2019s kit');sfx('burst');think('He lays out the kit like old friends, hands me his spare helm, and shows me how a seam holds.');save();return true;}
-  const left=KIT.filter(k=>!(cnt(k)>0)).map(k=>kitSpot(k).where);think('He waits. Still missing: '+left.join('; ')+'.');return true;}
+  const left=KIT.filter(k=>!(cnt(k)>0)).map(k=>itemName({id:k})+', '+kitSpot(k).where);think('He waits. Still missing: '+left.join('. ')+'.');return true;}
  return false;}
 function drawKit(){if(SH.on||tq().st!==1)return;for(const id of KIT){if(!kitOut(id))continue;const s=kitSpot(id);if(!s.vis())continue;drawOcc(s.p[0],s.p[1],()=>ctx.drawImage(iconImg(id),s.p[0]-11,s.p[1]-14,22,22),true);}}
+/* ---------- quests: a small table, a log in the Journal, one pinned quest tracked on screen and on the map ----------
+   Each quest: name, who gave it, why, and steps. A step has a label, a where-hint in directions and things you
+   can see, a done-check, and a spot (for the map mark). A quest shows once started; the pinned one shows a line
+   above the bottom-left corner and marks its outstanding spots on the map. New quests are new rows here. */
+function compass(x,y){const a=Math.atan2(y,x),k=Math.round(((a+Math.PI*2)%(Math.PI*2))/(Math.PI/4))%8;return ['east','south-east','south','south-west','west','north-west','north','north-east'][k];}
+const QUESTS={
+ thimble:{name:'The sailmaker\u2019s kit',giver:'Sir Thimble',why:'His helmet was the Grinning Gull\u2019s sailmaker\u2019s thimble. He wants the rest of the kit back.',
+  started:()=>tq().st>=1,done:()=>tq().st>=2,
+  steps:()=>[...KIT.map(id=>{const s=kitSpot(id);return {txt:itemName({id}),where:s.where,done:tq().st>=2||cnt(id)>0,spot:s.p};}),
+   {txt:'Bring all three to Sir Thimble',where:'he paces the beach by his rock',done:tq().st>=2,spot:[CRAB.x,CRAB.y]}]}};
+function questsActive(){return Object.keys(QUESTS).filter(k=>QUESTS[k].started()&&!QUESTS[k].done());}
+function questNext(k){const st=QUESTS[k].steps();return st.find(s=>!s.done&&(s.txt.indexOf('Bring')<0||st.slice(0,-1).every(t=>t.done)))||null;}
+/* the tracker line: the pinned quest's next step */
+const QT=document.createElement('button');QT.id='qtrack';QT.className='sk';document.body.appendChild(QT);
+QT.onclick=()=>{tab='journal';jView='quests';openPanel('journal');};
+let qtT=0;
+function questTick(dt){qtT-=dt;if(qtT>0)return;qtT=.5;
+ if(S.qpin&&(!QUESTS[S.qpin]||!QUESTS[S.qpin].started()||QUESTS[S.qpin].done()))S.qpin=null;
+ if(!S.qpin){const a=questsActive();if(a.length&&!S.qunpin)S.qpin=a[0];}
+ const k=S.qpin,n=k&&questNext(k);if(!k||!n||ccOn||SH.on&&k==='thimble'){QT.classList.remove('on');return;}
+ QT.innerHTML='<b>'+QUESTS[k].name+'</b><span>'+n.txt+': '+n.where+'</span>';QT.classList.add('on');}
+/* the Journal: Quests or Found */
+let jView='quests';
+function questsHTML(){const act=questsActive(),fin=Object.keys(QUESTS).filter(k=>QUESTS[k].done());let h='';
+ if(!act.length&&!fin.length)h+='<p class="muted">No quests yet. Someone on this island wants something. They usually find a way to say so.</p>';
+ for(const k of act){const Q=QUESTS[k],st=Q.steps(),nx=questNext(k);h+=`<div class="quest"><div class="qh"><b>${Q.name}</b><button data-qpin="${k}" class="${S.qpin===k?'on':''}">${S.qpin===k?'Tracking':'Track'}</button></div><p class="qwhy">${Q.giver}: ${Q.why}</p><ul>${st.map(s=>`<li class="${s.done?'ok':s===nx?'nx':''}">${s.done?'\u2713':'\u25cb'} ${s.txt}${!s.done?`<i>${s.where}</i>`:''}</li>`).join('')}</ul></div>`;}
+ if(fin.length)h+=`<p class="muted qdone">Done: ${fin.map(k=>QUESTS[k].name).join(', ')}</p>`;return h;}
+function journalSwitch(){return `<div class="jsw"><button data-jv="quests" class="${jView==='quests'?'on':''}">Quests</button><button data-jv="found" class="${jView==='found'?'on':''}">Found</button></div>`;}
+pbody.addEventListener('click',e=>{if(tab!=='journal')return;const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.jv){jView=b.dataset.jv;renderPanel();}else if(b.dataset.qpin){const k=b.dataset.qpin;if(S.qpin===k){S.qpin=null;S.qunpin=1;}else{S.qpin=k;S.qunpin=0;}save();renderPanel();}});
+/* map marks for the pinned quest's outstanding steps */
+function questMarks(){const k=S.qpin;if(!k||!QUESTS[k].started()||QUESTS[k].done())return [];return QUESTS[k].steps().filter(s=>!s.done&&s.spot).map(s=>s.spot);}
 /* The Shadow Forest: a collection of islands past the Key, each its own shape and kind, some bridged, most reached by swimming. Its own scene and coordinates; the Key's code is untouched. The big ones are forests, not mazes: twisted black trees in clumps and corridors, with canopies that hide what is under them. The more twisted a tree, the harder its wood. */
 const ISLES=[
  {x:0,y:920,rx:430,ry:320,kind:'grove',name:'Landing',landing:1,seed:11,k:[.08,.05,.03],ground:'#3f4d35',sand:'#8d7f63',dens:.22,twist:.2,anchors:[-1.57]},
@@ -2462,8 +2514,9 @@ const KPEAK=117,CLO=KPEAK*.52,CHI=KPEAK*.93;
 function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
  const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012));
  let h=Hc*ss(10,34,d)-Hc*.5*ss(34,60,d);
- const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=Math.max(200,iR(as))+30,q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
- h+=KPEAK*Math.pow(1-q,e)*ss(6,60,d);
+ const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=KSC*(520+60*Math.sin(3*as+1))+30,/* only the coast's broad shape: its small wiggles made radial creases */q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
+ /* a rounded top: a cone's point shades into spokes, so the summit is a gentle dome */
+ const qd=(Math.sqrt(q*q+.0144)-.12)/(Math.sqrt(1.0144)-.12);h+=KPEAK*Math.pow(1-qd,e)*ss(6,60,d);
  h+=gs(x,y,HEAD.x,HEAD.y,180,22)*ss(0,60,d);
  return h;}
 const flatAt=(x,y,cx,cy,r0,r1,H)=>{const cr=Math.hypot(x-cx,y-cy);return cr<r1?1-ss(r0,r1,cr):0;};
@@ -2476,7 +2529,8 @@ function hKey(x,y){let h=hKeyBase(x,y);if(h===0)return 0;
 /* the wobble trees live only in the fog belt on the upper slopes (a little cloud forest where the summit's cloud
    cap touches); palms grow on the sand, thickest on the lee; grass tufts only where there is grass */
 {const r=mulberry(77);trees.length=0;let tries=0;while(trees.length<30&&tries<6000){tries++;const a=r()*6.2832,d=Math.sqrt(r())*220*KSC,x=HILL.x+Math.cos(a)*d,y=HILL.y+Math.sin(a)*d,h=hKey(x,y);
-  if(h<CLO+2||h>CHI-1)continue;if(Math.hypot(x-FIRE.x,y-FIRE.y)<130)continue;if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<62))continue;
+  if(h<CLO+2||h>CHI-1)continue;/* keep the camp clear: no tree beside it, and none standing in front of it (south, nearer the viewer) */
+  {const dx=x-FIRE.x,dy=y-FIRE.y;if(Math.hypot(dx,dy)<200||dy>0&&dy<320&&Math.abs(dx)<190)continue;}if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<62))continue;
   trees.push({x,y,s:.8+r()*.4,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}}
 const KPALMS=[];{const r=mulberry(91);let tries=0;const avoid=[[DOCK.x0,0],[SIGN.x,SIGN.y],[GULL.x,GULL.y],[BOLLARD.x,BOLLARD.y],[G.x,G.y],[HEAD.x,HEAD.y],[R0-80,24]];
  while(KPALMS.length<28&&tries<5000){tries++;const a=r()*6.2832,i=iR(a),west=Math.max(0,-Math.cos(a));if(r()>.35+.65*west)continue;const d=18+r()*(80+60*west),x=Math.cos(a)*(i-d),y=Math.sin(a)*(i-d);
@@ -2549,7 +2603,7 @@ function tileFor(ti,tj){const scn=SH.on?'s':'k',k=scn+ti+','+tj;let T=TTILES[k];
   const gx=(hE-hW)/(2*R)*E,gy=(hS-hN)/(2*R)*E,nl=Math.hypot(gx,gy,1),cav=(hE+hW+hN+hS)/4-h0;
   let v=-Math.max(0,cav)*.06-(1-1/nl)*.25;
   if(sun){v+=((-gx*lx-gy*ly+se)/nl-se)*str*.9;
-   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el);for(let s=12;s<=96;s+=12){if(terrH(wx+ddx*s,wy+ddy*s)>h0+s*tn){v-=.14*str;break;}}}}
+   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el);let sh=0;for(let s=8;s<=96;s+=8){const over=terrH(wx+ddx*s,wy+ddy*s)-(h0+s*tn);if(over>0){sh=Math.max(sh,Math.min(1,over/6));}}v-=.14*str*sh;}}
   v+=Math.max(-1,Math.min(1,h0/40))*.05;
   const o=(j*TN+i)*4;if(v<0){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.34,-v)*255;}else{D[o]=255;D[o+1]=244;D[o+2]=210;D[o+3]=Math.min(.2,v)*255;}}
  g.putImageData(im,0,0);return T;}
@@ -2603,7 +2657,7 @@ function ksTrace(){const W2=KS.w,H2=KS.h,R=KS.res,X=i=>KS.x0+i*R+R/2,Y=j=>KS.y0+
  const land=(i,j)=>KS.mat[j*W2+i]>0?1:0,grass=(i,j)=>KS.mat[j*W2+i]>=2?1:0;
  const crestPts=[];for(let i=0;i<W2;i+=2)for(let j=1;j<H2;j++){const u=KS.fy[(j-1)*W2+i],v=KS.fy[j*W2+i];if(!isNaN(u)&&!isNaN(v)&&u<v-10)crestPts.push([X(i),Y(j)]);}
  const crests=[];{const byX=new Map();for(const p of crestPts){const k=p[0];if(!byX.has(k))byX.set(k,[]);byX.get(k).push(p[1]);}let prev=[];for(const x of [...byX.keys()].sort((a,b)=>a-b)){const now2=[];for(const y of byX.get(x)){const p=prev.find(q=>Math.abs(q.y-y)<8&&x-q.x<=8);const run=p?p.run:[];run.push([x,y]);if(!p)crests.push(run);now2.push({x,y,run});}prev=now2;}}
- return {coast:iso(land),grass:iso(grass),crests:crests.filter(r=>r.length>=5)};}
+ const rock=(i,j)=>KS.mat[j*W2+i]===5?1:0;return {rock:iso(rock),coast:iso(land),grass:iso(grass),crests:crests.filter(r=>r.length>=5)};}
 function chain(segs){const key=p=>Math.round(p[0]*2)+','+Math.round(p[1]*2),adj=new Map();segs.forEach((s,n)=>{for(const e of [0,1]){const k=key(s[e]);if(!adj.has(k))adj.set(k,[]);adj.get(k).push(n);}});
  const used=new Uint8Array(segs.length),out=[];
  for(let n=0;n<segs.length;n++){if(used[n])continue;used[n]=1;const line=[segs[n][0],segs[n][1]];
@@ -2614,9 +2668,12 @@ function chain(segs){const key=p=>Math.round(p[0]*2)+','+Math.round(p[1]*2),adj=
 function drawLandKey(outline){if(!ksBuild(10)){sketch(sandPts,true,1,4,'#f3d27a',outline,3.5);sketch(grassLifted(),true,2,4,'#86c25e',INK,3);return;}
  ctx.imageSmoothingEnabled=true;ctx.drawImage(KS.cv,KS.x0,KS.y0,KS.w*KS.res,KS.h*KS.res);
  const I=KS.ink,ink=(runs,col,lw)=>{for(const r of runs)sketch(r,r.length>8&&Math.hypot(r[0][0]-r[r.length-1][0],r[0][1]-r[r.length-1][1])<6,r.length,1.2,null,col,lw);};
- ink(I.grass,INK,3);ink(I.coast,outline,3.5);ctx.globalAlpha=.55;ink(I.crests,INK,2.2);ctx.globalAlpha=1;}
+ ink(I.grass,INK,3);ink(I.rock,'rgba(42,33,64,.6)',2);ink(I.coast,outline,3.5);ctx.globalAlpha=.55;ink(I.crests,INK,2.2);ctx.globalAlpha=1;}
 /* occlusion: the ground seen in front of a thing hides the part of it drawn below that ground's edge */
-function occludedBy(x,y){if(SH.on||!KS.ink)return null;const base=y-liftAt(x,y);let hz=null;
+/* switched off for now (Ross, build 30): nothing is clipped by ground in front of it. The code stays for steeper
+   ground later. */
+const OCCLUDE=false;
+function occludedBy(x,y){if(!OCCLUDE||SH.on||!KS.ink)return null;const base=y-liftAt(x,y);let hz=null;
  for(const dx of [-6,0,6])for(let s=base;s>=base-maxLift();s-=2){const f=ksFront(x+dx,s);if(f!=null&&f>y+3){if(hz===null||s<hz)hz=s;}}return hz!==null&&hz<base-2?hz:null;}
 const OC=document.createElement('canvas'),ocx=OC.getContext('2d');
 function drawOcc(x,y,fn,soft){const L=liftAt(x,y),hz=occludedBy(x,y);
@@ -2630,12 +2687,12 @@ function drawOcc(x,y,fn,soft){const L=liftAt(x,y),hz=occludedBy(x,y);
  const sy=((hz-cam.y)*Z+H/2)*DPR;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,sy,cv.width,cv.height-sy);ctx.clip();
  ctx.globalAlpha=.3;ctx.drawImage(OC,0,0);const o=1.5*DPR;ctx.globalAlpha=.22;for(const [dx,dy] of [[o,0],[-o,0],[0,o],[0,-o]])ctx.drawImage(OC,dx,dy);ctx.restore();}
 function softFn(fn){return fn===drawSwimmer||fn===drawCrab||fn===drawGull||fn===drawGubbins||fn===drawKindle;}
-const BUILD=29;
+const BUILD=30;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 sndUI();if(S.char)begin();else openCreator('new');
-if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,KS,ksFront,occludedBy,liftAt,trees,KPALMS,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},tstage,harvestObj,harvestFinish,harvestReady,terrH,tgrid,WXT,fogR,fn:{objAt,thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
+if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,bub:()=>bub,clearBub:()=>{bub=null},KS,ksFront,occludedBy,liftAt,trees,KPALMS,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},tstage,harvestObj,harvestFinish,harvestReady,terrH,tgrid,WXT,fogR,fn:{objAt,thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
 })();
 </script>
 </body>
