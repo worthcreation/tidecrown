@@ -1,6 +1,9 @@
 /* ---------- update ---------- */
 function update(dt){
- {const q=(Date.now()+DAYOFF)/DAY_PERIOD;S.day=q%1;S.dayN=Math.floor(q);}const light=.5-.5*Math.cos(S.day*6.2832);dark=Math.min(1,Math.max(0,(.42-light)/.3))*.62;dark=Math.min(.75,dark+.18*WX.rain);/* the sky alone sets the light: no fixed floor anywhere, no dimming for distance */
+ {const q=(Date.now()+DAYOFF)/DAY_PERIOD;S.day=q%1;S.dayN=Math.floor(q);}/* daylight follows the sun itself: full light once it is a little above the horizon, a short twilight around
+   sunrise and sunset, full dark once it is well below. (Before build 31 the light ran on its own clock, so it was
+   bright for most of an hour before the sun rose, and the setting moon threw the only shadows, the wrong way.) */
+ const sunUp=Math.cos((S.day-.5)*6.2832)*Math.cos(LAT);dark=Math.min(1,Math.max(0,(.06-sunUp)/.2))*.62;dark=Math.min(.75,dark+.18*WX.rain);/* the sky alone sets the light: no fixed floor anywhere, no dimming for distance */
  if(intro!=null){intro+=dt;if(intro>3.2)intro=null;}
  if(!SW.on&&P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const wd=inSea(P.x,P.y)?seaDepth(P.x,P.y):0;const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),sp=175*dt*(1-.68*Math.min(1,wd))*(wd>0?1:slopeK(P.x,P.y,dx/(d||1),dy/(d||1)));if(wd<=0&&d>0)walkFeel(dx/d,dy/d,dt);
   /* wading: the deeper, the slower; the first time past the knee, a word */

@@ -1,4 +1,4 @@
-# Tidecrown: handoff (build 30, 12 Oct 2026)
+# Tidecrown: handoff (build 31, 12 Oct 2026)
 Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/design-rules.md. Milestones and work order: docs/roadmap.md.
 
 ## Workflow
@@ -31,6 +31,7 @@ Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/de
 - 23d-quests: QUESTS table (name, giver, why, steps with where, done, spot), questTick (tracker #qtrack, auto-pin the first active quest unless unpinned), questsHTML/journalSwitch (Journal opens on Quests; jView), questMarks for the map. compass(x,y) gives directions for hints.
 - 28-test (test only): Test tab (levels, gear, items, time via DAYOFF, tide via tideF, weather and wind via WXT, wipe via WIPED).
 - 08-panel-bank: cntFmt badge; tabs Skills, Pack (true grid, pointer drag and drop: dgMove/dgDrop swap, push-apart insert, drop on a You slot to wear), Journal, You (SLOTS paperdoll, every slot tappable via canFit/wearFrom; Weapon slot holds scarf or hatchet), Map (drawMapTo sea chart; test: names and warps; play: the Key plus an unnamed smudge, no taps), bank.
+- 10-update: dark comes from the sun's height (sunUp with LAT), not a separate clock.
 - 10-update: movement (wading slows with depth; a walk into deep water turns into a swim), day/dark, Key-only logic guarded by !SH.on.
 - 11-render: skyLights() each frame sets SKY.sun and SKY.moon (real sun geometry at LAT 0.3 rad from S.day; moon opposite, shadows only in the dark) and SHF (lit fires); shadow(x,y,rx,ry,h,cr,m) records shapes into SQ (sun, moon, fire, contact, canopy, flecks); drawShadowLayers(), called after the ground, draws last frame's shapes as one half-resolution layer per light (layer(), no stacking), with cloud shapes and flecks cut out of the sun layer. dark comes from the day alone. Key world draw (drawDepthBands, drawIsletLand, islet palms); shWorld() replaces it when SH.on.
 - 12-skills-status: SKILLS (five), SUBS, METHODS (the ways under Strife and Accord: scarf, hatchet, thrown, food, ember, light). 13-skill-pages: parentPage, skillPage, ways pages.
@@ -48,6 +49,6 @@ Key: creator, Gubbins (fish buyer), Brimble (galley flame, teaches Cooking), Mor
 Shadow Forest (test build only for now): seven islands, reached by map warp or the swim east, long gradual swim with a mid-swim scene change, forests of twisted trees (black wood, twisted wood, ironbark), creatures with tells that Strife and Accord can each set right.
 
 ## Next
-Work order is docs/roadmap.md. Next: storms and windfall (roadmap 6b, build 31; the design check is written and waiting on Ross's answers: storm frequency, Brimble warning, storm wash-ups), then Invention design; each starts on "next" with a short design check. Then Invention design, which gates the fire ladder, glass and the lantern.
+Work order is docs/roadmap.md. Next: storms and windfall (roadmap 6b, build 32; the design check is written and waiting on Ross's answers: storm frequency, Brimble warning, storm wash-ups), then Invention design; each starts on "next" with a short design check. Then Invention design, which gates the fire ladder, glass and the lantern.
 - Tune by play: wave rates, swim feel, depth shelves, jelly density, day and tide lengths, the current's strength, grind stroke count (48), squall frequency, fog thickness, cloud shade strength, slope strength and hill heights.
 - Open for Ross: cliffs and scree (none yet; when Climbing exists, each needs a way around); the Oilskin Coat's upgrade or take-apart path; at the next handoff, add to the project instructions: attach PROJECT_INSTRUCTIONS.md only when asked, when it changed, or at a handoff; whether to run builds in Claude Code on a branch per build; move the Playwright tests into the repo (tools/tests/).

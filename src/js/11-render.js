@@ -18,7 +18,7 @@ const SM=document.createElement('canvas'),smx=SM.getContext('2d');
    the opposite path. */
 const LAT=.3;
 function skyLights(){const d=S.day,h=(d-.5)*6.2832,mk=(hh,a)=>{const up=Math.cos(hh)*Math.cos(LAT);if(up<=.04)return null;const el=Math.asin(up),sx=-Math.sin(hh),sy=Math.cos(hh)*Math.sin(LAT),n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
- SKY.sun=mk(h,.24*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,.09*Math.min(1,dark/.35));/* moonlight only shows when it is dark: at dawn the setting moon must not throw shadows */
+ SKY.sun=mk(h,.24*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,.09*Math.max(0,Math.min(1,(dark-.45)/.15)));/* moonlight only shows when it is dark: at dawn the setting moon must not throw shadows */
  SHF=[];if(!SH.on){SHF.push({x:FIRE.x,y:FIRE.y-6,a:.26});(S.fires||[]).forEach(f=>{if(fireLit(f))SHF.push({x:f.x,y:f.y-6,a:f.big?.3:.24});});}}
 /* one cast: a stretched ellipse from the base along the light, plus the canopy blob at the far end for trees */
 function castShape(q,x,y,rx,ry,h,cr,dx,dy,k){const L=h*k,ox=dx*L,oy=dy*L*.5,ang=Math.atan2(oy,ox),si=Math.abs(Math.sin(ang));
