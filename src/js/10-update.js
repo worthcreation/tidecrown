@@ -32,7 +32,7 @@ function update(dt){
   else{const s=Math.min(d,40*dt);CRAB.x+=dx/d*s;CRAB.y+=dy/d*s;}}
  if(!SH.on&&dark>.3&&!S.journal.moonpool&&Math.hypot(P.x-MOON.x,P.y-MOON.y)<340){discover('moonpool');think('The water to the west is glowing...');}
  pops=pops.filter(p=>(p.t+=dt)<1.5);
- if(bub&&(bub.t+=dt)>4.4)bub=null;
+ if(bub&&(bub.t+=dt)>(bub.dur||4.4))bub=null;
  flies=flies.filter(f=>(f.t+=dt)<.75);
  if(mark&&(mark.t+=dt)>.6)mark=null;
  if(cele&&(cele.t+=dt)>3.2)cele=null;

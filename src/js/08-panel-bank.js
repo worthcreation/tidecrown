@@ -31,7 +31,7 @@ const SLOTLAB={head:'Head',body:'Body',hand:'Hands',trinket:'Charm',back:'Back',
 let MAPHIT=[];
 function drawMapTo(c){const w=c.clientWidth||300,h=c.clientHeight||300,d=Math.min(2,devicePixelRatio||1);c.width=Math.round(w*d);c.height=Math.round(h*d);const k=ctx;ctx=c.getContext('2d');ctx.setTransform(d,0,0,d,0,0);
  /* the chart has north up, like the game: the Key on the left, the dark islands to its east */
- const KX=-2350,KY=0,X0=KX-640,X1=1730,Y0=-1560,Y1=1260,sc=Math.min((w-24)/(X1-X0),(h-78)/(Y1-Y0)),ox=w/2-(X0+X1)/2*sc,oy=h/2+2-(Y0+Y1)/2*sc,M=(x,y)=>[ox+x*sc,oy+y*sc];MAPHIT=[];
+ const KX=-2950,KY=0,X0=KX-1050,X1=1730,Y0=-1560,Y1=1260,sc=Math.min((w-24)/(X1-X0),(h-78)/(Y1-Y0)),ox=w/2-(X0+X1)/2*sc,oy=h/2+2-(Y0+Y1)/2*sc,M=(x,y)=>[ox+x*sc,oy+y*sc];MAPHIT=[];
  ctx.fillStyle='#2b6d7c';ctx.fillRect(0,0,w,h);ctx.globalAlpha=.35;for(let i=0;i<40;i++){const x=(i*73)%w,y=((i*131)%(h-40))+20;ln([[x-7,y],[x,y-3],[x+7,y]],700+i,1.8,'#9fc4cc',.8);}ctx.globalAlpha=1;
  const kp=sandPts.map(p=>M(KX+p[0],KY+p[1])),gp=grassPts.map(p=>M(KX+p[0]*.98,KY+p[1]*.98));sketch(kp,true,880,2,'#f3d27a',INK,2);sketch(gp,true,881,2,'#86c25e',INK,1.5);
  const dk=M(KX+DOCK.x0,KY),dk2=M(KX+DOCK.x1,KY);ln([dk,dk2],883,3,'#c98f56',.3);{const [kx,ky]=M(KX,KY);if(MODE==='test')MAPHIT.push({x:kx,y:ky,r:Math.max(26,560*sc),id:'key'});}

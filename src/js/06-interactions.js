@@ -70,7 +70,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  if(KW.active){const k=S.kindle,here=KW.mode==='fire'&&Math.hypot(KW.x-KW.tx,KW.y-KW.ty)<8;
   o.push({x:KW.x,y:KW.y-7,r:22,name:k.seen?'Kindle':'Driftwood',act:KW.mode==='fire'?(here?'Offer ash':null):'Pick up',onAct:()=>KW.mode==='fire'?offerAsh():spookKindle(),
    onExamine:()=>think(KW.mode==='fire'?'The little log is warming himself by my fire, eyes half shut. He keeps glancing at the ash.':(k.seen?'The runaway log. He’s pretending to be ordinary driftwood. Badly.':'Driftwood. With eyes. That just blinked.'))});}
- o.push({x:GULL.x,y:GULL.y-30,r:30,name:'Mortimer Gull',key:'gullbank',act:'Bank',onAct:()=>routeTo(GULL.x+30,GULL.y+18,openBank),more:[{l:'Talk',f:()=>routeTo(GULL.x+30,GULL.y+18,talkGull)}],onExamine:()=>{discover('gullbank');think('A seagull in a tiny green visor, standing on a post marked BANK. He’s counting something with great seriousness.');}});
+ o.push({x:GULL.x,y:GULL.y-30,r:30,name:'Mortimer Gull',key:'gullbank',act:'Bank',onAct:()=>routeTo(GULL.x+30,GULL.y+18,openBank),more:[{l:'Talk',f:()=>routeTo(GULL.x+30,GULL.y+18,talkGull)}],onExamine:()=>{discover('gullbank');think('A seagull in a green visor on a post marked BANK, counting very seriously.');}});
  (S.ground||[]).forEach(g=>o.push({x:g.x,y:g.y-6,r:18,name:itemName(g.it),act:'Pick up',onAct:()=>{const c=clampLand(g.x-14,g.y+6);routeTo(c[0],c[1],()=>pickGround(g));},onExamine:()=>think(itemDesc(g.it))}));
  (S.ashp||[]).forEach(a=>o.push({x:a.x,y:a.y-4,r:22,name:'Ash',key:'ash',act:'Scoop',onAct:()=>{const c=clampLand(a.x-18,a.y+6);routeTo(c[0],c[1],()=>scoopAsh(a));},onExamine:()=>think('Soft grey ash, still faintly warm. Smells like a story ending.')}));
  o.push({x:HEAD.x,y:HEAD.y-16,r:34,name:'Stone head',key:'head',act:'Listen',onAct:listenHead,onExamine:examineHead});
@@ -82,7 +82,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
  clamObjects(o);thimbleObjects(o);
  return o;}
-function objAt(wx,wy){let best=null,bd=1e9;const [tx,ty]=w2s(wx,wy);for(const o of objects()){if(fogHides(o.x,o.y))continue;const [ox,oy]=w2s(o.x,o.y),d=Math.hypot(ox-tx,oy-ty)/Z;if(d<o.r+14&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
+function objAt(wx,wy){let best=null,bd=1e9;const [tx,ty]=w2s(wx,wy);for(const o of objects()){if(fogHides(o.x,o.y))continue;const [ox,oy]=w2s(o.x,o.y),d=Math.hypot(ox-tx,oy-ty)/Z;if(d<o.r+(o.key==='tree'||o.key==='shadowtree'?2:10)&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
 /* screen and world, through the height lift (30-terrain): a world point is drawn its lift higher; a tap is mapped back down to the ground under it */
 function s2w(sx,sy){const x=(sx-W/2)/Z+cam.x;return[x,unlift(x,(sy-H/2)/Z+cam.y)];}
 function w2s(x,y){return[(x-cam.x)*Z+W/2,(y-liftAt(x,y)-cam.y)*Z+H/2];}

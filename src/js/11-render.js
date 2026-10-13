@@ -14,7 +14,7 @@ let SKY={sun:null,moon:null},SHF=[];
 const SQ={sun:[],moon:[],fire:[],ao:[],can:[],fleck:[]};let SQP=null;
 const SM=document.createElement('canvas'),smx=SM.getContext('2d');
 function skyLights(){const d=S.day,h=(d-.5)*6.2832,e=Math.cos(h)*1.45,mk=(az,el,a)=>{if(el<=.04)return null;const sx=-Math.sin(az),sy=-.1,n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
- SKY.sun=mk(h,e,.24*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,-e,.09);
+ SKY.sun=mk(h,e,.24*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,-e,.09*Math.min(1,dark/.35));/* moonlight only shows when it is dark: at dawn the setting moon must not throw shadows */
  SHF=[];if(!SH.on){SHF.push({x:FIRE.x,y:FIRE.y-6,a:.26});(S.fires||[]).forEach(f=>{if(fireLit(f))SHF.push({x:f.x,y:f.y-6,a:f.big?.3:.24});});}}
 /* one cast: a stretched ellipse from the base along the light, plus the canopy blob at the far end for trees */
 function castShape(q,x,y,rx,ry,h,cr,dx,dy,k){const L=h*k,ox=dx*L,oy=dy*L*.5,ang=Math.atan2(oy,ox),si=Math.abs(Math.sin(ang));
@@ -61,7 +61,13 @@ function drawHome(){const {x,y}=FIRE;
  const px=x+52,py=y+4;shadow(px,py+2,20,6,46);ln([[px-16,py],[px,py-46],[px+16,py]],305,3.5,'#9a6236',.8);ln([[px-16,py],[px,py-46],[px+16,py]],305,1.8,'#c98f56',.8);
  /* Brimble's teapot, hung on the tripod: he cooks in it */
  ln([[px,py-44],[px,py-34]],306,1.5,INK,.3);drawTeapot(px,py-14,.4);
- for(let i=0;i<3;i++){const sx=x+24+i*14,sy=y+30;blob(sx,sy-5,5,4.5,310+i,['#d6d0e2','#b9b3c9','#d9a066'][i],2,.4);}}
+ hearth(x,y,false);}
+/* Brimble's hearth: a ring of fire stones round him, and two big flat hearthstones by the tripod for setting the
+   teapot down; the back of the ring draws behind him, the front in front (drawHearthFront) */
+const HEARTH=[[-30,-2,8,5],[-24,-10,7,4.5],[-12,-14,7,4],[2,-15,8,4.5],[16,-13,7,4],[27,-8,7,4.5],[31,2,8,5],[23,11,8,5],[8,15,9,5.5],[-8,15,8,5],[-23,10,8,5]];
+function hearth(x,y,front){HEARTH.forEach(([dx,dy,rx,ry],i)=>{if((dy>3)!==front)return;blob(x+dx,y+4+dy,rx,ry,320+i,['#b9b3c9','#a39db4','#c8c2d6'][i%3],2.2,.5);ln([[x+dx-rx*.4,y+4+dy-ry*.35],[x+dx+rx*.2,y+4+dy-ry*.5]],330+i,1.2,'rgba(255,255,255,.35)',.3);});
+ if(!front){const px=x+52,py=y+4;blob(px+20,py+14,15,7,340,'#9e98ae',2.4,.6);blob(px-6,py+18,12,6,341,'#b1abc0',2.4,.6);}}
+function drawHearthFront(){hearth(FIRE.x,FIRE.y,true);}
 function drawTeapot(tx,ty,k){ctx.save();ctx.translate(tx,ty);ctx.scale(k,k);ctx.translate(-tx,-ty);
  blob(tx,ty-18,24,20,300,'#7fa8c9',2.6);blob(tx,ty-34,10,4,301,'#5d86a8',2.2,.5);dot(tx,ty-37,3.5,'#ffcf3a');
  ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,4,INK,.5);ln([[tx+20,ty-24],[tx+34,ty-38],[tx+36,ty-26]],302,2,'#7fa8c9',.5);
@@ -157,7 +163,7 @@ function render(){skyLights();
  drawPickups();drawKit();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y-liftAt(mark.x,mark.y),10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t),t.x]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k),k.x]));d.push([DOCK.y1+40,drawSurf]);
- (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
+ (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[FIRE.y+16,drawHearthFront,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  }
  drawFly();{const L=liftAt(P.x,P.y);ctx.save();ctx.translate(0,-L);drawScarfFX();drawChopFX();drawGrind();ctx.restore();}if(C){ctx.save();ctx.translate(0,-liftAt(C.fr.x,C.fr.y));drawCook();ctx.restore();}
@@ -171,9 +177,11 @@ function render(){skyLights();
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(Z,Z);ctx.translate(-cam.x,-cam.y);
  if(P.task&&P.task.phase==='bite'){const s=1+Math.sin(now*20)*.12;ctx.save();ctx.translate(P.x,P.y-82-liftAt(P.x,P.y));ctx.scale(s,s);otext('!',0,0,40,'#ffcf3a');ctx.restore();}
  for(const p of pops){ctx.globalAlpha=p.t>1?1-(p.t-1)/.5:1;otext(p.txt,p.x,p.y-liftAt(p.x,p.y)-p.t*30,p.size,p.col);}ctx.globalAlpha=1;
- if(bub){ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";const lines=wrap(bub.txt,210),lh=21,w=Math.max(...lines.map(l=>ctx.measureText(l).width))+26,h=lines.length*lh+16,bx=P.x-w/2,by=P.y-78-h;
-  ctx.globalAlpha=bub.t>3.9?1-(bub.t-3.9)/.5:Math.min(1,bub.t*6);blob(P.x+8,P.y-58,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,P.y-68,6,5,151,'#fffaf0',2,.3);
-  sketch(rrPts(bx,by,w,h,12),true,152,2,'#fffaf0',INK,2.6);ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,P.x,by+9+i*lh));ctx.globalAlpha=1;}
+ /* thought bubble: above your raised head, a little see-through, at most two lines at a time (longer thoughts page on) */
+ if(bub){ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";const all=wrap(bub.txt,210),pages=Math.ceil(all.length/2),pg=Math.min(pages-1,Math.floor(bub.t/BUBPAGE)),lines=all.slice(pg*2,pg*2+2);bub.dur=Math.max(4.4,pages*BUBPAGE+.6);
+  const lh=21,w=Math.max(...lines.map(l=>ctx.measureText(l).width))+26,h=lines.length*lh+16,Py=P.y-liftAt(P.x,P.y),bx=P.x-w/2,by=Py-86-h,fa=bub.t>bub.dur-.5?1-(bub.t-bub.dur+.5)/.5:Math.min(1,bub.t*6);
+  ctx.globalAlpha=.85*fa;blob(P.x+8,Py-62,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,Py-73,6,5,151,'#fffaf0',2,.3);
+  sketch(rrPts(bx,by,w,h,12),true,152,2,'#fffaf0',INK,2.6);ctx.globalAlpha=fa;ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,P.x,by+9+i*lh));if(pages>1){ctx.globalAlpha=.5*fa;ctx.font="13px 'Patrick Hand','Comic Sans MS',cursive";ctx.fillText((pg+1)+'/'+pages,bx+w-14,by+h-15);}ctx.globalAlpha=1;}
  ctx.restore();
  {const bk=Math.max(SW.on?SW.blk:0,SW.fade);if(bk>0){const g=ctx.createRadialGradient(W/2,H/2,Math.max(20,(1-bk)*W*.5),W/2,H/2,W*.75);g.addColorStop(0,`rgba(5,8,20,${Math.min(1,bk*bk*1.1)})`);g.addColorStop(1,`rgba(5,8,20,${Math.min(1,.4+bk)})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}}
  drawOrbsHUD();

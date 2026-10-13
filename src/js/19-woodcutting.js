@@ -3,7 +3,7 @@ let chips=[],leaves=[];const REGROW=3*60000;
 function leafOf(t){const c=(S.treeCut||{})[t.seed];if(!c)return 1;return Math.min(1,.12+.88*(Date.now()-c)/REGROW);}
 function treeReady(t){return t.sh?true:leafOf(t)>=.7;}
 function chopPer(){return lv('woodcutting')>=8?1.25:1.05;}
-function chopTree(t,layer){if(!hasHatchet()){discover('tree');think('I’d need a hatchet. Something sharp, something to hold, something to tie them together.');return;}
+function chopTree(t,layer){if(!hasHatchet()){discover('tree');const c=clampLand(t.x+(P.x<t.x?-30:30)*t.s,t.y+10);routeTo(c[0],c[1]);if(!S.st.noHatchet){S.st.noHatchet=1;think('I’d need a hatchet. Something sharp, something to hold, something to tie.');}return;}
  if(!treeReady(t)){think(pick(['Still growing back. It’s sighing at me.','Bare as a mast. Give it time.']));return;}
  const side=P.x<t.x?-1:1,c=clampLand(t.x+side*26,t.y+6);routeTo(c[0],c[1],()=>startChop(t,layer));}
 function startChop(t,layer){if(!treeReady(t))return;const w=t.sh?woodOf(t):'wobble';if(t.sh&&!harvestReady(t,layer))return;if(!t.sh&&!canAdd(w)){think('My pack is full. Nowhere to put a log.');return;}P.task={chop:1,tree:t,layer,t0:now,prog:0,combo:0,miss:0,swing:0};P.face=t.x>P.x?1:-1;

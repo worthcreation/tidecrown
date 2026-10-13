@@ -5,11 +5,11 @@
    answers "what is in front" for taps, shading and occlusion. Ink lines (the coast, the grass edge, crests that
    hide ground) are traced from the image as smooth vector lines, so they stay crisp at any coast shape. Until the
    image is built (a few columns a frame, nearest first) the old flat outlines stand in. Forest islands come later. */
-const KS={x0:-720,y0:-900,res:2,w:720,h:820,done:0,cols:null,fy:null,mat:null,cv:null,ink:null,order:null};
+const KS={x0:-1200,y0:-1500,res:2,w:1200,h:1350,done:0,cols:null,fy:null,mat:null,cv:null,ink:null,order:null};
 function ksInit(){KS.fy=new Float32Array(KS.w*KS.h).fill(NaN);KS.mat=new Uint8Array(KS.w*KS.h);KS.cv=document.createElement('canvas');KS.cv.width=KS.w;KS.cv.height=KS.h;KS.im=KS.cv.getContext('2d').createImageData(KS.w,KS.h);
  const cx=Math.round((P.x-KS.x0)/KS.res),o=[];for(let i=0;i<KS.w;i++)o.push(i);o.sort((a,b)=>Math.abs(a-cx)-Math.abs(b-cx));KS.order=o;KS.done=0;}
 function ksColumn(i){const R=KS.res,x=KS.x0+i*R+R/2,W2=KS.w,D=KS.im.data;let prev=null;
- for(let y=-720;y<=720;y+=1){const r=Math.hypot(x,y),a=Math.atan2(y,x);if(r>iR(a)){prev=null;continue;}
+ for(let y=-1200;y<=1200;y+=1.5){const r=Math.hypot(x,y),a=Math.atan2(y,x);if(r>iR(a)){prev=null;continue;}
   const L=liftAt(x,y),m=keyMat(x,y,L/LKs()),s=y-L,row=(s-KS.y0)/R,pr=prev===null?row:prev,py=prev===null?y:y-1;prev=row;
   /* fill every image row between the last sample and this one, with the ground y interpolated across them */
   const r0=Math.min(pr,row),r1=Math.max(pr,row);
@@ -18,7 +18,10 @@ function ksColumn(i){const R=KS.res,x=KS.x0+i*R+R/2,W2=KS.w,D=KS.im.data;let pre
 const KCOL=[null,[243,210,122],[134,194,94],[168,182,102],[96,148,94],[184,177,156]];
 function ksBuild(budgetMs){if(!KS.fy)ksInit();if(KS.done>=KS.w)return true;const t0=performance.now();
  while(KS.done<KS.w&&performance.now()-t0<budgetMs){ksColumn(KS.order[KS.done]);KS.done++;}
- if(KS.done>=KS.w){KS.cv.getContext('2d').putImageData(KS.im,0,0);KS.ink=ksTrace();KS.im=null;return true;}return false;}
+ if(KS.done>=KS.w){ksSoften();KS.cv.getContext('2d').putImageData(KS.im,0,0);KS.ink=ksTrace();KS.im=null;return true;}return false;}
+/* soften the edges between ground colours (the image is 2px a pixel): average each edge pixel with its neighbours */
+function ksSoften(){const W2=KS.w,H2=KS.h,D=KS.im.data,M=KS.mat,out=new Uint8ClampedArray(D);for(let j=1;j<H2-1;j++)for(let i=1;i<W2-1;i++){const k=j*W2+i,m=M[k];if(!m)continue;
+ if(M[k-1]===m&&M[k+1]===m&&M[k-W2]===m&&M[k+W2]===m)continue;let r=0,g=0,b=0,n=0;for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){const q=k+dj*W2+di;if(!M[q])continue;const o=q*4;r+=D[o];g+=D[o+1];b+=D[o+2];n++;}const o=k*4;out[o]=r/n;out[o+1]=g/n;out[o+2]=b/n;}D.set(out);}
 /* what ground is seen at a lifted point: its world y, or null for water */
 function ksFront(x,s){if(!KS.ink)return undefined;const i=Math.floor((x-KS.x0)/KS.res),j=Math.floor((s-KS.y0)/KS.res);if(i<0||j<0||i>=KS.w||j>=KS.h)return null;const v=KS.fy[j*KS.w+i];return isNaN(v)?null:v;}
 /* ink: marching squares on land and grass fields, chained into polylines; crests from jumps in the seen y */
@@ -37,7 +40,7 @@ function chain(segs){const key=p=>Math.round(p[0]*2)+','+Math.round(p[1]*2),adj=
   if(line.length>=4)out.push(line.filter((p,i)=>i%2===0||i===line.length-1));}
  return out;}
 /* drawing the Key's ground: the surface image, then the ink. Fallback: build 23's outlines */
-function drawLandKey(outline){if(!ksBuild(6)){sketch(sandPts,true,1,4,'#f3d27a',outline,3.5);sketch(grassLifted(),true,2,4,'#86c25e',INK,3);return;}
+function drawLandKey(outline){if(!ksBuild(10)){sketch(sandPts,true,1,4,'#f3d27a',outline,3.5);sketch(grassLifted(),true,2,4,'#86c25e',INK,3);return;}
  ctx.imageSmoothingEnabled=true;ctx.drawImage(KS.cv,KS.x0,KS.y0,KS.w*KS.res,KS.h*KS.res);
  const I=KS.ink,ink=(runs,col,lw)=>{for(const r of runs)sketch(r,r.length>8&&Math.hypot(r[0][0]-r[r.length-1][0],r[0][1]-r[r.length-1][1])<6,r.length,1.2,null,col,lw);};
  ink(I.grass,INK,3);ink(I.coast,outline,3.5);ctx.globalAlpha=.55;ink(I.crests,INK,2.2);ctx.globalAlpha=1;}

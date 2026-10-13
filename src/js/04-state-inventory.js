@@ -37,5 +37,5 @@ const cam={x:P.x,y:P.y};
 (S.fires||[]).forEach(f=>{if(!f.until)f.until=Date.now()+90000;if(f.until>Date.now()+8*60000)f.until=Date.now()+90000;if(!f.fuel)f.fuel={wood:3};});
 setInterval(save,5000);document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
 
-let flies=[],pops=[],bub=null,cele=null,fly=null,mark=null,intro=null,dark=0;
+const BUBPAGE=2.8;let flies=[],pops=[],bub=null,cele=null,fly=null,mark=null,intro=null,dark=0;
 

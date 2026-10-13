@@ -1,5 +1,7 @@
 /* ---------- world ---------- */
-function iR(a){return 520+60*Math.sin(3*a+1)+35*Math.sin(5*a+2.3)+20*Math.sin(9*a+.7);}
+/* KSC: the Key's size (build 28 made it 67% larger) */
+const KSC=1.67;
+function iR(a){return KSC*(520+60*Math.sin(3*a+1)+35*Math.sin(5*a+2.3)+20*Math.sin(9*a+.7));}
 function gR(a){return iR(a)*.8+14*Math.sin(7*a+1.3)-10;}
 function polar(a,r){return [Math.cos(a)*r,Math.sin(a)*r];}
 const NP=150,sandPts=[],grassPts=[],shallowPts=[],foamPts=[];
@@ -40,10 +42,10 @@ const SIGN={x:R0-95,y:-58};
 /* Brimble's camp: a flat shelf on the lee (west) shoulder of the hill near the middle of the Key, just below its
    crown: out of the east wind and spray, a few steps from a lookout over the whole horizon (HILL in 30-terrain) */
 const OLDFIRE=(()=>{const p=polar(-.95,iR(-.95)-42);return{x:Math.round(p[0]),y:Math.round(p[1])};})();
-const HILL={x:50,y:-70};
-const FIRE={x:-135,y:-62};
+const HILL={x:50*KSC,y:-70*KSC};
+const FIRE={x:-135*KSC,y:-62*KSC};
 const HEAD=(()=>{const a=Math.PI-.45,p=polar(a,iR(a)-70);return{x:p[0],y:p[1]};})();
-const POOL=(()=>{const p=polar(2.05,250);return{x:p[0],y:p[1]};})();
+const POOL=(()=>{const p=polar(2.05,250*KSC);return{x:p[0],y:p[1]};})();
 const GULL={x:R0-150,y:-34};
 const crabHome=polar(1.6,iR(1.6)-60);
 const CRAB={x:crabHome[0],y:crabHome[1],tx:crabHome[0],ty:crabHome[1],wait:1,hop:0};
@@ -52,7 +54,8 @@ const rocks=[];
 /* the windward east shore is rockier */
 [-.62,-.45,-.3,.32,.48,.66].forEach((a,i)=>{const p=polar(a,iR(a)-4);rocks.push({x:p[0],y:p[1],rx:13+(i*5)%8,ry:9+(i*3)%5,seed:240+i});});
 /* a low outcrop on the windward (east) edge of Brimble's shelf */
-[[62,-8,16,11],[70,16,13,9],[52,34,11,8]].forEach(([dx,dy,rx,ry],i)=>rocks.push({x:FIRE.x+dx,y:FIRE.y+dy,rx,ry,seed:260+i,camp:1}));
+/* set back behind the tripod, so the camp reads in front of them */
+[[74,-40,16,11],[104,-28,13,9],[90,-54,11,8]].forEach(([dx,dy,rx,ry],i)=>rocks.push({x:FIRE.x+dx,y:FIRE.y+dy,rx,ry,seed:260+i,camp:1}));
 
 const trees=[];
 {const r=mulberry(7);let tries=0;const avoid=[[GULL.x,GULL.y],[POOL.x,POOL.y],[R0-80,24],[OLDFIRE.x,OLDFIRE.y],[SIGN.x,SIGN.y],[HEAD.x,HEAD.y],[R0-25,0],crabHome,...spots.map(s=>[s.ax,s.ay])];
@@ -60,6 +63,6 @@ const trees=[];
   if(avoid.some(p=>Math.hypot(p[0]-x,p[1]-y)<120))continue;if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<90))continue;
   trees.push({x,y,s:.85+r()*.45,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}
 }
-const tufts=[];{const r=mulberry(11);for(let i=0;i<80;i++){const a=r()*6.2832,d=Math.sqrt(r())*.93;tufts.push({x:Math.cos(a)*gR(a)*d,y:Math.sin(a)*gR(a)*d,f:r()<.18,seed:i+500,c:r()});}}
+const tufts=[];{const r=mulberry(11);for(let i=0;i<150;i++){const a=r()*6.2832,d=Math.sqrt(r())*.93;tufts.push({x:Math.cos(a)*gR(a)*d,y:Math.sin(a)*gR(a)*d,f:r()<.18,seed:i+500,c:r()});}}
 const waves=[];{const r=mulberry(23);for(let i=0;i<300;i++){const a=r()*6.2832,d=iR(a)+110+r()*(i<140?1100:4300);waves.push({x:Math.cos(a)*d,y:Math.sin(a)*d,s:r()*6,seed:i+900});}}
 

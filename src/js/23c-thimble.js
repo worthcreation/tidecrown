@@ -21,9 +21,9 @@ function takeKit(id,s){if(!kitOut(id))return;if(Math.hypot(P.x-s.p[0],P.y-s.p[1]
  think(left?pick(['One of Sir Thimble\u2019s. '+(left===1?'One more.':'Two more.'),'The sea kept this one for him. '+(left===1?'One to go.':'Two to go.')]):'That is all three. Sir Thimble will want these.');save();}
 /* the crab: three salutes start it; a salute with the whole kit finishes it */
 function thimbleSalute(){const q=tq();
- if(q.st===0&&S.salutes>=3){S.q.thimble={st:1,got:{}};discover('thimblekit');toast('Quest: The sailmaker\u2019s kit');think('He taps his helmet, then mimes a strap round his claw, a spike, a coil. Then points at the sea. Three times.');save();return true;}
+ if(q.st===0&&S.salutes>=3){S.q.thimble={st:1,got:{}};discover('thimblekit');toast('Quest: The sailmaker\u2019s kit');think('He taps his helmet, mimes a strap, a spike, a coil, then points at the sea.');save();return true;}
  if(q.st===1){if(KIT.every(k=>cnt(k)>0)){if(!canAdd('thimble')){think('He has something for me. My pack is too full.');return true;}KIT.forEach(k=>takeItem(k));S.q.thimble={st:2};S.owned.thimble=1;S.know.sewing=1;addItem('thimble');
-   discover('sewing');toast('Quest done: The sailmaker\u2019s kit');sfx('burst');think('He lays out the palm, the fid and the twine like old friends. Then he hands me his spare helm, and shows me, very slowly, how a seam holds.');save();return true;}
+   discover('sewing');toast('Quest done: The sailmaker\u2019s kit');sfx('burst');think('He lays out the kit like old friends, hands me his spare helm, and shows me how a seam holds.');save();return true;}
   const left=KIT.filter(k=>!(cnt(k)>0)).map(k=>kitSpot(k).where);think('He waits. Still missing: '+left.join('; ')+'.');return true;}
  return false;}
 function drawKit(){if(SH.on||tq().st!==1)return;for(const id of KIT){if(!kitOut(id))continue;const s=kitSpot(id);if(!s.vis())continue;drawOcc(s.p[0],s.p[1],()=>ctx.drawImage(iconImg(id),s.p[0]-11,s.p[1]-14,22,22),true);}}
