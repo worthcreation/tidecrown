@@ -52,7 +52,9 @@ function rollGear(sp){const L=lv('fishing');let g=null;
  S.inv.push({id:g});S.owned[g]=1;toast('Found: '+EQUIP[g].name);pop('Something tangled on the line!',P.x,P.y-120,'#ffcf3a',18);}
 function lore(){discover('gubbinslore');say('Gubbins','Driftwood Key. Smallest island in the Lantern Sea. Folk say past the last lighthouse there\u2019s the Far Light, where dreams go to come true. Folk say lots of things. Mostly to buckets.',gOpts());}
 function examineHead(){discover('head');think(dark>.25?'A stone head, half buried. Its eyes are glowing faintly. Its mouth is open.':'A stone head, half buried in the sand. Eyes shut, mouth shut, very old.');}
-function listenHead(){if(dark>.25){discover('headnight');think('It’s humming. Something about the west shore, and the moon.');}else think(pick(['Nothing. Just wind whistling through a stone ear.','I press my ear to it. Silence. It feels like it’s waiting for dark.']));}
+/* listening means going up to it and putting an ear to the stone */
+function listenHead(){const c=clampLand(HEAD.x+34,HEAD.y+14);routeTo(c[0],c[1],()=>quietly(listenHead2));}
+function listenHead2(){if(dark>.25){discover('headnight');think('It’s humming. Something about the west shore, and the moon.');}else think(pick(['Nothing. Just the wind moving over the stone.','I press my ear to it. Silence. It feels like it’s waiting for dark.']));}
 function saluteCrab(){discover('crab');CRAB.hop=.5;S.salutes=(S.salutes||0)+1;
  if(thimbleSalute())return;
  think(S.salutes>1?pick(['Sir Thimble salutes again. Crisper this time.','We salute. He clicks approvingly.','He salutes with both claws. Showing off.']):'A crab wearing a thimble for a helmet. He salutes. I salute back. Friends now.');}

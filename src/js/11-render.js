@@ -186,7 +186,7 @@ function render(){skyLights();
  /* thought bubble: above your raised head, a little see-through, at most three lines at a time (longer thoughts page on) */
  if(bub){ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";const all=wrap(bub.txt,250),pages=Math.ceil(all.length/3),pg=Math.min(pages-1,Math.floor(bub.t/BUBPAGE)),lines=all.slice(pg*3,pg*3+3);bub.dur=Math.max(4.4,pages*BUBPAGE+.6);
   const lh=21,w=Math.max(...lines.map(l=>ctx.measureText(l).width))+26,h=lines.length*lh+16,Py=P.y-liftAt(P.x,P.y),bx=P.x-w/2,by=Py-86-h,fa=bub.t>bub.dur-.5?1-(bub.t-bub.dur+.5)/.5:Math.min(1,bub.t*6);
-  ctx.globalAlpha=.85*fa;blob(P.x+8,Py-62,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,Py-73,6,5,151,'#fffaf0',2,.3);
+  ctx.globalAlpha=.6*fa;blob(P.x+8,Py-62,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,Py-73,6,5,151,'#fffaf0',2,.3);
   sketch(rrPts(bx,by,w,h,12),true,152,2,'#fffaf0',INK,2.6);ctx.globalAlpha=fa;ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,P.x,by+9+i*lh));if(pages>1){ctx.globalAlpha=.5*fa;ctx.font="13px 'Patrick Hand','Comic Sans MS',cursive";ctx.fillText((pg+1)+'/'+pages,bx+w-14,by+h-15);}ctx.globalAlpha=1;}
  ctx.restore();
  {const bk=Math.max(SW.on?SW.blk:0,SW.fade);if(bk>0){const g=ctx.createRadialGradient(W/2,H/2,Math.max(20,(1-bk)*W*.5),W/2,H/2,W*.75);g.addColorStop(0,`rgba(5,8,20,${Math.min(1,bk*bk*1.1)})`);g.addColorStop(1,`rgba(5,8,20,${Math.min(1,.4+bk)})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}}

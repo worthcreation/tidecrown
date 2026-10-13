@@ -634,7 +634,9 @@ function rollGear(sp){const L=lv('fishing');let g=null;
  S.inv.push({id:g});S.owned[g]=1;toast('Found: '+EQUIP[g].name);pop('Something tangled on the line!',P.x,P.y-120,'#ffcf3a',18);}
 function lore(){discover('gubbinslore');say('Gubbins','Driftwood Key. Smallest island in the Lantern Sea. Folk say past the last lighthouse there\u2019s the Far Light, where dreams go to come true. Folk say lots of things. Mostly to buckets.',gOpts());}
 function examineHead(){discover('head');think(dark>.25?'A stone head, half buried. Its eyes are glowing faintly. Its mouth is open.':'A stone head, half buried in the sand. Eyes shut, mouth shut, very old.');}
-function listenHead(){if(dark>.25){discover('headnight');think('It’s humming. Something about the west shore, and the moon.');}else think(pick(['Nothing. Just wind whistling through a stone ear.','I press my ear to it. Silence. It feels like it’s waiting for dark.']));}
+/* listening means going up to it and putting an ear to the stone */
+function listenHead(){const c=clampLand(HEAD.x+34,HEAD.y+14);routeTo(c[0],c[1],()=>quietly(listenHead2));}
+function listenHead2(){if(dark>.25){discover('headnight');think('It’s humming. Something about the west shore, and the moon.');}else think(pick(['Nothing. Just the wind moving over the stone.','I press my ear to it. Silence. It feels like it’s waiting for dark.']));}
 function saluteCrab(){discover('crab');CRAB.hop=.5;S.salutes=(S.salutes||0)+1;
  if(thimbleSalute())return;
  think(S.salutes>1?pick(['Sir Thimble salutes again. Crisper this time.','We salute. He clicks approvingly.','He salutes with both claws. Showing off.']):'A crab wearing a thimble for a helmet. He salutes. I salute back. Friends now.');}
@@ -1166,7 +1168,7 @@ function render(){skyLights();
  /* thought bubble: above your raised head, a little see-through, at most three lines at a time (longer thoughts page on) */
  if(bub){ctx.font="18px 'Patrick Hand','Comic Sans MS',cursive";const all=wrap(bub.txt,250),pages=Math.ceil(all.length/3),pg=Math.min(pages-1,Math.floor(bub.t/BUBPAGE)),lines=all.slice(pg*3,pg*3+3);bub.dur=Math.max(4.4,pages*BUBPAGE+.6);
   const lh=21,w=Math.max(...lines.map(l=>ctx.measureText(l).width))+26,h=lines.length*lh+16,Py=P.y-liftAt(P.x,P.y),bx=P.x-w/2,by=Py-86-h,fa=bub.t>bub.dur-.5?1-(bub.t-bub.dur+.5)/.5:Math.min(1,bub.t*6);
-  ctx.globalAlpha=.85*fa;blob(P.x+8,Py-62,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,Py-73,6,5,151,'#fffaf0',2,.3);
+  ctx.globalAlpha=.6*fa;blob(P.x+8,Py-62,4,3.5,150,'#fffaf0',2,.3);blob(P.x+3,Py-73,6,5,151,'#fffaf0',2,.3);
   sketch(rrPts(bx,by,w,h,12),true,152,2,'#fffaf0',INK,2.6);ctx.globalAlpha=fa;ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,P.x,by+9+i*lh));if(pages>1){ctx.globalAlpha=.5*fa;ctx.font="13px 'Patrick Hand','Comic Sans MS',cursive";ctx.fillText((pg+1)+'/'+pages,bx+w-14,by+h-15);}ctx.globalAlpha=1;}
  ctx.restore();
  {const bk=Math.max(SW.on?SW.blk:0,SW.fade);if(bk>0){const g=ctx.createRadialGradient(W/2,H/2,Math.max(20,(1-bk)*W*.5),W/2,H/2,W*.75);g.addColorStop(0,`rgba(5,8,20,${Math.min(1,bk*bk*1.1)})`);g.addColorStop(1,`rgba(5,8,20,${Math.min(1,.4+bk)})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}}
@@ -2692,7 +2694,7 @@ function drawOcc(x,y,fn,soft){const L=liftAt(x,y),hz=occludedBy(x,y);
  const sy=((hz-cam.y)*Z+H/2)*DPR;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,sy,cv.width,cv.height-sy);ctx.clip();
  ctx.globalAlpha=.3;ctx.drawImage(OC,0,0);const o=1.5*DPR;ctx.globalAlpha=.22;for(const [dx,dy] of [[o,0],[-o,0],[0,o],[0,-o]])ctx.drawImage(OC,dx,dy);ctx.restore();}
 function softFn(fn){return fn===drawSwimmer||fn===drawCrab||fn===drawGull||fn===drawGubbins||fn===drawKindle;}
-const BUILD=32;
+const BUILD=33;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);

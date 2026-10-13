@@ -75,7 +75,7 @@ No menu, no sliders, no picking a kin or a colour from a list. The player is nev
 - Directions: up is north on the game screen and on the Map tab (since build 26), right is east. The sun rises on the right, the trade wind blows from the right, the dark islands lie east.
 - Quests (build 30): a small table (23d-quests); the Journal opens on Quests, each with who asked, why, and a checklist whose where-hints use directions and things you can see. One quest is tracked: its next step at the top left, its outstanding spots marked on the map, nothing marked you have not been told about.
 - Every hold or right-click menu offers "Walk here", whatever else it offers.
-- Thought bubbles sit above your raised head, slightly see-through, at most three lines at a time; longer thoughts page on (1/2, 2/2). Keep new lines under about 110 characters.
+- Thought bubbles sit above your raised head, clearly see-through (the bubble at 60%, the words solid), at most three lines at a time; longer thoughts page on (1/2, 2/2). Keep new lines under about 110 characters.
 - Taps show only new lines: a tap acts if it can, or walks you to the thing, and any line it would say shows only if you have never seen it. Examine in the hold menu always shows its line. Lines about a full pack always show. (Build 30; S.seen keeps the lines shown.)
 - Moonlight throws shadows only in the dark; at dawn the setting moon throws none.
 - Brimble's hearth: a ring of fire stones round him and two flat hearthstones by the tripod; the camp's outcrop sits behind the tripod.
