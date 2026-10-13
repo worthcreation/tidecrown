@@ -26,16 +26,25 @@ function fogAt0(x,y){if(SH.on){const I=ISLES.find(I=>isleK(I,x,y)<=1.05),n=I?I.n
  const sea=curK(x,y)>0||x>CUR0()-400?WX.seaFog*Math.min(1,(x-CUR0()+400)/500):0;return Math.min(1,Math.max(WX.fog*k,sea));}
 function fogR(){const f=fogAt(P.x,P.y);return f<.04?1e9:(120+(1-f)*900)*(1+Math.max(0,terrH(P.x,P.y))/50);}
 function fogHides(x,y){const R=fogR();return R<1e8&&Math.hypot(x-P.x,y-P.y)>R*.95;}
-/* clouds: puffs on a 3000px tile that slides with the wind; low cumulus casts crisp shade, high cirrus faint */
-const CLOUDS=[];{const r=mulberry(77);for(let i=0;i<16;i++)CLOUDS.push({x:r()*3000,y:r()*3000,rx:120+r()*200,ry:60+r()*90,low:r()<.6,h:r(),seed:600+i});}
-function cloudPos(c){const t=Date.now()/1000,sp=14,ox=Math.cos(WX.wa)*sp*t,oy=Math.sin(WX.wa)*sp*t;const m=v=>((v%3000)+3000)%3000;
- let x=m(c.x+ox),y=m(c.y+oy);x+=Math.floor((cam.x-x+1500)/3000)*3000;y+=Math.floor((cam.y-y+1500)/3000)*3000;return [x,y];}
-function cloudOn(c){return c.h<WX.cover;}
-function cloudOver(x,y){let v=0;for(const c of CLOUDS){if(!cloudOn(c))continue;const [cx,cy]=cloudPos(c),u=((x-cx)/c.rx)**2+((y-cy)/c.ry)**2;if(u<1)v=Math.max(v,(c.low?.85:.35)*(1-u*.4));}return v;}
-function drawWeatherWorld(){const sun=SKY.sun,sa=sun?Math.min(1,sun.a/.24):0;ctx.fillStyle='rgb(42,33,64)';
- if(sa>0)for(const c of CLOUDS){if(!cloudOn(c))continue;const [x,y]=cloudPos(c);ctx.globalAlpha=(c.low?.13:.05)*sa*(1-WX.rain*.5);sketch(ell(x,y,c.rx,c.ry,16),true,c.seed,c.low?12:20,'rgb(42,33,64)',null);}
- /* the odd low cloud passes below the view: soft white, not often */
- for(const c of CLOUDS){if(!cloudOn(c)||!c.low||c.h>.12+WX.rain*.2)continue;const [x,y]=cloudPos(c);ctx.globalAlpha=.32*(.4+.6*sa);sketch(ell(x-80,y-120,c.rx*.8,c.ry*.8,16),true,c.seed+3,14,'#f4f6f8',null);}
+/* clouds: fair-weather cumulus, each a silhouette of overlapping lobes with a flatter base, on a 3000px tile.
+   They drift slowly with the wind: the drift builds up frame by frame (CLOFF), so a wandering wind bends their
+   path instead of moving them all at once. Speed is a slow walk, well under yours. */
+const CLOUDS=[],CL_SP=38;{const r=mulberry(77);for(let i=0;i<16;i++){const rx=110+r()*190,ry=55+r()*70,lobes=[],n=4+Math.floor(r()*4);
+ for(let k=0;k<n;k++){const u=(k+.5)/n*2-1,lr=ry*(.55+r()*.5)*(1-Math.abs(u)*.35);lobes.push([u*rx*.75,-lr*.35-r()*ry*.25,lr]);}
+ lobes.push([0,ry*.15,rx*.8,ry*.35]);CLOUDS.push({x:r()*3000,y:r()*3000,rx,ry,lobes,low:r()<.6,h:r(),seed:600+i});}}
+let CLOFF=null;
+function cloudDrift(dt){if(!CLOFF){const t=Date.now()/1000;CLOFF={x:-CL_SP*t%3000,y:0};}CLOFF.x=(CLOFF.x+Math.cos(WX.wa)*CL_SP*dt)%3000;CLOFF.y=(CLOFF.y+Math.sin(WX.wa)*CL_SP*dt)%3000;}
+function cloudPos(c){const o=CLOFF||{x:0,y:0},m=v=>((v%3000)+3000)%3000;let x=m(c.x+o.x),y=m(c.y+o.y);x+=Math.floor((cam.x-x+1500)/3000)*3000;y+=Math.floor((cam.y-y+1500)/3000)*3000;return [x,y];}
+/* a cloud shows when the cover is high enough for it, fading in and out rather than popping */
+function cloudK(c){return Math.max(0,Math.min(1,(WX.cover-c.h)/.08));}
+/* a cloud forming or thinning grows or shrinks its lobes instead of popping */
+function cloudShapes(){const out=[];for(const c of CLOUDS){const k=cloudK(c);if(k<.03)continue;const [x,y]=cloudPos(c);if(Math.abs(x-cam.x)>W/Z/2+c.rx+60||Math.abs(y-cam.y)>H/Z/2+c.ry+60)continue;
+ for(const L of c.lobes)out.push(L.length===4?[x+L[0]*k,y+L[1]*k,L[2]*k,L[3]*k,0]:[x+L[0]*k,y+L[1]*k,L[2]*k,L[2]*.62*k,0]);}return out;}
+function cloudOver(x,y){for(const c of CLOUDS){if(cloudK(c)<.5)continue;const [cx,cy]=cloudPos(c);if(((x-cx)/c.rx)**2+((y-cy)/c.ry)**2<1)return 1;}return 0;}
+function drawWeatherWorld(){const sun=SKY.sun,sa=sun?Math.min(1,sun.a/.24):0;
+ /* the odd low cloud passes below the view: a soft white cumulus, not often */
+ const low=[];for(const c of CLOUDS){const k=cloudK(c)*Math.max(0,Math.min(1,(.1+WX.rain*.2-c.h)/.03));if(k<.03||!c.low)continue;const [x,y]=cloudPos(c);for(const L of c.lobes)low.push(L.length===4?[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[3]*.85*k,0]:[x-80+L[0]*k,y-120+L[1]*k,L[2]*.85*k,L[2]*.55*k,0]);}
+ if(low.length)layer(low,.3*(.4+.6*sa),'#f4f6f8');
  /* fog wisps drifting with the wind */
  const f=fogAt(P.x,P.y);if(f>.05){const t=Date.now()/1000;for(let i=0;i<8;i++){const px=P.x+((i*431+Math.cos(WX.wa)*t*10)%900+900)%900-450,py=P.y+((i*277+Math.sin(WX.wa)*t*10)%700+700)%700-350;ctx.globalAlpha=.16*f;blob(px,py,140,50,700+i,'#eef2f4',0,8);}}
  ctx.globalAlpha=1;}
@@ -46,7 +55,7 @@ function drawWeatherScreen(){const r=WX.rain;
  const f=fogAt(P.x,P.y);if(f>.04){const [sx,sy]=w2s(P.x,P.y-20),R=fogR()*Z;const g=ctx.createRadialGradient(sx,sy,R*.25,sx,sy,R);g.addColorStop(0,'rgba(232,238,242,0)');g.addColorStop(1,'rgba(232,238,242,'+(.92*f)+')');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}}
 /* rain on the world: small fires drown, big ones burn down faster, Brimble keeps his hearth; drying salt washes off */
 let rainSaid=0;
-function wxTick(dt){wxUpdate();const r=WX.rain;if(r<.3)return;
+function wxTick(dt){wxUpdate();cloudDrift(dt);const r=WX.rain;if(r<.3)return;
  if(!SH.on){for(const f of S.fires||[]){if(f.main||!fireLit(f))continue;f.until-=dt*1000*r*(f.big?2:7);if(!fireLit(f)&&!rainSaid){rainSaid=1;think('The rain put my fire out.');}}
   for(const s of SURF)if(s.st==='sparkle')s.st='dry';}
  if(r>.6&&!S.st.rainHint){S.st.rainHint=1;think('Rain. Squalls blow through here fast. Fires will not like it.');}}

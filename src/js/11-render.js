@@ -1,21 +1,50 @@
 /* ---------- draw ---------- */
-/* Shadows. One sky light: a tropical sun that rises east, passes nearly overhead and sets west, so shadows run long
-   west at dawn, almost vanish at noon and run long east at dusk; a moon on the opposite path at night, faint; and
-   every lit fire, casting outward. SKY is set once a frame (skyLights); shadow() draws a soft contact patch plus one
-   cast per light. h is the caster's height; cr, if given, is a canopy radius cast from the top (trees). */
+/* Shadows, the way real ones behave.
+   Lights: a tropical sun (rises east, nearly overhead at noon, sets west), a faint moon on the opposite path, and
+   every lit fire casting outward. Shadows from one light never stack: a patch of ground is either out of the sun or
+   not, so all sun shadows (trunk and canopy, tree and crab) go into one silhouette layer drawn at one darkness.
+   Different lights do combine (out of sun and out of firelight is darker than either), so each light has its own
+   layer. Cloud shade is its own layer too, and where a cloud covers the sun the sun shadows are cut away, leaving
+   only the faint contact shadow every object keeps where it meets the ground. Dense canopy also blocks skylight
+   right under the crown (its own layer). Shadows fall on the ground only, not across other objects.
+   shadow() records shapes during a frame; drawShadowLayers() draws them, after the ground and before the objects,
+   on the next frame (one frame behind, which does not show). Layers render at half resolution, which also softens
+   their edges. */
 let SKY={sun:null,moon:null},SHF=[];
+const SQ={sun:[],moon:[],fire:[],ao:[],can:[],fleck:[]};let SQP=null;
+const SM=document.createElement('canvas'),smx=SM.getContext('2d');
 function skyLights(){const d=S.day,h=(d-.5)*6.2832,e=Math.cos(h)*1.45,mk=(az,el,a)=>{if(el<=.04)return null;const sx=-Math.sin(az),sy=-.1,n=Math.hypot(sx,sy)||1;return {dx:-sx/n,dy:-sy/n,k:Math.min(5,1/Math.tan(el)),a:a*Math.min(1,el/.3)};};
- SKY.sun=mk(h,e,.24*(1-.8*cloudOver(P.x,P.y))*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,-e,.09);
+ SKY.sun=mk(h,e,.24*(1-.6*WX.rain));SKY.moon=mk(h+Math.PI,-e,.09);
  SHF=[];if(!SH.on){SHF.push({x:FIRE.x,y:FIRE.y-6,a:.26});(S.fires||[]).forEach(f=>{if(fireLit(f))SHF.push({x:f.x,y:f.y-6,a:f.big?.3:.24});});}}
-function castOne(x,y,rx,ry,h,cr,dx,dy,k,a){const L=h*k,ox=dx*L,oy=dy*L*.5,ang=Math.atan2(oy,ox),si=Math.abs(Math.sin(ang));
- ctx.globalAlpha=a;ctx.beginPath();if(cr){const w=cr*(1-si*.55);ctx.ellipse(x+ox,y+oy,cr,cr*.5,0,0,6.3);ctx.fill();ctx.beginPath();ctx.ellipse(x+ox*.5,y+oy*.5,Math.max(3,Math.hypot(ox,oy)*.5),Math.max(2,rx*.25),ang,0,6.3);ctx.fill();}
- else{ctx.ellipse(x+ox*.5,y+oy*.5,Math.hypot(ox,oy)*.5+rx*.7,ry*(1-si)+rx*.7*si,ang,0,6.3);ctx.fill();}}
-function shadow(x,y,rx,ry,h,cr,m){h=h||rx*2.2;m=m||1;ctx.fillStyle='rgb(42,33,64)';ctx.globalAlpha=.1;ctx.beginPath();ctx.ellipse(x,y,rx*.75,ry*.75,0,0,6.3);ctx.fill();
- for(const L of [SKY.sun,SKY.moon])if(L)castOne(x,y,rx,ry,h,cr,L.dx,L.dy,L.k,Math.min(.6,L.a*m));
- /* sun flecks: under a big canopy by day, a few coins of light get through the gaps */
- if(cr&&m>1&&SKY.sun&&SKY.sun.a>.12){const L=SKY.sun,cx=x+L.dx*h*L.k,cy=y+L.dy*h*L.k*.5;ctx.fillStyle='rgb(255,236,170)';for(let i=0;i<3;i++){const a=i*2.1+now*.05+x,rr=cr*(.25+.2*i);ctx.globalAlpha=.18*L.a/.24;ctx.beginPath();ctx.ellipse(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.5,2.6,1.4,0,0,6.3);ctx.fill();}ctx.fillStyle='rgb(42,33,64)';}
- for(const f of SHF){const ddx=x-f.x,ddy=y-f.y,d=Math.hypot(ddx,ddy);if(d<14||d>260)continue;const fa=f.a*(1-d/260)*(.35+.65*dark/.62);castOne(x,y,rx,ry,h,cr,ddx/d,ddy/d*2,Math.min(4,40/d+.3),fa);}
- ctx.globalAlpha=1;}
+/* one cast: a stretched ellipse from the base along the light, plus the canopy blob at the far end for trees */
+function castShape(q,x,y,rx,ry,h,cr,dx,dy,k){const L=h*k,ox=dx*L,oy=dy*L*.5,ang=Math.atan2(oy,ox),si=Math.abs(Math.sin(ang));
+ if(cr){q.push([x+ox,y+oy,cr,cr*.5,0]);q.push([x+ox*.5,y+oy*.5,Math.max(3,Math.hypot(ox,oy)*.5),Math.max(2,rx*.25),ang]);}
+ else q.push([x+ox*.5,y+oy*.5,Math.hypot(ox,oy)*.5+rx*.7,ry*(1-si)+rx*.7*si,ang]);}
+function shadow(x,y,rx,ry,h,cr,m){h=h||rx*2.2;m=m||1;SQ.ao.push([x,y,rx*.75,ry*.75,0]);
+ if(SKY.sun)castShape(SQ.sun,x,y,rx,ry,h,cr,SKY.sun.dx,SKY.sun.dy,SKY.sun.k);
+ if(SKY.moon)castShape(SQ.moon,x,y,rx,ry,h,cr,SKY.moon.dx,SKY.moon.dy,SKY.moon.k);
+ for(const f of SHF){const ddx=x-f.x,ddy=y-f.y,d=Math.hypot(ddx,ddy);if(d<14||d>260)continue;castShape(SQ.fire,x,y,rx,ry,h,cr,ddx/d,ddy/d*2,Math.min(4,40/d+.3));}
+ if(cr&&m>1){SQ.can.push([x,y-2,cr*.95,cr*.5,0]);
+  /* sun flecks: a few coins of light through the gaps in a big canopy */
+  if(SKY.sun&&SKY.sun.a>.12){const L=SKY.sun,cx=x+L.dx*h*L.k,cy=y+L.dy*h*L.k*.5;for(let i=0;i<3;i++){const a=i*2.1+now*.05+x,rr=cr*(.25+.2*i);SQ.fleck.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.5,2.6,1.4,0]);}}}}
+/* draw one layer: fill its shapes opaque on the half-resolution mask, optionally cut holes, composite once */
+function layer(shapes,alpha,col,cut){if(!shapes.length||alpha<=.004)return;const s=.5*DPR;
+ if(SM.width!==Math.round(W*s)||SM.height!==Math.round(H*s)){SM.width=Math.round(W*s);SM.height=Math.round(H*s);}
+ smx.setTransform(1,0,0,1,0,0);smx.clearRect(0,0,SM.width,SM.height);smx.setTransform(s*Z,0,0,s*Z,(W/2-cam.x*Z)*s,(H/2-cam.y*Z)*s);
+ smx.fillStyle=col||'rgb(42,33,64)';smx.beginPath();for(const e of shapes){smx.moveTo(e[0]+e[2]*Math.cos(e[4]),e[1]+e[2]*Math.sin(e[4]));smx.ellipse(e[0],e[1],e[2],e[3],e[4],0,6.3);}smx.fill();
+ if(cut)cut(smx);
+ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=true;ctx.drawImage(SM,0,0,SM.width,SM.height,0,0,cv.width,cv.height);ctx.restore();}
+function cutShapes(list,keep){return m=>{if(!list.length)return;m.globalCompositeOperation='destination-out';m.beginPath();for(const e of list){m.moveTo(e[0]+e[2]*Math.cos(e[4]),e[1]+e[2]*Math.sin(e[4]));m.ellipse(e[0],e[1],e[2],e[3],e[4],0,6.3);}m.fill();m.globalCompositeOperation='source-over';};}
+function drawShadowLayers(){const Q=SQP;
+ /* this frame's recording starts fresh; last frame's shapes are drawn now */
+ SQP={sun:SQ.sun,moon:SQ.moon,fire:SQ.fire,ao:SQ.ao,can:SQ.can,fleck:SQ.fleck};SQ.sun=[];SQ.moon=[];SQ.fire=[];SQ.ao=[];SQ.can=[];SQ.fleck=[];
+ if(!Q)return;const sunA=SKY.sun?SKY.sun.a:0,cl=cloudShapes();
+ layer(Q.ao,.1);
+ layer(Q.can,.22*(SH.on?1:.5));
+ layer(cl,.13*Math.min(1,sunA/.24)*(1-WX.rain*.5));
+ layer(Q.sun,sunA,null,m=>{cutShapes(cl)(m);cutShapes(Q.fleck)(m);});
+ layer(Q.moon,SKY.moon?SKY.moon.a:0);
+ if(SHF.length)layer(Q.fire,.26*(.35+.65*dark/.62));}
 function drawTree(t){const x=t.x,y=t.y,s=t.s,wsw=Math.cos(WX.wa)*WX.ws*(2.5+1.5*Math.sin(now*1.6+t.seed))*s;shadow(x,y+2,10*s,4*s,52*s,26*s*(.3+.7*leafOf(t)));const tx=x+t.lean*s+wsw,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
  ln(pts,t.seed,11*s,INK,1.2);ln(pts,t.seed,6*s,'#b07a4a',1.2);const g=['#4fa14a','#5fb35a','#3f9356'][Math.floor(t.hue*3)];
  const lf=leafOf(t),k=.3+.7*lf,ch=P.task&&P.task.chop&&P.task.tree===t,sw=ch?Math.cos(Math.PI*(now-P.task.t0)/chopPer())*7*s:Math.sin(now*1.3+t.seed)*2*(lf<.7?.3:1);
@@ -121,7 +150,7 @@ function render(){skyLights();
  drawFoam();drawWet();
  sketch(sandPts,true,1,4,'#f3d27a',tideLevel()>.985?INK:'rgba(42,33,64,.25)',3.5);drawBreaks();
  drawDock();
- sketch(grassPts,true,2,4,'#86c25e',INK,3);drawTerrain(vw,vh);
+ sketch(grassPts,true,2,4,'#86c25e',INK,3);drawTerrain(vw,vh);drawShadowLayers();
  for(const t of tufts){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;if(t.f){dot(t.x,t.y,3.2,t.c>.5?'#ff8fb1':'#fff6a8');dot(t.x,t.y,1.2,'#ffcf3a');}else ln([[t.x-5,t.y-6],[t.x,t.y],[t.x+5,t.y-7]],t.seed,2,'#5a9a3f',.6);}
  drawPickups();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y,10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}

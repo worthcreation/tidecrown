@@ -9,6 +9,7 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - 4 Weather (build 18): wandering trade wind that moves trees, scarf, smoke and rain; cloud shade; rare low clouds; squalls that drown small fires and wash off salt; dawn fog and sea fog that hide what is out of sight; big waves from the windward side.
 - 5 Terrain height (build 19): dunes and a rise on the Key, a landform per dark island, contours and sun hillshade, Tobler walking speed, fog pooling in valleys, wider view from high ground.
 - 6 Shadow harvest and regrowth (build 20): branches, limbs and trunk by Woodcutting level, yields that include the lower layers, per-layer regrowth paced by wood, stumps that keep their size, stump digging, sapling poles, a seeded forest age mix with snags.
+- Fix (build 21): clouds no longer jump (their drift now builds up frame by frame), cumulus silhouettes drift slowly, and shadows are non-stacking layers per light with cloud cutouts.
 
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |
