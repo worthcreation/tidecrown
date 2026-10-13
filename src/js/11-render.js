@@ -39,7 +39,7 @@ function layer(shapes,alpha,col,cut){if(!shapes.length||alpha<=.004)return;const
  if(cut)cut(smx);
  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=alpha;ctx.imageSmoothingEnabled=true;ctx.drawImage(SM,0,0,SM.width,SM.height,0,0,cv.width,cv.height);ctx.restore();}
 function cutShapes(list,keep){return m=>{if(!list.length)return;m.globalCompositeOperation='destination-out';m.beginPath();for(const e of list){m.moveTo(e[0]+e[2]*Math.cos(e[4]),e[1]+e[2]*Math.sin(e[4]));m.ellipse(e[0],e[1],e[2],e[3],e[4],0,6.3);}m.fill();m.globalCompositeOperation='source-over';};}
-function drawShadowLayers(){const Q=SQP;
+function drawShadowLayers(){if(TDBG&2){SQ.sun=[];SQ.moon=[];SQ.fire=[];SQ.ao=[];SQ.can=[];SQ.fleck=[];return;}const Q=SQP;
  /* this frame's recording starts fresh; last frame's shapes are drawn now */
  SQP={sun:SQ.sun,moon:SQ.moon,fire:SQ.fire,ao:SQ.ao,can:SQ.can,fleck:SQ.fleck};SQ.sun=[];SQ.moon=[];SQ.fire=[];SQ.ao=[];SQ.can=[];SQ.fleck=[];
  if(!Q)return;const sunA=SKY.sun?SKY.sun.a:0,cl=cloudShapes();

@@ -17,7 +17,9 @@ const ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t
 const KPEAK=117,CLO=KPEAK*.52,CHI=KPEAK*.93;
 function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
  const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012));
- let h=Hc*ss(10,34,d)-Hc*.5*ss(34,60,d);
+ /* the foredune is a bump that returns to nothing inland: its height varies around the coast, and if any of that
+    carried inland it would meet at the island's centre in spokes */
+ let h=Hc*(ss(10,34,d)-ss(34,72,d));
  const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=KSC*(520+60*Math.sin(3*as+1))+30,/* only the coast's broad shape: its small wiggles made radial creases */q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
  /* a rounded top: a cone's point shades into spokes, so the summit is a gentle dome */
  const qd=(Math.sqrt(q*q+.0144)-.12)/(Math.sqrt(1.0144)-.12);h+=KPEAK*Math.pow(1-qd,e)*ss(6,60,d);
@@ -111,7 +113,7 @@ function tileFor(ti,tj){const scn=SH.on?'s':'k',k=scn+ti+','+tj;let T=TTILES[k];
   v+=Math.max(-1,Math.min(1,h0/40))*.05;
   const o=(j*TN+i)*4;if(v<0){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.34,-v)*255;}else{D[o]=255;D[o+1]=244;D[o+2]=210;D[o+3]=Math.min(.2,v)*255;}}
  g.putImageData(im,0,0);return T;}
-function drawTerrain(vw,vh){tBudget=SH.on?1:2;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
+var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;tBudget=SH.on?1:2;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
  for(let tj=Math.floor((cam.y-vh)/TT);tj<=Math.floor((cam.y+vh+maxLift())/TT);tj++)for(let ti=Math.floor((cam.x-vw)/TT);ti<=Math.floor((cam.x+vw)/TT);ti++){const T=tileFor(ti,tj);if(T.any)vis.push(T);}
  /* swap when every visible tile has the new light (or has never had any) */
  if(vis.every(T=>T.key===sk||T.nkey===sk))for(const T of vis)if(T.nkey===sk&&T.key!==sk){const c=T.cv;T.cv=T.nv;T.nv=c;T.key=sk;T.nkey=null;}
