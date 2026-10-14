@@ -16,7 +16,7 @@ Full design rules and the story so far: docs/design-rules.md. Read it before any
 - In a voice call bash_tool and present_files do not work: run shell through code_execution (Python subprocess) and deliver the files when back in text chat, saying so.
 - Always attach files. Never give instructions that leave Ross to find or assemble files himself.
 - Attach PROJECT_INSTRUCTIONS.md only when Ross asks for it, when it changed, or at a handoff.
-- Handoff (end of a chat or when Ross says handoff): update HANDOFF.md and, if they changed, docs/design-rules.md and this file.
+- Handoff (end of a chat or when Ross says handoff): update HANDOFF.md and, if they changed, docs/design-rules.md and this file. Every handoff ends with a ready-to-paste opening prompt for the next chat, in a text code block, and the same prompt is saved at the bottom of HANDOFF.md under "Next chat prompt".
 
 ## Working with Ross
 - Always ask before building anything, including small fixes. Design talk first: reflect the idea back as systems, check it against the pillars, flag what fails a rule, pose questions, and wait for Ross to say go.

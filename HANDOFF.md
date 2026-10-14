@@ -63,3 +63,8 @@ Work order: the batch below (agreed with Ross at the build 35 handoff, design po
 - Tune by play: wave rates, swim feel, depth shelves, jelly density, day and tide lengths, the current's strength, grind stroke count (48), shower and monsoon frequency, fog thickness, cloud shade strength, slope strength and hill heights.
 - Open for Ross: action flavour lines go quiet once seen like examine lines (since build 30); keep, or let action lines repeat. Cliffs and scree when Climbing exists, each with a way around. Whether to run builds in Claude Code on a branch per build. Move the Playwright tests into the repo (tools/tests/); today they live only in each chat's sandbox.
 - Testing notes: force clear weather in tests (fog hides things by design); the 390px quest test misses the bone fid because the test player is swimming at the reef (fixed by item 2).
+
+## Next chat prompt
+Paste as the first message of the next chat:
+
+    Start of chat as usual. Then begin HANDOFF's Next batch with item 1, tropical weather. Design check first: where Survival sits and how it is earned, then go. Pier west and the stone head on an east headland: confirmed as proposed in HANDOFF item 4. Test notes: none yet.
