@@ -27,13 +27,19 @@ function beachAdd(a){return 93*Math.max(0,207-sandW0(a))/114;}
 const HUMB=96,HUMS=[];{const r=mulberry(4242);for(let b=0;b<HUMB;b++)HUMS.push([]);for(let k=0;k<170;k++){const a=r()*6.2832,ad=beachAdd(a),fb=10+ad,d=fb*(.35+r()*.6)+r()*28,p=polar(a,iR(a)-d),rr=(7+r()*7)*(1+.3*Math.max(0,Math.cos(a))),hh=2+r()*3;
  const b=Math.floor(((a+Math.PI)/6.2832)*HUMB)%HUMB;HUMS[b].push([p[0],p[1],rr,hh]);}}
 function hummocks(x,y,a){const b=Math.floor(((a+Math.PI)/6.2832)*HUMB)%HUMB;let h=0;for(const k of [b-1,b,b+1])for(const [hx,hy,rr,hh] of HUMS[(k+HUMB)%HUMB]){const q=((x-hx)**2+(y-hy)**2)/(2*rr*rr);if(q<9)h+=hh*Math.exp(-q);}return h;}
-function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
- const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012)),add=beachAdd(a),fb=10+add+8*Math.sin(a*17+.6)+5*Math.sin(a*29),u=d-fb;
+/* the dunes alone (foredune groups, the second ridge, hummocks), also read by 30c to outline them */
+function duneAt(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;return duneAD(x,y,a,i-r);}
+function beachFB(a){return 10+beachAdd(a)+8*Math.sin(a*17+.6)+5*Math.sin(a*29);}
+function duneAD(x,y,a,d){const fb=beachFB(a),u=d-fb;if(u>130)return 0;
+ const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012));
  /* groups and gaps along the shore, the pier's path, the windward feed */
  const cl=Math.max(0,.32+.45*Math.sin(a*11+1)+.3*Math.sin(a*23+2.2)+.22*Math.sin(a*41+.4))*(1-.9*Math.exp(-(angDiff(a,0)**2)/.006)),wind=1+.7*Math.max(0,Math.cos(a));
  let h=Hc*cl*wind*1.75*(ss(0,30,u)-ss(32,74,u));
  const s2=Math.max(0,Math.sin(a*7+3)-.25)/.75;if(s2>0)h+=Hc*1.1*s2*wind*(ss(56,80,u)-ss(82,120,u));
  if(d<fb+90)h+=hummocks(x,y,a)*(1-ss(fb+40,fb+90,d));
+ return h;}
+function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r,fb=beachFB(a);
+ let h=duneAD(x,y,a,d);
  const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=KSC*(520+60*Math.sin(3*as+1))+30-45*(1+Math.cos(as)),/* the hill's foot pulls back where the beach widened (east), one smooth harmonic so no spokes *//* only the coast's broad shape: its small wiggles made radial creases */q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
  /* a rounded top: a cone's point shades into spokes, so the summit is a gentle dome; the hill starts behind the beach */
  const qd=(Math.sqrt(q*q+.0144)-.12)/(Math.sqrt(1.0144)-.12);h+=KPEAK*Math.pow(1-qd,e)*ss(fb+40,fb+120,d);
@@ -135,11 +141,13 @@ function tileFor(ti,tj){const scn=SH.on?'s':'k',k=scn+ti+','+tj;let T=TTILES[k];
   const gx=(hE-hW)/(2*R)*E,gy=(hS-hN)/(2*R)*E,nl=Math.hypot(gx,gy,1),cav=(hE+hW+hN+hS)/4-h0;
   /* cel-shaded (build 38): the slope's light snaps to three flat tones (lit, plain, shade); only real landforms (more
      than about 4 above the line of sight) throw a cast shadow, in one flat tone; a faint tint by height stays */
-  let v=0;
-  if(sun){const lt=((-gx*lx-gy*ly+se)/nl-se)*str;v=lt>.14?.06:lt<-.14?-.12:0;
-   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el);for(let s=8;s<=96;s+=8){if(terrH(wx+ddx*s,wy+ddy*s)-(h0+s*tn)>4){v=-.2*str-.02;break;}}}}
-  else if(cav>.35)v=-.06;
-  v+=Math.max(-1,Math.min(1,h0/40))*.04;
+  /* sand stays clean flat colour (build 39): its dunes read through their own outlines (30c), and only the hill's
+     shadow falls across it */
+  let v=0;const sand=!SH.on&&keyMat(wx,wy,h0)===1;
+  if(sun){const lt=((-gx*lx-gy*ly+se)/nl-se)*str;if(!sand)v=lt>.14?.06:lt<-.14?-.12:0;
+   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el),thr=sand?12:4;for(let s=8;s<=96;s+=8){if(terrH(wx+ddx*s,wy+ddy*s)-(h0+s*tn)>thr){v=-.2*str-.02;break;}}}}
+  else if(cav>.35&&!sand)v=-.06;
+  if(!sand)v+=Math.max(-1,Math.min(1,h0/40))*.04;
   const o=(j*TN+i)*4;if(v<0){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.34,-v)*255;}else{D[o]=255;D[o+1]=244;D[o+2]=210;D[o+3]=Math.min(.2,v)*255;}}
  g.putImageData(im,0,0);return T;}
 let tMiss=0;var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;/* one tile of new light a frame; more while some visible tile has none yet */tBudget=tMiss?3:1;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();

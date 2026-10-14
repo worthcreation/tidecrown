@@ -1196,7 +1196,7 @@ function render(){skyLights();
  drawFoam();drawWet();
  drawLandKey(tideLevel()>.985?INK:'rgba(42,33,64,.25)');drawBreaks();
  drawDock();
- drawTerrain(vw,vh);drawShadowLayers();drawFlood(vw,vh);
+ drawTerrain(vw,vh);drawDunes(vw,vh);drawShadowLayers();drawFlood(vw,vh);
  for(const t of tufts){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;if(t.f){dot(t.x,t.y,3.2,t.c>.5?'#ff8fb1':'#fff6a8');dot(t.x,t.y,1.2,'#ffcf3a');}else ln([[t.x-5,t.y-6],[t.x,t.y],[t.x+5,t.y-7]],t.seed,2,'#5a9a3f',.6);}
  drawPickups();drawKit();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y-liftAt(mark.x,mark.y),10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
@@ -2805,13 +2805,19 @@ function beachAdd(a){return 93*Math.max(0,207-sandW0(a))/114;}
 const HUMB=96,HUMS=[];{const r=mulberry(4242);for(let b=0;b<HUMB;b++)HUMS.push([]);for(let k=0;k<170;k++){const a=r()*6.2832,ad=beachAdd(a),fb=10+ad,d=fb*(.35+r()*.6)+r()*28,p=polar(a,iR(a)-d),rr=(7+r()*7)*(1+.3*Math.max(0,Math.cos(a))),hh=2+r()*3;
  const b=Math.floor(((a+Math.PI)/6.2832)*HUMB)%HUMB;HUMS[b].push([p[0],p[1],rr,hh]);}}
 function hummocks(x,y,a){const b=Math.floor(((a+Math.PI)/6.2832)*HUMB)%HUMB;let h=0;for(const k of [b-1,b,b+1])for(const [hx,hy,rr,hh] of HUMS[(k+HUMB)%HUMB]){const q=((x-hx)**2+(y-hy)**2)/(2*rr*rr);if(q<9)h+=hh*Math.exp(-q);}return h;}
-function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
- const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012)),add=beachAdd(a),fb=10+add+8*Math.sin(a*17+.6)+5*Math.sin(a*29),u=d-fb;
+/* the dunes alone (foredune groups, the second ridge, hummocks), also read by 30c to outline them */
+function duneAt(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;return duneAD(x,y,a,i-r);}
+function beachFB(a){return 10+beachAdd(a)+8*Math.sin(a*17+.6)+5*Math.sin(a*29);}
+function duneAD(x,y,a,d){const fb=beachFB(a),u=d-fb;if(u>130)return 0;
+ const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012));
  /* groups and gaps along the shore, the pier's path, the windward feed */
  const cl=Math.max(0,.32+.45*Math.sin(a*11+1)+.3*Math.sin(a*23+2.2)+.22*Math.sin(a*41+.4))*(1-.9*Math.exp(-(angDiff(a,0)**2)/.006)),wind=1+.7*Math.max(0,Math.cos(a));
  let h=Hc*cl*wind*1.75*(ss(0,30,u)-ss(32,74,u));
  const s2=Math.max(0,Math.sin(a*7+3)-.25)/.75;if(s2>0)h+=Hc*1.1*s2*wind*(ss(56,80,u)-ss(82,120,u));
  if(d<fb+90)h+=hummocks(x,y,a)*(1-ss(fb+40,fb+90,d));
+ return h;}
+function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r,fb=beachFB(a);
+ let h=duneAD(x,y,a,d);
  const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=KSC*(520+60*Math.sin(3*as+1))+30-45*(1+Math.cos(as)),/* the hill's foot pulls back where the beach widened (east), one smooth harmonic so no spokes *//* only the coast's broad shape: its small wiggles made radial creases */q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
  /* a rounded top: a cone's point shades into spokes, so the summit is a gentle dome; the hill starts behind the beach */
  const qd=(Math.sqrt(q*q+.0144)-.12)/(Math.sqrt(1.0144)-.12);h+=KPEAK*Math.pow(1-qd,e)*ss(fb+40,fb+120,d);
@@ -2913,11 +2919,13 @@ function tileFor(ti,tj){const scn=SH.on?'s':'k',k=scn+ti+','+tj;let T=TTILES[k];
   const gx=(hE-hW)/(2*R)*E,gy=(hS-hN)/(2*R)*E,nl=Math.hypot(gx,gy,1),cav=(hE+hW+hN+hS)/4-h0;
   /* cel-shaded (build 38): the slope's light snaps to three flat tones (lit, plain, shade); only real landforms (more
      than about 4 above the line of sight) throw a cast shadow, in one flat tone; a faint tint by height stays */
-  let v=0;
-  if(sun){const lt=((-gx*lx-gy*ly+se)/nl-se)*str;v=lt>.14?.06:lt<-.14?-.12:0;
-   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el);for(let s=8;s<=96;s+=8){if(terrH(wx+ddx*s,wy+ddy*s)-(h0+s*tn)>4){v=-.2*str-.02;break;}}}}
-  else if(cav>.35)v=-.06;
-  v+=Math.max(-1,Math.min(1,h0/40))*.04;
+  /* sand stays clean flat colour (build 39): its dunes read through their own outlines (30c), and only the hill's
+     shadow falls across it */
+  let v=0;const sand=!SH.on&&keyMat(wx,wy,h0)===1;
+  if(sun){const lt=((-gx*lx-gy*ly+se)/nl-se)*str;if(!sand)v=lt>.14?.06:lt<-.14?-.12:0;
+   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el),thr=sand?12:4;for(let s=8;s<=96;s+=8){if(terrH(wx+ddx*s,wy+ddy*s)-(h0+s*tn)>thr){v=-.2*str-.02;break;}}}}
+  else if(cav>.35&&!sand)v=-.06;
+  if(!sand)v+=Math.max(-1,Math.min(1,h0/40))*.04;
   const o=(j*TN+i)*4;if(v<0){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.34,-v)*255;}else{D[o]=255;D[o+1]=244;D[o+2]=210;D[o+3]=Math.min(.2,v)*255;}}
  g.putImageData(im,0,0);return T;}
 let tMiss=0;var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;/* one tile of new light a frame; more while some visible tile has none yet */tBudget=tMiss?3:1;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
@@ -3002,15 +3010,56 @@ function drawOcc(x,y,fn,soft){const L=liftAt(x,y),hz=occludedBy(x,y);
  const sy=((hz-cam.y)*Z+H/2)*DPR;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,sy,cv.width,cv.height-sy);ctx.clip();
  ctx.globalAlpha=.3;ctx.drawImage(OC,0,0);const o=1.5*DPR;ctx.globalAlpha=.22;for(const [dx,dy] of [[o,0],[-o,0],[0,o],[0,-o]])ctx.drawImage(OC,dx,dy);ctx.restore();}
 function softFn(fn){return fn===drawSwimmer||fn===drawCrab||fn===drawGull||fn===drawGubbins||fn===drawKindle;}
-const BUILD=38;
+/* ---------- dunes drawn as ink (build 39) ----------
+   The sand is clean flat colour, so each dune reads by its own shape: the dune field alone (duneAt, 30-terrain) is
+   sampled on an 8px grid once, traced with marching squares into smooth closed outlines at two heights, and drawn
+   lifted onto the ground: a warm body with an ink outline, a faint inner line near the top, wind ripples on the backs,
+   and a grass tuft on each hummock where a plant caught the sand. Nothing saved; built a few ms a frame after the
+   height cache, while the title shows. */
+const DNG=8,DNR=1150,DUNE={row:0,v:null,n:0,done:false,lo:null,hi:null,rip:null,tuft:null};
+function duneBuild(ms){if(DUNE.done)return true;const n=DUNE.n||(DUNE.n=Math.ceil(2*DNR/DNG)+1);if(!DUNE.v)DUNE.v=new Float32Array(n*n);const t0=performance.now(),v=DUNE.v;
+ while(DUNE.row<n&&performance.now()-t0<ms){const j=DUNE.row,y=-DNR+j*DNG;for(let i=0;i<n;i++){const x=-DNR+i*DNG,r=Math.hypot(x,y),a=Math.atan2(y,x),ir=iR(a);v[j*n+i]=r>ir||ir-r>beachFB(a)+140?0:duneAD(x,y,a,ir-r);}DUNE.row++;}
+ if(DUNE.row<n)return false;
+ DUNE.lo=duneTrace(v,n,2.4);DUNE.hi=duneTrace(v,n,6.5);
+ /* wind ripples: short strokes along the contour on the dune backs, a few per dune */
+ DUNE.rip=[];for(let j=1;j<n-1;j+=2)for(let i=1;i<n-1;i+=2){const h=v[j*n+i];if(h<3.2||hash1(j*977+i*31)>.16)continue;const gx=v[j*n+i+1]-v[j*n+i-1],gy=v[(j+1)*n+i]-v[(j-1)*n+i],gl=Math.hypot(gx,gy);if(gl<.4)continue;
+  const tx=-gy/gl,ty=gx/gl,x=-DNR+i*DNG,y=-DNR+j*DNG,k=7,bx=gx/gl*2,by=gy/gl*2;DUNE.rip.push(duneLift([[x-tx*k,y-ty*k],[x+bx,y+by],[x+tx*k,y+ty*k]]));}
+ DUNE.tuft=[];for(const B of HUMS)for(const [hx,hy,,hh] of B)if(hh>3.2)DUNE.tuft.push([hx,hy-liftAt(hx,hy)]);
+ DUNE.v=null;DUNE.done=true;return true;}
+function duneLift(pts){return pts.map(([x,y])=>[x,y-liftAt(x,y)]);}
+/* marching squares, chained into polylines; saddles split by the centre value; two passes of corner cutting smooth them */
+function duneTrace(v,n,L){const P={},segs=[],pt=(id,x0,y0,x1,y1,a,b)=>{if(!P[id]){const t=(L-a)/(b-a);P[id]=[x0+(x1-x0)*t,y0+(y1-y0)*t];}return id;};
+ for(let j=0;j<n-1;j++)for(let i=0;i<n-1;i++){const tl=v[j*n+i],tr=v[j*n+i+1],br=v[(j+1)*n+i+1],bl=v[(j+1)*n+i];const c=(tl>L?8:0)|(tr>L?4:0)|(br>L?2:0)|(bl>L?1:0);if(c===0||c===15)continue;
+  const X=-DNR+i*DNG,Y=-DNR+j*DNG,T=()=>pt('h'+(j*n+i),X,Y,X+DNG,Y,tl,tr),R=()=>pt('v'+(j*n+i+1),X+DNG,Y,X+DNG,Y+DNG,tr,br),B=()=>pt('h'+((j+1)*n+i),X,Y+DNG,X+DNG,Y+DNG,bl,br),Lf=()=>pt('v'+(j*n+i),X,Y,X,Y+DNG,tl,bl);
+  const mid=(tl+tr+br+bl)/4>L,s=(a,b)=>segs.push([a(),b()]);
+  switch(c){case 1:case 14:s(Lf,B);break;case 2:case 13:s(B,R);break;case 3:case 12:s(Lf,R);break;case 4:case 11:s(T,R);break;case 6:case 9:s(T,B);break;case 7:case 8:s(T,Lf);break;
+   case 5:if(mid){s(T,Lf);s(B,R);}else{s(T,R);s(Lf,B);}break;case 10:if(mid){s(T,R);s(Lf,B);}else{s(T,Lf);s(B,R);}break;}}
+ const at={};segs.forEach((g,k)=>{for(const e of g)(at[e]=at[e]||[]).push(k);});const used=new Uint8Array(segs.length),out=[];
+ for(let k=0;k<segs.length;k++){if(used[k])continue;used[k]=1;const ch=[segs[k][0],segs[k][1]];
+  for(let dir=0;dir<2;dir++){for(;;){const e=dir?ch[0]:ch[ch.length-1],nx=(at[e]||[]).find(q=>!used[q]);if(nx==null)break;used[nx]=1;const o=segs[nx][0]===e?segs[nx][1]:segs[nx][0];if(dir)ch.unshift(o);else ch.push(o);}}
+  if(ch.length<5)continue;const closed=ch[0]===ch[ch.length-1];let p=ch.map(e=>P[e]);if(closed)p.pop();
+  for(let it=0;it<2;it++){const q=[],m=p.length;for(let a=0;a<(closed?m:m-1);a++){const A=p[a],Bq=p[(a+1)%m];q.push([A[0]*.75+Bq[0]*.25,A[1]*.75+Bq[1]*.25],[A[0]*.25+Bq[0]*.75,A[1]*.25+Bq[1]*.75]);}p=q;}
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const lp=duneLift(p);for(const [x,y] of lp){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}out.push({p:lp,closed,b:[x0,y0,x1,y1]});}
+ return out;}
+function drawDunes(vw,vh){if(SH.on||!DUNE.done)return;const inView=b=>b[2]>cam.x-vw&&b[0]<cam.x+vw&&b[3]>cam.y-vh&&b[1]<cam.y+vh;
+ const path=(list,close)=>{ctx.beginPath();for(const D of list){if(!inView(D.b))continue;const p=D.p;ctx.moveTo(p[0][0],p[0][1]);for(let k=1;k<p.length;k++)ctx.lineTo(p[k][0],p[k][1]);if(close&&D.closed)ctx.closePath();}};
+ ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+ /* the body: a warmer sand, so a dune shows on any light */
+ path(DUNE.lo,true);ctx.fillStyle='rgba(214,170,82,.32)';ctx.fill('evenodd');ctx.strokeStyle='rgba(42,33,64,.42)';ctx.lineWidth=1.7;ctx.stroke();
+ /* near the top: a faint line, and the top a touch lighter where the sun bleaches it */
+ path(DUNE.hi,true);ctx.fillStyle='rgba(255,246,214,.22)';ctx.fill('evenodd');ctx.strokeStyle='rgba(42,33,64,.18)';ctx.lineWidth=1.2;ctx.stroke();
+ ctx.strokeStyle='rgba(150,112,50,.5)';ctx.lineWidth=1.3;ctx.beginPath();for(const r of DUNE.rip){if(Math.abs(r[1][0]-cam.x)>vw||Math.abs(r[1][1]-cam.y)>vh)continue;ctx.moveTo(r[0][0],r[0][1]);ctx.quadraticCurveTo(r[1][0],r[1][1],r[2][0],r[2][1]);}ctx.stroke();
+ ctx.restore();
+ for(const [x,y] of DUNE.tuft){if(Math.abs(x-cam.x)>vw||Math.abs(y-cam.y)>vh)continue;ln([[x-6,y-7],[x-1,y],[x+1,y-9],[x+2,y],[x+7,y-6]],(x*7|0)&1023,2,'#5a9a3f',.6);}}
+const BUILD=39;
 let last=performance.now(),fdt=1/60;
-function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(!(HC&&HC.done))hcBuild(ccOn||intro!=null?14:8);perfTick(dt);if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
+function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(!(HC&&HC.done))hcBuild(ccOn||intro!=null?14:8);else if(!DUNE.done)duneBuild(ccOn||intro!=null?12:5);perfTick(dt);if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 sndUI();if(S.char)begin();else openCreator('new');
 if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,tdbg:v=>{TDBG=v},bub:()=>bub,clearBub:()=>{bub=null},KS,ksFront,occludedBy,liftAt,trees,KPALMS,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},tstage,harvestObj,harvestFinish,harvestReady,terrH,tgrid,WXT,fogR,fn:{objAt,thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};
 /* test build only: storm hooks for headless tests */
 if(MODE==='test')Object.assign(window.DK,{gNow,stormAt,nextStorm,lastStorm,monNow,floodK,floodAt,floodGrid,windfalls,wfLying,wfStage,wfBranches,wfSections,gatherWF,buckWF,showerOf,showerK,hKey,stormWalkK,wfBlock,survL,setWXL:v=>{WXL=v},STORMWASH,rollStormWash,grabShore,treeGrow,
- jump:ms=>{DAYOFF+=ms;WFC=null;},walkable,keyMat,hKeyRaw,beachAdd,skipCC:()=>{if(S.char)return;S.char=randomLook();S.origin=Object.keys(ORIGINS)[0];closeCC();save();begin();},get WFC(){return WFC;},brimbleStormLine});
+ jump:ms=>{DAYOFF+=ms;WFC=null;},walkable,keyMat,DUNE,duneAt,hKeyRaw,beachAdd,skipCC:()=>{if(S.char)return;S.char=randomLook();S.origin=Object.keys(ORIGINS)[0];closeCC();save();begin();},get WFC(){return WFC;},brimbleStormLine});
 })();
 </script>
 </body>
