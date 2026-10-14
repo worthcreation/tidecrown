@@ -15,6 +15,7 @@ Full design rules and the story so far: docs/design-rules.md. Read it before any
 - Ship one build per reply, numbered main's BUILD plus one: add a line at the top of docs/HISTORY.md, run node tools/ship-local.js NN "Build NN: ...", deliver the zip with present_files, and publish test.html as the play-test artifact. Never commit or push. End the reply with the printed PowerShell line (powershell block) and zsh line (zsh block), the play link, and any file Ross must delete by hand (an unzip never deletes).
 - In a voice call bash_tool and present_files do not work: run shell through code_execution (Python subprocess) and deliver the files when back in text chat, saying so.
 - Always attach files. Never give instructions that leave Ross to find or assemble files himself.
+- Attach PROJECT_INSTRUCTIONS.md only when Ross asks for it, when it changed, or at a handoff.
 - Handoff (end of a chat or when Ross says handoff): update HANDOFF.md and, if they changed, docs/design-rules.md and this file.
 
 ## Working with Ross

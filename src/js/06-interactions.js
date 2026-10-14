@@ -60,7 +60,7 @@ function saluteCrab(){discover('crab');CRAB.hop=.5;S.salutes=(S.salutes||0)+1;
  think(S.salutes>1?pick(['Sir Thimble salutes again. Crisper this time.','We salute. He clicks approvingly.','He salutes with both claws. Showing off.']):'A crab wearing a thimble for a helmet. He salutes. I salute back. Friends now.');}
 
 let objT=-1,objC=null;
-function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if(SH.on){o.push(...shObjects());return o;}
+function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;youObject(o);if(SH.on){o.push(...shObjects());return o;}
  spots.forEach(sp=>{if(sp.type==='moon'&&dark<.15)return;if(sp.al<.4||sp.st==='out')return;o.push({x:sp.x,y:sp.y,r:42,name:{shallow:'Bubbling water',deep:'Wild water',moon:'Glowing pool'}[sp.type],act:'Fish',onAct:()=>goFish(sp),
   onExamine:()=>think({shallow:'Little fish, busy with little fish business.',deep:'Something heavy is thrashing down there.',moon:'Pale shapes circling slowly. Waiting for something.'}[sp.type])});});
  o.push({x:G.x,y:G.y-20,r:30,name:'Gubbins',key:'gubbins',act:'Talk',onAct:()=>routeTo(G.x-36,6,talkG),onExamine:()=>think('A bucket with opinions.')});
@@ -87,6 +87,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  /* palms on the sand */
  for(const t of KPALMS)if(Math.hypot(t.x-P.x,t.y-P.y)<300)o.push({x:t.x,y:t.y-30*t.s,r:16,name:'Palm',key:'palm',onExamine:()=>{discover('palm');think(pick(['A palm, leaning the way the wind has pushed it all its life.','Palms grow on the sand here and nowhere else. The hill is too high for them.']));}});
  o.push({x:HILL.x,y:HILL.y-18,r:22,name:'Cairn',key:'cairn',onExamine:()=>{discover('cairn');think('Stones stacked to mark the top. From here you can see every shore of the Key, and the sea all round.');}});
+ hearthObject(o);
  clamObjects(o);thimbleObjects(o);
  return o;}
 function objAt(wx,wy){let best=null,bd=1e9;const [tx,ty]=w2s(wx,wy);for(const o of objects()){if(fogHides(o.x,o.y))continue;const [ox,oy]=w2s(o.x,o.y),d=Math.hypot(ox-tx,oy-ty)/Z;if(d<o.r+(o.key==='tree'||o.key==='shadowtree'?2:10)&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
@@ -118,7 +119,7 @@ function swipe(x0,y0,x1,y1,ms){if(C||ccOn||dlgOn)return;const dx=x1-x0,dy=y1-y0,
 function longPress(sx,sy){if(C||SW.on)return;const [wx,wy]=s2w(sx,sy);const o=objAt(wx,wy);const items=[];let title;
  hap(12);sfx('open',.6);
  if(o){title=o.name;if(o.act)items.push({l:o.act,f:o.onAct});if(o.more)o.more.forEach(m=>items.push(m));const tg=scarfAt(wx,wy);if(tg&&tg.kind!=='dead')items.push({l:'Slap',f:()=>scarfMove('slap',tg)},{l:'Trip',f:()=>scarfMove('trip',tg)},{l:'Wrap',f:()=>scarfMove('wrap',tg)});items.push({l:'Walk here',f:()=>inSea(wx,wy)?walkStraight(wx,wy):routeTo(wx,wy)});items.push({l:'Examine',f:o.onExamine});}
- else if(walkable(wx,wy)){title='Ground';items.push({l:'Walk here',f:()=>routeTo(wx,wy)});if(lv('survival')>=3){items.push({l:'Build a campfire (3 driftwood)',f:()=>buildFire(wx,wy,false)});if((S.wobble||0)>=2)items.push({l:'Build a bonfire (2 wobblewood, 2 driftwood)',f:()=>buildFire(wx,wy,true)});}items.push({l:'Examine',f:()=>think(pick(['Sand. Warm. Slightly judgmental.','Tiny footprints here. Not mine. Not the crab\u2019s either.','The grass is softer than it has any right to be.']))});}
- else{title='The sea';if(S.eq.trinket==='spyglass')items.push({l:'Look through spyglass',f:spyglass});items.push({l:'Walk here',f:()=>walkStraight(wx,wy)});items.push({l:'Walk to shore',f:()=>{const c=clampLand(wx,wy);routeTo(c[0],c[1]);}});items.push({l:'Examine',f:()=>think(pick(['The Lantern Sea. Somewhere out there is the Far Light.','Big. Wet. Full of fish and secrets.','I can\u2019t swim that far. Yet.']))});}
+ else if(walkable(wx,wy)){title=groundName(wx,wy);items.push({l:'Walk here',f:()=>routeTo(wx,wy)});if(lv('survival')>=3){items.push({l:'Build a campfire (3 driftwood)',f:()=>buildFire(wx,wy,false)});if((S.wobble||0)>=2)items.push({l:'Build a bonfire (2 wobblewood, 2 driftwood)',f:()=>buildFire(wx,wy,true)});}items.push({l:'Examine',f:()=>think(groundLine(wx,wy))});}
+ else{title=seaName(wx,wy);if(S.eq.trinket==='spyglass')items.push({l:'Look through spyglass',f:spyglass});items.push({l:'Walk here',f:()=>walkStraight(wx,wy)});items.push({l:'Walk to shore',f:()=>{const c=clampLand(wx,wy);routeTo(c[0],c[1]);}});items.push({l:'Examine',f:()=>think(seaLine(wx,wy))});}
  showCtx(sx,sy,title,items);if(S.hint===3)advanceHint(4);}
 

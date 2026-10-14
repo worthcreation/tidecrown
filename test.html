@@ -654,7 +654,7 @@ function saluteCrab(){discover('crab');CRAB.hop=.5;S.salutes=(S.salutes||0)+1;
  think(S.salutes>1?pick(['Sir Thimble salutes again. Crisper this time.','We salute. He clicks approvingly.','He salutes with both claws. Showing off.']):'A crab wearing a thimble for a helmet. He salutes. I salute back. Friends now.');}
 
 let objT=-1,objC=null;
-function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if(SH.on){o.push(...shObjects());return o;}
+function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;youObject(o);if(SH.on){o.push(...shObjects());return o;}
  spots.forEach(sp=>{if(sp.type==='moon'&&dark<.15)return;if(sp.al<.4||sp.st==='out')return;o.push({x:sp.x,y:sp.y,r:42,name:{shallow:'Bubbling water',deep:'Wild water',moon:'Glowing pool'}[sp.type],act:'Fish',onAct:()=>goFish(sp),
   onExamine:()=>think({shallow:'Little fish, busy with little fish business.',deep:'Something heavy is thrashing down there.',moon:'Pale shapes circling slowly. Waiting for something.'}[sp.type])});});
  o.push({x:G.x,y:G.y-20,r:30,name:'Gubbins',key:'gubbins',act:'Talk',onAct:()=>routeTo(G.x-36,6,talkG),onExamine:()=>think('A bucket with opinions.')});
@@ -681,6 +681,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;if
  /* palms on the sand */
  for(const t of KPALMS)if(Math.hypot(t.x-P.x,t.y-P.y)<300)o.push({x:t.x,y:t.y-30*t.s,r:16,name:'Palm',key:'palm',onExamine:()=>{discover('palm');think(pick(['A palm, leaning the way the wind has pushed it all its life.','Palms grow on the sand here and nowhere else. The hill is too high for them.']));}});
  o.push({x:HILL.x,y:HILL.y-18,r:22,name:'Cairn',key:'cairn',onExamine:()=>{discover('cairn');think('Stones stacked to mark the top. From here you can see every shore of the Key, and the sea all round.');}});
+ hearthObject(o);
  clamObjects(o);thimbleObjects(o);
  return o;}
 function objAt(wx,wy){let best=null,bd=1e9;const [tx,ty]=w2s(wx,wy);for(const o of objects()){if(fogHides(o.x,o.y))continue;const [ox,oy]=w2s(o.x,o.y),d=Math.hypot(ox-tx,oy-ty)/Z;if(d<o.r+(o.key==='tree'||o.key==='shadowtree'?2:10)&&d/o.r<bd){bd=d/o.r;best=o;}}return best;}
@@ -712,8 +713,8 @@ function swipe(x0,y0,x1,y1,ms){if(C||ccOn||dlgOn)return;const dx=x1-x0,dy=y1-y0,
 function longPress(sx,sy){if(C||SW.on)return;const [wx,wy]=s2w(sx,sy);const o=objAt(wx,wy);const items=[];let title;
  hap(12);sfx('open',.6);
  if(o){title=o.name;if(o.act)items.push({l:o.act,f:o.onAct});if(o.more)o.more.forEach(m=>items.push(m));const tg=scarfAt(wx,wy);if(tg&&tg.kind!=='dead')items.push({l:'Slap',f:()=>scarfMove('slap',tg)},{l:'Trip',f:()=>scarfMove('trip',tg)},{l:'Wrap',f:()=>scarfMove('wrap',tg)});items.push({l:'Walk here',f:()=>inSea(wx,wy)?walkStraight(wx,wy):routeTo(wx,wy)});items.push({l:'Examine',f:o.onExamine});}
- else if(walkable(wx,wy)){title='Ground';items.push({l:'Walk here',f:()=>routeTo(wx,wy)});if(lv('survival')>=3){items.push({l:'Build a campfire (3 driftwood)',f:()=>buildFire(wx,wy,false)});if((S.wobble||0)>=2)items.push({l:'Build a bonfire (2 wobblewood, 2 driftwood)',f:()=>buildFire(wx,wy,true)});}items.push({l:'Examine',f:()=>think(pick(['Sand. Warm. Slightly judgmental.','Tiny footprints here. Not mine. Not the crab\u2019s either.','The grass is softer than it has any right to be.']))});}
- else{title='The sea';if(S.eq.trinket==='spyglass')items.push({l:'Look through spyglass',f:spyglass});items.push({l:'Walk here',f:()=>walkStraight(wx,wy)});items.push({l:'Walk to shore',f:()=>{const c=clampLand(wx,wy);routeTo(c[0],c[1]);}});items.push({l:'Examine',f:()=>think(pick(['The Lantern Sea. Somewhere out there is the Far Light.','Big. Wet. Full of fish and secrets.','I can\u2019t swim that far. Yet.']))});}
+ else if(walkable(wx,wy)){title=groundName(wx,wy);items.push({l:'Walk here',f:()=>routeTo(wx,wy)});if(lv('survival')>=3){items.push({l:'Build a campfire (3 driftwood)',f:()=>buildFire(wx,wy,false)});if((S.wobble||0)>=2)items.push({l:'Build a bonfire (2 wobblewood, 2 driftwood)',f:()=>buildFire(wx,wy,true)});}items.push({l:'Examine',f:()=>think(groundLine(wx,wy))});}
+ else{title=seaName(wx,wy);if(S.eq.trinket==='spyglass')items.push({l:'Look through spyglass',f:spyglass});items.push({l:'Walk here',f:()=>walkStraight(wx,wy)});items.push({l:'Walk to shore',f:()=>{const c=clampLand(wx,wy);routeTo(c[0],c[1]);}});items.push({l:'Examine',f:()=>think(seaLine(wx,wy))});}
  showCtx(sx,sy,title,items);if(S.hint===3)advanceHint(4);}
 
 /* ---------- input ---------- */
@@ -1827,6 +1828,30 @@ pbody.addEventListener('click',e=>{if(tab!=='journal')return;const b=e.target.cl
  if(b.dataset.jv){jView=b.dataset.jv;renderPanel();}else if(b.dataset.qpin){const k=b.dataset.qpin;if(S.qpin===k){S.qpin=null;S.qunpin=1;}else{S.qpin=k;S.qunpin=0;}save();renderPanel();}});
 /* map marks for the pinned quest's outstanding steps */
 function questMarks(){const k=S.qpin;if(!k||!QUESTS[k].started()||QUESTS[k].done())return [];return QUESTS[k].steps().filter(s=>!s.done&&s.spot).map(s=>s.spot);}
+/* ---------- examine for everything: the ground, the sea, you, and the camp's hearth ----------
+   Every object already has its own line; these cover the rest of what is drawn. */
+function groundName(x,y){if(onDock(x,y))return 'The pier';if(SH.on)return 'Forest floor';if(onIsletK(x,y))return 'A tiny island';
+ const r=Math.hypot(x,y),a=Math.atan2(y,x);if(r>iR(a)-4)return 'Wet sand';const m=keyMat(x,y,hKey(x,y));return ['','Sand','Grass','Scrub','Fog forest','Summit rock'][m]||'Ground';}
+function groundLine(x,y){const n=groundName(x,y),L={
+ 'The pier':['Grey planks, salt-stiff, every nail a different size. Someone built it in a hurry and it has outlasted them.'],
+ 'Forest floor':['Black needles and soft rot. Nothing grows down here that does not like the dark.','The ground gives a little underfoot, like it is breathing out.'],
+ 'A tiny island':['A patch of sand the sea forgot to cover. Barely room to turn around.'],
+ 'Wet sand':['Wet sand, packed hard by the last wave. It drinks my footprints.','The swash line: shells, weed and whatever the sea is done with.'],
+ 'Sand':['Sand. Warm. Slightly judgmental.','Dry sand, piled by the wind into soft ridges. Palms like it here.','Tiny footprints here. Not mine. Not the crab\u2019s either.'],
+ 'Scrub':['Low, tough scrub with leathery leaves. It holds the sand down against the wind.'],
+ 'Grass':['The grass is softer than it has any right to be.','Grass, flowers here and there. The hill rises behind it.'],
+ 'Fog forest':['Mossy ground under the wobble trees. The fog keeps everything damp up here.','Cool and wet. The cloud sits on this part of the hill most mornings.'],
+ 'Summit rock':['Bare rock at the top of the Key. The wind never stops up here.']}[n]||['Ground.'];return pick(L);}
+function seaName(x,y){const d=seaDepth(x,y);if(curK&&curK(x,y)>.2)return 'The current';if(onIsletK&&KFEAT){for(const f of KFEAT)if(f.kind==='reef'&&fDepth(f,x,y)<STAND&&Math.hypot(x-f.x,y-f.y)<f.rx*1.2)return 'A reef';}return d<STAND?'The shallows':'The sea';}
+function seaLine(x,y){const n=seaName(x,y),L={
+ 'The current':['The water runs hard to the west here. It would carry me straight back to the Key.'],
+ 'A reef':['Shallow water over coral and old shells. I could stand out there.'],
+ 'The shallows':['Clear and warm. Little fish dart off at my shadow.','Shallow enough to wade. The sand ripples underneath.'],
+ 'The sea':['The Lantern Sea. Somewhere out there is the Far Light.','Big. Wet. Full of fish and secrets.','Deep, dark water. Swimmable, if I keep moving.']}[n];return pick(L);}
+/* you */
+function youObject(o){o.push({x:P.x,y:P.y-24,r:14,name:S.char&&S.char.name?S.char.name:'You',key:'self',onExamine:()=>think(pick(['Still here. Still a bit salty.','Washed up, dried off, getting on with it.','Me. Mostly in one piece.']))});}
+/* Brimble's two flat hearthstones by the tripod */
+function hearthObject(o){o.push({x:FIRE.x+66,y:FIRE.y+14,r:12,name:'Hearthstones',key:'hearthstone',onExamine:()=>think(pick(['Two flat stones by the tripod, where the teapot goes when it comes off the heat.','A ring of fire stones round Brimble, and two flat ones for setting things down. Warm to the touch.']))});}
 /* The Shadow Forest: a collection of islands past the Key, each its own shape and kind, some bridged, most reached by swimming. Its own scene and coordinates; the Key's code is untouched. The big ones are forests, not mazes: twisted black trees in clumps and corridors, with canopies that hide what is under them. The more twisted a tree, the harder its wood. */
 const ISLES=[
  {x:0,y:920,rx:430,ry:320,kind:'grove',name:'Landing',landing:1,seed:11,k:[.08,.05,.03],ground:'#3f4d35',sand:'#8d7f63',dens:.22,twist:.2,anchors:[-1.57]},
@@ -2737,7 +2762,7 @@ function drawOcc(x,y,fn,soft){const L=liftAt(x,y),hz=occludedBy(x,y);
  const sy=((hz-cam.y)*Z+H/2)*DPR;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,sy,cv.width,cv.height-sy);ctx.clip();
  ctx.globalAlpha=.3;ctx.drawImage(OC,0,0);const o=1.5*DPR;ctx.globalAlpha=.22;for(const [dx,dy] of [[o,0],[-o,0],[0,o],[0,-o]])ctx.drawImage(OC,dx,dy);ctx.restore();}
 function softFn(fn){return fn===drawSwimmer||fn===drawCrab||fn===drawGull||fn===drawGubbins||fn===drawKindle;}
-const BUILD=34;
+const BUILD=35;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);

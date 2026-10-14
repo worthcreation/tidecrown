@@ -23,9 +23,12 @@ Milestones in two groups: what can be built now (designed enough to start), then
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |
 |---|---|---|
-| 6b | Storms and windfall | Rare storms stronger than squalls fell old trees; fallen trunks and branches to gather; downed trees block paths until chopped, gone around or climbed; on the Key, branches and maybe one tree |
+| 6b | Weather, tropical: daily showers, rare monsoons with flooding, fish and heavier wash-ups ashore, windfall, Brimble's warning, weather reading by Survival level | Rare storms stronger than squalls fell old trees; fallen trunks and branches to gather; downed trees block paths until chopped, gone around or climbed; on the Key, branches and maybe one tree |
 
 After the pipeline: design Invention, then the made-things milestones it unlocks.
+
+## Next batch (agreed at the build 35 handoff)
+- 6b Weather, tropical (above). 6c Swimming pickup by reach (Swimming and Foraging levels). 6d Summit to about 13 character heights with a lookout vista at the cairn. 6e Pier to the lee shore and the stone head onto an east headland, moonlit-calm fishing there (confirm).
 
 ## Needs design first
 | # | Milestone | Missing |
@@ -41,6 +44,7 @@ After the pipeline: design Invention, then the made-things milestones it unlocks
 | 15 | Dwellers and standing | Name, relocation rules, shelters, jobs, staged decay |
 | 16 | The Hollow | Its answer is unwritten |
 | 17 | Delving | Underground, untouched |
+| Open | Survival skill: where it sits and how it is earned; it governs reading the weather |
 | Open | Salt's second route | Salt has one way to get it today |
 
 ## Audit to do: work that earns nothing
