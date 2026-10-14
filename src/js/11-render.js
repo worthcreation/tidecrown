@@ -177,9 +177,9 @@ function render(){skyLights();
   ctx.globalAlpha=.35+tw*.65;ctx.beginPath();ctx.moveTo(sx-r,sy);ctx.lineTo(sx+r,sy);ctx.moveTo(sx,sy-r);ctx.lineTo(sx,sy+r);ctx.stroke();}ctx.globalAlpha=1;}
  drawWeatherWorld();ctx.restore();drawWeatherScreen();
  if(dark>.01){dctx.setTransform(1,0,0,1,0,0);dctx.globalCompositeOperation='source-over';dctx.clearRect(0,0,dk.width,dk.height);dctx.fillStyle='rgba(22,17,62,'+dark+')';dctx.fillRect(0,0,dk.width,dk.height);
-  dctx.globalCompositeOperation='destination-out';const L=SH.on?shLights():[[P.x,P.y-20,120+eff('light')+(S.char&&S.char.kin==='ember'?45:0)],[FIRE.x,FIRE.y-10,180+Math.sin(now*9)*8]];(S.fires||[]).forEach(f=>{if(fireLit(f))L.push([f.x,f.y-10,(f.big?250:160)+Math.sin(now*9+f.x)*6]);});if(dark>.15)L.push([MOON.x,MOON.y,140]);if(dark>.25)L.push([HEAD.x,HEAD.y-18,55]);
-  for(const [x,y,r] of L){const [sx,sy]=w2s(x,y),R=r*Z*DPR;const g=dctx.createRadialGradient(sx*DPR,sy*DPR,0,sx*DPR,sy*DPR,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.5,'rgba(0,0,0,.7)');g.addColorStop(1,'rgba(0,0,0,0)');dctx.fillStyle=g;dctx.beginPath();dctx.arc(sx*DPR,sy*DPR,R,0,6.3);dctx.fill();}
-  ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(dk,0,0);ctx.setTransform(DPR,0,0,DPR,0,0);}
+  dctx.globalCompositeOperation='destination-out';/* no light of your own (build 37): only real sources light the dark; ember kin glow faintly, being ember */const L=SH.on?shLights():[...(S.char&&S.char.kin==='ember'?[[P.x,P.y-20,70]]:[]),[FIRE.x,FIRE.y-10,180+Math.sin(now*9)*8]];(S.fires||[]).forEach(f=>{if(fireLit(f))L.push([f.x,f.y-10,(f.big?250:160)+Math.sin(now*9+f.x)*6]);});if(dark>.15)L.push([MOON.x,MOON.y,140]);if(dark>.25)L.push([HEAD.x,HEAD.y-18,55]);
+  for(const [x,y,r] of L){const [sx,sy]=w2s(x,y),R=r*Z*DPR*DKS;const g=dctx.createRadialGradient(sx*DPR*DKS,sy*DPR*DKS,0,sx*DPR*DKS,sy*DPR*DKS,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.5,'rgba(0,0,0,.7)');g.addColorStop(1,'rgba(0,0,0,0)');dctx.fillStyle=g;dctx.beginPath();dctx.arc(sx*DPR*DKS,sy*DPR*DKS,R,0,6.3);dctx.fill();}
+  ctx.setTransform(1,0,0,1,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(dk,0,0,cv.width,cv.height);ctx.setTransform(DPR,0,0,DPR,0,0);}
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(Z,Z);ctx.translate(-cam.x,-cam.y);
  if(P.task&&P.task.phase==='bite'){const s=1+Math.sin(now*20)*.12;ctx.save();ctx.translate(P.x,P.y-82-liftAt(P.x,P.y));ctx.scale(s,s);otext('!',0,0,40,'#ffcf3a');ctx.restore();}
  for(const p of pops){ctx.globalAlpha=p.t>1?1-(p.t-1)/.5:1;otext(p.txt,p.x,p.y-liftAt(p.x,p.y)-p.t*30,p.size,p.col);}ctx.globalAlpha=1;

@@ -27,7 +27,16 @@ function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)
  return h;}
 const flatAt=(x,y,cx,cy,r0,r1,H)=>{const cr=Math.hypot(x-cx,y-cy);return cr<r1?1-ss(r0,r1,cr):0;};
 let SHELF=null,POOLH=null;
-function hKey(x,y){let h=hKeyBase(x,y);if(h===0)return 0;
+/* height cache (build 37): the Key's height field sampled every 4px once, built a few ms a frame while the title
+   shows; hKey reads it with bilinear interpolation, which is exact enough for a field this smooth and many times
+   cheaper than the sums below (shading tiles alone asked for ~165,000 heights a tile). Until it is done, hKey
+   computes directly. */
+const HCS=4,HCR=1150;let HC=null;
+function hcBuild(ms){if(!HC){const n=Math.ceil(2*HCR/HCS)+2;HC={x0:-HCR,n,a:new Float32Array(n*n),row:0,done:false};}if(HC.done)return true;const t0=performance.now(),n=HC.n,a=HC.a;
+ while(HC.row<n&&performance.now()-t0<ms){const j=HC.row,y=HC.x0+j*HCS;for(let i=0;i<n;i++)a[j*n+i]=hKeyRaw(HC.x0+i*HCS,y);HC.row++;}if(HC.row>=n)HC.done=true;return HC.done;}
+function hKey(x,y){if(HC&&HC.done){const fx=(x-HC.x0)/HCS,fy=(y-HC.x0)/HCS,n=HC.n;if(!(fx>=0&&fy>=0&&fx<n-1&&fy<n-1))return 0;const i=fx|0,j=fy|0,u=fx-i,v=fy-j,a=HC.a,k=j*n+i;
+ return (a[k]*(1-u)+a[k+1]*u)*(1-v)+(a[k+n]*(1-u)+a[k+n+1]*u)*v;}return hKeyRaw(x,y);}
+function hKeyRaw(x,y){let h=hKeyBase(x,y);if(h===0)return 0;
  if(SHELF===null){SHELF=hKeyBase(FIRE.x,FIRE.y);POOLH=hKeyBase(POOL.x,POOL.y)-3;}
  let k=flatAt(x,y,FIRE.x,FIRE.y,60,150);if(k)h=h*(1-k)+SHELF*k;
  k=flatAt(x,y,POOL.x,POOL.y,45,95);if(k)h=h*(1-k)+POOLH*k;
@@ -113,8 +122,9 @@ function tileFor(ti,tj){const scn=SH.on?'s':'k',k=scn+ti+','+tj;let T=TTILES[k];
   v+=Math.max(-1,Math.min(1,h0/40))*.05;
   const o=(j*TN+i)*4;if(v<0){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.34,-v)*255;}else{D[o]=255;D[o+1]=244;D[o+2]=210;D[o+3]=Math.min(.2,v)*255;}}
  g.putImageData(im,0,0);return T;}
-var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;tBudget=SH.on?1:2;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
+let tMiss=0;var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;/* one tile of new light a frame; more while some visible tile has none yet */tBudget=tMiss?3:1;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
  for(let tj=Math.floor((cam.y-vh)/TT);tj<=Math.floor((cam.y+vh+maxLift())/TT);tj++)for(let ti=Math.floor((cam.x-vw)/TT);ti<=Math.floor((cam.x+vw)/TT);ti++){const T=tileFor(ti,tj);if(T.any)vis.push(T);}
+ tMiss=vis.some(T=>!T.cv&&!T.nv)?1:0;
  /* swap when every visible tile has the new light (or has never had any) */
  if(vis.every(T=>T.key===sk||T.nkey===sk))for(const T of vis)if(T.nkey===sk&&T.key!==sk){const c=T.cv;T.cv=T.nv;T.nv=c;T.key=sk;T.nkey=null;}
  else for(const T of vis)if(!T.cv&&T.nkey){T.cv=T.nv;T.nv=null;T.key=T.nkey;T.nkey=null;}

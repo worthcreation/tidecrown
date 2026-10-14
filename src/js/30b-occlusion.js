@@ -40,7 +40,7 @@ function chain(segs){const key=p=>Math.round(p[0]*2)+','+Math.round(p[1]*2),adj=
   if(line.length>=4)out.push(line.filter((p,i)=>i%2===0||i===line.length-1));}
  return out;}
 /* drawing the Key's ground: the surface image, then the ink. Fallback: build 23's outlines */
-function drawLandKey(outline){if(!ksBuild(10)){sketch(sandPts,true,1,4,'#f3d27a',outline,3.5);sketch(grassLifted(),true,2,4,'#86c25e',INK,3);return;}
+function drawLandKey(outline){if(!(HC&&HC.done)||!ksBuild(intro!=null||ccOn?12:4)){sketch(sandPts,true,1,4,'#f3d27a',outline,3.5);sketch(grassLifted(),true,2,4,'#86c25e',INK,3);return;}
  ctx.imageSmoothingEnabled=true;ctx.drawImage(KS.cv,KS.x0,KS.y0,KS.w*KS.res,KS.h*KS.res);
  const I=KS.ink,ink=(runs,col,lw)=>{for(const r of runs)sketch(r,r.length>8&&Math.hypot(r[0][0]-r[r.length-1][0],r[0][1]-r[r.length-1][1])<6,r.length,1.2,null,col,lw);};
  ink(I.grass,INK,3);ink(I.rock,'rgba(42,33,64,.6)',2);ink(I.coast,outline,3.5);ctx.globalAlpha=.55;ink(I.crests,INK,2.2);ctx.globalAlpha=1;}

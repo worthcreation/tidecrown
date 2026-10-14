@@ -89,7 +89,7 @@ function drawSwimWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;drawCurrent();
  for(const b of bubbles){const k=b.t/1.6,x=b.x+b.vx*b.t+Math.sin(b.t*9+b.r)*2,y=b.y-k*34;ctx.globalAlpha=.85*(1-k*k);sketch(ell(x,y,b.r,b.r*.9,8),true,960+(b.r*10|0),.3,'rgba(255,255,255,.35)','#fffaf0',1.2);}ctx.globalAlpha=1;}
 /* the player in water: only the submerged part of the body changes colour (drawn through an offscreen canvas so the tint lands on the player alone), a transparent layer flows over it, and the waves move you. */
 const pcv=document.createElement('canvas'),pctx=pcv.getContext('2d');
-function drawTinted(x,y,dy,rot,wl){const sc=Z*DPR*1.2,w=200,h=240;pcv.width=w*sc;pcv.height=h*sc;const k=ctx;ctx=pctx;ctx.setTransform(sc,0,0,sc,w/2*sc,(h-40)*sc);ctx.clearRect(-w/2,-(h-40),w,h);
+function drawTinted(x,y,dy,rot,wl){const sc=Math.round(Z*DPR*12)/10,w=200,h=240;/* resizing a canvas reallocates it, so only when the scale changed */if(pcv.width!==Math.round(w*sc)||pcv.height!==Math.round(h*sc)){pcv.width=Math.round(w*sc);pcv.height=Math.round(h*sc);}const k=ctx;ctx=pctx;ctx.setTransform(sc,0,0,sc,w/2*sc,(h-40)*sc);ctx.clearRect(-w/2,-(h-40),w,h);
  if(rot){ctx.translate(0,-4);ctx.rotate(rot);ctx.translate(0,4);}drawChar(S.char||DEFAULT_LOOK,S.eq,0,dy,P.face,true,false);
  if(rot){ctx.setTransform(sc,0,0,sc,w/2*sc,(h-40)*sc);}
  ctx.globalCompositeOperation='source-atop';ctx.beginPath();const rel=wl-y;ctx.moveTo(-w/2,rel+Math.sin(now*5)*1.6);for(let i=1;i<=20;i++)ctx.lineTo(-w/2+i*(w/20),rel+Math.sin(now*5+i*.9)*1.6);ctx.lineTo(w/2,h);ctx.lineTo(-w/2,h);ctx.closePath();ctx.fillStyle='rgba(20,60,110,.62)';ctx.fill();ctx.globalCompositeOperation='source-over';

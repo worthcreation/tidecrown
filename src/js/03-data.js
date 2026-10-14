@@ -108,7 +108,7 @@ const EQUIP={
  stache:{name:'Ash Mustache',slot:'head',desc:'Braided from ash by Brimble. Ridiculous. Magnificent. Gubbins pays an extra shell for everything you sell him.',eff:{}},
  cap:{name:'Barnacle Cap',slot:'head',desc:'Crusty, damp, weirdly lucky. Perfect catches come easier.',eff:{perfect:.12}},
  thimble:{name:'Thimble Helm',slot:'head',desc:'Sir Thimble’s spare, for bringing home the sailmaker’s kit. The fish seem to respect it. Bites come sooner.',eff:{wait:.6}},
- coat:{name:'Oilskin Coat',slot:'body',desc:'Keeps the spray off. Your glow reaches farther at night.',eff:{light:70}},
+ coat:{name:'Oilskin Coat',slot:'body',desc:'Keeps the spray off. Smells of fish oil and old voyages.',eff:{}},
  gloves:{name:'Kelp Gloves',slot:'hand',desc:'Slick outside, grippy inside. Bites hang on longer.',eff:{win:120}},
  spyglass:{name:'Brass Spyglass',slot:'trinket',desc:'Hold your finger on the sea to look far out with it.',eff:{}},
  salttin:{name:'Salt Tin',slot:'trinket',desc:'Every fish you trade is worth one more shell.',eff:{}},

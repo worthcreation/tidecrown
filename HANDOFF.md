@@ -1,4 +1,4 @@
-# Tidecrown: handoff (build 36, 14 Oct 2026)
+# Tidecrown: handoff (build 37, 14 Oct 2026)
 Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/design-rules.md. Milestones and work order: docs/roadmap.md.
 
 ## Workflow
@@ -15,6 +15,8 @@ Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/de
 - Save key driftwood_key_v1. New fields get defaults; migrations live in 04-state-inventory.
 
 ## Code map
+- 00-canvas: DPRCAP (1.5 max), DPRQ steps by .25 between 1 and the cap from PERF (perfTick in frame: ema over 26 ms for 2 s steps down, under 13 ms for 6 s steps up; paused in the title and creator); dk (night layer) at DKS .5 of the canvas. Anything new that sizes a canvas from cv must handle a resize mid-play, and never set a canvas's width or height every frame (that reallocates it).
+- 30-terrain height cache: HC (4px grid over plus/minus 1150) built by hcBuild in frame() while the title shows; hKey reads it bilinearly once done, hKeyRaw is the formula. Change the Key's shape in hKeyRaw/hKeyBase; the cache follows on reload. KS (30b) waits for HC so the two agree.
 - 02-world: Key geometry (iR, gR, wetR), DOCK, tide (tideLevel, DAY_PERIOD 24 min real time, TIDE_PERIOD half), roaming fishing spots, walkable/clampLand (SH-aware, tiny islets walkable via onIsletK).
 - 03-data: FISH, EQUIP, ITEMS registry (iget, itemName/Desc/Icon/Val/Key, stackOf; hatchet, dead wood, black, twist and ironbark wood), JOURNAL, ORIGINS, PXP (parent skill levels, 10 levels).
 - 04-state-inventory: S, migrations, skill helpers, inventory (addItem, canAdd, cnt); items keep a persistent pack cell (it.c) so gaps survive save and reload.
@@ -32,7 +34,7 @@ Current state only. Changes by build: docs/HISTORY.md. Design and story: docs/de
 - 23e-examine: groundName/groundLine (by surface: pier, wet sand, sand, scrub, grass, fog forest, summit rock, tiny island, forest floor), seaName/seaLine (shallows, reef, current, deep), youObject (you), hearthObject. Rule: everything drawn has an examine; t41-style audit: every objects() entry has onExamine.
 - 23d-quests: QUESTS table (name, giver, why, steps with where, done, spot), questTick (tracker #qtrack, auto-pin the first active quest unless unpinned), questsHTML/journalSwitch (Journal opens on Quests; jView), questMarks for the map. compass(x,y) gives directions for hints.
 - Debug: DK.tdbg(n) hides the terrain tiles (1) and/or the shadow layers (2), to find which layer an artifact lives in. Rule learned in 32: anything in a height formula that varies with angle around the island's centre must fade to nothing inland, or it meets at the centre in spokes.
-- 28-test (test only): Test tab (levels, gear, items, time via DAYOFF, tide via tideF, weather and wind via WXT including shower and monsoon, jump to a monsoon's start, peak or after, sky-reading level, wipe via WIPED). 99b-storm-test adds storm hooks and DK.skipCC() to DK.
+- 28-test (test only): Test tab (frame meter: fps, median, p95, max and the resolution in use; levels, gear, items, time via DAYOFF, tide via tideF, weather and wind via WXT including shower and monsoon, jump to a monsoon's start, peak or after, sky-reading level, wipe via WIPED). 99b-storm-test adds storm hooks and DK.skipCC() to DK.
 - 08-panel-bank: cntFmt badge; tabs Skills, Pack (true grid, pointer drag and drop: dgMove/dgDrop swap, push-apart insert, drop on a You slot to wear), Journal, You (SLOTS paperdoll, every slot tappable via canFit/wearFrom; Weapon slot holds scarf or hatchet), Map (drawMapTo sea chart; test: names and warps; play: the Key plus an unnamed smudge, no taps), bank.
 - 10-update: dark comes from the sun's height (sunUp with LAT), not a separate clock.
 - 10-update: movement (wading slows with depth; a walk into deep water turns into a swim), day/dark, Key-only logic guarded by !SH.on.
@@ -52,16 +54,19 @@ Key: tropical weather (daily showers, rare monsoons with floods, windfall, storm
 Shadow Forest (test build only for now): seven islands, reached by map warp or the swim east, long gradual swim with a mid-swim scene change, forests of twisted trees (black wood, twisted wood, ironbark), creatures with tells that Strife and Accord can each set right.
 
 ## Next
-Work order: the batch below (agreed with Ross at the build 35 handoff, all confirmed), then the rest of docs/roadmap.md. Each build starts with a short design check unless Ross has already said go.
-
-1. Swimming pickup (build 37). While swimming, things in reach are picked up automatically; the reach grows with Swimming and Foraging levels.
-2. Summit and the view (build 38). Summit to about 13 character heights (KPEAK about 217 at LK 2.4). At the cairn the camera eases out to a vista that shows the whole island and the sea round it (the player says they can see the whole island, so it must be true); it eases back in as you walk down. Seeing the whole Key on a portrait phone needs about 0.2 zoom (island about 1,800 px across), so this is a lookout moment, not the normal view. Warning: at that height the steepest slopes fold (lift changes faster than distance), and with occlusion off, things behind a ridge would draw over it; either shape the profile so nothing folds, or turn occlusion back on properly for this.
-3. Pier and stone head (build 39, confirmed by Ross). The pier moves to the lee (west) shore, in a sheltered bend, with Gubbins, Mortimer, the sign and the bollard; the stone head moves to the end of a rocky headland on the windward east, a peninsula with a cliff face to the sea and a gentler spine to walk out along. Fishing from the headland works only on calm, moonlit nights (low wind, no rain, moon up). The head's night humming points at the moon and the headland water. Existing quest spots and the start position follow.
-4. Then: the same ground surface for the dark islands; Invention design (gates the fire ladder, glass, the jelly trap, the lantern, the shell needle for sewing).
+Agreed with Ross after build 37 (each still starts with a short design check):
+1. Beach (build 38): the beach widens where it is thin (the thinnest stretches twice as wide, the widest unchanged, between scaled), and the foredune moves back with it so the flat beach really widens; dunes in natural groups (clusters, hummocks, blowouts, a ridge that breaks and doubles), not a single band. The coastline, pier, reefs and tide line stay; swales, flood basins and palms follow.
+2. Leads and a journal rework (Opus: save model): any collected information (your own thoughts, what dwellers say, things you read) logs a lead with steps that reveal as you learn them and tick themselves off; one tracked thing at the top left, quest or lead. The journal is reworked to be more intuitive and match the game's feel; design talk first.
+Then:
+3. Swimming pickup. While swimming, things in reach are picked up automatically; the reach grows with Swimming and Foraging levels.
+4. Summit and the view. Summit to about 13 character heights (KPEAK about 217 at LK 2.4). At the cairn the camera eases out to a vista that shows the whole island and the sea round it (the player says they can see the whole island, so it must be true); it eases back in as you walk down. Seeing the whole Key on a portrait phone needs about 0.2 zoom (island about 1,800 px across), so this is a lookout moment, not the normal view. Warning: at that height the steepest slopes fold (lift changes faster than distance), and with occlusion off, things behind a ridge would draw over it; either shape the profile so nothing folds, or turn occlusion back on properly for this.
+5. Pier and stone head (confirmed by Ross). The pier moves to the lee (west) shore, in a sheltered bend, with Gubbins, Mortimer, the sign and the bollard; the stone head moves to the end of a rocky headland on the windward east, a peninsula with a cliff face to the sea and a gentler spine to walk out along. Fishing from the headland works only on calm, moonlit nights (low wind, no rain, moon up). The head's night humming points at the moon and the headland water. Existing quest spots and the start position follow.
+6. Then: the same ground surface for the dark islands; Invention design (gates the fire ladder, glass, the jelly trap, the lantern, the shell needle for sewing).
 
 - Parked: the Oilskin Coat's upgrade or take-apart path, until the Invention rework. Occlusion (code kept, OCCLUDE false) until steep ground needs it.
 - Tune by play: wave rates, swim feel, depth shelves, jelly density, day and tide lengths, the current's strength, grind stroke count (48), shower and monsoon frequency (MON_P .12, MON_LEN .4 day), flood depth (the swales are shallow, about ankle deep), windfall count (2 or 3), headwind slowdown, fog thickness, cloud shade strength, slope strength and hill heights.
 - Open for Ross: action flavour lines go quiet once seen like examine lines (since build 30); keep, or let action lines repeat. Cliffs and scree when Climbing exists, each with a way around. Whether to run builds in Claude Code on a branch per build. Move the Playwright tests into the repo (tools/tests/); today they live only in each chat's sandbox.
+- Lag: after 37, ask Ross for frame meter numbers from his phone (test build, World, Frame meter on) before more optimisation; headless numbers are software drawing and overstate fill cost.
 - Testing notes: call DK.skipCC() after load in test.html to get past the creator; DK.jump(ms) moves the game clock (storms, floods, windfall follow); force clear weather in tests (fog hides things by design); the 390px quest test misses the bone fid because the test player is swimming at the reef (fixed by item 2).
 
 ## Next chat prompt

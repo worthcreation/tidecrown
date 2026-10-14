@@ -92,7 +92,7 @@ No menu, no sliders, no picking a kin or a colour from a list. The player is nev
 - Light stacks: sky light, then cloud shade, then canopy shade. Only fire and lanterns add light.
 - Canopy shade is the trees' own shadows: dense forest overlaps them into deep shade, with a few coins of sunlight through the gaps. By island: the Tangle darkest, the Thicket and Far Grove dim, Landing mixed, the Clearing open, the Fallow flat grey. Felling a canopy (Strife) lets light in; pruning, coppicing or a lit lantern post (Accord) are the tending routes.
 - Dark seas are a water property: forest runoff stains the water (tannins, silt), tea-dark to black near the dark islands. The sky does not dim for distance.
-- Night with no light of your own is near black under canopy; light sources are few today and more come as the game grows.
+- The player has no light of their own (build 37): at night only real sources light the dark (fires, Brimble, the moon, the stone head, planted Hollowmaws, clearings). Ember kin glow faintly, being ember. Night with no light of your own is near black under canopy; light sources are few today, and a carried light (the lantern, perhaps a burning brand first) comes as the game grows.
 - The cycle has to matter: Moonlappers need the moon and thin it; open ground keeps moonlight and stays navigable at night; jellies, fireflies and moonkoi read differently after dark; Kindle's three-night trust needs real nights.
 
 ## Weather (built, build 18)

@@ -262,10 +262,21 @@ const cv=document.getElementById('c');
 let ctx=cv.getContext('2d');
 const dk=document.createElement('canvas'),dctx=dk.getContext('2d');
 let W=0,H=0,DPR=1,Z=1,ZB=1,camZ=1;
-function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);dk.width=cv.width;dk.height=cv.height;ZB=Math.max(.85,Math.min(1.4,Math.min(W,H)/430));Z=ZB*camZ;}
+/* render resolution (build 37): at most 1.5 pixels per CSS pixel, and it steps down by .25 (to 1) when frames run
+   slow for a while and back up when they run fast; the hand-drawn look hides it, and filling pixels is most of the
+   cost. The night layer (dk) is drawn at half that: its edges are all soft gradients. */
+const DPRCAP=Math.min(1.5,window.devicePixelRatio||1);let DPRQ=DPRCAP;const DKS=.5;
+function resize(){DPR=DPRQ;W=innerWidth;H=innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);dk.width=Math.round(cv.width*DKS);dk.height=Math.round(cv.height*DKS);ZB=Math.max(.85,Math.min(1.4,Math.min(W,H)/430));Z=ZB*camZ;}
 addEventListener('resize',resize);resize();
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+
+/* frame-time watch: an average of the last frames; slow for 2 s drops the resolution a step, fast for 6 s raises it */
+const PERF={ema:16,slow:0,fast:0,hist:new Float32Array(240),hi:0};
+function perfTick(dt){const ms=dt*1000;PERF.hist[PERF.hi++%240]=ms;if(intro!=null||ccOn)return;PERF.ema+=(ms-PERF.ema)*.05;
+ if(PERF.ema>26){PERF.slow+=dt;PERF.fast=0;}else if(PERF.ema<13){PERF.fast+=dt;PERF.slow=0;}else{PERF.slow=0;PERF.fast=0;}
+ if(PERF.slow>2&&DPRQ>1){DPRQ=Math.max(1,DPRQ-.25);PERF.slow=0;PERF.ema=18;resize();}
+ else if(PERF.fast>6&&DPRQ<DPRCAP){DPRQ=Math.min(DPRCAP,DPRQ+.25);PERF.fast=0;PERF.ema=16;resize();}}
 /* ---------- hand-drawn primitives ---------- */
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 let now=0,boil=0;
@@ -467,7 +478,7 @@ const EQUIP={
  stache:{name:'Ash Mustache',slot:'head',desc:'Braided from ash by Brimble. Ridiculous. Magnificent. Gubbins pays an extra shell for everything you sell him.',eff:{}},
  cap:{name:'Barnacle Cap',slot:'head',desc:'Crusty, damp, weirdly lucky. Perfect catches come easier.',eff:{perfect:.12}},
  thimble:{name:'Thimble Helm',slot:'head',desc:'Sir Thimble’s spare, for bringing home the sailmaker’s kit. The fish seem to respect it. Bites come sooner.',eff:{wait:.6}},
- coat:{name:'Oilskin Coat',slot:'body',desc:'Keeps the spray off. Your glow reaches farther at night.',eff:{light:70}},
+ coat:{name:'Oilskin Coat',slot:'body',desc:'Keeps the spray off. Smells of fish oil and old voyages.',eff:{}},
  gloves:{name:'Kelp Gloves',slot:'hand',desc:'Slick outside, grippy inside. Bites hang on longer.',eff:{win:120}},
  spyglass:{name:'Brass Spyglass',slot:'trinket',desc:'Hold your finger on the sea to look far out with it.',eff:{}},
  salttin:{name:'Salt Tin',slot:'trinket',desc:'Every fish you trade is worth one more shell.',eff:{}},
@@ -1194,9 +1205,9 @@ function render(){skyLights();
   ctx.globalAlpha=.35+tw*.65;ctx.beginPath();ctx.moveTo(sx-r,sy);ctx.lineTo(sx+r,sy);ctx.moveTo(sx,sy-r);ctx.lineTo(sx,sy+r);ctx.stroke();}ctx.globalAlpha=1;}
  drawWeatherWorld();ctx.restore();drawWeatherScreen();
  if(dark>.01){dctx.setTransform(1,0,0,1,0,0);dctx.globalCompositeOperation='source-over';dctx.clearRect(0,0,dk.width,dk.height);dctx.fillStyle='rgba(22,17,62,'+dark+')';dctx.fillRect(0,0,dk.width,dk.height);
-  dctx.globalCompositeOperation='destination-out';const L=SH.on?shLights():[[P.x,P.y-20,120+eff('light')+(S.char&&S.char.kin==='ember'?45:0)],[FIRE.x,FIRE.y-10,180+Math.sin(now*9)*8]];(S.fires||[]).forEach(f=>{if(fireLit(f))L.push([f.x,f.y-10,(f.big?250:160)+Math.sin(now*9+f.x)*6]);});if(dark>.15)L.push([MOON.x,MOON.y,140]);if(dark>.25)L.push([HEAD.x,HEAD.y-18,55]);
-  for(const [x,y,r] of L){const [sx,sy]=w2s(x,y),R=r*Z*DPR;const g=dctx.createRadialGradient(sx*DPR,sy*DPR,0,sx*DPR,sy*DPR,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.5,'rgba(0,0,0,.7)');g.addColorStop(1,'rgba(0,0,0,0)');dctx.fillStyle=g;dctx.beginPath();dctx.arc(sx*DPR,sy*DPR,R,0,6.3);dctx.fill();}
-  ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(dk,0,0);ctx.setTransform(DPR,0,0,DPR,0,0);}
+  dctx.globalCompositeOperation='destination-out';/* no light of your own (build 37): only real sources light the dark; ember kin glow faintly, being ember */const L=SH.on?shLights():[...(S.char&&S.char.kin==='ember'?[[P.x,P.y-20,70]]:[]),[FIRE.x,FIRE.y-10,180+Math.sin(now*9)*8]];(S.fires||[]).forEach(f=>{if(fireLit(f))L.push([f.x,f.y-10,(f.big?250:160)+Math.sin(now*9+f.x)*6]);});if(dark>.15)L.push([MOON.x,MOON.y,140]);if(dark>.25)L.push([HEAD.x,HEAD.y-18,55]);
+  for(const [x,y,r] of L){const [sx,sy]=w2s(x,y),R=r*Z*DPR*DKS;const g=dctx.createRadialGradient(sx*DPR*DKS,sy*DPR*DKS,0,sx*DPR*DKS,sy*DPR*DKS,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.5,'rgba(0,0,0,.7)');g.addColorStop(1,'rgba(0,0,0,0)');dctx.fillStyle=g;dctx.beginPath();dctx.arc(sx*DPR*DKS,sy*DPR*DKS,R,0,6.3);dctx.fill();}
+  ctx.setTransform(1,0,0,1,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(dk,0,0,cv.width,cv.height);ctx.setTransform(DPR,0,0,DPR,0,0);}
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(Z,Z);ctx.translate(-cam.x,-cam.y);
  if(P.task&&P.task.phase==='bite'){const s=1+Math.sin(now*20)*.12;ctx.save();ctx.translate(P.x,P.y-82-liftAt(P.x,P.y));ctx.scale(s,s);otext('!',0,0,40,'#ffcf3a');ctx.restore();}
  for(const p of pops){ctx.globalAlpha=p.t>1?1-(p.t-1)/.5:1;otext(p.txt,p.x,p.y-liftAt(p.x,p.y)-p.t*30,p.size,p.col);}ctx.globalAlpha=1;
@@ -2053,7 +2064,7 @@ function shWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  /* canopies last, over everything under them: the forest hides what it covers */
  for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;const under=Math.hypot(t.x-P.x,t.y-(P.y+30))<30*t.s;ctx.globalAlpha=under?.8:1;const L=liftAt(t.x,t.y);ctx.save();ctx.translate(0,-L);drawShCanopy(t);ctx.restore();}ctx.globalAlpha=1;drawFlies(vw,vh);}
-function shLights(){const L=[[P.x,P.y-20,95+eff('light')]];MAWS.forEach(m=>{if(m.st==='open'||m.st==='lunge')L.push([m.x,m.y-46,40]);});PLANTED.forEach(p=>L.push([p.x,p.y-16,55+15*Math.min(1,p.t/8)]));L.push([HOLLOW.x-150,HOLLOW.y,70]);
+function shLights(){const L=S.char&&S.char.kin==='ember'?[[P.x,P.y-20,60]]:[];MAWS.forEach(m=>{if(m.st==='open'||m.st==='lunge')L.push([m.x,m.y-46,40]);});PLANTED.forEach(p=>L.push([p.x,p.y-16,55+15*Math.min(1,p.t/8)]));L.push([HOLLOW.x-150,HOLLOW.y,70]);
  ISLES.forEach(I=>{if(I.kind==='clearing')L.push([I.x,I.y,Math.max(I.rx,I.ry)*.9]);});return L;}
 /* Water depth. Every point of sea has a depth in body units: 0 at the waterline, about .5 at the waist, 1 where you can no longer stand, capped at 3 for the open deep. Around every shore the bottom shelves out and then drops; how long the shelf runs and how steep the drop is changes as you go round, so one stretch is a long gentle wade and the next falls away in a few steps. Out at sea there are sandbars, reefs and tiny islands, some with trees. The shallowest thing at a point wins. The water's colour is drawn from the same numbers as contour bands, so a gentle slope reads as wide bands and a drop-off as tight ones. */
 const SEA_R=()=>iR(0)+4600,FAR_X=()=>iR(0)+3600,SH_WEST=-3600,SH_IN=[-3150,380];
@@ -2272,7 +2283,7 @@ function drawSwimWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;drawCurrent();
  for(const b of bubbles){const k=b.t/1.6,x=b.x+b.vx*b.t+Math.sin(b.t*9+b.r)*2,y=b.y-k*34;ctx.globalAlpha=.85*(1-k*k);sketch(ell(x,y,b.r,b.r*.9,8),true,960+(b.r*10|0),.3,'rgba(255,255,255,.35)','#fffaf0',1.2);}ctx.globalAlpha=1;}
 /* the player in water: only the submerged part of the body changes colour (drawn through an offscreen canvas so the tint lands on the player alone), a transparent layer flows over it, and the waves move you. */
 const pcv=document.createElement('canvas'),pctx=pcv.getContext('2d');
-function drawTinted(x,y,dy,rot,wl){const sc=Z*DPR*1.2,w=200,h=240;pcv.width=w*sc;pcv.height=h*sc;const k=ctx;ctx=pctx;ctx.setTransform(sc,0,0,sc,w/2*sc,(h-40)*sc);ctx.clearRect(-w/2,-(h-40),w,h);
+function drawTinted(x,y,dy,rot,wl){const sc=Math.round(Z*DPR*12)/10,w=200,h=240;/* resizing a canvas reallocates it, so only when the scale changed */if(pcv.width!==Math.round(w*sc)||pcv.height!==Math.round(h*sc)){pcv.width=Math.round(w*sc);pcv.height=Math.round(h*sc);}const k=ctx;ctx=pctx;ctx.setTransform(sc,0,0,sc,w/2*sc,(h-40)*sc);ctx.clearRect(-w/2,-(h-40),w,h);
  if(rot){ctx.translate(0,-4);ctx.rotate(rot);ctx.translate(0,4);}drawChar(S.char||DEFAULT_LOOK,S.eq,0,dy,P.face,true,false);
  if(rot){ctx.setTransform(sc,0,0,sc,w/2*sc,(h-40)*sc);}
  ctx.globalCompositeOperation='source-atop';ctx.beginPath();const rel=wl-y;ctx.moveTo(-w/2,rel+Math.sin(now*5)*1.6);for(let i=1;i<=20;i++)ctx.lineTo(-w/2+i*(w/20),rel+Math.sin(now*5+i*.9)*1.6);ctx.lineTo(w/2,h);ctx.lineTo(-w/2,h);ctx.closePath();ctx.fillStyle='rgba(20,60,110,.62)';ctx.fill();ctx.globalCompositeOperation='source-over';
@@ -2512,8 +2523,12 @@ function testHTML(){const sec=(k,t,body)=>`<div class="tsec"><button class="tsh"
   <div class="trow"><span>Monsoon ${(()=>{const t=gNow(),c=stormAt(t),n=nextStorm(t);return c?'now':n?'in '+Math.round((n.s-t)/HOUR)+'h':'none';})()}</span><span><button data-tw="m:start">jump to start</button><button data-tw="m:peak">peak</button><button data-tw="m:after">after</button></span></div>
   <div class="trow"><span>Sky reading (Survival) <b>${survL()}</b></span><span>${[1,3,5,8].map(l=>`<button data-tw="sl:${l}">${l}</button>`).join('')}<button data-tw="sl:0">real</button></span></div>
   <div class="trow"><span>Wind ${Math.round(((WX.wa*180/Math.PI)%360+360)%360)}°</span><span><button data-tw="wt:1">turn 45°</button><button data-tw="wt:0">reset</button></span></div>
+  <div class="trow"><span>Frame meter ${PMON?'on':'off'}</span><span><button data-tw="pm:1">on</button><button data-tw="pm:0">off</button></span></div>
   <div class="trow"><span>Test save</span><span><button data-tw="wipe">Wipe and restart</button></span></div>`);
  return h+'</div>';}
+/* frame meter: median and slow frames over the last 240, the resolution in use and frames per second, so a phone's real numbers can be read off */
+let PMON=null;function perfMeter(on){if(PMON){clearInterval(PMON.t);PMON.el.remove();PMON=null;}if(!on)return;const el=document.createElement('div');el.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:4px;z-index:99;font:12px monospace;background:rgba(0,0,0,.6);color:#fff;padding:2px 6px;border-radius:6px;pointer-events:none';document.body.appendChild(el);
+ PMON={el,t:setInterval(()=>{const a=Array.from(PERF.hist).filter(x=>x>0).sort((x,y)=>x-y);if(!a.length)return;const med=a[a.length>>1],p95=a[Math.floor(a.length*.95)];el.textContent=`${Math.round(1000/med)} fps  med ${med.toFixed(0)}ms  p95 ${p95.toFixed(0)}ms  max ${a[a.length-1].toFixed(0)}ms  res ${DPR}`;},500)};}
 function testSetLevel(k,d){unlockSkill(k);const L=d===99?99:Math.max(1,Math.min(99,lv(k)+d));S.sk[k].xp=XP[L]||0;if(L===1)S.sk[k].xp=0;}
 if(MODE==='test'){
  const x=panel.querySelector('.tabs .x'),b=document.createElement('button');b.className='tab';b.dataset.t='test';b.textContent='Test';x.parentNode.insertBefore(b,x);panel.querySelector('.tabs').classList.add('t6');
@@ -2523,7 +2538,7 @@ if(MODE==='test'){
   else if(D.tl){const [k,d]=D.tl.split(':');testSetLevel(k,+d);}
   else if(D.tg){const sl=EQUIP[D.tg].slot;S.eq[sl]=S.eq[sl]===D.tg?null:D.tg;}
   else if(D.ti){const [id,n]=D.ti.split(':');if(+n===0)takeItem(id,cnt(id));else if(!addItem(id,+n))toast('No room in the pack');}
-  else if(D.tw){const [k,v]=D.tw.split(':');if(k==='d')DAYOFF=v==='0'?0:DAYOFF+(+v)*DAY_PERIOD/24;else if(k==='t')tideF=v==='live'?null:+v;else if(k==='w')WXT.force=v==='auto'?null:v;else if(k==='m'){WXT.force=null;const t=gNow(),st=stormAt(t)||nextStorm(t),tg=v==='start'?st.s-60000:v==='peak'?st.s+.5*(st.e-st.s):st.e+HOUR;DAYOFF+=tg-t;WFC=null;}else if(k==='sl')WXL=+v;else if(k==='wt')WXT.turn=v==='0'?0:WXT.turn+Math.PI/4;else if(k==='wipe'){WIPED=true;try{localStorage.removeItem(SAVE);}catch(err){}location.reload();return;}}
+  else if(D.tw){const [k,v]=D.tw.split(':');if(k==='d')DAYOFF=v==='0'?0:DAYOFF+(+v)*DAY_PERIOD/24;else if(k==='t')tideF=v==='live'?null:+v;else if(k==='w')WXT.force=v==='auto'?null:v;else if(k==='m'){WXT.force=null;const t=gNow(),st=stormAt(t)||nextStorm(t),tg=v==='start'?st.s-60000:v==='peak'?st.s+.5*(st.e-st.s):st.e+HOUR;DAYOFF+=tg-t;WFC=null;}else if(k==='sl')WXL=+v;else if(k==='pm')perfMeter(v==='1');else if(k==='wt')WXT.turn=v==='0'?0:WXT.turn+Math.PI/4;else if(k==='wipe'){WIPED=true;try{localStorage.removeItem(SAVE);}catch(err){}location.reload();return;}}
   else return;
   save();const st=pbody.querySelector('.tbody'),y=st?st.scrollTop:0;renderPanel();const nb=pbody.querySelector('.tbody');if(nb)nb.scrollTop=y;});}
 /* ---------- weather ----------
@@ -2786,7 +2801,16 @@ function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)
  return h;}
 const flatAt=(x,y,cx,cy,r0,r1,H)=>{const cr=Math.hypot(x-cx,y-cy);return cr<r1?1-ss(r0,r1,cr):0;};
 let SHELF=null,POOLH=null;
-function hKey(x,y){let h=hKeyBase(x,y);if(h===0)return 0;
+/* height cache (build 37): the Key's height field sampled every 4px once, built a few ms a frame while the title
+   shows; hKey reads it with bilinear interpolation, which is exact enough for a field this smooth and many times
+   cheaper than the sums below (shading tiles alone asked for ~165,000 heights a tile). Until it is done, hKey
+   computes directly. */
+const HCS=4,HCR=1150;let HC=null;
+function hcBuild(ms){if(!HC){const n=Math.ceil(2*HCR/HCS)+2;HC={x0:-HCR,n,a:new Float32Array(n*n),row:0,done:false};}if(HC.done)return true;const t0=performance.now(),n=HC.n,a=HC.a;
+ while(HC.row<n&&performance.now()-t0<ms){const j=HC.row,y=HC.x0+j*HCS;for(let i=0;i<n;i++)a[j*n+i]=hKeyRaw(HC.x0+i*HCS,y);HC.row++;}if(HC.row>=n)HC.done=true;return HC.done;}
+function hKey(x,y){if(HC&&HC.done){const fx=(x-HC.x0)/HCS,fy=(y-HC.x0)/HCS,n=HC.n;if(!(fx>=0&&fy>=0&&fx<n-1&&fy<n-1))return 0;const i=fx|0,j=fy|0,u=fx-i,v=fy-j,a=HC.a,k=j*n+i;
+ return (a[k]*(1-u)+a[k+1]*u)*(1-v)+(a[k+n]*(1-u)+a[k+n+1]*u)*v;}return hKeyRaw(x,y);}
+function hKeyRaw(x,y){let h=hKeyBase(x,y);if(h===0)return 0;
  if(SHELF===null){SHELF=hKeyBase(FIRE.x,FIRE.y);POOLH=hKeyBase(POOL.x,POOL.y)-3;}
  let k=flatAt(x,y,FIRE.x,FIRE.y,60,150);if(k)h=h*(1-k)+SHELF*k;
  k=flatAt(x,y,POOL.x,POOL.y,45,95);if(k)h=h*(1-k)+POOLH*k;
@@ -2872,8 +2896,9 @@ function tileFor(ti,tj){const scn=SH.on?'s':'k',k=scn+ti+','+tj;let T=TTILES[k];
   v+=Math.max(-1,Math.min(1,h0/40))*.05;
   const o=(j*TN+i)*4;if(v<0){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.34,-v)*255;}else{D[o]=255;D[o+1]=244;D[o+2]=210;D[o+3]=Math.min(.2,v)*255;}}
  g.putImageData(im,0,0);return T;}
-var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;tBudget=SH.on?1:2;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
+let tMiss=0;var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;/* one tile of new light a frame; more while some visible tile has none yet */tBudget=tMiss?3:1;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
  for(let tj=Math.floor((cam.y-vh)/TT);tj<=Math.floor((cam.y+vh+maxLift())/TT);tj++)for(let ti=Math.floor((cam.x-vw)/TT);ti<=Math.floor((cam.x+vw)/TT);ti++){const T=tileFor(ti,tj);if(T.any)vis.push(T);}
+ tMiss=vis.some(T=>!T.cv&&!T.nv)?1:0;
  /* swap when every visible tile has the new light (or has never had any) */
  if(vis.every(T=>T.key===sk||T.nkey===sk))for(const T of vis)if(T.nkey===sk&&T.key!==sk){const c=T.cv;T.cv=T.nv;T.nv=c;T.key=sk;T.nkey=null;}
  else for(const T of vis)if(!T.cv&&T.nkey){T.cv=T.nv;T.nv=null;T.key=T.nkey;T.nkey=null;}
@@ -2930,7 +2955,7 @@ function chain(segs){const key=p=>Math.round(p[0]*2)+','+Math.round(p[1]*2),adj=
   if(line.length>=4)out.push(line.filter((p,i)=>i%2===0||i===line.length-1));}
  return out;}
 /* drawing the Key's ground: the surface image, then the ink. Fallback: build 23's outlines */
-function drawLandKey(outline){if(!ksBuild(10)){sketch(sandPts,true,1,4,'#f3d27a',outline,3.5);sketch(grassLifted(),true,2,4,'#86c25e',INK,3);return;}
+function drawLandKey(outline){if(!(HC&&HC.done)||!ksBuild(intro!=null||ccOn?12:4)){sketch(sandPts,true,1,4,'#f3d27a',outline,3.5);sketch(grassLifted(),true,2,4,'#86c25e',INK,3);return;}
  ctx.imageSmoothingEnabled=true;ctx.drawImage(KS.cv,KS.x0,KS.y0,KS.w*KS.res,KS.h*KS.res);
  const I=KS.ink,ink=(runs,col,lw)=>{for(const r of runs)sketch(r,r.length>8&&Math.hypot(r[0][0]-r[r.length-1][0],r[0][1]-r[r.length-1][1])<6,r.length,1.2,null,col,lw);};
  ink(I.grass,INK,3);ink(I.rock,'rgba(42,33,64,.6)',2);ink(I.coast,outline,3.5);ctx.globalAlpha=.55;ink(I.crests,INK,2.2);ctx.globalAlpha=1;}
@@ -2952,9 +2977,9 @@ function drawOcc(x,y,fn,soft){const L=liftAt(x,y),hz=occludedBy(x,y);
  const sy=((hz-cam.y)*Z+H/2)*DPR;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.beginPath();ctx.rect(0,sy,cv.width,cv.height-sy);ctx.clip();
  ctx.globalAlpha=.3;ctx.drawImage(OC,0,0);const o=1.5*DPR;ctx.globalAlpha=.22;for(const [dx,dy] of [[o,0],[-o,0],[0,o],[0,-o]])ctx.drawImage(OC,dx,dy);ctx.restore();}
 function softFn(fn){return fn===drawSwimmer||fn===drawCrab||fn===drawGull||fn===drawGubbins||fn===drawKindle;}
-const BUILD=36;
+const BUILD=37;
 let last=performance.now(),fdt=1/60;
-function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
+function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(!(HC&&HC.done))hcBuild(ccOn||intro!=null?14:8);perfTick(dt);if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 sndUI();if(S.char)begin();else openCreator('new');
 if(MODE==='test')window.DK={BUILD,S,P,trees,chopPer:()=>chopPer(),nowT:()=>now,w2s:(x,y)=>w2s(x,y),s2w:(x,y)=>s2w(x,y),MF:MAINFIRE,enterCook:f=>enterCook(f||MAINFIRE),addXP,lv,hasSkill,SW,swimTo,swimStroke,seaDepth,inSea,canStep,get jellies(){return jellies;},get floaters(){return floaters;},SH,shEnter,shLeave,KFEAT:()=>KFEAT,SHFEAT:()=>SHFEAT,depthAt,MAWS,MOSS,DEAD,PLANTED,BOLLARD,SC,sfx,SND,get MAPHIT(){return MAPHIT;},get AC(){return AC;},sndInit,scarfMove,scarfAt,scarfSlide,scarfTargets,reach,LAPPERS,ISLES,BRIDGES,shWalkable,shTrees,treeNear,cellOf,cellLand,zoneOf,inMaze,leafOf,BREAKS,SURF,spots,spawnBreak,coverBreak,setTide:v=>{tideF=v;},tideLevel,get C(){return C;},clams:()=>clams(),get GRD(){return GRD;},curK,kitSpot,tq,tdbg:v=>{TDBG=v},bub:()=>bub,clearBub:()=>{bub=null},KS,ksFront,occludedBy,liftAt,trees,KPALMS,setDay:v=>{DAYOFF=0;const q=Date.now()/DAY_PERIOD;DAYOFF=((v-q%1+1)%1)*DAY_PERIOD;},get SKY(){return SKY;},get WX(){return WX;},tstage,harvestObj,harvestFinish,harvestReady,terrH,tgrid,WXT,fogR,fn:{objAt,thimbleSalute,takeKit,routeTo,walkStraight,startGrind,grindStroke,pryClam,hook,startFish,rollFish,finishPan,panTap,buildFire,feedFire,burnOut,scoopAsh,openBank,deposit,withdraw,sellPick,renderSell,dropGround,pickGround,addItem,cnt,objects,openPanel,renderPanel,strike,startChop,finishChop,feedWick,offerAsh,kindleTick,ashTalk,talkGull,saluteCrab,exitCook,fuel}};

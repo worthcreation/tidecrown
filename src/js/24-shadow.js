@@ -173,5 +173,5 @@ function shWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  /* canopies last, over everything under them: the forest hides what it covers */
  for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;const under=Math.hypot(t.x-P.x,t.y-(P.y+30))<30*t.s;ctx.globalAlpha=under?.8:1;const L=liftAt(t.x,t.y);ctx.save();ctx.translate(0,-L);drawShCanopy(t);ctx.restore();}ctx.globalAlpha=1;drawFlies(vw,vh);}
-function shLights(){const L=[[P.x,P.y-20,95+eff('light')]];MAWS.forEach(m=>{if(m.st==='open'||m.st==='lunge')L.push([m.x,m.y-46,40]);});PLANTED.forEach(p=>L.push([p.x,p.y-16,55+15*Math.min(1,p.t/8)]));L.push([HOLLOW.x-150,HOLLOW.y,70]);
+function shLights(){const L=S.char&&S.char.kin==='ember'?[[P.x,P.y-20,60]]:[];MAWS.forEach(m=>{if(m.st==='open'||m.st==='lunge')L.push([m.x,m.y-46,40]);});PLANTED.forEach(p=>L.push([p.x,p.y-16,55+15*Math.min(1,p.t/8)]));L.push([HOLLOW.x-150,HOLLOW.y,70]);
  ISLES.forEach(I=>{if(I.kind==='clearing')L.push([I.x,I.y,Math.max(I.rx,I.ry)*.9]);});return L;}

@@ -53,7 +53,7 @@ Every task should have at least a chance of reward. Check a missed fishing strik
 ## Given today (audit)
 Judged against the rules: equippables earned behind a task; bought things never dead ends; each item keeps its own source.
 - Origin keepsakes (spyglass, salt tin, whisper shell, blank map) are equipped free at creation. Fails. Fix with The opening: earned in the starting areas.
-- Oilskin Coat, bought from Gubbins for shells: allowed as a finished good, but today it is a dead end. Needs an upgrade, take-apart or repair path (re-oiling with jelly oil, patching with sewing, cloth for a sail patch).
+- Oilskin Coat, bought from Gubbins for shells: allowed as a finished good, but today it is a dead end, and since build 37 it has no effect (its light was removed: a coat does not glow). Needs an upgrade, take-apart or repair path (re-oiling with jelly oil, patching with sewing, cloth for a sail patch).
 - Glitter bait: a material used up per cast; passes.
 - Barnacle Cap and Kelp Gloves: rare fishing drops gated by level and spot; pass.
 - Ash Mustache: Brimble makes it from ash you bring; passes.
