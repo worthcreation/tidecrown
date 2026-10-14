@@ -19,16 +19,17 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - Fixes and scale (build 28): the Key 67% larger with a summit about seven characters up, more trees and palms, dawn moon shadows gone, tighter tap areas, no-hatchet taps walk, bubbles lifted, see-through and paged, long lines shortened, a hearth ring for Brimble, outcrop behind the tripod, softer ground colour edges.
 - Fixes (build 29): real sun path (no noon flip), longer bubbles (three lines a page), slower clouds, world-fixed fog wisps, summit cap sized to the island, wash-ups kept to the beach (old ones moved down), curved vegetation edges.
 - Taps show only new lines, a quest log with tracking and map marks, a rounded summit with a cairn (build 30).
+- 6b Weather, tropical (build 36): daily showers, rare monsoons with floods, fish and heavier wash-ups ashore, windfall, Brimble's warning, sky reading by Survival level.
 
 ## Buildable now (the approved pipeline, in order)
 | # | Milestone | Holds |
 |---|---|---|
-| 6b | Weather, tropical: daily showers, rare monsoons with flooding, fish and heavier wash-ups ashore, windfall, Brimble's warning, weather reading by Survival level | Rare storms stronger than squalls fell old trees; fallen trunks and branches to gather; downed trees block paths until chopped, gone around or climbed; on the Key, branches and maybe one tree |
+| 6c | Swimming pickup | While swimming, things in reach are picked up; reach grows with Swimming and Foraging |
 
 After the pipeline: design Invention, then the made-things milestones it unlocks.
 
 ## Next batch (agreed at the build 35 handoff)
-- 6b Weather, tropical (above). 6c Swimming pickup by reach (Swimming and Foraging levels). 6d Summit to about 13 character heights with a lookout vista at the cairn. 6e Pier to the lee shore and the stone head onto an east headland, moonlit-calm fishing there (confirm).
+- 6b Weather, tropical: done in 36. 6c Swimming pickup by reach (Swimming and Foraging levels). 6d Summit to about 13 character heights with a lookout vista at the cairn. 6e Pier to the lee shore and the stone head onto an east headland, moonlit-calm fishing there (confirm).
 
 ## Needs design first
 | # | Milestone | Missing |
@@ -44,7 +45,6 @@ After the pipeline: design Invention, then the made-things milestones it unlocks
 | 15 | Dwellers and standing | Name, relocation rules, shelters, jobs, staged decay |
 | 16 | The Hollow | Its answer is unwritten |
 | 17 | Delving | Underground, untouched |
-| Open | Survival skill: where it sits and how it is earned; it governs reading the weather |
 | Open | Salt's second route | Salt has one way to get it today |
 
 ## Audit to do: work that earns nothing

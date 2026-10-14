@@ -37,7 +37,7 @@ function methodPage(sub,m){const M=METHODS[sub][m],D=SUBS[sub];
  const got=Object.keys(S.st.bursts||{}).filter(x=>x.startsWith(sub+':')).map(x=>x.slice(sub.length+1)),b=M.bursts.filter(x=>got.includes(x));
  h+=`<div class="next">Bursts found this way: ${b.length?b.join(', '):'none yet'}.${M.bursts.length>b.length?' Others are still hidden in it.':''}</div>`;return h;}
 function parentPage(k){const D=SKILLS[k];
- return `<button class="back2" data-skb="1">‹ All skills</button><div class="skill">${skBar(k)}</div><p class="sdesc pd">${D.desc}</p>`+D.subs.map(subRow).join('');}
+ return `<button class="back2" data-skb="1">‹ All skills</button><div class="skill">${skBar(k)}</div><p class="sdesc pd">${D.desc}</p>`+D.subs.map(subRow).join('')+(ACH[k]?`<p class="sdesc${ddSel?' dd':''}">${ddSel&&ddSel.startsWith('a:'+k+':')?ddText(ddSel):'Achievements of its own:'}</p><div class="ach">`+ACH[k].map(([n,,f],i)=>{const ok=f(),key='a:'+k+':'+i;return `<button class="${ok?'ok':''}${ddSel===key?' sel':''}" data-dd="${key}"><span class="ck">${ok?'✓':''}</span><b>${n}</b></button>`;}).join('')+'</div>':'');}
 function skillPage(k){const D=SUBS[k],L=lv(k),B=buffOn();
  let h=`<button class="back2" data-skb="1">‹ ${SKILLS[D.p].name}</button><div class="skill">${skBar(k)}</div><p class="sdesc${ddSel?' dd':''}">${ddSel?ddText(ddSel):D.desc}</p>`;
  if(METHODS[k])h+=`<div class="sh">Ways</div><div class="ways">${Object.keys(METHODS[k]).map(m=>methRow(k,m)).join('')}</div>`;

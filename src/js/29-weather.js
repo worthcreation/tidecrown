@@ -1,6 +1,6 @@
 /* ---------- weather ----------
    Two layers, both pure functions of time and place, nothing saved: everyone sees the same sky.
-   Base: a trade wind from the east that wanders, cloud that travels with it, squalls now and then, dawn fog.
+   Base: a trade wind from the east that wanders, cloud that travels with it, a light shower most afternoons, a rare monsoon (29b-storm), dawn fog.
    Terrain modifiers: open sand burns fog off fast, grass slower, the sea holds it, the cold dark water over the
    current holds a sea fog that rarely clears, dense forest holds fog longest, clearings clear first, the Fallow worst.
    WXT is the test build's override. */
@@ -8,16 +8,16 @@ const WXT={force:null,turn:0};
 let WX={wa:Math.PI,ws:.4,cover:.3,rain:0,fog:0,seaFog:0};
 function hash1(n){const s=Math.sin(n*127.1+311.7)*43758.5453;return s-Math.floor(s);}
 function wxUpdate(){const t=Date.now()/1000,sm=x=>Math.max(0,Math.min(1,x));
- /* squalls: a 15 minute slot holds one about one time in seven; rain swells, peaks and passes in about five minutes */
- const slot=Math.floor(t/900),ph=(t%900)/900;let rain=hash1(slot)<.14?sm(1-Math.abs(ph-.45)/.17):0;rain=Math.pow(rain,.7);
- let cover=sm(.28+.22*Math.sin(t/1100)+.14*Math.sin(t/333+1)+rain*.8);
+ /* tropical (build 36): a light afternoon shower most days, a rare monsoon (29b-storm). Both on the game clock. */
+ const m=WXT.force?0:monNow(),pre=WXT.force?0:preStorm(),gt=gNow(),stA=WXT.force?null:stormAt(gt);let rain=Math.max(WXT.force?0:.45*showerK(gt),Math.pow(m,.8));
+ let cover=sm(.28+.22*Math.sin(t/1100)+.14*Math.sin(t/333+1)+rain*.8+pre*.25+m);
  /* dawn radiation fog: some mornings none, some thick; builds before sunrise, burns off by late morning */
  const amt=hash1(S.dayN*3.7+1),a=amt<.35?0:(amt-.35)/.65,d=S.day;let fog=0;
  if(d>.16&&d<.42)fog=a*(d<.23?(d-.16)/.07:d<.29?1:1-(d-.29)/.13);
  let seaFog=sm(.35+.3*Math.sin(t/1500+2)+.5*fog);
- let wa=Math.PI+.55*Math.sin(t/1900+1)+.25*Math.sin(t/640),ws=sm(.32+.22*Math.sin(t/1300)+.12*Math.sin(t/410+2)+rain*.45);
- const F=WXT.force;if(F==='clear'){cover=.05;rain=0;fog=0;seaFog=0;}else if(F==='cloudy'){cover=.85;rain=0;}else if(F==='fog'){fog=1;seaFog=1;}else if(F==='squall'){rain=1;cover=1;ws=.85;}
- wa+=WXT.turn;WX={wa,ws,cover,rain,fog,seaFog};}
+ let wa=Math.PI+.55*Math.sin(t/1900+1)*(1-m)+.25*Math.sin(t/640)+(stA?stormVeer(stA,gt)*m:0),ws=sm(.32+.22*Math.sin(t/1300)+.12*Math.sin(t/410+2)+rain*.3+pre*.15+m*.5+m*.12*Math.sin(t*1.7));
+ const F=WXT.force;if(F==='clear'){cover=.05;rain=0;fog=0;seaFog=0;}else if(F==='cloudy'){cover=.85;rain=0;}else if(F==='fog'){fog=1;seaFog=1;}else if(F==='shower'){rain=.45;cover=.8;}else if(F==='monsoon'){rain=1;cover=1;ws=.98;}
+ wa+=WXT.turn;WX={wa,ws,cover,rain,fog,seaFog,mon:F==='monsoon'?1:m,pre};}
 /* how much fog sits at a place, 0 to 1 */
 /* valleys hold fog, high ground sheds it */
 function fogAt(x,y){const cap=capAt(x,y)*.85,th=terrH(x,y),tk=(1+Math.min(1,Math.max(0,-th/30))*.6)*(1-Math.min(1,Math.max(0,th/80))*.5);return Math.min(1,Math.max(cap,fogAt0(x,y)*tk));}
@@ -45,7 +45,7 @@ function cloudK(c){return Math.max(0,Math.min(1,(WX.cover-c.h)/.08));}
 function cloudShapes(){const out=[];for(const c of CLOUDS){const k=cloudK(c);if(k<.03)continue;const [x,y]=cloudPos(c);if(Math.abs(x-cam.x)>W/Z/2+c.rx+60||Math.abs(y-cam.y)>H/Z/2+c.ry+60)continue;
  for(const L of c.lobes)out.push(L.length===4?[x+L[0]*k,y+L[1]*k,L[2]*k,L[3]*k,0]:[x+L[0]*k,y+L[1]*k,L[2]*k,L[2]*.62*k,0]);}return out;}
 function cloudOver(x,y){for(const c of CLOUDS){if(cloudK(c)<.5)continue;const [cx,cy]=cloudPos(c);if(((x-cx)/c.rx)**2+((y-cy)/c.ry)**2<1)return 1;}return 0;}
-function drawWeatherWorld(){const sun=SKY.sun,sa=sun?Math.min(1,sun.a/.24):0;
+function drawWeatherWorld(){const sun=SKY.sun,sa=sun?Math.min(1,sun.a/.24):0;drawStormGulls();
  /* the cap on the summit, seen from below: soft white over the hilltop */
  if(!SH.on){const c=capAmt();if(c>.05){const L=liftAt(HILL.x,HILL.y),sh=[];for(let i=0;i<9;i++){const a=i/9*6.2832+Date.now()/90000,rr=(60+30*Math.sin(i*1.7))*KSC;sh.push([HILL.x+Math.cos(a)*rr,HILL.y-L-40+Math.sin(a)*rr*.45,(70+20*Math.sin(i*2.3))*KSC,40*KSC,0]);}layer(sh,.42*c,'#f4f6f8');}}
  /* the odd low cloud passes below the view: a soft white cumulus, not often */
@@ -59,11 +59,12 @@ function drawWeatherScreen(){const r=WX.rain;
   for(let i=0;i<n;i++){const sx=((i*97.3+t*(60+wx*20))%(W+80))-40,sy=((i*53.7+t*620*(.8+(i%5)*.1))%(H+60))-30;ctx.moveTo(sx,sy);ctx.lineTo(sx+wx,sy+14);}ctx.stroke();
   ctx.fillStyle='rgba(60,70,90,'+(.12*r)+')';ctx.fillRect(0,0,W,H);}
  const f=fogAt(P.x,P.y);if(f>.04){const [sx,sy]=w2s(P.x,P.y-20),R=fogR()*Z;const g=ctx.createRadialGradient(sx,sy,R*.25,sx,sy,R);g.addColorStop(0,'rgba(232,238,242,0)');g.addColorStop(1,'rgba(232,238,242,'+(.92*f)+')');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}}
-/* rain on the world: small fires drown, big ones burn down faster, Brimble keeps his hearth; drying salt washes off */
+/* rain on the world: a light shower makes small fires hiss and burn down faster; a monsoon drowns them in seconds and
+   big ones burn down fast; Brimble keeps his hearth (lid on). Drying salt washes off and cannot form while it rains. */
 let rainSaid=0;
-function wxTick(dt){wxUpdate();cloudDrift(dt);const r=WX.rain;if(r<.3)return;
- if(!SH.on){for(const f of S.fires||[]){if(f.main||!fireLit(f))continue;f.until-=dt*1000*r*(f.big?2:7);if(!fireLit(f)&&!rainSaid){rainSaid=1;think('The rain put my fire out.');}}
+function wxTick(dt){wxUpdate();cloudDrift(dt);stormTick(dt);const r=WX.rain;if(r<.3)return;
+ if(!SH.on){for(const f of S.fires||[]){if(f.main||!fireLit(f))continue;f.until-=dt*1000*r*r*(f.big?2.5:9);if(!fireLit(f)&&!rainSaid){rainSaid=1;think('The rain put my fire out.');}}
   for(const s of SURF)if(s.st==='sparkle')s.st='dry';}
- if(r>.6&&!S.st.rainHint){S.st.rainHint=1;think('Rain. Squalls blow through here fast. Fires will not like it.');}}
+ if(r>.35&&!S.st.rainHint){S.st.rainHint=1;think('Rain. It comes most afternoons here, short and warm. Fires won’t like it.');}}
 /* waves: they still come at every shore, but the big ones come from where the wind blows */
 function waveAlign(a0){return .5+.5*Math.cos(angDiff(a0,WX.wa+Math.PI));}

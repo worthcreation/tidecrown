@@ -13,6 +13,7 @@ function drawFireBody(fr){const {x,y}=fr,sd=(fr.seed||0)*7,hot=C&&C.fr===fr?C.he
   else{dot(x-4,ey,2);dot(x+4,ey,2);const talking=(C&&C.fr===fr&&C.sayT>0)||(dlgOn&&curWho==='Brimble');
    if(talking)blob(x,ey+6,2.6,1.4+Math.abs(Math.sin(now*14))*2.2,76,INK,0);else ln([[x-3,ey+6],[x+3,ey+5.5]],77,1.8,INK,.2);}}}
 function talkWick(){const first=!S.metWick;S.metWick=1;discover('wick');
+ {const sl=first?null:brimbleStormLine();if(sl){discover('monsoon');say('Brimble',sl,wickOpts());return;}}
  if(!hasSkill('cooking')){say('Brimble',first?'Hm? Oh. An audience. Brimble, galley flame of the Grinning Gull, finest ship that ever sank. Forty years I fed that crew. Now I feed myself, badly, from a teapot. Bring me driftwood from the beach and I’ll teach you to cook. Properly.':
   ((S.wood||0)>0?'Is that driftwood I smell? Don’t tease a stove.':'Still starving. Driftwood. Flames don’t beg, as a rule. Consider this the exception.'),wickOpts());return;}
  if(!rawCount()){say('Brimble',pick(['Nothing to cook? The sea’s full of fish. Catch one and bring it here.','Empty hands, empty pans. Go fish, then tap me.']),wickOpts());return;}

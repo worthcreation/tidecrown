@@ -9,7 +9,7 @@ function hearthGuide(){if(!hasSkill('cooking')||(S.st.cooked||0)>0||C||ccOn||dlg
 /* skill tree: five skills, each a family of specific subskills. XP lives on subskills (S.sk[sub]={xp}); a skill's XP is the sum of its subskills plus 50 per achievement done. A skill or subskill is unlocked when its entry exists; unbuilt ones carry only name and clue. */
 const SKILLS={
  gathering:{name:'Gathering',icon:'basket',col:'#6fd6ff',clue:'The island gives to those who wait.',desc:'Everything the island gives up, if you know how to ask. Patience, rhythm and quick hands.',subs:['fishing','woodcutting','foraging','growing']},
- survival:{name:'Survival',icon:'flame',col:'#ffb347',clue:'It starts with a spark. Someone on this island is very hungry.',desc:'Keep yourself fed and warm, and a crew will follow. Juggle the heat and nothing goes cold.',subs:['cooking','firemaking'],
+ survival:{name:'Survival',icon:'flame',col:'#ffb347',clue:'It starts with a spark. Someone on this island is very hungry.',desc:'Keep yourself fed and warm, and a crew will follow. Juggle the heat and nothing goes cold. The higher it climbs, the earlier you read a storm in the sky.',subs:['cooking','firemaking'],
   unl:{3:'You can build your own fires',6:'Something on the beach starts blinking at night'}},
  invention:{name:'Invention',icon:'hatchet',col:'#a8d07e',clue:'Something sharp, something to hold, something to tie them.',desc:'Fit what you gathered into tools, then fit tools into grander things. No clock, just the right parts in the right order.',subs:['tinkering','shipwright'],
   unl:{8:'Brimble has a project in mind for your wood'}},
@@ -51,6 +51,7 @@ const METHODS={
 const ACH={
  fishing:[['First bite','Catch your first fish',()=>S.catches>=1],['Steady hand','Land 10 perfect catches',()=>(S.st.perf||0)>=10],['Wild water','Catch a Grumpfish',()=>!!S.journal.fish_grump],['Letters from C.','Find a message in a bottle',()=>S.bottles>=1],['Moonlit','Catch a Moonkoi',()=>!!S.journal.fish_koi]],
  woodcutting:[['First log','Earn a log from a wobble tree',()=>!!S.journal.wobblelog],['In the groove','Land 10 clean chops in a row',()=>!!S.st.groove],['Bonfire','Build a bonfire',()=>!!S.journal.bonfire]],
+ survival:[['Saw it coming','Read a monsoon in the sky before it breaks',()=>!!S.st.sawstorm],['Rode it out','Be on the Key when a monsoon peaks',()=>!!S.st.rodeout],['Windfall','Clear a tree the storm brought down',()=>(S.st.windfall||0)>=1],['Storm harvest','Pick up a fish the storm threw ashore',()=>(S.st.stormfish||0)>=1]],
  cooking:[['Golden','Cook a fish golden on both sides',()=>(S.st.perfC||0)>=1],['Smoke signals','Discover smoky fish',()=>!!S.journal.smoky],['Three pans','Keep three pans going at once',()=>!!S.st.pans3]],
  firemaking:[['Kindled','Feed Brimble',()=>hasSkill('cooking')],['Keeper of flames','Build three fires of your own',()=>(S.st.fires||0)>=3],['Ember pearl','Find an ember pearl in the ashes',()=>!!S.journal.pearl]],
  foraging:[['Beachcomber','Grab your first wash-up',()=>(S.st.washes||0)>=1],['Salt of the sea','Scrape salt off wet rock',()=>(S.st.pinches||0)>=1],['Quick hands','Grab 25 wash-ups before the backwash',()=>(S.st.washes||0)>=25],['Springy','Catch a wobblewood log on the tide',()=>!!(S.st.found&&S.st.found.wobble)]],

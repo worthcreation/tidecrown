@@ -3,10 +3,10 @@ function dropGround(it){S.ground=S.ground||[];const k=S.ground.filter(g=>Math.hy
 function pickGround(g){const i=(S.ground||[]).indexOf(g);if(i<0)return;const it=g.it,n=it.n||1;
  if(stackOf(it.id)){const got=addItem(it.id,n);if(!got){think('No room in my pack.');return;}if(got<n){it.n=n-got;think('My pack only fit some of it.');}else S.ground.splice(i,1);}
  else{if(S.inv.length>=PACK){think('No room in my pack.');return;}const c=Object.assign({},it);delete c.n;S.inv.push(c);S.ground.splice(i,1);}
- flies.push({id:'misc',img:itemIcon(it),x0:g.x,y0:g.y,t:0});save();}
+ flies.push({id:'misc',img:itemIcon(it),x0:g.x,y0:g.y,t:0});if(g.storm&&S.ground.indexOf(g)<0)stormFishPicked(g);save();}
 function drawGround(){const T=Date.now();for(const g of (S.ground||[])){if(Math.abs(g.x-cam.x)>W/Z/2+60||Math.abs(g.y-cam.y)>H/Z/2+60)continue;drawOcc(g.x,g.y,()=>drawGroundOne(g,T),true);}}
 function drawGroundOne(g,T){{const left=g.exp-T;if(left<20000&&Math.floor(now*5)%2)return;
- shadow(g.x,g.y+2,10,3.5);ctx.drawImage(iconImg(itemIcon(g.it)),g.x-12,g.y-20+Math.sin(now*2+g.x)*1.2,24,24);if((g.it.n||1)>1)otext(String(g.it.n),g.x+11,g.y-2,12,'#fff');}}
+ shadow(g.x,g.y+2,10,3.5);if(g.storm){/* a stranded fish flops */const f=Math.max(0,Math.sin(now*5+g.x))**3,a=Math.sin(now*9+g.y)*.5*f;ctx.save();ctx.translate(g.x,g.y-10-f*8);ctx.rotate(a);ctx.drawImage(iconImg(itemIcon(g.it)),-12,-10,24,24);ctx.restore();}else ctx.drawImage(iconImg(itemIcon(g.it)),g.x-12,g.y-20+Math.sin(now*2+g.x)*1.2,24,24);if((g.it.n||1)>1)otext(String(g.it.n),g.x+11,g.y-2,12,'#fff');}}
 function drawGull(){const {x,y}=GULL,b=Math.sin(now*2.2)*1.2,talk=(dlgOn&&curWho==='Mortimer Gull')||bankOpen;
  shadow(x,y+3,14,4);ln([[x,y],[x,y-26]],1001,8,INK,.6);ln([[x,y],[x,y-26]],1001,4.5,'#a8703f',.6);sketch(rrPts(x-17,y-22,34,13,3),true,1002,1,'#e8d6b0',INK,2.4);ln([[x-10,y-16],[x+9,y-16]],1003,1.8,INK,.8);
  const gy=y-38+b;ln([[x-3,y-27],[x-3,gy+8]],1004,1.8,'#e8a23a',.2);ln([[x+3,y-27],[x+3,gy+8]],1005,1.8,'#e8a23a',.2);

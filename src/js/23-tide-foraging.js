@@ -6,7 +6,7 @@ function drawWet(){const t=tideLevel();if(t>.985)return;sketch(wetPts,true,1,4,'
 function drawFoam(){const t=tideLevel();ctx.setLineDash([16,12]);ctx.lineDashOffset=-now*8;ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=3;ctx.beginPath();
  for(let i=0;i<NP;i++){const a=i/NP*6.2832,r=iR(a)+(1-t)*TIDE_REACH+9+Math.sin(now*1.4+a*7)*3;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.closePath();ctx.stroke();ctx.setLineDash([]);}
 
-/* breaking waves: a swell builds offshore, foam runs up the beach, and whatever it carried is lying there when it pulls back. The next wave over an item may take it again. Everything on the sand comes from this. S.shore holds what the beach has right now. */
+/* breaking waves: a swell builds offshore, foam runs up the beach, and whatever it carried is lying there when it pulls back. The next wave over an item may take it again. Everything on the sand comes from this; in a monsoon, heavier things too (29b-storm), never the heaviest. S.shore holds what the beach has right now. */
 const BREAKS=[];let breakT=3;const SHORE_MAX=14;
 const WASH=[['wood',44,4],['kelp',30,3],['shells',16,5],['bait',6,6],['wobble',4,10]];
 function rollWash(){const r=Math.random()*100;let acc=0;for(const [k,wt] of WASH){acc+=wt;if(r<acc)return k;}return 'wood';}
@@ -14,7 +14,8 @@ function spawnBreak(){const pa=Math.atan2(P.y,P.x),t=tideLevel();let a0=pa+(Math
  /* the sea comes for its salt: a wave near you aims at a sparkling surface more often than not */
  const salted=SURF.filter(s=>s.st==='sparkle'&&Math.abs(angDiff(Math.atan2(s.y,s.x),pa))<1.1);if(salted.length&&Math.random()<.6){const s=pick(salted);a0=Math.atan2(s.y,s.x)+(Math.random()-.5)*.12;}
  /* size: most waves are small and just break on the shore, rocks and pier. Big ones are rare, run far up the beach and can carry up to three things. */
- let r=Math.random();/* wind: the windward shore gets the big ones, the lee gets the small */r*=.55+.5*waveAlign(a0)*(.6+.6*WX.ws);r=Math.min(.999,r);
+ let r=Math.random();/* wind: the windward shore gets the big ones, the lee gets the small */r*=.55+.5*waveAlign(a0)*(.6+.6*WX.ws);
+ /* a storm's swell runs ahead of it, and in a monsoon most waves are big */const sw=Math.max(monNow(),WX.pre*.5);r=1-(1-r)*(1-.6*sw);r=Math.min(.999,r);
  const size=r<.55?r*.5:r<.86?.4+(r-.55)*1.2:.8+(r-.86)*1.4;let n=0;
  if(size<.4){if(Math.random()<.22+.18*t)n=1;}
  else if(size<.8){const p=Math.random();n=p<.35+.3*t?1:0;if(p<.08+.1*t)n=2;}
@@ -27,11 +28,11 @@ function coverBreak(w){S.shore=S.shore||[];const inArc=it=>Math.abs(angDiff(it.a
  for(let i=S.shore.length-1;i>=0;i--){const it=S.shore[i];if(!inArc(it))continue;const fr=frontR(w,it.a);if(it.r>=fr-4&&Math.random()<.5)S.shore.splice(i,1);}
  for(let i=0;i<w.n;i++){const a=w.a0+(Math.random()-.5)*w.hw*1.4,r=Math.max(iR(a)-6,wetR(a)-6-Math.random()*(w.reach-10)),x=Math.cos(a)*r,y=Math.sin(a)*r;
   if(!walkable(x,y)||onDock(x,y)||Math.abs(x-R0)<60&&Math.abs(y)<60)continue;if(S.shore.some(q=>Math.hypot(q.x-x,q.y-y)<22))continue;
-  const id=rollWash();S.shore.push({a,r,x,y,id,n:id==='shells'?1+Math.floor(Math.random()*3):1,seed:Math.floor(Math.random()*999)});}
+  const id=monNow()>.4&&Math.random()<.75?rollStormWash():rollWash();S.shore.push({a,r,x,y,id,n:id==='shells'?1+Math.floor(Math.random()*3):1,seed:Math.floor(Math.random()*999)});}
  while(S.shore.length>SHORE_MAX)S.shore.shift();save();}
 function underFoam(it){for(const w of BREAKS)if(w.t>0&&w.t<3&&it.r>=frontR(w,it.a)-3)return true;return false;}
 function tideUpdate(dt){tideGeom();if(ccOn||C||SH.on)return;if(tideLevel()<.5&&!S.journal.tide&&!dlgOn)discover('tide');
- breakT-=dt;if(breakT<=0){breakT=5.5+Math.random()*3.5;if(BREAKS.length<3)spawnBreak();}
+ breakT-=dt;if(breakT<=0){const m=monNow();breakT=(5.5+Math.random()*3.5)*(1-.5*m);if(BREAKS.length<(m>.4?4:3))spawnBreak();}
  for(const w of BREAKS){w.t+=dt;if(!w.done&&w.t>=1.6){w.done=true;coverBreak(w);if(w.n&&!S.st.sawWash){S.st.sawWash=1;think('The wave left something behind.');}}}
  for(const w of BREAKS){if(w.t<=0)continue;for(const s of SURF){const a=Math.atan2(s.y,s.x);if(Math.abs(angDiff(a,w.a0))>w.hw)continue;const r=Math.hypot(s.x,s.y),fr=frontR(w,a);
   if(s.hit!==w&&fr<=r+2){s.hit=w;s.had=s.st==='sparkle';s.st='wet';splash(s);}
@@ -49,8 +50,12 @@ function drawBreaks(){for(const w of BREAKS){const t=w.t;ctx.save();
  const fp=pts.slice(3,N-2);ln(fp,w.seed+1,4+w.size*6,'rgba(255,255,255,.85)',2.2);ln(fp,w.seed+2,2+w.size*1.5,'#fff',3);ctx.restore();}}
 function drawShore(it){if(underFoam(it))return;shadow(it.x,it.y+2,10,3.5);ctx.drawImage(iconImg(itemIcon({id:it.id})),it.x-12,it.y-20+Math.sin(now*2+it.seed)*1.2,24,24);if(it.n>1)otext(String(it.n),it.x+11,it.y-2,12,'#fff');}
 function grabShore(it){const i=(S.shore||[]).indexOf(it);if(i>=0&&!underFoam(it))sfx('grab');if(i<0||underFoam(it)){think(pick(['The sea took it back.','Too slow. Next wave.']));return;}
+ /* a crate breaks open where it lies: planks, and whatever the sea left in it */
+ if(it.id==='crate'){const n=2+Math.floor(Math.random()*2);if(!canAdd('plank',n)){think('No room in my pack for the planks.');return;}S.shore.splice(i,1);addItem('plank',n);sfx('chop');
+  think(pick(['I prise it apart. Empty. Whatever it held, the sea had it first.','Stove in. Good planks, though.','Nothing inside but sand and a smell of tar.']));flies.push({id:'misc',img:'plank',x0:it.x,y0:it.y,t:0});
+  S.st.found=S.st.found||{};S.st.found.crate=(S.st.found.crate||0)+1;S.st.washes=(S.st.washes||0)+1;addXP('foraging',washXP('crate'),'normal',[it.x,it.y-20]);discover('stormwash');save();return;}
  const got=addItem(it.id,it.n);if(!got){think('No room in my pack.');return;}if(got<it.n)it.n-=got;else S.shore.splice(i,1);
- flies.push({id:'misc',img:itemIcon({id:it.id}),x0:it.x,y0:it.y,t:0});const xp=WASH.find(x=>x[0]===it.id)[2];
+ flies.push({id:'misc',img:itemIcon({id:it.id}),x0:it.x,y0:it.y,t:0});const xp=washXP(it.id);if(STORMWASH.some(x=>x[0]===it.id&&!WASH.some(y=>y[0]===it.id)))discover('stormwash');
  const first=!hasSkill('foraging');if(first){unlockSkill('foraging');discover('foraging');toast('New skill: Foraging');}discover(it.id==='wood'?'driftwood':it.id==='kelp'?'kelp':'foraging');
  S.st.found=S.st.found||{};S.st.found[it.id]=(S.st.found[it.id]||0)+got;S.st.washes=(S.st.washes||0)+1;
  addXP('foraging',xp,first?'first':'normal',[it.x,it.y-20]);

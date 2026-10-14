@@ -49,7 +49,7 @@ function drawShadowLayers(){if(TDBG&2){SQ.sun=[];SQ.moon=[];SQ.fire=[];SQ.ao=[];
  layer(Q.sun,sunA,null,m=>{cutShapes(cl)(m);cutShapes(Q.fleck)(m);});
  layer(Q.moon,SKY.moon?SKY.moon.a:0);
  if(SHF.length)layer(Q.fire,.26*(.35+.65*dark/.62));}
-function drawTree(t){const x=t.x,y=t.y,s=t.s,wsw=Math.cos(WX.wa)*WX.ws*(2.5+1.5*Math.sin(now*1.6+t.seed))*s;shadow(x,y+2,10*s,4*s,52*s,26*s*(.3+.7*leafOf(t)));const tx=x+t.lean*s+wsw,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
+function drawTree(t,gr){const x=t.x,y=t.y,s=t.s*(gr==null?1:gr),wsw=Math.cos(WX.wa)*WX.ws*(2.5+1.5*Math.sin(now*1.6+t.seed))*s;shadow(x,y+2,10*s,4*s,52*s,26*s*(.3+.7*leafOf(t)));const tx=x+t.lean*s+wsw,ty=y-52*s,pts=[[x,y],[x+t.lean*.4*s,y-26*s],[tx,ty]];
  ln(pts,t.seed,11*s,INK,1.2);ln(pts,t.seed,6*s,'#b07a4a',1.2);const g=['#4fa14a','#5fb35a','#3f9356'][Math.floor(t.hue*3)];
  const lf=leafOf(t),k=.3+.7*lf,ch=P.task&&P.task.chop&&P.task.tree===t,sw=ch?Math.cos(Math.PI*(now-P.task.t0)/chopPer())*7*s:Math.sin(now*1.3+t.seed)*2*(lf<.7?.3:1);
  if(lf<.95){ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,4*s,INK,.8);ln([[tx-4*s,ty+2*s],[tx-22*s,ty-14*s]],t.seed+5,2*s,'#b07a4a',.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,4*s,INK,.8);ln([[tx+3*s,ty-2*s],[tx+18*s,ty-20*s]],t.seed+6,2*s,'#b07a4a',.8);
@@ -164,11 +164,11 @@ function render(){skyLights();
  drawFoam();drawWet();
  drawLandKey(tideLevel()>.985?INK:'rgba(42,33,64,.25)');drawBreaks();
  drawDock();
- drawTerrain(vw,vh);drawShadowLayers();
+ drawTerrain(vw,vh);drawShadowLayers();drawFlood(vw,vh);
  for(const t of tufts){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;if(t.f){dot(t.x,t.y,3.2,t.c>.5?'#ff8fb1':'#fff6a8');dot(t.x,t.y,1.2,'#ffcf3a');}else ln([[t.x-5,t.y-6],[t.x,t.y],[t.x+5,t.y-7]],t.seed,2,'#5a9a3f',.6);}
  drawPickups();drawKit();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y-liftAt(mark.x,mark.y),10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
- const d=[];trees.forEach(t=>d.push([t.y,()=>drawTree(t),t.x]));rocks.forEach(k=>d.push([k.y,()=>drawRock(k),k.x]));d.push([DOCK.y1+40,drawSurf]);
+ const d=[];trees.forEach(t=>{const g=treeGrow(t);if(g>0)d.push([t.y,()=>drawTree(t,g),t.x]);});for(const w of wfLying())d.push([w.tr.y+Math.sin(w.ang)*w.len*.35,()=>drawWindfall(w)]);rocks.forEach(k=>d.push([k.y,()=>drawRock(k),k.x]));d.push([DOCK.y1+40,drawSurf]);
  (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[HILL.y,drawCairn,HILL.x],[FIRE.y+16,drawHearthFront,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  }

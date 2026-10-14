@@ -40,12 +40,12 @@ Everything else in the world follows real-world rules, simplified but not bent. 
 | Skill | Interaction | Subskills (built first) |
 |---|---|---|
 | Gathering | Wait, then react | Fishing, Woodcutting, Foraging, Growing |
-| Survival | Juggle several things at once | Cooking, Firemaking |
+| Survival | Juggle several things at once; the parent level reads the weather | Cooking, Firemaking |
 | Invention | Fit parts together, no clock | Tinkering, Shipwright |
 | Exploration | Read the way through | Swimming, Delving, Sailing, and likely Climbing |
 | Dominion | Read the tell, then commit | Strife (the taking hand), Accord (the keeping hand) |
 
-Parent skill XP is 5% of its subskills' XP plus 50 per achievement, on its own 10-level scale (so a parent always trails its subskills).
+Parent skill XP is 5% of its subskills' XP plus 50 per achievement (its subskills' and its own), on its own 10-level scale (so a parent always trails its subskills). Survival's own achievements come from weathering storms; its level sets how early and how clearly you read the sky (build 36). No Survival subskill reads weather: reading is not a loop worth repeating, it is what a seasoned islander knows.
 
 ## Character creation (planned rework)
 No menu, no sliders, no picking a kin or a colour from a list. The player is never shown on screen until the opening sequence resolves.
@@ -58,7 +58,7 @@ No menu, no sliders, no picking a kin or a colour from a list. The player is nev
 ## World systems (built)
 - Timing in the Runescape ballpark: fires of 90 s you feed, trees back in 3 min, fishing spots that roam every 2 to 5 min, a 24-minute real-time day with two tides, the water always moving. Dial by play.
 - Tide: read off the beach (foam line, wet sand). High tide brings wash-ups; low tide bares the wet band and the rock pools.
-- Waves: a swell builds, foam runs up the beach, and what it carried lies there when it pulls back; the next wave may take it. Small waves break on shore, rocks and pier and carry at most one thing; rare big ones run far up and carry up to three. Everything on the sand comes from waves, and only small things wash up (shells, pebbles, kelp, salt, sticks, bottles). Heavier things (anchors, hull timbers, brass, lenses) stay on the bottom and need salvage.
+- Waves: a swell builds, foam runs up the beach, and what it carried lies there when it pulls back; the next wave may take it. Small waves break on shore, rocks and pier and carry at most one thing; rare big ones run far up and carry up to three. Everything on the sand comes from waves. Ordinary waves bring only small things (shells, pebbles, kelp, salt, sticks, bottles); a monsoon also throws up drift logs, crates, old nets and loose wreck timber. The heaviest things (hulls, anchors, brass, lenses) never wash up; they stay on the bottom and need salvage.
 - Salvage ladder: reach by hand in the shallows, free-dive for the deeper, a grapnel line for deep, a dredge net worked from a boat for the heaviest. Iron corrodes in sea water; brass and bronze hold up better, and salvaged scrap is what a forge later turns into a permanent metal lantern frame.
 - Salt: only where a wave has just broken on a hard surface (rocks, pilings, never sand), wet on the hit, sparkle on the pull-back about half the time, staying until the next wave hits that surface; waves aim at salted surfaces more often than not.
 - Trees: a chopped Key tree drops a branch, loses its canopy, grows back in minutes; a small pulse marks the beat window.
@@ -97,13 +97,18 @@ No menu, no sliders, no picking a kin or a colour from a list. The player is nev
 
 ## Weather (built, build 18)
 - Two layers, both pure functions of time and place, nothing saved, so everyone sees the same sky: a travelling base system (wind, cloud, squalls, fog) plus fixed terrain modifiers that lessen or enhance whatever passes through a place.
-- Wind: a trade wind from the east that wanders slowly in direction and strength, stronger in a squall. It touches everything it can, gently: trees and palms sway with it, the scarf streams with it, smoke drifts with it, rain slants with it, clouds and fog travel with it. Strong wind is kept for places where it is the narrative or the challenge.
+- Wind: a trade wind from the east that wanders slowly in direction and strength, much stronger in a monsoon. It touches everything it can, gently: trees and palms sway with it, the scarf streams with it, smoke drifts with it, rain slants with it, clouds and fog travel with it. Strong wind is kept for places where it is the narrative or the challenge.
 - Waves still reach every shore of the Key, but the biggest ones come from the windward side; the lee gets small ones.
 - Clouds are fair-weather cumulus silhouettes (lobed tops, flatter base) that drift slowly with the wind, well under walking pace; fog wisps are fixed to the world and drift the same way, only where there is fog; a forming or thinning cloud grows or shrinks rather than popping. Clouds travel with the wind. Low puffy cloud casts crisp moving shade, thin high cloud faint shade, none at night; under a cloud every shadow goes faint because the sun is covered. Now and then a low cloud passes below the view as soft white; not often.
 - Wash-ups land only on the beach, between the low-tide line and the strand line (the top of the swash), never up on the dune.
-- Tropical weather (agreed, build 35 handoff; to build): usually one light shower a day; occasionally a monsoon that floods low ground, blows fish up onto land and washes heavier things ashore (never the heaviest), and fells old trees. Brimble warns of a monsoon. How well you read the weather grows with a Survival level.
+- Tropical weather (built, build 36), on the game clock, nothing saved but what the player did:
+  - Showers: about six days in seven, one light shower in the afternoon, under two game hours. Small fires hiss and burn down faster; salt washes off.
+  - Monsoons: about one day in nine, never two days running, about ten game hours. Swell and high cloud come six hours ahead, gulls fly inland, the wind builds over the first quarter, holds, then eases, and veers as the system passes. Heavy rain drowns small fires; Brimble keeps his hearth with the lid on. Walking into the wind is slow.
+  - Floods: the swales behind the foredune fill to their real spill height (computed by a priority flood on the height field) and drain over six hours after. Wading slows you. The still pool is left alone.
+  - The sea: bigger and more frequent waves, fish thrown up on land (they spoil in minutes; picking one up is Foraging), and heavier wash-ups (above). A crate is prised open where it lies for planks.
+  - Windfall: two or three of the oldest, biggest wobble trees fall downwind, chosen from the storm and each tree's seed; a tree only falls again once it has grown back. Branches come off by hand (Foraging); the trunk is bucked into wobble logs with a hatchet, thicker trunks needing Woodcutting 3 or 6. A trunk slows anyone climbing over it; going round is faster. Untouched, it rots in stages (sound, worn, failing: grubs, fewer logs) and is gone after three days; then a sapling comes up and grows back over a day and a half.
+  - Reading the sky: the signs show for everyone; the Survival level turns them into a thought, from none at level 1 (you know when the wind rises) to 18 game hours ahead at 10, clearer as it rises. From Survival 3 you also read the day's shower. Brimble warns everyone near his camp within eight hours of a monsoon.
 - Swimming pickup (agreed): while swimming, things within reach are picked up on their own; reach grows with Swimming and Foraging.
-- Squalls: about one fifteen-minute stretch in seven holds a squall that swells, peaks and passes in about five minutes. Rain greys the light a little, small fires drown in seconds, big fires burn down faster, Brimble keeps his hearth going, and drying salt washes off and cannot form until it passes.
 - Fog: dawn radiation fog, some mornings none and some thick, building before sunrise and burning off by late morning. Fog cuts how far you can see without darkening anything, and what lies beyond your sight cannot be seen or touched. Terrain: open sand clears fastest, grass slower, the sea holds it; the cold dark water over the current keeps a sea fog most of the time, hiding the dark islands; in the forest the Clearing clears first, the Tangle holds longest, the Fallow worst.
 - Not built yet: miasma (tied to the Hollow and the Fallow, retreats from a lit lantern post), sea and land breezes, and weather shaping (windbreaks, planting, felling, fog nets, lantern posts), which is late game, local only, and needs upkeep. Reading the sky comes before shaping it.
 
