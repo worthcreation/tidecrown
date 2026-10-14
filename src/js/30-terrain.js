@@ -15,14 +15,31 @@ const ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t
    head on a smaller western shoulder; a spring-fed pool on a level patch of the slope; Brimble's camp on a level
    shelf on the upper lee shoulder, just under the cloud belt where the wobble trees grow. */
 const KPEAK=117,CLO=KPEAK*.52,CHI=KPEAK*.93;
+/* the beach (build 38): the sand band's width round the coast (sw0, as keyMat had it) is widened by how thin it is,
+   so the thinnest stretches double and the widest stay; the flat beach and the dunes move back by the same amount. */
+function sandW0(a){return 105+90*Math.max(0,-Math.cos(a))+12*Math.sin(a*5);}
+function beachAdd(a){return 93*Math.max(0,207-sandW0(a))/114;}
+/* dunes as nature makes them: a foredune broken into groups with gaps, taller where the trade wind feeds it sand
+   (the windward east), its line wandering in and out; in places a second ridge behind; a gap where the path from
+   the pier runs up; and small hummocks scattered on the back beach, each where a plant caught the sand. Every term
+   is a bump that returns to nothing inland (anything that varied with angle and carried inland would meet at the
+   island's centre in spokes). */
+const HUMB=96,HUMS=[];{const r=mulberry(4242);for(let b=0;b<HUMB;b++)HUMS.push([]);for(let k=0;k<170;k++){const a=r()*6.2832,ad=beachAdd(a),fb=10+ad,d=fb*(.35+r()*.6)+r()*28,p=polar(a,iR(a)-d),rr=(7+r()*7)*(1+.3*Math.max(0,Math.cos(a))),hh=2+r()*3;
+ const b=Math.floor(((a+Math.PI)/6.2832)*HUMB)%HUMB;HUMS[b].push([p[0],p[1],rr,hh]);}}
+function hummocks(x,y,a){const b=Math.floor(((a+Math.PI)/6.2832)*HUMB)%HUMB;let h=0;for(const k of [b-1,b,b+1])for(const [hx,hy,rr,hh] of HUMS[(k+HUMB)%HUMB]){const q=((x-hx)**2+(y-hy)**2)/(2*rr*rr);if(q<9)h+=hh*Math.exp(-q);}return h;}
 function hKeyBase(x,y){const r=Math.hypot(x,y),a=Math.atan2(y,x),i=iR(a);if(r>i)return 0;const d=i-r;
- const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012));
- /* the foredune is a bump that returns to nothing inland: its height varies around the coast, and if any of that
-    carried inland it would meet at the island's centre in spokes */
- let h=Hc*(ss(10,34,d)-ss(34,72,d));
- const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=KSC*(520+60*Math.sin(3*as+1))+30,/* only the coast's broad shape: its small wiggles made radial creases */q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
- /* a rounded top: a cone's point shades into spokes, so the summit is a gentle dome */
- const qd=(Math.sqrt(q*q+.0144)-.12)/(Math.sqrt(1.0144)-.12);h+=KPEAK*Math.pow(1-qd,e)*ss(6,60,d);
+ const Hc=(4+2*Math.sin(a*3+.7)+1.5*Math.sin(a*7+2))*(1-.6*Math.exp(-((angDiff(a,.9))**2)/.012)),add=beachAdd(a),fb=10+add+8*Math.sin(a*17+.6)+5*Math.sin(a*29),u=d-fb;
+ /* groups and gaps along the shore, the pier's path, the windward feed */
+ const cl=Math.max(0,.32+.45*Math.sin(a*11+1)+.3*Math.sin(a*23+2.2)+.22*Math.sin(a*41+.4))*(1-.9*Math.exp(-(angDiff(a,0)**2)/.006)),wind=1+.7*Math.max(0,Math.cos(a));
+ let h=Hc*cl*wind*1.75*(ss(0,30,u)-ss(32,74,u));
+ const s2=Math.max(0,Math.sin(a*7+3)-.25)/.75;if(s2>0)h+=Hc*1.1*s2*wind*(ss(56,80,u)-ss(82,120,u));
+ if(d<fb+90)h+=hummocks(x,y,a)*(1-ss(fb+40,fb+90,d));
+ const sx=x-HILL.x,sy=y-HILL.y,ds=Math.hypot(sx,sy),as=Math.atan2(sy,sx),R=KSC*(520+60*Math.sin(3*as+1))+30-45*(1+Math.cos(as)),/* the hill's foot pulls back where the beach widened (east), one smooth harmonic so no spokes *//* only the coast's broad shape: its small wiggles made radial creases */q=Math.min(1,ds/R),e=1.7-.55*Math.cos(as);
+ /* a rounded top: a cone's point shades into spokes, so the summit is a gentle dome; the hill starts behind the beach */
+ const qd=(Math.sqrt(q*q+.0144)-.12)/(Math.sqrt(1.0144)-.12);h+=KPEAK*Math.pow(1-qd,e)*ss(fb+40,fb+120,d);
+ /* the beach rises a little to a berm and stays up through the dunes, then drops behind them: a dune slack, the low
+    ground that floods in a monsoon (gaps in the dunes are at berm height, so the slack holds water) */
+ h+=1.8*ss(0,fb*.8,d)*(1-ss(fb+55,fb+90,d));
  h+=gs(x,y,HEAD.x,HEAD.y,180,22)*ss(0,60,d);
  return h;}
 const flatAt=(x,y,cx,cy,r0,r1,H)=>{const cr=Math.hypot(x-cx,y-cy);return cr<r1?1-ss(r0,r1,cr):0;};
@@ -48,13 +65,13 @@ function hKeyRaw(x,y){let h=hKeyBase(x,y);if(h===0)return 0;
   {const dx=x-FIRE.x,dy=y-FIRE.y;if(Math.hypot(dx,dy)<200||dy>0&&dy<320&&Math.abs(dx)<190)continue;}if(trees.some(t=>Math.hypot(t.x-x,t.y-y)<62))continue;
   trees.push({x,y,s:.8+r()*.4,seed:trees.length*31+3,lean:(r()-.5)*18,hue:r()});}}
 const KPALMS=[];{const r=mulberry(91);let tries=0;const avoid=[[DOCK.x0,0],[SIGN.x,SIGN.y],[GULL.x,GULL.y],[BOLLARD.x,BOLLARD.y],[G.x,G.y],[HEAD.x,HEAD.y],[R0-80,24]];
- while(KPALMS.length<28&&tries<5000){tries++;const a=r()*6.2832,i=iR(a),west=Math.max(0,-Math.cos(a));if(r()>.35+.65*west)continue;const d=18+r()*(80+60*west),x=Math.cos(a)*(i-d),y=Math.sin(a)*(i-d);
+ while(KPALMS.length<28&&tries<5000){tries++;const a=r()*6.2832,i=iR(a),west=Math.max(0,-Math.cos(a));if(r()>.35+.65*west)continue;const d=18+r()*(80+60*west+beachAdd(a)*.8),x=Math.cos(a)*(i-d),y=Math.sin(a)*(i-d);
   if(keyMat(x,y,hKey(x,y))!==1)continue;if(avoid.some(p=>Math.hypot(p[0]-x,p[1]-y)<70)||KPALMS.some(p=>Math.hypot(p.x-x,p.y-y)<55))continue;KPALMS.push({x,y,s:.9+r()*.35,seed:700+KPALMS.length*13});}}
 for(let i=tufts.length-1;i>=0;i--){const t=tufts[i];if(keyMat(t.x,t.y,hKey(t.x,t.y))===1)tufts.splice(i,1);}
 /* what grows where, by distance from the sea and by height: wide sand (widest on the lee), a scrub belt, grass on
    the slopes, the cloud-forest floor in the fog belt, open rock at the very top */
 function smax(a,b,k){return k*Math.log(Math.exp(a/k)+Math.exp(b/k));}
-function keyMat(x,y,h){const r=Math.hypot(x,y),a=Math.atan2(y,x),wob=9*Math.sin(x/37+y/53)+6*Math.sin(x/19-y/23),d=iR(a)-r+wob,sw=105+90*Math.max(0,-Math.cos(a))+12*Math.sin(a*5);
+function keyMat(x,y,h){const r=Math.hypot(x,y),a=Math.atan2(y,x),wob=9*Math.sin(x/37+y/53)+6*Math.sin(x/19-y/23),d=iR(a)-r+wob,sw=sandW0(a)+beachAdd(a);
  /* sand where it is near the sea or low; the two rules blend into curves instead of meeting in corners */
  const sand=smax(sw-d,(10-h)*7,14),scrub=smax(sw+40-d,(20-h)*7,14);
  if(sand>0)return 1;if(scrub>0)return 3;if(h>=CHI)return 5;if(h>=CLO)return 4;return 2;}
@@ -116,10 +133,13 @@ function tileFor(ti,tj){const scn=SH.on?'s':'k',k=scn+ti+','+tj;let T=TTILES[k];
  for(let j=0;j<TN;j++)for(let i=0;i<TN;i++){const wx=T.x0+i*R,wy=unlift(wx,T.y0+j*R),h0=terrH(wx,wy);
   const hE=terrH(wx+R,wy),hW=terrH(wx-R,wy),hN=terrH(wx,wy-R),hS=terrH(wx,wy+R);if(h0===0&&hE===0&&hW===0&&hN===0&&hS===0)continue;
   const gx=(hE-hW)/(2*R)*E,gy=(hS-hN)/(2*R)*E,nl=Math.hypot(gx,gy,1),cav=(hE+hW+hN+hS)/4-h0;
-  let v=-Math.max(0,cav)*.06-(1-1/nl)*.25;
-  if(sun){v+=((-gx*lx-gy*ly+se)/nl-se)*str*.9;
-   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el);let sh=0;for(let s=8;s<=96;s+=8){const over=terrH(wx+ddx*s,wy+ddy*s)-(h0+s*tn);if(over>0){sh=Math.max(sh,Math.min(1,over/6));}}v-=.14*str*sh;}}
-  v+=Math.max(-1,Math.min(1,h0/40))*.05;
+  /* cel-shaded (build 38): the slope's light snaps to three flat tones (lit, plain, shade); only real landforms (more
+     than about 4 above the line of sight) throw a cast shadow, in one flat tone; a faint tint by height stays */
+  let v=0;
+  if(sun){const lt=((-gx*lx-gy*ly+se)/nl-se)*str;v=lt>.14?.06:lt<-.14?-.12:0;
+   if(el<.7){const ddx=-sun.dx,ddy=-sun.dy,tn=Math.tan(el);for(let s=8;s<=96;s+=8){if(terrH(wx+ddx*s,wy+ddy*s)-(h0+s*tn)>4){v=-.2*str-.02;break;}}}}
+  else if(cav>.35)v=-.06;
+  v+=Math.max(-1,Math.min(1,h0/40))*.04;
   const o=(j*TN+i)*4;if(v<0){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.34,-v)*255;}else{D[o]=255;D[o+1]=244;D[o+2]=210;D[o+3]=Math.min(.2,v)*255;}}
  g.putImageData(im,0,0);return T;}
 let tMiss=0;var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;/* one tile of new light a frame; more while some visible tile has none yet */tBudget=tMiss?3:1;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
@@ -133,9 +153,10 @@ let tMiss=0;var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;/* one tile 
   for(let bx=Math.floor((cam.x-vw)/400);bx<=Math.floor((cam.x+vw)/400);bx++)for(let by=Math.floor((cam.y-vh)/400);by<=Math.floor((cam.y+vh)/400);by++){const s=m.get(bx+','+by);if(!s)continue;for(let k=0;k<s.length;k+=4){ctx.moveTo(s[k],s[k+1]);ctx.lineTo(s[k+2],s[k+3]);}}
   ctx.stroke();}}
 /* Tobler: speed = 6 exp(-3.5 |slope + 0.05|) km/h, fastest on a gentle downhill; scaled so flat ground is 1 */
-function slopeK(x,y,ux,uy){const s=(terrH(x+ux*6,y+uy*6)-terrH(x,y))/6;return Math.max(.35,Math.min(1.2,Math.exp(-3.5*Math.abs(s+.05))/Math.exp(-.175)));}
+/* slope over 20px either side, so cell edges in the height cache and small hummocks do not make the pace flicker */
+function slopeK(x,y,ux,uy){const s=(terrH(x+ux*10,y+uy*10)-terrH(x-ux*10,y-uy*10))/20;return Math.max(.35,Math.min(1.2,Math.exp(-3.5*Math.abs(s+.05))/Math.exp(-.175)));}
 /* feeling the slope: lean into a climb, lean back going down; a little sand slides off a dune face on the way down */
-function walkFeel(ux,uy,dt){const s=(terrH(P.x+ux*8,P.y+uy*8)-terrH(P.x,P.y))/8;P.slope=s;
+function walkFeel(ux,uy,dt){const s0=(terrH(P.x+ux*10,P.y+uy*10)-terrH(P.x-ux*10,P.y-uy*10))/20;P.slope=(P.slope||0)+(s0-(P.slope||0))*Math.min(1,dt*5);const s=P.slope;
  if(!SH.on&&s<-.06&&Math.random()<dt*14){const r=Math.hypot(P.x,P.y),a=Math.atan2(P.y,P.x);if(r>gR(a))for(let i=0;i<2;i++)grindDust.push({x:P.x+(Math.random()-.5)*10,y:P.y+2,vx:ux*30+(Math.random()-.5)*30,vy:-12-Math.random()*16,t:0});}}
 function leanNow(dt){const tgt=P.moving?Math.max(-.14,Math.min(.14,(P.slope||0)*1.6)):0;P.lean=(P.lean||0)+(tgt-(P.lean||0))*Math.min(1,dt*6);return P.lean;}
 function hillZoom(){return 1/(1+Math.max(0,terrH(P.x,P.y))/520);}

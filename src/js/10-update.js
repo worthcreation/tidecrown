@@ -5,7 +5,7 @@ function update(dt){
    bright for most of an hour before the sun rose, and the setting moon threw the only shadows, the wrong way.) */
  const sunUp=Math.cos((S.day-.5)*6.2832)*Math.cos(LAT);dark=Math.min(1,Math.max(0,(.06-sunUp)/.2))*.62;dark=Math.min(.75,dark+.18*WX.rain);/* the sky alone sets the light: no fixed floor anywhere, no dimming for distance */
  if(intro!=null){intro+=dt;if(intro>3.2)intro=null;}
- if(!SW.on&&P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const wd=inSea(P.x,P.y)?seaDepth(P.x,P.y):0;const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),sp=175*dt*(1-.68*Math.min(1,wd))*(wd>0?1:slopeK(P.x,P.y,dx/(d||1),dy/(d||1))*(SH.on?1:stormWalkK(P.x,P.y,dx/(d||1),dy/(d||1))));if(wd<=0&&d>0)walkFeel(dx/d,dy/d,dt);
+ if(!SW.on&&P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const wd=inSea(P.x,P.y)?seaDepth(P.x,P.y):0;const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),sk=wd>0?1:slopeK(P.x,P.y,dx/(d||1),dy/(d||1))*(SH.on?1:stormWalkK(P.x,P.y,dx/(d||1),dy/(d||1)));P.spk=P.spk==null?sk:P.spk+(sk-P.spk)*Math.min(1,dt*4);/* the pace eases into a change of ground over a quarter second */const sp=175*dt*(1-.68*Math.min(1,wd))*P.spk;if(wd<=0&&d>0)walkFeel(dx/d,dy/d,dt);
   /* wading: the deeper, the slower; the first time past the knee, a word */
   if(wd>.45&&!S.st.wadeHint){S.st.wadeHint=1;discover('shallows');hint('The deeper it gets, the slower you go. Past your depth, slide to swim.',7000);}
   if(Math.abs(dx)>1)P.face=dx>0?1:-1;
@@ -39,7 +39,7 @@ function update(dt){
  flies=flies.filter(f=>(f.t+=dt)<.75);
  if(mark&&(mark.t+=dt)>.6)mark=null;
  if(cele&&(cele.t+=dt)>3.2)cele=null;
- const k=Math.min(1,dt*5),tx=C?C.fr.x:P.x,ty=C?C.fr.y-50-liftAt(C.fr.x,C.fr.y):P.y-liftAt(P.x,P.y);cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;const zt=C?cookZoom():(P.task&&P.task.chop?1.25:SW.on?swimZoom():hillZoom());camZ+=(zt-camZ)*Math.min(1,dt*(SW.on||zt===1&&camZ<1?1.4:4));Z=ZB*camZ;
+ const k=Math.min(1,dt*5),tx=C?C.fr.x:P.x,ty=C?C.fr.y-50-liftAt(C.fr.x,C.fr.y):P.y-(P.camL=(P.camL==null||Math.abs(liftAt(P.x,P.y)-P.camL)>160?liftAt(P.x,P.y):P.camL+(liftAt(P.x,P.y)-P.camL)*Math.min(1,dt*1.8)));/* the view follows your height slowly, so it rises and settles with the land instead of bobbing over every dune */cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;const zt=C?cookZoom():(P.task&&P.task.chop?1.25:SW.on?swimZoom():hillZoom());camZ+=(zt-camZ)*Math.min(1,dt*(SW.on||zt===1&&camZ<1?1.4:4));Z=ZB*camZ;
  wxTick(dt);questTick(dt);if(C)cookUpdate(dt);tideUpdate(dt);spotsUpdate(dt);if(SH.on)shUpdate(dt);swimUpdate(dt);updOrbs(dt);guideT-=dt;if(guideT<=0&&!SH.on){guideT=1;hearthGuide();}buffT-=dt;if(buffT<=0){buffT=.5;buffUI();kindleTick();if(S.ground&&S.ground.length){const T=Date.now(),n0=S.ground.length;S.ground=S.ground.filter(g=>g.exp>T);if(S.ground.length!==n0)save();}(S.fires||[]).slice().forEach(fr=>{if(!fireLit(fr)&&!(C&&C.fr===fr))burnOut(fr);});}
 }
 

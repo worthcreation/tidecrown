@@ -45,14 +45,14 @@ function floodGrid(){if(FLG)return FLG;let R=0;for(let i=0;i<64;i++)R=Math.max(R
  const dep=new Float32Array(N);for(let c=0;c<N;c++){const i=c%nx,j=(c-i)/nx,x=x0+i*FLC,y=x0+j*FLC;if(Math.hypot(x-POOL.x,y-POOL.y)<110)continue;dep[c]=sp[c]-h[c];}
  /* each basin's deepest point, so a filling flood rises from the bottom */
  const bas=new Int32Array(N).fill(-1),bmax=[];for(let c=0;c<N;c++){if(dep[c]<.3||bas[c]>=0)continue;const id=bmax.length;let m=0;const st=[c];bas[c]=id;while(st.length){const q=st.pop();m=Math.max(m,dep[q]);const i=q%nx,j=(q-i)/nx;for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){const a=i+di,b=j+dj;if(a<0||b<0||a>=nx||b>=nx)continue;const r=b*nx+a;if(bas[r]<0&&dep[r]>=.3){bas[r]=id;st.push(r);}}}bmax.push(m);}
- const cells=[];for(let c=0;c<N;c++)if(bas[c]>=0&&bmax[bas[c]]>=1)cells.push(c);
+ const cells=[];for(let c=0;c<N;c++)if(bas[c]>=0&&bmax[bas[c]]>=.6)cells.push(c);
  return FLG={nx,x0,dep,bas,bmax,cells};}
 /* how full the hollows are, 0 to 1: rising through the storm's peak, holding, draining over six hours after */
 /* the grid takes a moment to build; do it soon after load, not mid-storm */
 setTimeout(()=>{try{floodGrid();}catch(e){}},5000);
 function floodK(){if(WXT.force==='monsoon')return 1;const t=gNow(),st=lastStorm(t);if(!st)return 0;const d=st.e-st.s,p=(t-st.s)/d;
  if(p<.3)return 0;if(p<.6)return (p-.3)/.3;if(t<st.e)return 1;return sm01(1-(t-st.e)/(6*HOUR));}
-function floodAt(x,y){const k=floodK();if(k<=0||SH.on)return 0;const G=floodGrid(),i=Math.round((x-G.x0)/FLC),j=Math.round((y-G.x0)/FLC);if(i<0||j<0||i>=G.nx||j>=G.nx)return 0;const c=j*G.nx+i,b=G.bas[c];if(b<0||G.bmax[b]<1)return 0;return Math.max(0,G.dep[c]-(1-k)*G.bmax[b]);}
+function floodAt(x,y){const k=floodK();if(k<=0||SH.on)return 0;const G=floodGrid(),i=Math.round((x-G.x0)/FLC),j=Math.round((y-G.x0)/FLC);if(i<0||j<0||i>=G.nx||j>=G.nx)return 0;const c=j*G.nx+i,b=G.bas[c];if(b<0||G.bmax[b]<.6)return 0;return Math.max(0,G.dep[c]-(1-k)*G.bmax[b]);}
 /* the water is an image with one pixel per grid cell, scaled up with smoothing, so its edge comes out soft and
    round instead of a row of circles. Rebuilt only when the level moves. Swales sit low, so one lift fits them. */
 let FLIM=null,FLIMK=-1,FLLIFT=0;

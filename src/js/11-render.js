@@ -8,8 +8,7 @@
    only the faint contact shadow every object keeps where it meets the ground. Dense canopy also blocks skylight
    right under the crown (its own layer). Shadows fall on the ground only, not across other objects.
    shadow() records shapes during a frame; drawShadowLayers() draws them, after the ground and before the objects,
-   on the next frame (one frame behind, which does not show). Layers render at half resolution, which also softens
-   their edges. */
+   on the next frame (one frame behind, which does not show). Since build 38 they are flat with crisp edges, to match the hand-drawn art. */
 let SKY={sun:null,moon:null},SHF=[];
 const SQ={sun:[],moon:[],fire:[],ao:[],can:[],fleck:[]};let SQP=null;
 const SM=document.createElement('canvas'),smx=SM.getContext('2d');
@@ -32,7 +31,12 @@ function shadow(x,y0,rx,ry,h,cr,m){h=h||rx*2.2;m=m||1;const y=y0-liftAt(x,y0);SQ
   /* sun flecks: a few coins of light through the gaps in a big canopy */
   if(SKY.sun&&SKY.sun.a>.12){const L=SKY.sun,cx=x+L.dx*h*L.k,cy=y+L.dy*h*L.k*.5;for(let i=0;i<3;i++){const a=i*2.1+now*.05+x,rr=cr*(.25+.2*i);SQ.fleck.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.5,2.6,1.4,0]);}}}}
 /* draw one layer: fill its shapes opaque on the half-resolution mask, optionally cut holes, composite once */
-function layer(shapes,alpha,col,cut){if(!shapes.length||alpha<=.004)return;const s=.5*DPR;
+/* flat, crisp-edged shadows to match the art (build 38): a layer with nothing cut out of it is filled straight onto
+   the world as one path, so overlapping shapes union into one silhouette at one darkness; a layer with cut-outs (the
+   sun's, holed by clouds and flecks) goes through a mask at full resolution */
+function layer(shapes,alpha,col,cut){if(!shapes.length||alpha<=.004)return;
+ if(!cut){ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle=col||'rgb(42,33,64)';ctx.beginPath();for(const e of shapes){ctx.moveTo(e[0]+e[2]*Math.cos(e[4]),e[1]+e[2]*Math.sin(e[4]));ctx.ellipse(e[0],e[1],e[2],e[3],e[4],0,6.3);}ctx.fill();ctx.restore();return;}
+ const s=DPR;
  if(SM.width!==Math.round(W*s)||SM.height!==Math.round(H*s)){SM.width=Math.round(W*s);SM.height=Math.round(H*s);}
  smx.setTransform(1,0,0,1,0,0);smx.clearRect(0,0,SM.width,SM.height);smx.setTransform(s*Z,0,0,s*Z,(W/2-cam.x*Z)*s,(H/2-cam.y*Z)*s);
  smx.fillStyle=col||'rgb(42,33,64)';smx.beginPath();for(const e of shapes){smx.moveTo(e[0]+e[2]*Math.cos(e[4]),e[1]+e[2]*Math.sin(e[4]));smx.ellipse(e[0],e[1],e[2],e[3],e[4],0,6.3);}smx.fill();
