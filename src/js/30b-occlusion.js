@@ -32,7 +32,9 @@ function ksTrace(){const W2=KS.w,H2=KS.h,R=KS.res,X=i=>KS.x0+i*R+R/2,Y=j=>KS.y0+
  const land=(i,j)=>KS.mat[j*W2+i]>0?1:0,grass=(i,j)=>KS.mat[j*W2+i]>=2?1:0;
  const crestPts=[];for(let i=0;i<W2;i+=2)for(let j=1;j<H2;j++){const u=KS.fy[(j-1)*W2+i],v=KS.fy[j*W2+i];if(!isNaN(u)&&!isNaN(v)&&u<v-10)crestPts.push([X(i),Y(j)]);}
  const crests=[];{const byX=new Map();for(const p of crestPts){const k=p[0];if(!byX.has(k))byX.set(k,[]);byX.get(k).push(p[1]);}let prev=[];for(const x of [...byX.keys()].sort((a,b)=>a-b)){const now2=[];for(const y of byX.get(x)){const p=prev.find(q=>Math.abs(q.y-y)<8&&x-q.x<=8);const run=p?p.run:[];run.push([x,y]);if(!p)crests.push(run);now2.push({x,y,run});}prev=now2;}}
- const rock=(i,j)=>KS.mat[j*W2+i]===5?1:0;return {rock:iso(rock),coast:iso(land),grass:iso(grass),crests:crests.filter(r=>r.length>=5)};}
+ const rock=(i,j)=>KS.mat[j*W2+i]===5?1:0;/* no specks: a closed loop under ~30px round is too small to mean anything, so it gets no ink (its colour stays) */
+ const speck=r=>{if(r.length>8&&Math.hypot(r[0][0]-r[r.length-1][0],r[0][1]-r[r.length-1][1])>=6)return false;let L=0;for(let k=1;k<r.length;k++)L+=Math.hypot(r[k][0]-r[k-1][0],r[k][1]-r[k-1][1]);return L<30;},keep=l=>l.filter(r=>!speck(r));
+ return {rock:keep(iso(rock)),coast:keep(iso(land)),grass:keep(iso(grass)),crests:crests.filter(r=>r.length>=5)};}
 function chain(segs){const key=p=>Math.round(p[0]*2)+','+Math.round(p[1]*2),adj=new Map();segs.forEach((s,n)=>{for(const e of [0,1]){const k=key(s[e]);if(!adj.has(k))adj.set(k,[]);adj.get(k).push(n);}});
  const used=new Uint8Array(segs.length),out=[];
  for(let n=0;n<segs.length;n++){if(used[n])continue;used[n]=1;const line=[segs[n][0],segs[n][1]];

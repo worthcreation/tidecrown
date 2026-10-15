@@ -79,7 +79,7 @@ for(let i=tufts.length-1;i>=0;i--){const t=tufts[i];if(keyMat(t.x,t.y,hKey(t.x,t
 function smax(a,b,k){return k*Math.log(Math.exp(a/k)+Math.exp(b/k));}
 function keyMat(x,y,h){const r=Math.hypot(x,y),a=Math.atan2(y,x),wob=9*Math.sin(x/37+y/53)+6*Math.sin(x/19-y/23),d=iR(a)-r+wob,sw=sandW0(a)+beachAdd(a);
  /* sand where it is near the sea or low; the two rules blend into curves instead of meeting in corners */
- const sand=smax(sw-d,(10-h)*7,14),scrub=smax(sw+40-d,(20-h)*7,14);
+ /* a dune is sand all the way up (build 40): the low rule reads the ground under it */const hd=h-(SH.on?0:duneAt(x,y)),sand=smax(sw-d,(10-hd)*7,14),scrub=smax(sw+40-d,(20-hd)*7,14);
  if(sand>0)return 1;if(scrub>0)return 3;if(h>=CHI)return 5;if(h>=CLO)return 4;return 2;}
 function hShadow(x,y){let best=null,bk=9;for(const I of ISLES){const k=isleK(I,x,y);if(k<bk){bk=k;best=I;}}if(!best||bk>1)return 0;
  const I=best,f=Math.min(1,(1-bk)/.25),n=I.name,cx=I.x,cy=I.y,m=Math.min(I.rx,I.ry);let h;
