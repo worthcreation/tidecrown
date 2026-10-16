@@ -1,7 +1,7 @@
 /* ---------- test build only: a Test tab to dial things in ----------
    Levels per subskill, gear straight into a slot, any item at any count, time of day and tide, a wipe.
    The play build never shows it. The map's island taps (warps) live in the map. */
-const TSEC={skills:1,gear:0,items:0,world:0};
+const TSEC={skills:1,gear:0,items:0,world:0,memory:0};
 function testHTML(){const sec=(k,t,body)=>`<div class="tsec"><button class="tsh" data-ts="${k}">${TSEC[k]?'\u25be':'\u25b8'} ${t}</button>${TSEC[k]?body:''}</div>`;let h='<div class="tbody">';
  h+=sec('skills','Skills',Object.keys(SUBS).filter(k=>SUBS[k].icon).map(k=>`<div class="trow"><span>${SUBS[k].name} <b>${hasSkill(k)?lv(k):'-'}</b></span><span>${[-10,-1,1,10,99].map(d=>`<button data-tl="${k}:${d}">${d===99?'99':d>0?'+'+d:d}</button>`).join('')}</span></div>`).join(''));
  h+=sec('gear','Gear (tap to wear, again to take off)',`<div class="tgrid">${Object.keys(EQUIP).map(id=>`<button data-tg="${id}" class="${S.eq[EQUIP[id].slot]===id?'on':''}"><img src="${icon(id)}" alt="">${EQUIP[id].name}</button>`).join('')}</div>`);
@@ -16,6 +16,7 @@ function testHTML(){const sec=(k,t,body)=>`<div class="tsec"><button class="tsh"
   <div class="trow"><span>Wind ${Math.round(((WX.wa*180/Math.PI)%360+360)%360)}°</span><span><button data-tw="wt:1">turn 45°</button><button data-tw="wt:0">reset</button></span></div>
   <div class="trow"><span>Frame meter ${PMON?'on':'off'}</span><span><button data-tw="pm:1">on</button><button data-tw="pm:0">off</button></span></div>
   <div class="trow"><span>Test save</span><span><button data-tw="wipe">Wipe and restart</button></span></div>`);
+ h+=sec('memory','World memory',wmTestHTML());
  return h+'</div>';}
 /* frame meter: median and slow frames over the last 240, the resolution in use and frames per second, so a phone's real numbers can be read off */
 let PMON=null;function perfMeter(on){if(PMON){clearInterval(PMON.t);PMON.el.remove();PMON=null;}if(!on)return;const el=document.createElement('div');el.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:4px;z-index:99;font:12px monospace;background:rgba(0,0,0,.6);color:#fff;padding:2px 6px;border-radius:6px;pointer-events:none';document.body.appendChild(el);
@@ -27,6 +28,7 @@ if(MODE==='test'){
  pbody.addEventListener('input',e=>{if(tab!=='test'||!e.target.dataset||!e.target.dataset.twd)return;WXT.force='dial';WXT.dv=+e.target.value/100;const b=document.getElementById('twdv');if(b)b.textContent=e.target.value;});
 pbody.addEventListener('click',e=>{if(tab!=='test')return;const t=e.target.closest('button');if(!t)return;const D=t.dataset;
   if(D.ts){TSEC[D.ts]=TSEC[D.ts]?0:1;}
+  else if(D.tm)wmTestAct(D.tm);
   else if(D.tl){const [k,d]=D.tl.split(':');testSetLevel(k,+d);}
   else if(D.tg){const sl=EQUIP[D.tg].slot;S.eq[sl]=S.eq[sl]===D.tg?null:D.tg;}
   else if(D.ti){const [id,n]=D.ti.split(':');if(+n===0)takeItem(id,cnt(id));else if(!addItem(id,+n))toast('No room in the pack');}

@@ -1,7 +1,8 @@
 // node tools/build.js: builds index.html (play) and test.html (test) at the repo root from src/. CSS files in src/css and JS files in
 // src/js are concatenated in filename order (numeric prefixes set load order; all JS shares one closure).
 // The two differ only in const MODE ('play' or 'test'), injected at the top of the script.
-// Then checks the built script parses and exits 1 if not.
+// Then checks the built script parses and exits 1 if not. First runs tools/world-graph.js (world memory registry checks,
+// writes docs/world-graph.md) and stops if it fails.
 // Options: --watch rebuilds on every save; --serve serves the game at http://localhost:5173 (test build at /test.html) (phone on the
 // same Wi-Fi: http://<computer-ip>:5173). npm run dev does both.
 const fs = require('fs'), path = require('path'), http = require('http');
@@ -19,7 +20,7 @@ function one(mode, file) {
   console.log(`built ${file} (${(html.match(/\n/g) || []).length} lines, ${(html.length / 1024).toFixed(0)} KB)`);
   return true;
 }
-function build() { return one('play', 'index.html') && one('test', 'test.html'); }
+function build() { delete require.cache[require.resolve('./world-graph.js')]; return require('./world-graph.js').run() && one('play', 'index.html') && one('test', 'test.html'); }
 
 const ok = build(), args = process.argv.slice(2);
 if (!ok && !args.includes('--watch')) process.exit(1);

@@ -548,7 +548,7 @@ for(const k of ['xp','hx','sx','hearth','shipwright'])delete S[k];
 /* build 4: Hearth became Cooking (and Firemaking), Shipwright became Woodcutting (and Tinkering, unlocked by the hatchet) */
 if(S.sk.hearth){S.sk.cooking=S.sk.hearth;S.sk.firemaking={xp:0};delete S.sk.hearth;}
 if(S.sk.shipwright){S.sk.woodcutting=S.sk.shipwright;S.sk.tinkering={xp:30};delete S.sk.shipwright;}
-S.st=S.st||{};/* build 41: no scarf; a hatchet made earlier becomes the longaxe, a little worn */if(!S.axe&&(S.owned&&S.owned.hatchet||S.eq&&S.eq.weapon==='hatchet'||(S.inv||[]).some(i=>i.id==='hatchet')))S.axe={h:{w:.2,g:0},f:{k:'drift',w:.15,s:0,cr:0},l:{w:.3}};if(S.eq&&S.eq.weapon&&S.eq.weapon!=='hatchet')S.eq.weapon=null;S.wx=S.wx||{r:{},b:{}};S.wf=S.wf||{};S.st.fires=Math.max(S.st.fires||0,(S.fires||[]).length,S.journal&&S.journal.firstfire?1:0);
+S.st=S.st||{};/* build 41: no scarf; a hatchet made earlier becomes the longaxe, a little worn */if(!S.axe&&(S.owned&&S.owned.hatchet||S.eq&&S.eq.weapon==='hatchet'||(S.inv||[]).some(i=>i.id==='hatchet')))S.axe={h:{w:.2,g:0},f:{k:'drift',w:.15,s:0,cr:0},l:{w:.3}};if(S.eq&&S.eq.weapon&&S.eq.weapon!=='hatchet')S.eq.weapon=null;S.wx=S.wx||{r:{},b:{}};/* build 42: world memory */S.wm=S.wm||{n:0,d:[],k:{},r:{}};S.wf=S.wf||{};S.st.fires=Math.max(S.st.fires||0,(S.fires||[]).length,S.journal&&S.journal.firstfire?1:0);
 /* k may be a skill (gathering) or a subskill (fishing). A skill is unlocked when any subskill is. A skill's XP is 5% of its subskills' XP plus 50 per achievement, on its own 10-level scale (PXP), so it always trails the subskills: 10 comes when they are deep in the 60s and 70s. */
 function hasSkill(k){return SKILLS[k]?SKILLS[k].subs.some(s=>!!S.sk[s]):!!S.sk[k];}
 function unlockSkill(k){if(!S.sk[k])S.sk[k]={xp:0};}
@@ -628,12 +628,13 @@ function tooEarly(){const T=P.task;T.phase='miss';T.t=0;streak('fish',false);sfx
 
 function talkG(){discover('gubbins');G.talk=true;P.face=1;sfx('talk');
  if(!S.metG){S.metG=true;say('Gubbins','Oi! Mind the paint. Name\u2019s Gubbins. I\u2019m a bucket. A talking one, which is rarer. You washed up here, so you\u2019re a fisher now. Them bubbles off the shore? Fish. Go on.',gOpts());return;}
+ {const hl=wmHeard('gubbins');if(hl){say('Gubbins',hl,gOpts());return;}}
  say('Gubbins',pick(['Back again. Smells like you brought snacks.','Bucket business is slow. Got fish?','The sea\u2019s been chatty today. Never says anything useful.','You\u2019ve got that look. The far-off look. Dangerous, that.']),gOpts());}
 function gOpts(){const o=[];const n=S.inv.filter(i=>itemVal(i)>0).length;if(n)o.push({l:'Sell to Gubbins ('+n+')',f:sellPick});
- o.push({l:'Glitter bait, 5 casts (20 shells)',f:buyBait});if(!S.owned.coat)o.push({l:'Oilskin coat (60 shells)',f:buyCoat});o.push({l:'What is this place?',f:lore});o.push({l:'See you',f:closeDlg});return o;}
+ o.push({l:'Glitter bait, 5 casts (20 shells)',f:buyBait});if(!S.owned.coat)o.push({l:'Oilskin coat (60 shells)',f:buyCoat});if(wmMood('gubbins')==='warm')o.push({l:'Where are they biting?',f:()=>say('Gubbins',gubbinsTip(),gOpts())});o.push({l:'What is this place?',f:lore});o.push({l:'See you',f:closeDlg});return o;}
 function buyBait(){if(S.shells<20){say('Gubbins','That\u2019s 20 shells, friend. You\u2019ve got '+S.shells+'. Fish more, talk less.',gOpts());return;}
  if(!canAdd('bait',5)){say('Gubbins','No room in that pack for bait, friend.',gOpts());return;}S.shells-=20;S.bait+=5;save();say('Gubbins','Glitter bait. Fish go silly for it. Bites come quicker and hang on longer.',gOpts());}
-function valOf(it){const v=itemVal(it);return v?v+(S.eq.trinket==='salttin'?1:0)+(S.eq.head==='stache'?1:0):0;}
+function valOf(it){const v=itemVal(it);return v?v+(S.eq.trinket==='salttin'?1:0)+(S.eq.head==='stache'?1:0)+(wmMood('gubbins')==='afraid'?1:0):0;}
 let sellSel=new Set();
 function sellPick(){sellSel=new Set();renderSell();}
 function renderSell(){const list=S.inv.map((it,i)=>[it,i]).filter(([it])=>valOf(it)>0);if(!list.length){say('Gubbins','Nothing I can eat. Fish, friend. Fish.',gOpts());return;}
@@ -647,7 +648,7 @@ dlg.querySelector('.opts').addEventListener('click',e=>{const t=e.target.closest
  if(act==='back'){say('Gubbins','Changed your mind? Buckets understand.',gOpts());return;}
  if(act==='all'){const list=S.inv.map((it,i)=>[it,i]).filter(([it])=>valOf(it)>0);sellSel=sellSel.size===list.length?new Set():new Set(list.map(x=>x[1]));renderSell();return;}
  if(act==='sell'&&sellSel.size){sfx('shells');let v=0;[...sellSel].sort((a,b)=>b-a).forEach(i=>{v+=valOf(S.inv[i]);S.inv.splice(i,1);});S.shells+=v;sellSel=new Set();save();
-  say('Gubbins',pick(['*slurp* Lovely. That’s '+v+' shells. Don’t ask where I keep them.','*crunch* Ooh, that one had character. '+v+' shells for you.','*gulp* Bucket’s happy. Here’s '+v+' shells.']),gOpts());}});
+  say('Gubbins',wmMood('gubbins')==='afraid'?'*gulp* '+v+' shells. '+wmLine('gubbins','afraid'):pick(['*slurp* Lovely. That’s '+v+' shells. Don’t ask where I keep them.','*crunch* Ooh, that one had character. '+v+' shells for you.','*gulp* Bucket’s happy. Here’s '+v+' shells.']),gOpts());}});
 function buyCoat(){if(S.shells<60){say('Gubbins','Sixty shells for the coat. It was my uncle’s. He was a mop.',gOpts());return;}
  if(S.inv.length>=PACK){say('Gubbins','Your pack’s full. Make some room first.',gOpts());return;}
  S.shells-=60;S.owned.coat=1;S.inv.push({id:'coat'});save();say('Gubbins','There. Keeps the spray off and the dark back. Put it on from your satchel.',gOpts());}
@@ -678,7 +679,9 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;yo
  if(KW.active){const k=S.kindle,here=KW.mode==='fire'&&Math.hypot(KW.x-KW.tx,KW.y-KW.ty)<8;
   o.push({x:KW.x,y:KW.y-7,r:22,name:k.seen?'Kindle':'Driftwood',act:KW.mode==='fire'?(here?'Offer ash':null):'Pick up',onAct:()=>KW.mode==='fire'?offerAsh():spookKindle(),
    onExamine:()=>think(KW.mode==='fire'?'The little log is warming himself by my fire, eyes half shut. He keeps glancing at the ash.':(k.seen?'The runaway log. He’s pretending to be ordinary driftwood. Badly.':'Driftwood. With eyes. That just blinked.'))});}
- o.push({x:GULL.x,y:GULL.y-30,r:30,name:'Mortimer Gull',key:'gullbank',act:'Bank',onAct:()=>routeTo(GULL.x+30,GULL.y+18,openBank),more:[{l:'Talk',f:()=>routeTo(GULL.x+30,GULL.y+18,talkGull)}],onExamine:()=>{discover('gullbank');think('A seagull in a green visor on a post marked BANK, counting very seriously.');}});
+ if(mortShooed())o.push({x:GULL.x,y:GULL.y-30,r:30,name:'Mortimer Gull',key:'gullbank',onExamine:()=>think('Mortimer, wheeling over his post and squawking. The Gull Post is shut until he lands.')});
+ else{const mm=[{l:'Talk',f:()=>routeTo(GULL.x+30,GULL.y+18,talkGull)}];if(goldenIdx()>=0)mm.push({l:'Give a golden fish',f:()=>routeTo(GULL.x+30,GULL.y+18,mortGift)});if(axeWhole())mm.push({l:'Shoo him off',f:()=>routeTo(GULL.x+30,GULL.y+18,mortShoo)});
+ o.push({x:GULL.x,y:GULL.y-30,r:30,name:'Mortimer Gull',key:'gullbank',act:'Bank',onAct:()=>routeTo(GULL.x+30,GULL.y+18,openBank),more:mm,onExamine:()=>{discover('gullbank');const f=wmPeek('mortimer').f;think(f>.25?'Mortimer, leaning as far from me as his post allows. Still counting, but with one eye on me.':'A seagull in a green visor on a post marked BANK, counting very seriously.');}});}
  (S.ground||[]).forEach(g=>o.push({x:g.x,y:g.y-6,r:18,name:itemName(g.it),act:'Pick up',onAct:()=>{const c=clampLand(g.x-14,g.y+6);routeTo(c[0],c[1],()=>pickGround(g));},onExamine:()=>think(itemDesc(g.it))}));
  (S.ashp||[]).forEach(a=>o.push({x:a.x,y:a.y-4,r:22,name:'Ash',key:'ash',act:'Scoop',onAct:()=>{const c=clampLand(a.x-18,a.y+6);routeTo(c[0],c[1],()=>scoopAsh(a));},onExamine:()=>think('Soft grey ash, still faintly warm. Smells like a story ending.')}));
  o.push({x:HEAD.x,y:HEAD.y-16,r:34,name:'Stone head',key:'head',act:'Listen',onAct:listenHead,onExamine:examineHead});
@@ -757,7 +760,7 @@ let tab='pack',sel=-1,selG=null;
 function openPanel(t){sfx('open');tab=t||tab;sel=-1;selG=null;jPage=0;skView=null;methView=null;ddSel=null;renderPanel();panel.classList.add('on');scrim.style.display='block';closeCtx();bag.classList.remove('pulse');if(S.hint===4)advanceHint(5);}
 function closePanel(){panel.classList.remove('on');scrim.style.display='none';}
 const BANKSLOTS=30,bankEl=$('bank');let bankOpen=false,bankMode='all';
-function openBank(){discover('gullbank');S.bank=S.bank||[];bankOpen=true;closeCtx();closePanel();bankEl.classList.add('on');scrim.style.display='block';renderBank();}
+function openBank(){if(mortShooed()){think('Mortimer is circling overhead. The Gull Post is shut until he lands.');return;}discover('gullbank');S.bank=S.bank||[];bankOpen=true;closeCtx();closePanel();bankEl.classList.add('on');scrim.style.display='block';renderBank();mortTithe();}
 function closeBank(){bankOpen=false;bankEl.classList.remove('on');scrim.style.display='none';}
 function renderBank(note){const st=getComputedStyle(bankEl),W2=bankEl.clientWidth-24,H2=bankEl.clientHeight-20-44-40-24;const bs=Math.max(34,Math.floor(Math.min((W2-30)/6,(H2-8*6)/9)));bankEl.style.setProperty('--bs',bs+'px');
  const b=S.bank;let h='';for(let i=0;i<BANKSLOTS;i++){const e=b[i];h+=e?`<button class="slot f" data-b="${i}" aria-label="${itemName(e.it)}"><img src="${stackIcon(itemIcon(e.it),e.n)}" alt=""><i class="cnt">${cntFmt(e.n,1)}</i></button>`:'<div class="slot"></div>';}
@@ -1115,13 +1118,13 @@ function drawCrab(){const {x}=CRAB,y=CRAB.y-(CRAB.hop>0?Math.sin(CRAB.hop/.5*Mat
  for(const sd of[-1,1])for(let i=0;i<3;i++)ln([[x+sd*6,y-3+i*2],[x+sd*(13+w),y+1+i*3]],90+i+(sd>0?5:0),2,INK,.3);
  blob(x,y-4,11,7,95,'#ff6b6b',2.4,.6);blob(x,y-11,7,5,96,'#cfc8dc',2.2,.5);dot(x-3,y-12,.9,'#2a2140');dot(x+2,y-13,.9,'#2a2140');
  ln([[x-4,y-6],[x-5,y-15]],97,1.8,INK,.2);ln([[x+4,y-6],[x+5,y-15]],98,1.8,INK,.2);dot(x-5,y-16,2.2);dot(x+5,y-16,2.2);}
-function drawGubbins(){const {x,y}=G;shadow(x,y+2,17,5);const sq=G.talk?Math.sin(now*16)*1.5:0;
+function drawGubbins(){const R=wmPeek('gubbins'),fe=Math.max(0,R.f),wa=Math.max(0,R.w),y=G.y,x=G.x+(fe>.25?Math.sin(now*31)*fe*1.4:0);shadow(G.x,y+2,17,5);const sq=G.talk?Math.sin(now*16)*1.5:0;
  ln([[x-16,y-34],[x-10,y-52],[x+10,y-52],[x+16,y-34]],100,2.6,INK,1);
  sketch([[x-17,y-34-sq],[x+17,y-34-sq],[x+13,y],[x-13,y]],true,101,1.5,'#7fa8c9',INK,3);
  blob(x,y-34-sq,17,5,102,'#5d86a8',2.6,.6);
  ln([[x-13,y-12],[x+13,y-12]],103,2,'rgba(42,33,64,.35)',.6);
- const lx=Math.max(-2,Math.min(2,(P.x-x)/40));blob(x-6,y-22-sq,5,5.5,104,'#fff',2,.4);blob(x+6,y-22-sq,5,5.5,105,'#fff',2,.4);dot(x-6+lx,y-21-sq,2);dot(x+6+lx,y-21-sq,2);
- if(G.talk)blob(x,y-12,4,2+Math.abs(Math.sin(now*12))*3,106,INK,0);else ln([[x-4,y-12],[x+4,y-13]],107,2,INK,.3);}
+ const lx=fe>.25?-Math.sign(P.x-x||1)*2:Math.max(-2,Math.min(2,(P.x-x)/40));blob(x-6,y-22-sq,5,5.5,104,'#fff',2,.4);blob(x+6,y-22-sq,5,5.5,105,'#fff',2,.4);dot(x-6+lx,y-21-sq,2);dot(x+6+lx,y-21-sq,2);
+ if(G.talk)blob(x,y-12,4,2+Math.abs(Math.sin(now*12))*3,106,INK,0);else if(wa>.25&&wa>=fe)ln([[x-5,y-13],[x,y-10],[x+5,y-13]],107,2,INK,.3);else ln([[x-4,y-12],[x+4,y-13]],107,2,INK,.3);}
 function drawPlayer(){const ln0=leanNow(fdt);ctx.save();if(ln0){ctx.translate(P.x,P.y);ctx.rotate(P.face*ln0);ctx.translate(-P.x,-P.y);}drawChar(S.char||DEFAULT_LOOK,S.eq,P.x,P.y,P.face,P.moving,!!P.task&&!P.task.chop);ctx.restore();if(P.task&&P.task.chop){const f=P.face,a=-1.1+(P.task.swing>0?(1-P.task.swing/.22)*2.2:0),hx=P.x+f*8,hy=P.y-20;ctx.save();ctx.translate(hx,hy);ctx.scale(f,1);ctx.rotate(a);ln([[0,0],[0,-20]],950,5,INK,.3);ln([[0,0],[0,-20]],950,2.6,'#d9cdb5',.3);sketch([[-2,-24],[8,-22],[6,-14],[0,-17]],true,951,.3,'#8a8494',INK,1.8);ctx.restore();}if(buffOn()){const ph=(now*.5)%1;ctx.globalAlpha=(1-ph)*.7;ln([[P.x+4,P.y-62-ph*24],[P.x+9,P.y-70-ph*24],[P.x+4,P.y-78-ph*24]],890,2.2,'#fff',.4);ctx.globalAlpha=1;}}
 function drawChar(a,eq,x,y,f,mv,fishing){
  const K=KIN[a.kin]||KIN.human,skin=K.tones[a.tone]||K.tones[0],sh=SHAPES[a.shape]||SHAPES.bean,rx=sh[0],ry=sh[1],acc=ACCS[a.acc]||ACCS[0],hc=HAIRC[a.hc]||HAIRC[0];
@@ -1416,21 +1419,24 @@ function pickGround(g){const i=(S.ground||[]).indexOf(g);if(i<0)return;const it=
 function drawGround(){const T=Date.now();for(const g of (S.ground||[])){if(Math.abs(g.x-cam.x)>W/Z/2+60||Math.abs(g.y-cam.y)>H/Z/2+60)continue;drawOcc(g.x,g.y,()=>drawGroundOne(g,T),true);}}
 function drawGroundOne(g,T){{const left=g.exp-T;if(left<20000&&Math.floor(now*5)%2)return;
  shadow(g.x,g.y+2,10,3.5);if(g.storm){/* a stranded fish flops */const f=Math.max(0,Math.sin(now*5+g.x))**3,a=Math.sin(now*9+g.y)*.5*f;ctx.save();ctx.translate(g.x,g.y-10-f*8);ctx.rotate(a);ctx.drawImage(iconImg(itemIcon(g.it)),-12,-10,24,24);ctx.restore();}else ctx.drawImage(iconImg(itemIcon(g.it)),g.x-12,g.y-20+Math.sin(now*2+g.x)*1.2,24,24);if((g.it.n||1)>1)otext(String(g.it.n),g.x+11,g.y-2,12,'#fff');}}
-function drawGull(){const {x,y}=GULL,b=Math.sin(now*2.2)*1.2,talk=(dlgOn&&curWho==='Mortimer Gull')||bankOpen;
+function drawGull(){if(mortShooed()){drawGullAloft();return;}const {y}=GULL,x0=GULL.x,lean=Math.min(1,Math.max(0,wmPeek('mortimer').f))*8,x=x0,b=Math.sin(now*2.2)*1.2,talk=(dlgOn&&curWho==='Mortimer Gull')||bankOpen;
  shadow(x,y+3,14,4);ln([[x,y],[x,y-26]],1001,8,INK,.6);ln([[x,y],[x,y-26]],1001,4.5,'#a8703f',.6);sketch(rrPts(x-17,y-22,34,13,3),true,1002,1,'#e8d6b0',INK,2.4);ln([[x-10,y-16],[x+9,y-16]],1003,1.8,INK,.8);
+ ctx.save();ctx.translate(-(P.x>x?1:-1)*lean,0);
  const gy=y-38+b;ln([[x-3,y-27],[x-3,gy+8]],1004,1.8,'#e8a23a',.2);ln([[x+3,y-27],[x+3,gy+8]],1005,1.8,'#e8a23a',.2);
  blob(x,gy,13,10,1006,'#fbfbff',2.6,.8);sketch([[x-11,gy-3],[x-1,gy-2],[x-6,gy+6]],true,1007,.4,'#c9c3d6',INK,2);
  blob(x+8,gy-11,7,6.5,1008,'#fbfbff',2.4,.4);dot(x+10,gy-12,1.5);sketch([[x+13,gy-11],[x+21,gy-9+(talk?Math.abs(Math.sin(now*14))*2:0)],[x+13,gy-8]],true,1009,.2,'#ffcf3a',INK,1.8);
- sketch([[x+2,gy-15],[x+15,gy-15],[x+17,gy-12],[x+4,gy-13]],true,1010,.3,'#5fae6a',INK,1.8);}
-function talkGull(){discover('gullbank');say('Mortimer Gull',S.metGull?pick(['SQUAWK. Ahem. Still here. Still counting.','Your things are safe. We already stole them once, no need to do it twice.','The Gull Post never closes. We tried closing once. Someone stole the door.']):'SQUAWK. Ahem. Mortimer Gull, the Gull Post. Leave anything with us and it’s safe. Gulls steal everything, so nobody steals from gulls. Very secure.',
- [{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'Can you come to me?',f:()=>say('Mortimer Gull','Gulls don’t make house calls. Unless there’s something crunchy in it for us. Find me something truly crunchy and we’ll talk.',[{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'See you',f:closeDlg}])},{l:'See you',f:closeDlg}]);S.metGull=1;}
+ sketch([[x+2,gy-15],[x+15,gy-15],[x+17,gy-12],[x+4,gy-13]],true,1010,.3,'#5fae6a',INK,1.8);ctx.restore();}
+function talkGull(){if(mortShooed())return;discover('gullbank');const mo=[{l:'Open the bank',f:()=>{closeDlg();openBank();}}];if(wmMood('mortimer')==='warm')mo.push({l:'Any news?',f:()=>say('Mortimer Gull',mortimerNews(),[{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'See you',f:closeDlg}])});
+ {const hl=S.metGull&&wmHeard('mortimer');if(hl){say('Mortimer Gull',hl,mo.concat([{l:'See you',f:closeDlg}]));return;}}
+ say('Mortimer Gull',S.metGull?pick(['SQUAWK. Ahem. Still here. Still counting.','Your things are safe. We already stole them once, no need to do it twice.','The Gull Post never closes. We tried closing once. Someone stole the door.']):'SQUAWK. Ahem. Mortimer Gull, the Gull Post. Leave anything with us and it’s safe. Gulls steal everything, so nobody steals from gulls. Very secure.',
+ mo.concat([{l:'Can you come to me?',f:()=>say('Mortimer Gull','Gulls don’t make house calls. Unless there’s something crunchy in it for us. Find me something truly crunchy and we’ll talk.',[{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'See you',f:closeDlg}])},{l:'See you',f:closeDlg}]));S.metGull=1;}
 function drawPickups(){drawGround();drawAsh();}
 function drawFireAt(fr){if(fr.big){ctx.save();ctx.translate(fr.x,fr.y);ctx.scale(1.45,1.45);ctx.translate(-fr.x,-fr.y);drawFireBody(fr);ctx.restore();}else drawFireBody(fr);}
 function drawFireBody(fr){const {x,y}=fr,sd=(fr.seed||0)*7,hot=C&&C.fr===fr?C.heat:lifeHeat(fr);shadow(x,y+3,22,6);
  if(!fr.main&&!fireLit(fr))return;
  if(C&&C.fr===fr&&C.out){blob(x,y,22,9,985,'#b8b2c4',2.4,.8);for(let i=0;i<4;i++)dot(x-12+i*8,y-1+(i%2)*2,1.3,'#5a5266');const ph=(now*.6)%1;ctx.globalAlpha=.8;blob(x,y-30-Math.sin(now*2)*3,10,13,986,'#e4e0ea',2,.9);dot(x-3.5,y-32-Math.sin(now*2)*3,1.7);dot(x+3.5,y-32-Math.sin(now*2)*3,1.7);ctx.globalAlpha=(1-ph)*.5;ln([[x,y-44-ph*20],[x+5,y-52-ph*20],[x-2,y-60-ph*20]],987,2.4,'#cfc8dc',.4);ctx.globalAlpha=1;return;}
  ln([[x-18,y+2],[x+16,y-6]],70+sd,8,INK,1);ln([[x-18,y+2],[x+16,y-6]],70+sd,4.5,'#9a6236',1);ln([[x-16,y-6],[x+18,y+2]],71+sd,8,INK,1);ln([[x-16,y-6],[x+18,y+2]],71+sd,4.5,'#a8703f',1);
- const ck=C&&C.fr===fr,f=Math.sin(now*13+sd)*2.5*(.5+hot),fh=ck?16+hot*30:6+hot*19,fw=ck?8+hot*6:6+hot*7,fy=y-4-fh*.55-(ck?14:0);
+ const ck=C&&C.fr===fr,f=Math.sin(now*13+sd)*2.5*(.5+hot),fh=(ck?16+hot*30:6+hot*19)*(fr.main?wmFlame():1),fw=ck?8+hot*6:6+hot*7,fy=y-4-fh*.55-(ck?14:0);
  blob(x,fy,fw+3,fh+f,72+sd,hot<.4?'#d9553a':'#ff8a3d',2.5);blob(x+1,fy+fh*.3,fw*.55,fh*.55+f*.6,73+sd,hot>1?'#fff6d0':'#ffd23f',0);
  const sp=(now*.9+sd)%1;dot(x+Math.sin(now*3+sd)*6,fy-fh-sp*26,2*(1-sp),'#ffcf3a');
  if(hot>1&&Math.random()<24*fdt)sparks.push({x:x+(Math.random()-.5)*12,y:fy-fh*.6,vx:(Math.random()-.5)*50,vy:-70-Math.random()*60,t:0});
@@ -1440,6 +1446,7 @@ function drawFireBody(fr){const {x,y}=fr,sd=(fr.seed||0)*7,hot=C&&C.fr===fr?C.he
    if(talking)blob(x,ey+6,2.6,1.4+Math.abs(Math.sin(now*14))*2.2,76,INK,0);else ln([[x-3,ey+6],[x+3,ey+5.5]],77,1.8,INK,.2);}}}
 function talkWick(){const first=!S.metWick;S.metWick=1;discover('wick');
  {const sl=first?null:brimbleStormLine();if(sl){discover('monsoon');say('Brimble',sl,wickOpts());return;}}
+ if(!first){const hl=wmHeard('brimble');if(hl){say('Brimble',hl,wickOpts());return;}}
  if(!hasSkill('cooking')){say('Brimble',first?'Hm? Oh. An audience. Brimble, galley flame of the Grinning Gull, finest ship that ever sank. Forty years I fed that crew. Now I feed myself, badly, from a teapot. Bring me driftwood from the beach and I’ll teach you to cook. Properly.':
   ((S.wood||0)>0?'Is that driftwood I smell? Don’t tease a stove.':'Still starving. Driftwood. Flames don’t beg, as a rule. Consider this the exception.'),wickOpts());return;}
  if(!rawCount()){say('Brimble',pick(['Nothing to cook? The sea’s full of fish. Catch one and bring it here.','Empty hands, empty pans. Go fish, then tap me.']),wickOpts());return;}
@@ -1450,6 +1457,7 @@ function wickOpts(){const o=[];
  const n=rawCount();if(n)o.push({l:'Cook ('+n+' raw fish)',f:()=>{closeDlg();goCook(MAINFIRE);}});
  if((S.ash||0)>0)o.push({l:'About this ash...',f:ashTalk});
  if(S.kindle&&S.kindle.seen&&!S.kindle.joined)o.push({l:'A log ran away from me',f:()=>say('Brimble','A runaway log? That’s a Kindle! Wild ones spook easy, but they can’t resist a fire at night. Light one of your own, keep it fed past dark, and bring something tasty. Kindles eat ash, the weirdos. Takes a few nights before they trust you.',wickOpts())});
+ {const md=wmMood('brimble');if(md==='warm')o.push({l:'What’s the sky doing?',f:()=>say('Brimble',brimbleForecast(),wickOpts())});else if(md==='afraid'&&n)o.push({l:'Cook these for me',f:brimbleCooks});}
  o.push({l:'Any tips?',f:()=>{const i=Math.floor(Math.random()*WTIPS.length);if(i===3)discover('gull');say('Brimble',WTIPS[i],wickOpts());}});o.push({l:'See you',f:closeDlg});return o;}
 function feedWick(){S.wood--;unlockSkill('cooking');discover('hearth');save();addXP('firemaking',20,'first',[FIRE.x,FIRE.y-24]);toast('New skill: Cooking');
  say('Brimble','Ahhh. That’s the stuff. Lesson one: a fire is a promise. Keep it fed and it keeps you. Put a fish on, flip it when it goes golden, pull it when the other side matches. Driftwood burns steady, kelp burns wild. I’ll holler if you’re doing it wrong. '+(rawCount()?'You’ve got fish on you. Let’s cook!':'Now go catch me a fish and come back. A Minnowbit will do.'),wickOpts());}
@@ -1983,7 +1991,7 @@ function shObjects(){const o=[];
  for(const l of LAPPERS)if(nightNow()&&l.st!=='gone')o.push({x:l.x,y:l.y,r:26,name:'Moonlapper',key:'moonlapper',act:null,onExamine:()=>{discover('moonlapper');think('Eyeless. Drinking the moon off the water.');}});
  for(const m of MUD)o.push({x:m.x,y:m.y,r:m.rx+4,name:'Mud',key:'fallow',act:null,onExamine:()=>{discover('fallow');think(pick(['It bubbles. It smells like something gave up.','Fallow ground. Nothing has grown here in a long while.']));}});
  return o;}
-function feedMoss(m){const i=S.inv.findIndex(x=>x.id==='cook');if(i<0)return;S.inv.splice(i,1);sfx('eat');m.fed=true;m.follow=true;discover('mossback');pop('*munch*',m.x,m.y-30,'#fff',17);think(pick(['It ate the lot. It’s looking at me differently.','Fed. It’s following. I suppose I have a Mossback now.']));save();}
+function feedMoss(m){const i=S.inv.findIndex(x=>x.id==='cook');if(i<0)return;S.inv.splice(i,1);sfx('eat');m.fed=true;m.follow=true;discover('mossback');pop('*munch*',m.x,m.y-30,'#fff',17);wmDeed('moss_feed',m.x,m.y);think(pick(['It ate the lot. It’s looking at me differently.','Fed. It’s following. I suppose I have a Mossback now.']));save();}
 function nightNow(){const light=.5-.5*Math.cos(S.day*6.2832);return light<.4;}
 function shUpdate(dt){if(!SW.on&&!P.path.length&&!shWalkable(P.x,P.y)&&shDepth(P.x,P.y)<=0){const c=shClamp(P.x,P.y);P.x=c[0];P.y=c[1];}
  for(const p of PLANTED)p.t+=dt;
@@ -2363,11 +2371,11 @@ function mawPlant(m){const i=MAWS.indexOf(m);if(i>=0)MAWS.splice(i,1);S.shPlante
 {const pl=S.shPlanted||{};for(let i=MAWS.length-1;i>=0;i--){const m=MAWS[i];if(pl[m.seed]){MAWS.splice(i,1);PLANTED.push({x:m.x,y:m.y,seed:m.seed,t:9});}}}
 /* Mossback: it shivers now and then; that is its tell. Wrap it on the shiver and it warms and follows for a while. Bind it while wrapped and it is yours. Slap or trip it and it runs; it is not a fighter. */
 function mossHit(m,kind,tg){const pos=[m.x,m.y-40];
- if(kind==='slap'||kind==='trip'){if(!m.fed&&!m.bound)m.follow=false;m.flee=kind==='trip'?2.6:1.8;if(kind==='trip')m.tumble=.8;sfx('squeak');addXP('strife',kind==='trip'?2:1,'normal',pos);pop(kind==='trip'?'*flump*':'*squeak*',m.x,m.y-30,'#fff',17);think(pick(['That was not kind.','It ran. Of course it ran.','It looked at me the way Gubbins looks at an empty net.']));return;}
- if(kind==='wrap'){if(m.sh>0){m.sh=0;m.shT=30;m.warm=Date.now()+150000;m.follow=true;S.st.mirrored=1;S.st.mosswarm=1;burst('accord','Mirrored',15,pos);discover('mossback');think('I nudged it along with the haft. It stopped shaking and fell in behind me, for a while.');}
+ if(kind==='slap'||kind==='trip'){if(!m.fed&&!m.bound)m.follow=false;m.flee=kind==='trip'?2.6:1.8;if(kind==='trip')m.tumble=.8;sfx('squeak');addXP('strife',kind==='trip'?2:1,'normal',pos);pop(kind==='trip'?'*flump*':'*squeak*',m.x,m.y-30,'#fff',17);think(pick(['That was not kind.','It ran. Of course it ran.','It looked at me the way Gubbins looks at an empty net.']));wmDeed('moss_drive',m.x,m.y);return;}
+ if(kind==='wrap'){if(m.sh>0){m.sh=0;m.shT=30;m.warm=Date.now()+150000;m.follow=true;S.st.mirrored=1;S.st.mosswarm=1;burst('accord','Mirrored',15,pos);discover('mossback');wmDeed('moss_warm',m.x,m.y);think('I nudged it along with the haft. It stopped shaking and fell in behind me, for a while.');}
   else{addXP('accord',2,'normal',pos);think(pick(['It blinks at me. Not cold, just now.','Warm enough. Hungry, though.']));}return;}
  if(kind==='bind'){if(m.bound){addXP('accord',1,'normal',pos);think('It is already mine. It knows it.');return;}
-  m.bound=1;m.follow=true;m.warm=0;burst('accord','Kept',25,pos);discover('mossback');think('One more nudge and it settles in at my heels. It is coming with me, and seems glad about it.');}}
+  m.bound=1;m.follow=true;m.warm=0;burst('accord','Kept',25,pos);discover('mossback');wmDeed('moss_bind',m.x,m.y);think('One more nudge and it settles in at my heels. It is coming with me, and seems glad about it.');}}
 /* Old Bollard: slaps and trips he enjoys, trips on the lean ring him, wraps on the lean make his day. His XP fades: he is practice. */
 function postHit(b,kind,tg){const pos=[b.x,b.y-40],tell=b.st==='lean',n=S.st.postHits=(S.st.postHits||0)+1,fade=k=>Math.max(1,Math.round(k*Math.max(.15,1-n/40)));
  discover('bollard');b.said=1.6;b.t=0;b.wait=4+Math.random()*4;if(!S.st.scarfHint&&S.hint>=3){S.st.scarfHint=1;hint('Tap to slice. Slide across him to knock him. Slide straight at him to prod him. Watch for the lean.',8000);}
@@ -3224,7 +3232,155 @@ function mmHit(sx,sy){if(!mmShown())return false;const {cx,cy}=mmPos();return Ma
 /* tap: walk (or swim) to that spot */
 function mmTap(sx,sy){const {cx,cy}=mmPos(),wx=P.x+(sx-cx)/MMK,wy=P.y+(sy-cy)/MMK;
  if(SW.on){swimTo(wx,wy);return;}if(!SH.on&&inSea(wx,wy)){const c=clampLand(wx,wy);routeTo(c[0],c[1]);return;}if(!walkable(wx,wy)){const c=clampLand(wx,wy);routeTo(c[0],c[1]);return;}routeTo(wx,wy);}
-const BUILD=41;
+/* World memory registry (build 42). Pure data, no code and no references to anything else in the game:
+   tools/world-graph.js loads this file on its own, writes docs/world-graph.md and fails the build on orphans,
+   single-outcome events and dead ends. 33-world-memory.js is the engine that runs it.
+   who: everyone who can see, tell, feel or be the subject of a deed.
+     kind 'dweller' feels (regard: t trust, f fear, w warmth) and can witness; 'flock' witnesses and talks but has
+     no feelings of its own; 'creature' is only ever a deed's subject.
+     sees: places where they witness deeds ('key' the Key, 'forest' the dark islands).
+     talks: [to, game hours before it passes on, how much certainty survives the telling].
+     care: how much a deed done to someone moves this dweller (default .5).
+     hear: what they say, the next time you talk, about a deed they learned of: [sure, unsure] by the deed's line group.
+   deeds: to whom, the hand, where it can happen, tags for the style picture, fx: regard moves (pulled toward the sign,
+     so recent deeds count most and nothing fades with time; Ross, 16 Oct 2026: feelings change only by deeds).
+   events: read a dweller's regard; each outcome needs a gift (engine-implemented, listed in GIFTS) and a line.
+   style: the player's style picture, axes and the tags that feed them (an axis with no source yet is waiting). */
+const WREG={
+ who:{
+  mortimer:{name:'Mortimer Gull',kind:'dweller',sees:['key'],talks:[['gubbins',1,.85],['gulls',2,.8]],care:{mossbacks:.4},
+   hear:{mosskind:['SQUAWK. The flock says you fed a mossback. Generous. Unprofitable, but generous.','The flock says someone was kind to a mossback. Flock can’t count, mind.'],
+         mosscruel:['The flock saw you scatter a mossback. Noted. The ledger is open, friend.','Rumour on the wing: somebody’s been rough with the mossbacks. Just rumour. For now.']}},
+  gubbins:{name:'Gubbins',kind:'dweller',sees:['key'],talks:[['mortimer',1,.85]],care:{mortimer:.8,mossbacks:.3},
+   hear:{mortkind:['Saw you bring Mortimer a golden fish. Golden! He’s been preening all day. Nice of you, though.','Mortimer’s telling everyone someone brought him a fancy fish. Reckon that was you?'],
+         mortcruel:['I saw that. Swatting Mortimer off his own post. He’s a banker, friend, not a fly.','Word is somebody knocked Mortimer off his post. Don’t suppose you know anything.'],
+         mosskind:['Gulls say you’ve been kind to some mossy thing out east. Soft, you are. I like it.','Gulls are going on about a mossy creature and someone being nice to it. Gulls exaggerate.'],
+         mosscruel:['Gulls say you’ve been kicking mossy little things about out east. That true?','Something about you and a mossy creature out east. Gulls tell it worse every time.']}},
+  brimble:{name:'Brimble',kind:'dweller',sees:['key'],talks:[],care:{mortimer:.5,mossbacks:.8},
+   hear:{mortkind:['The gulls tell me you fed Mortimer a golden fish. Golden both sides, I hope. Someone listens to me.','A golden fish for that featherbrained banker, the gulls say? If it was you, I approve.'],
+         mortcruel:['You chased Mortimer off his post. I’m a flame. I know what it is to be swatted at. Don’t.','The gulls are screaming about someone knocking Mortimer about. Gulls scream about everything. Was it you?'],
+         mosskind:['Word from the gulls: you warmed some starving mossy thing. Good. Cold is the worst of it. Ask any fire.','The gulls say somebody’s been kind to the mossy things out east. I hope it was you.'],
+         mosscruel:['The gulls saw you scatter those mossy creatures. Hungry, cold, and now kicked. Hm.','Something’s been scaring the mossy creatures out east, the gulls say. Not you, surely.']}},
+  gulls:{name:'the gulls',kind:'flock',sees:['key','forest'],talks:[['mortimer',1,.7],['brimble',3,.7]]},
+  mossbacks:{name:'the Mossbacks',kind:'creature'}
+ },
+ deeds:{
+  mort_gift:{to:'mortimer',hand:'accord',where:['key'],line:'mortkind',tags:['generous'],fx:{t:.2,f:-.1,w:.4},say:'gave Mortimer a golden fish'},
+  mort_shoo:{to:'mortimer',hand:'strife',where:['key'],line:'mortcruel',tags:['rough'],fx:{t:-.3,f:.5,w:-.4},say:'shooed Mortimer off his post'},
+  moss_feed:{to:'mossbacks',hand:'accord',where:['forest'],line:'mosskind',tags:['generous'],fx:{t:.1,f:-.05,w:.35},say:'fed a Mossback'},
+  moss_warm:{to:'mossbacks',hand:'accord',where:['forest'],line:'mosskind',tags:['patient'],fx:{t:.1,w:.3},say:'warmed a shivering Mossback'},
+  moss_bind:{to:'mossbacks',hand:'accord',where:['forest'],line:'mosskind',tags:[],fx:{t:.2,w:.4},say:'kept a Mossback'},
+  moss_drive:{to:'mossbacks',hand:'strife',where:['forest'],line:'mosscruel',tags:['rough'],fx:{t:-.15,f:.3,w:-.3},say:'drove off a Mossback'}
+ },
+ /* fear gets you labour and goods; warmth gets you knowledge (the standing principle, agreed 16 Oct 2026) */
+ events:{
+  gubbins_mood:{who:'gubbins',outcomes:{
+   warm:{when:{w:.25},gift:'tip',line:'Between us? They’re biting {dir} of you. Don’t tell the gulls.'},
+   afraid:{when:{f:.25},gift:'price',line:'Extra shell in there for each one. No need for... any of that.'}}},
+  brimble_mood:{who:'brimble',outcomes:{
+   warm:{when:{w:.25},gift:'forecast',line:'Sit, sit. Let a flame read the sky for you.'},
+   afraid:{when:{f:.25},gift:'cooks',line:'Fine. Give them here. I’ll do it. Just... stand back.'}}},
+  mortimer_mood:{who:'mortimer',outcomes:{
+   warm:{when:{w:.25},gift:'news',line:'News from the wing, for a friend of the Post.'},
+   afraid:{when:{f:.25},gift:'tithe',line:'Mortimer slides a few shells across the counter without meeting my eye.'}}}
+ },
+ GIFTS:{tip:'Gubbins says which way the fish are biting (knowledge)',price:'Gubbins pays a shell more per fish (goods)',
+  forecast:'Brimble reads the next shower and monsoon for you, a day ahead (knowledge)',cooks:'Brimble cooks your raw fish for you: always plain cooked, no XP (labour)',
+  news:'Mortimer tells you how Gubbins and Brimble feel about you (knowledge)',tithe:'Mortimer slides you five shells at the bank, once a day (goods)'},
+ style:{
+  hand:{ends:['Strife','Accord'],from:'deed hands'},
+  roam:{ends:['homebody','roamer'],from:'where deeds happen (the Key or beyond)'},
+  pace:{ends:['hasty','patient'],tags:['hasty','patient']},
+  care:{ends:['reckless','careful'],tags:['reckless','careful']}
+ }
+};
+/* World memory engine (build 42). Runs the registry in 32-world-registry.js.
+   S.wm = {n: deed counter, d: deeds [seq, id, game time, x, y, realm 0 Key / 1 forest] (last WM_CAP kept),
+           k: {who: {seq: [certainty, game time learned, shown]}}, r: {who: {t, f, w}}, shoo: until (ms), tithe: day}.
+   A deed is seen by its subject and by witnesses in sight (fog, night and canopy hide it); the gulls see open ground
+   anywhere in daylight. Gossip passes along WREG talk edges on the game clock (seeded, so a reload agrees) and blurs:
+   certainty drops each telling. A dweller's regard moves only when they learn a deed, pulled toward the deed's sign
+   by its weight, certainty and how much they care, so the latest deeds count most and nothing fades with time.
+   Fear gets you labour and goods, warmth gets you knowledge (events, read when you talk). */
+const WM_CAP=120,WM_SIGHT=360;
+function wmS(){const m=S.wm=S.wm||{};m.n=m.n||0;m.d=m.d||[];m.k=m.k||{};m.r=m.r||{};return m;}
+function wmR(who){const m=wmS();return m.r[who]=m.r[who]||{t:0,f:0,w:0};}
+function wmPeek(who){const m=S.wm;return (m&&m.r&&m.r[who])||{t:0,f:0,w:0};}
+function wmPos(who){return who==='mortimer'?GULL:who==='gubbins'?G:who==='brimble'?MAINFIRE:null;}
+function wmCanopy(x,y){if(!SH.on)return false;for(const t of shTrees){if(Math.abs(t.x-x)>60||Math.abs(t.y-y)>90)continue;if(tstage(t).c>0&&Math.hypot(t.x-x,t.y-(y+30))<30*t.s)return true;}return false;}
+/* how sure a witness is that they saw it: 0 not seen, 1 seen */
+function wmSees(who,x,y,realm,seq){const W=WREG.who[who];if(!W||!W.sees||!W.sees.includes(realm?'forest':'key'))return 0;
+ const fog=fogR();
+ if(W.kind==='flock'){if(dark>.3||fog<400||wmCanopy(x,y))return 0;return hash1(seq*3.7+11)<.75?1:0;}
+ if(realm)return 0;const p=wmPos(who);if(!p)return 0;const sight=Math.min(who==='brimble'?WM_SIGHT:WM_SIGHT*(1-dark)+90*dark,fog);
+ return Math.hypot(p.x-x,p.y-y)<=sight?1:0;}
+function wmDeed(id,x,y){const D=WREG.deeds[id];if(!D)return;const m=wmS(),seq=++m.n,t=gNow(),realm=SH.on?1:0;
+ m.d.push([seq,id,t,Math.round(x),Math.round(y),realm]);
+ while(m.d.length>WM_CAP){const old=m.d.shift();for(const w in m.k)delete m.k[w][old[0]];}
+ if(WREG.who[D.to].kind==='dweller')wmLearn(D.to,seq,1,t,1);
+ for(const w in WREG.who)if(w!==D.to&&wmSees(w,x,y,realm,seq))wmLearn(w,seq,1,t,0);
+ wmTick();save();}
+function wmFind(seq){const d=S.wm.d;for(let i=d.length-1;i>=0;i--)if(d[i][0]===seq)return d[i];return null;}
+function wmLearn(who,seq,cert,t,shown){const m=wmS(),K=m.k[who]=m.k[who]||{};if(K[seq])return false;const dd=wmFind(seq);if(!dd)return false;
+ K[seq]=[Math.round(cert*100)/100,t,shown?1:0];const W=WREG.who[who];if(W.kind!=='dweller')return true;
+ const D=WREG.deeds[dd[1]],care=D.to===who?1:((W.care&&W.care[D.to])||.5),R=wmR(who);
+ for(const a of ['t','f','w']){const v=D.fx[a];if(!v)continue;const goal=v>0?1:a==='f'?0:-1,k=Math.min(1,Math.abs(v)*cert*care*.5);R[a]=Math.round((R[a]+(goal-R[a])*k)*1000)/1000;}
+ return true;}
+/* gossip: every known deed passes along each talk edge once its delay has passed on the game clock */
+function wmTick(){const m=S.wm;if(!m||!m.d||!m.d.length)return;const T=gNow();let ch=false;
+ for(let pass=0;pass<6;pass++){let any=false;
+  for(const w in WREG.who){const W=WREG.who[w],K=m.k[w];if(!W.talks||!K)continue;
+   for(const s in K){const [c,t0]=K[s];W.talks.forEach(([to,h,keep],i)=>{const tK=m.k[to];if(tK&&tK[s])return;const at=t0+h*HOUR*(.75+.5*hash1(+s*13.1+i*7.3));
+    if(T>=at&&wmLearn(to,+s,c*keep,at,0))any=ch=true;});}}
+  if(!any)break;}
+ if(ch)save();}
+setInterval(()=>{try{wmTick();}catch(e){}},2000);
+/* the line a dweller says about the latest thing they heard and have not spoken of yet */
+function wmHeard(who){const m=S.wm,K=m&&m.k&&m.k[who],W=WREG.who[who];if(!K||!W.hear)return null;let best=null;
+ for(const s in K){const e=K[s];if(e[2])continue;e[2]=1;const dd=wmFind(+s);if(!dd)continue;const D=WREG.deeds[dd[1]];if(!W.hear[D.line])continue;if(!best||e[1]>best.t)best={t:e[1],c:e[0],line:D.line};}
+ if(!best)return null;save();return W.hear[best.line][best.c>=.8?0:1];}
+/* which event outcome a dweller is in now (null: neither) */
+function wmMood(who){let best=null,bm=0;for(const k in WREG.events){const E=WREG.events[k];if(E.who!==who)continue;const R=wmPeek(who);
+ for(const o in E.outcomes){const wh=E.outcomes[o].when;let mg=1e9;for(const a in wh)mg=Math.min(mg,R[a]-wh[a]);if(mg>=0&&(best===null||mg>bm)){best=o;bm=mg;}}}return best;}
+function wmLine(who,o){for(const k in WREG.events){const E=WREG.events[k];if(E.who===who&&E.outcomes[o])return E.outcomes[o].line;}return '';}
+/* the style picture: the last 40 deeds, each axis -1..1, null where nothing has fed it yet */
+function wmStyle(){const d=(S.wm&&S.wm.d||[]).slice(-40),st={};if(!d.length)return st;let h=0,r=0;const tg={};
+ for(const x of d){const D=WREG.deeds[x[1]];h+=D.hand==='accord'?1:-1;r+=x[5]?1:-1;for(const t of D.tags)tg[t]=(tg[t]||0)+1;}
+ st.hand=h/d.length;st.roam=r/d.length;for(const k of ['pace','care']){const [a,b]=WREG.style[k].tags,n=(tg[a]||0)+(tg[b]||0);st[k]=n?((tg[b]||0)-(tg[a]||0))/n:null;}return st;}
+
+/* ---- gifts: what each outcome gives (the registry's GIFTS) ---- */
+function gubbinsTip(){let b=null,bd=1e9;for(const s of spots){if(s.type==='moon'||s.st!=='on')continue;const d=Math.hypot(s.x-P.x,s.y-P.y);if(d<bd){bd=d;b=s;}}
+ if(!b)return 'Nothing biting this minute. Give it a breath and look for bubbles.';return wmLine('gubbins','warm').replace('{dir}',compass(b.x-P.x,b.y-P.y));}
+function brimbleForecast(){const t=gNow(),day=24*HOUR;let sh=null;const n0=Math.floor(t/DAY_PERIOD);
+ for(let n=n0;n<n0+3&&!sh;n++){const s=showerOf(n);if(s&&s.e>t&&s.s-t<day&&!stormAt(s.s))sh=s;}
+ const cur=stormAt(t),ns=nextStorm(t);let a=wmLine('brimble','warm')+' ';
+ if(cur)a+='We’re in it now. It eases '+whenWords(cur.e)+'.';
+ else if(ns&&ns.s-t<day)a+='A monsoon, '+whenWords(ns.s)+'. Get your wood up high.';
+ else a+='No monsoon this side of tomorrow.';
+ a+=sh?(sh.s<=t?' And this rain passes soon.':' A shower, '+whenWords(sh.s)+'.'):' No rain worth the name.';return a;}
+function brimbleCooks(){let n=0;S.inv.forEach((it,i)=>{if(FISH[it.id]){S.inv[i]={id:'cook',f:it.id,q:'good',c:it.c};n++;}});if(!n)return;sfx('plate');save();
+ say('Brimble',wmLine('brimble','afraid')+' There. '+n+' cooked. Plain. Don’t expect golden from a nervous stove.',wickOpts());}
+function mortimerNews(){const f=w=>{const o=wmMood(w);return o==='warm'?'thinks you’re alright':o==='afraid'?'gets twitchy when your name comes up':'hasn’t made up his mind about you';};
+ return wmLine('mortimer','warm')+' Gubbins '+f('gubbins')+'. Brimble '+f('brimble')+'. The flock sees everything, mind. Mostly.';}
+function mortTithe(){if(wmMood('mortimer')!=='afraid')return;const day=Math.floor(gNow()/DAY_PERIOD);if(S.wm.tithe===day)return;S.wm.tithe=day;S.shells+=5;sfx('shells');think(wmLine('mortimer','afraid'));save();}
+/* ---- Mortimer: the two deeds ---- */
+function mortShooed(){return !!(S.wm&&S.wm.shoo>Date.now());}
+function goldenIdx(){return S.inv.findIndex(i=>i.id==='cook'&&i.q==='perfect');}
+function mortGift(){const i=goldenIdx();if(i<0){think('I’d need something golden. Truly crunchy.');return;}S.inv.splice(i,1);sfx('eat');pop('*CRUNCH*',GULL.x,GULL.y-60,'#fff',18);
+ wmDeed('mort_gift',GULL.x,GULL.y);
+ say('Mortimer Gull',pick(['Golden. Both sides. *CRUNCH*. This is a deposit the Gull Post will remember.','For me? *CRUNCH*. Oh, that’s the good stuff. You have an account in good standing, friend.']),[{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'See you',f:closeDlg}]);}
+function mortShoo(){if(!axeWhole()){think('Flapping my arms at a banker won’t do it. I’d need some reach.');return;}if(mortShooed())return;
+ P.face=GULL.x>P.x?1:-1;SC.fx=[{kind:'sweep',tx:GULL.x,ty:GULL.y-30,t:0,r:30}];sfx('sweep');S.st.sweeps=(S.st.sweeps||0)+1;
+ if(!hasSkill('strife')){unlockSkill('strife');discover('strife');toast('New skill: Dominion, Strife');}addXP('strife',2,'normal',[GULL.x,GULL.y-70]);axeWear('blunt');
+ S.wm=wmS();S.wm.shoo=Date.now()+HOUR;pop('*SQUAWK*',GULL.x,GULL.y-70,'#fff',19);sfx('squeak');
+ wmDeed('mort_shoo',GULL.x,GULL.y);think(pick(['Off he goes, circling and squawking. The Gull Post is shut until he lands.','He’s up, wheeling over the post and swearing in gull. No banking for a while.']));}
+/* body tells: Brimble's flame, Mortimer leaning away; Gubbins is in drawGubbins */
+function wmFlame(){const R=wmPeek('brimble');return Math.max(.6,1+.22*Math.max(0,R.w)-.38*R.f);}
+function drawGullAloft(){const {x,y}=GULL;shadow(x,y+3,14,4);ln([[x,y],[x,y-26]],1001,8,INK,.6);ln([[x,y],[x,y-26]],1001,4.5,'#a8703f',.6);sketch(rrPts(x-17,y-22,34,13,3),true,1002,1,'#e8d6b0',INK,2.4);ln([[x-10,y-16],[x+9,y-16]],1003,1.8,INK,.8);
+ const a=now*1.6,gx=x+Math.cos(a)*46,gy=y-110+Math.sin(a)*14,fl=Math.sin(now*14)*7,f=Math.cos(a+1.57)>0?1:-1;
+ blob(gx,gy,9,6,1012,'#fbfbff',2.2,.6);ln([[gx-2,gy-2],[gx-13,gy-8-fl],[gx-22,gy-4-fl*.6]],1013,2,INK,.4);ln([[gx+2,gy-2],[gx+13,gy-8-fl],[gx+22,gy-4-fl*.6]],1014,2,INK,.4);
+ dot(gx+f*6,gy-3,1.2);sketch([[gx+f*8,gy-2],[gx+f*13,gy-1],[gx+f*8,gy+1]],true,1015,.2,'#ffcf3a',INK,1.2);}
+const BUILD=42;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(!(HC&&HC.done))hcBuild(ccOn||intro!=null?14:8);else if(!DUNE.done)duneBuild(ccOn||intro!=null?12:5);else if(!LS.done)lsBuild(ccOn||intro!=null?12:5);perfTick(dt);if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);

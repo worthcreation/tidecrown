@@ -94,13 +94,13 @@ function drawCrab(){const {x}=CRAB,y=CRAB.y-(CRAB.hop>0?Math.sin(CRAB.hop/.5*Mat
  for(const sd of[-1,1])for(let i=0;i<3;i++)ln([[x+sd*6,y-3+i*2],[x+sd*(13+w),y+1+i*3]],90+i+(sd>0?5:0),2,INK,.3);
  blob(x,y-4,11,7,95,'#ff6b6b',2.4,.6);blob(x,y-11,7,5,96,'#cfc8dc',2.2,.5);dot(x-3,y-12,.9,'#2a2140');dot(x+2,y-13,.9,'#2a2140');
  ln([[x-4,y-6],[x-5,y-15]],97,1.8,INK,.2);ln([[x+4,y-6],[x+5,y-15]],98,1.8,INK,.2);dot(x-5,y-16,2.2);dot(x+5,y-16,2.2);}
-function drawGubbins(){const {x,y}=G;shadow(x,y+2,17,5);const sq=G.talk?Math.sin(now*16)*1.5:0;
+function drawGubbins(){const R=wmPeek('gubbins'),fe=Math.max(0,R.f),wa=Math.max(0,R.w),y=G.y,x=G.x+(fe>.25?Math.sin(now*31)*fe*1.4:0);shadow(G.x,y+2,17,5);const sq=G.talk?Math.sin(now*16)*1.5:0;
  ln([[x-16,y-34],[x-10,y-52],[x+10,y-52],[x+16,y-34]],100,2.6,INK,1);
  sketch([[x-17,y-34-sq],[x+17,y-34-sq],[x+13,y],[x-13,y]],true,101,1.5,'#7fa8c9',INK,3);
  blob(x,y-34-sq,17,5,102,'#5d86a8',2.6,.6);
  ln([[x-13,y-12],[x+13,y-12]],103,2,'rgba(42,33,64,.35)',.6);
- const lx=Math.max(-2,Math.min(2,(P.x-x)/40));blob(x-6,y-22-sq,5,5.5,104,'#fff',2,.4);blob(x+6,y-22-sq,5,5.5,105,'#fff',2,.4);dot(x-6+lx,y-21-sq,2);dot(x+6+lx,y-21-sq,2);
- if(G.talk)blob(x,y-12,4,2+Math.abs(Math.sin(now*12))*3,106,INK,0);else ln([[x-4,y-12],[x+4,y-13]],107,2,INK,.3);}
+ const lx=fe>.25?-Math.sign(P.x-x||1)*2:Math.max(-2,Math.min(2,(P.x-x)/40));blob(x-6,y-22-sq,5,5.5,104,'#fff',2,.4);blob(x+6,y-22-sq,5,5.5,105,'#fff',2,.4);dot(x-6+lx,y-21-sq,2);dot(x+6+lx,y-21-sq,2);
+ if(G.talk)blob(x,y-12,4,2+Math.abs(Math.sin(now*12))*3,106,INK,0);else if(wa>.25&&wa>=fe)ln([[x-5,y-13],[x,y-10],[x+5,y-13]],107,2,INK,.3);else ln([[x-4,y-12],[x+4,y-13]],107,2,INK,.3);}
 function drawPlayer(){const ln0=leanNow(fdt);ctx.save();if(ln0){ctx.translate(P.x,P.y);ctx.rotate(P.face*ln0);ctx.translate(-P.x,-P.y);}drawChar(S.char||DEFAULT_LOOK,S.eq,P.x,P.y,P.face,P.moving,!!P.task&&!P.task.chop);ctx.restore();if(P.task&&P.task.chop){const f=P.face,a=-1.1+(P.task.swing>0?(1-P.task.swing/.22)*2.2:0),hx=P.x+f*8,hy=P.y-20;ctx.save();ctx.translate(hx,hy);ctx.scale(f,1);ctx.rotate(a);ln([[0,0],[0,-20]],950,5,INK,.3);ln([[0,0],[0,-20]],950,2.6,'#d9cdb5',.3);sketch([[-2,-24],[8,-22],[6,-14],[0,-17]],true,951,.3,'#8a8494',INK,1.8);ctx.restore();}if(buffOn()){const ph=(now*.5)%1;ctx.globalAlpha=(1-ph)*.7;ln([[P.x+4,P.y-62-ph*24],[P.x+9,P.y-70-ph*24],[P.x+4,P.y-78-ph*24]],890,2.2,'#fff',.4);ctx.globalAlpha=1;}}
 function drawChar(a,eq,x,y,f,mv,fishing){
  const K=KIN[a.kin]||KIN.human,skin=K.tones[a.tone]||K.tones[0],sh=SHAPES[a.shape]||SHAPES.bean,rx=sh[0],ry=sh[1],acc=ACCS[a.acc]||ACCS[0],hc=HAIRC[a.hc]||HAIRC[0];

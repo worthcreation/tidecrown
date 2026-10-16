@@ -1,4 +1,4 @@
-const BUILD=41;
+const BUILD=42;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(!(HC&&HC.done))hcBuild(ccOn||intro!=null?14:8);else if(!DUNE.done)duneBuild(ccOn||intro!=null?12:5);else if(!LS.done)lsBuild(ccOn||intro!=null?12:5);perfTick(dt);if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);

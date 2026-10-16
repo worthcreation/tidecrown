@@ -22,12 +22,13 @@ function tooEarly(){const T=P.task;T.phase='miss';T.t=0;streak('fish',false);sfx
 
 function talkG(){discover('gubbins');G.talk=true;P.face=1;sfx('talk');
  if(!S.metG){S.metG=true;say('Gubbins','Oi! Mind the paint. Name\u2019s Gubbins. I\u2019m a bucket. A talking one, which is rarer. You washed up here, so you\u2019re a fisher now. Them bubbles off the shore? Fish. Go on.',gOpts());return;}
+ {const hl=wmHeard('gubbins');if(hl){say('Gubbins',hl,gOpts());return;}}
  say('Gubbins',pick(['Back again. Smells like you brought snacks.','Bucket business is slow. Got fish?','The sea\u2019s been chatty today. Never says anything useful.','You\u2019ve got that look. The far-off look. Dangerous, that.']),gOpts());}
 function gOpts(){const o=[];const n=S.inv.filter(i=>itemVal(i)>0).length;if(n)o.push({l:'Sell to Gubbins ('+n+')',f:sellPick});
- o.push({l:'Glitter bait, 5 casts (20 shells)',f:buyBait});if(!S.owned.coat)o.push({l:'Oilskin coat (60 shells)',f:buyCoat});o.push({l:'What is this place?',f:lore});o.push({l:'See you',f:closeDlg});return o;}
+ o.push({l:'Glitter bait, 5 casts (20 shells)',f:buyBait});if(!S.owned.coat)o.push({l:'Oilskin coat (60 shells)',f:buyCoat});if(wmMood('gubbins')==='warm')o.push({l:'Where are they biting?',f:()=>say('Gubbins',gubbinsTip(),gOpts())});o.push({l:'What is this place?',f:lore});o.push({l:'See you',f:closeDlg});return o;}
 function buyBait(){if(S.shells<20){say('Gubbins','That\u2019s 20 shells, friend. You\u2019ve got '+S.shells+'. Fish more, talk less.',gOpts());return;}
  if(!canAdd('bait',5)){say('Gubbins','No room in that pack for bait, friend.',gOpts());return;}S.shells-=20;S.bait+=5;save();say('Gubbins','Glitter bait. Fish go silly for it. Bites come quicker and hang on longer.',gOpts());}
-function valOf(it){const v=itemVal(it);return v?v+(S.eq.trinket==='salttin'?1:0)+(S.eq.head==='stache'?1:0):0;}
+function valOf(it){const v=itemVal(it);return v?v+(S.eq.trinket==='salttin'?1:0)+(S.eq.head==='stache'?1:0)+(wmMood('gubbins')==='afraid'?1:0):0;}
 let sellSel=new Set();
 function sellPick(){sellSel=new Set();renderSell();}
 function renderSell(){const list=S.inv.map((it,i)=>[it,i]).filter(([it])=>valOf(it)>0);if(!list.length){say('Gubbins','Nothing I can eat. Fish, friend. Fish.',gOpts());return;}
@@ -41,7 +42,7 @@ dlg.querySelector('.opts').addEventListener('click',e=>{const t=e.target.closest
  if(act==='back'){say('Gubbins','Changed your mind? Buckets understand.',gOpts());return;}
  if(act==='all'){const list=S.inv.map((it,i)=>[it,i]).filter(([it])=>valOf(it)>0);sellSel=sellSel.size===list.length?new Set():new Set(list.map(x=>x[1]));renderSell();return;}
  if(act==='sell'&&sellSel.size){sfx('shells');let v=0;[...sellSel].sort((a,b)=>b-a).forEach(i=>{v+=valOf(S.inv[i]);S.inv.splice(i,1);});S.shells+=v;sellSel=new Set();save();
-  say('Gubbins',pick(['*slurp* Lovely. That’s '+v+' shells. Don’t ask where I keep them.','*crunch* Ooh, that one had character. '+v+' shells for you.','*gulp* Bucket’s happy. Here’s '+v+' shells.']),gOpts());}});
+  say('Gubbins',wmMood('gubbins')==='afraid'?'*gulp* '+v+' shells. '+wmLine('gubbins','afraid'):pick(['*slurp* Lovely. That’s '+v+' shells. Don’t ask where I keep them.','*crunch* Ooh, that one had character. '+v+' shells for you.','*gulp* Bucket’s happy. Here’s '+v+' shells.']),gOpts());}});
 function buyCoat(){if(S.shells<60){say('Gubbins','Sixty shells for the coat. It was my uncle’s. He was a mop.',gOpts());return;}
  if(S.inv.length>=PACK){say('Gubbins','Your pack’s full. Make some room first.',gOpts());return;}
  S.shells-=60;S.owned.coat=1;S.inv.push({id:'coat'});save();say('Gubbins','There. Keeps the spray off and the dark back. Put it on from your satchel.',gOpts());}
@@ -72,7 +73,9 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;yo
  if(KW.active){const k=S.kindle,here=KW.mode==='fire'&&Math.hypot(KW.x-KW.tx,KW.y-KW.ty)<8;
   o.push({x:KW.x,y:KW.y-7,r:22,name:k.seen?'Kindle':'Driftwood',act:KW.mode==='fire'?(here?'Offer ash':null):'Pick up',onAct:()=>KW.mode==='fire'?offerAsh():spookKindle(),
    onExamine:()=>think(KW.mode==='fire'?'The little log is warming himself by my fire, eyes half shut. He keeps glancing at the ash.':(k.seen?'The runaway log. He’s pretending to be ordinary driftwood. Badly.':'Driftwood. With eyes. That just blinked.'))});}
- o.push({x:GULL.x,y:GULL.y-30,r:30,name:'Mortimer Gull',key:'gullbank',act:'Bank',onAct:()=>routeTo(GULL.x+30,GULL.y+18,openBank),more:[{l:'Talk',f:()=>routeTo(GULL.x+30,GULL.y+18,talkGull)}],onExamine:()=>{discover('gullbank');think('A seagull in a green visor on a post marked BANK, counting very seriously.');}});
+ if(mortShooed())o.push({x:GULL.x,y:GULL.y-30,r:30,name:'Mortimer Gull',key:'gullbank',onExamine:()=>think('Mortimer, wheeling over his post and squawking. The Gull Post is shut until he lands.')});
+ else{const mm=[{l:'Talk',f:()=>routeTo(GULL.x+30,GULL.y+18,talkGull)}];if(goldenIdx()>=0)mm.push({l:'Give a golden fish',f:()=>routeTo(GULL.x+30,GULL.y+18,mortGift)});if(axeWhole())mm.push({l:'Shoo him off',f:()=>routeTo(GULL.x+30,GULL.y+18,mortShoo)});
+ o.push({x:GULL.x,y:GULL.y-30,r:30,name:'Mortimer Gull',key:'gullbank',act:'Bank',onAct:()=>routeTo(GULL.x+30,GULL.y+18,openBank),more:mm,onExamine:()=>{discover('gullbank');const f=wmPeek('mortimer').f;think(f>.25?'Mortimer, leaning as far from me as his post allows. Still counting, but with one eye on me.':'A seagull in a green visor on a post marked BANK, counting very seriously.');}});}
  (S.ground||[]).forEach(g=>o.push({x:g.x,y:g.y-6,r:18,name:itemName(g.it),act:'Pick up',onAct:()=>{const c=clampLand(g.x-14,g.y+6);routeTo(c[0],c[1],()=>pickGround(g));},onExamine:()=>think(itemDesc(g.it))}));
  (S.ashp||[]).forEach(a=>o.push({x:a.x,y:a.y-4,r:22,name:'Ash',key:'ash',act:'Scoop',onAct:()=>{const c=clampLand(a.x-18,a.y+6);routeTo(c[0],c[1],()=>scoopAsh(a));},onExamine:()=>think('Soft grey ash, still faintly warm. Smells like a story ending.')}));
  o.push({x:HEAD.x,y:HEAD.y-16,r:34,name:'Stone head',key:'head',act:'Listen',onAct:listenHead,onExamine:examineHead});

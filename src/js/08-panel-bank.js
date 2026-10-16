@@ -5,7 +5,7 @@ let tab='pack',sel=-1,selG=null;
 function openPanel(t){sfx('open');tab=t||tab;sel=-1;selG=null;jPage=0;skView=null;methView=null;ddSel=null;renderPanel();panel.classList.add('on');scrim.style.display='block';closeCtx();bag.classList.remove('pulse');if(S.hint===4)advanceHint(5);}
 function closePanel(){panel.classList.remove('on');scrim.style.display='none';}
 const BANKSLOTS=30,bankEl=$('bank');let bankOpen=false,bankMode='all';
-function openBank(){discover('gullbank');S.bank=S.bank||[];bankOpen=true;closeCtx();closePanel();bankEl.classList.add('on');scrim.style.display='block';renderBank();}
+function openBank(){if(mortShooed()){think('Mortimer is circling overhead. The Gull Post is shut until he lands.');return;}discover('gullbank');S.bank=S.bank||[];bankOpen=true;closeCtx();closePanel();bankEl.classList.add('on');scrim.style.display='block';renderBank();mortTithe();}
 function closeBank(){bankOpen=false;bankEl.classList.remove('on');scrim.style.display='none';}
 function renderBank(note){const st=getComputedStyle(bankEl),W2=bankEl.clientWidth-24,H2=bankEl.clientHeight-20-44-40-24;const bs=Math.max(34,Math.floor(Math.min((W2-30)/6,(H2-8*6)/9)));bankEl.style.setProperty('--bs',bs+'px');
  const b=S.bank;let h='';for(let i=0;i<BANKSLOTS;i++){const e=b[i];h+=e?`<button class="slot f" data-b="${i}" aria-label="${itemName(e.it)}"><img src="${stackIcon(itemIcon(e.it),e.n)}" alt=""><i class="cnt">${cntFmt(e.n,1)}</i></button>`:'<div class="slot"></div>';}

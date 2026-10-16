@@ -13,7 +13,7 @@ for(const k of ['xp','hx','sx','hearth','shipwright'])delete S[k];
 /* build 4: Hearth became Cooking (and Firemaking), Shipwright became Woodcutting (and Tinkering, unlocked by the hatchet) */
 if(S.sk.hearth){S.sk.cooking=S.sk.hearth;S.sk.firemaking={xp:0};delete S.sk.hearth;}
 if(S.sk.shipwright){S.sk.woodcutting=S.sk.shipwright;S.sk.tinkering={xp:30};delete S.sk.shipwright;}
-S.st=S.st||{};/* build 41: no scarf; a hatchet made earlier becomes the longaxe, a little worn */if(!S.axe&&(S.owned&&S.owned.hatchet||S.eq&&S.eq.weapon==='hatchet'||(S.inv||[]).some(i=>i.id==='hatchet')))S.axe={h:{w:.2,g:0},f:{k:'drift',w:.15,s:0,cr:0},l:{w:.3}};if(S.eq&&S.eq.weapon&&S.eq.weapon!=='hatchet')S.eq.weapon=null;S.wx=S.wx||{r:{},b:{}};S.wf=S.wf||{};S.st.fires=Math.max(S.st.fires||0,(S.fires||[]).length,S.journal&&S.journal.firstfire?1:0);
+S.st=S.st||{};/* build 41: no scarf; a hatchet made earlier becomes the longaxe, a little worn */if(!S.axe&&(S.owned&&S.owned.hatchet||S.eq&&S.eq.weapon==='hatchet'||(S.inv||[]).some(i=>i.id==='hatchet')))S.axe={h:{w:.2,g:0},f:{k:'drift',w:.15,s:0,cr:0},l:{w:.3}};if(S.eq&&S.eq.weapon&&S.eq.weapon!=='hatchet')S.eq.weapon=null;S.wx=S.wx||{r:{},b:{}};/* build 42: world memory */S.wm=S.wm||{n:0,d:[],k:{},r:{}};S.wf=S.wf||{};S.st.fires=Math.max(S.st.fires||0,(S.fires||[]).length,S.journal&&S.journal.firstfire?1:0);
 /* k may be a skill (gathering) or a subskill (fishing). A skill is unlocked when any subskill is. A skill's XP is 5% of its subskills' XP plus 50 per achievement, on its own 10-level scale (PXP), so it always trails the subskills: 10 comes when they are deep in the 60s and 70s. */
 function hasSkill(k){return SKILLS[k]?SKILLS[k].subs.some(s=>!!S.sk[s]):!!S.sk[k];}
 function unlockSkill(k){if(!S.sk[k])S.sk[k]={xp:0};}
