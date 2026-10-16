@@ -25,6 +25,7 @@ graph LR
   moss_warm([moss_warm]) -.-> mossbacks
   moss_bind([moss_bind]) -.-> mossbacks
   moss_drive([moss_drive]) -.-> mossbacks
+  went_down([went_down]) -.-> you
 ```
 
 ## Deeds
@@ -37,6 +38,7 @@ graph LR
 | moss_warm: warmed a shivering Mossback | accord | mossbacks | forest | t+0.1 w+0.3 | gulls, mortimer, brimble, gubbins |
 | moss_bind: kept a Mossback | accord | mossbacks | forest | t+0.2 w+0.4 | gulls, mortimer, brimble, gubbins |
 | moss_drive: drove off a Mossback | strife | mossbacks | forest | t-0.15 f+0.3 w-0.3 | gulls, mortimer, brimble, gubbins |
+| went_down: went under (drowned or collapsed) | none | you | key, forest |  | mortimer, gubbins, brimble, gulls |
 
 ## Events
 
@@ -56,4 +58,4 @@ graph LR
 | hand | Strife / Accord | deed hands |
 | roam | homebody / roamer | where deeds happen (the Key or beyond) |
 | pace | hasty / patient | patient |
-| care | reckless / careful | waiting: no deed carries its tags yet |
+| care | reckless / careful | reckless |

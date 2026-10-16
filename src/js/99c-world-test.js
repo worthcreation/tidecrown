@@ -6,4 +6,4 @@ function wmTestHTML(){const m=wmS(),f=v=>(v>=0?'+':'')+(+v).toFixed(2),st=wmStyl
  h+=`<div class="trow"><span>${m.d.length} deeds kept${mortShooed()?', Mortimer aloft':''}</span><span><button data-tm="gossip">pass gossip</button><button data-tm="land">land Mortimer</button><button data-tm="reset">reset memory</button></span></div>`;
  return h;}
 function wmTestAct(k){if(k==='gossip')wmTick();else if(k==='land'){if(S.wm)S.wm.shoo=0;}else if(k==='reset'){S.wm={n:0,d:[],k:{},r:{}};}save();}
-if(MODE==='test')Object.assign(window.DK,{WREG,wmS,wmR,wmPeek,wmDeed,wmTick,wmHeard,wmMood,wmStyle,wmSees,mortGift,mortShoo,mortShooed,mortTithe,gubbinsTip,brimbleForecast,brimbleCooks,mortimerNews,wmFlame,G,GULL,FIRE,spots,talkG,talkWick,valOf,wickOpts,gOpts});
+if(MODE==='test')Object.assign(window.DK,{WREG,wmS,wmR,wmPeek,wmDeed,wmTick,wmHeard,wmMood,wmStyle,wmSees,mortGift,mortShoo,mortShooed,mortTithe,gubbinsTip,brimbleForecast,brimbleCooks,mortimerNews,wmFlame,G,GULL,FIRE,spots,talkG,talkWick,valOf,wickOpts,gOpts,MMI:MM,mmBox,tideOff});

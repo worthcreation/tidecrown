@@ -16,17 +16,20 @@ const WREG={
  who:{
   mortimer:{name:'Mortimer Gull',kind:'dweller',sees:['key'],talks:[['gubbins',1,.85],['gulls',2,.8]],care:{mossbacks:.4},
    hear:{mosskind:['SQUAWK. The flock says you fed a mossback. Generous. Unprofitable, but generous.','The flock says someone was kind to a mossback. Flock can’t count, mind.'],
-         mosscruel:['The flock saw you scatter a mossback. Noted. The ledger is open, friend.','Rumour on the wing: somebody’s been rough with the mossbacks. Just rumour. For now.']}},
+         mosscruel:['The flock saw you scatter a mossback. Noted. The ledger is open, friend.','Rumour on the wing: somebody’s been rough with the mossbacks. Just rumour. For now.'],
+         down:['SQUAWK. The flock says you went under. Your account remains open. Out of respect, mostly.','Rumour on the wing: someone went under. The Gull Post extends its condolences, provisionally.']}},
   gubbins:{name:'Gubbins',kind:'dweller',sees:['key'],talks:[['mortimer',1,.85]],care:{mortimer:.8,mossbacks:.3},
    hear:{mortkind:['Saw you bring Mortimer a golden fish. Golden! He’s been preening all day. Nice of you, though.','Mortimer’s telling everyone someone brought him a fancy fish. Reckon that was you?'],
          mortcruel:['I saw that. Swatting Mortimer off his own post. He’s a banker, friend, not a fly.','Word is somebody knocked Mortimer off his post. Don’t suppose you know anything.'],
          mosskind:['Gulls say you’ve been kind to some mossy thing out east. Soft, you are. I like it.','Gulls are going on about a mossy creature and someone being nice to it. Gulls exaggerate.'],
-         mosscruel:['Gulls say you’ve been kicking mossy little things about out east. That true?','Something about you and a mossy creature out east. Gulls tell it worse every time.']}},
+         mosscruel:['Gulls say you’ve been kicking mossy little things about out east. That true?','Something about you and a mossy creature out east. Gulls tell it worse every time.'],
+         down:['Heard you went under. Bucket’s honest opinion? Swim less, fish more.','Gulls say somebody went under out past the reef. Not you, I hope. Who’d sell me fish?']}},
   brimble:{name:'Brimble',kind:'dweller',sees:['key'],talks:[],care:{mortimer:.5,mossbacks:.8},
    hear:{mortkind:['The gulls tell me you fed Mortimer a golden fish. Golden both sides, I hope. Someone listens to me.','A golden fish for that featherbrained banker, the gulls say? If it was you, I approve.'],
          mortcruel:['You chased Mortimer off his post. I’m a flame. I know what it is to be swatted at. Don’t.','The gulls are screaming about someone knocking Mortimer about. Gulls scream about everything. Was it you?'],
          mosskind:['Word from the gulls: you warmed some starving mossy thing. Good. Cold is the worst of it. Ask any fire.','The gulls say somebody’s been kind to the mossy things out east. I hope it was you.'],
-         mosscruel:['The gulls saw you scatter those mossy creatures. Hungry, cold, and now kicked. Hm.','Something’s been scaring the mossy creatures out east, the gulls say. Not you, surely.']}},
+         mosscruel:['The gulls saw you scatter those mossy creatures. Hungry, cold, and now kicked. Hm.','Something’s been scaring the mossy creatures out east, the gulls say. Not you, surely.'],
+         down:['There you are. You came to at my hearth, grey as ash. Sit. Warm up. Don’t do that again.','The gulls say someone went under out there. I do hope it wasn’t you.']}},
   gulls:{name:'the gulls',kind:'flock',sees:['key','forest'],talks:[['mortimer',1,.7],['brimble',3,.7]]},
   mossbacks:{name:'the Mossbacks',kind:'creature'}
  },
@@ -36,7 +39,9 @@ const WREG={
   moss_feed:{to:'mossbacks',hand:'accord',where:['forest'],line:'mosskind',tags:['generous'],fx:{t:.1,f:-.05,w:.35},say:'fed a Mossback'},
   moss_warm:{to:'mossbacks',hand:'accord',where:['forest'],line:'mosskind',tags:['patient'],fx:{t:.1,w:.3},say:'warmed a shivering Mossback'},
   moss_bind:{to:'mossbacks',hand:'accord',where:['forest'],line:'mosskind',tags:[],fx:{t:.2,w:.4},say:'kept a Mossback'},
-  moss_drive:{to:'mossbacks',hand:'strife',where:['forest'],line:'mosscruel',tags:['rough'],fx:{t:-.15,f:.3,w:-.3},say:'drove off a Mossback'}
+  moss_drive:{to:'mossbacks',hand:'strife',where:['forest'],line:'mosscruel',tags:['rough'],fx:{t:-.15,f:.3,w:-.3},say:'drove off a Mossback'},
+  /* to 'you' with hand 'none': something that happened to you, seen and talked about, moving no one's regard (yet) */
+  went_down:{to:'you',hand:'none',where:['key','forest'],line:'down',tags:['reckless'],fx:{},say:'went under (drowned or collapsed)'}
  },
  /* fear gets you labour and goods; warmth gets you knowledge (the standing principle, agreed 16 Oct 2026) */
  events:{

@@ -1,6 +1,8 @@
 /* Water depth. Every point of sea has a depth in body units: 0 at the waterline, about .5 at the waist, 1 where you can no longer stand, capped at 3 for the open deep. Around every shore the bottom shelves out and then drops; how long the shelf runs and how steep the drop is changes as you go round, so one stretch is a long gentle wade and the next falls away in a few steps. Out at sea there are sandbars, reefs and tiny islands, some with trees. The shallowest thing at a point wins. The water's colour is drawn from the same numbers as contour bands, so a gentle slope reads as wide bands and a drop-off as tight ones. */
 const SEA_R=()=>iR(0)+4600,FAR_X=()=>iR(0)+3600,SH_WEST=-3600,SH_IN=[-3150,380];
 const STAND=1,SWIMD=.55,DLEVELS=[2.4,1.6,1,.7,.45,.25,.1];
+/* the tide reaches every shore (build 43): the Key's by its moving waterline (wetR), every bar, reef, islet and dark island by the water rising and falling TAMP body units over a tide, so bars bare at low tide, islets grow a wet beach and reefs nearly break the surface */
+const TAMP=.4;function tideOff(){return (tideLevel()-.5)*TAMP;}
 function nz(s,t){return Math.max(0,Math.min(1,.5+.5*(.6*Math.sin(2*t+s)+.3*Math.sin(5*t+s*1.7)+.12*Math.sin(11*t+s*2.9))));}
 /* a shore profile: a shelf down to the waist over L, then a drop of one body height per D */
 function prof(s,L,D){return s<=0?0:s<=L?.5*s/L:.5+(s-L)/D;}
@@ -37,8 +39,8 @@ function onIsletS(x,y){if(!SHFEAT)return null;for(const f of SHFEAT)if(f.kind===
 function isleShelf(I,t){return [20+180*Math.pow(nz(I.seed*1.3,t),1.5),20+220*nz(I.seed*2.1+1,t)];}
 function isleDepth(I,x,y){if(Math.abs(x-I.x)>I.rx*1.3+700||Math.abs(y-I.y)>I.ry*1.3+700)return 9;const u=(x-I.x)/I.rx,v=(y-I.y)/I.ry,t=Math.atan2(v,u),R=isleR(I,t),s=Math.hypot(x-I.x,y-I.y)-Math.hypot(Math.cos(t)*I.rx*R,Math.sin(t)*I.ry*R);if(s<=0)return 0;const [L,D]=isleShelf(I,t);return prof(s,L,D);}
 /* ---- the one call everything uses ---- */
-function depthAt(x,y){let d;if(SH.on){if(shIsle(x,y))return 0;d=3;for(const I of ISLES)d=Math.min(d,isleDepth(I,x,y));for(const f of SHFEAT)d=Math.min(d,fDepth(f,x,y));}
- else{if(onDock(x,y)||onIsland(x,y)||onIsletK(x,y))return 0;d=Math.min(3,keyDepth(x,y));for(const f of KFEAT)d=Math.min(d,fDepth(f,x,y));}
+function depthAt(x,y){let d;const off=tideOff();if(SH.on){if(shIsle(x,y))return 0;d=3;for(const I of ISLES)d=Math.min(d,isleDepth(I,x,y));for(const f of SHFEAT)d=Math.min(d,fDepth(f,x,y));if(d>=0)d+=off;}
+ else{if(onDock(x,y)||onIsland(x,y)||onIsletK(x,y))return 0;let e=9;for(const f of KFEAT)e=Math.min(e,fDepth(f,x,y));d=Math.min(3,keyDepth(x,y),e<0?e:e+off);}
  return Math.max(0,Math.min(3,d));}
 /* nearest dry land to a point in this scene, for washing up */
 function nearestIslet(x,y,within){const L=SH.on?SHFEAT:KFEAT;let best=null,bd=within;for(const f of L){if(f.kind!=='islet')continue;const s=fLocal(f,x,y);if(s<bd){bd=s;best=f;}}return best;}
@@ -51,12 +53,19 @@ function inView(x,y,r,vw,vh){return Math.abs(x-cam.x)<vw+r&&Math.abs(y-cam.y)<vh
 /* contour bands, deepest first; each band covers where the water is at most that deep */
 function drawDepthBands(){const vw=W/Z/2+80,vh=H/Z/2+80;
  for(const v of DLEVELS){ctx.fillStyle=waterCol(v);
-  if(SH.on){for(const I of ISLES){const ext=Math.max(I.rx,I.ry)*1.3+profInv(v,200,240);if(!inView(I.x,I.y,ext,vw,vh))continue;const n=Math.max(48,Math.round((I.rx+I.ry)/12)),p=[];for(let i=0;i<n;i++){const t=i/n*6.2832,R=isleR(I,t),[L,D]=isleShelf(I,t),o=profInv(v,L,D),ex=Math.cos(t)*I.rx*R,ey=Math.sin(t)*I.ry*R,el=Math.hypot(ex,ey)||1;p.push([I.x+ex*(1+o/el),I.y+ey*(1+o/el)]);}fillPts(p);}}
+  const off=tideOff(),vt=v-off;if(SH.on){for(const I of ISLES){const ext=Math.max(I.rx,I.ry)*1.3+profInv(Math.max(0,vt),200,240);if(!inView(I.x,I.y,ext,vw,vh))continue;const n=Math.max(48,Math.round((I.rx+I.ry)/12)),p=[];for(let i=0;i<n;i++){const t=i/n*6.2832,R=isleR(I,t),[L,D]=isleShelf(I,t),o=vt>0?profInv(vt,L,D):0,ex=Math.cos(t)*I.rx*R,ey=Math.sin(t)*I.ry*R,el=Math.hypot(ex,ey)||1;p.push([I.x+ex*(1+o/el),I.y+ey*(1+o/el)]);}fillPts(p);}}
   else{const p=[];for(let i=0;i<NP;i++){const a=i/NP*6.2832,o=profInv(v,KSH[i][0],KSH[i][1]),r=wetR(a)+o;p.push([Math.cos(a)*r,Math.sin(a)*r]);}fillPts(p);}
-  for(const f of SH.on?SHFEAT:KFEAT){if(!inView(f.x,f.y,f.reach,vw,vh))continue;const o=fOffset(f,v);if(o==null)continue;fillPts(fPts(f,o,40));}}
+  for(const f of SH.on?SHFEAT:KFEAT){if(!inView(f.x,f.y,f.reach,vw,vh))continue;const o=fOffset(f,vt);if(o==null)continue;fillPts(fPts(f,o,40));}}
+ drawTideFlats(vw,vh);
  /* reefs show their tops; bars their pale sand where they nearly break the surface */
  for(const f of SH.on?SHFEAT:KFEAT){if(!inView(f.x,f.y,f.reach,vw,vh))continue;if(f.kind==='reef'){const r=mulberry(Math.floor(f.seed*100));ctx.globalAlpha=.55;for(let i=0;i<9;i++){const a=r()*6.28,d=Math.sqrt(r())*.8,x=f.x+Math.cos(a)*f.rx*d,y=f.y+Math.sin(a)*f.ry*d;blob(x,y,4+r()*5,3+r()*3,7000+i,SH.on?'#6a5a6e':'#e98a7a',1.4,.4);}ctx.globalAlpha=1;}
-  else if(f.kind==='bar'&&f.top<.22){ctx.globalAlpha=.35*(1-f.top/.22);ctx.fillStyle=SH.on?'#8d7f63':'#f3d27a';fillPts(fPts(f,-Math.min(f.rx,f.ry)*.35,32));ctx.globalAlpha=1;}}}
+  else if(f.kind==='bar'&&f.top+tideOff()<.22&&f.top+tideOff()>0){ctx.globalAlpha=.35*(1-(f.top+tideOff())/.22);ctx.fillStyle=SH.on?'#8d7f63':'#f3d27a';fillPts(fPts(f,-Math.min(f.rx,f.ry)*.35,32));ctx.globalAlpha=1;}}}
+/* what the low tide bares: wet sand round islets and dark islands, and whole bars */
+function drawTideFlats(vw,vh){const off=tideOff();if(off>=0&&!(SH.on?SHFEAT:KFEAT).some(f=>f.kind==='bar'&&f.top+off<=0))return;const wet=SH.on?'#6d6550':'#e2c98e';ctx.fillStyle=wet;
+ for(const f of SH.on?SHFEAT:KFEAT){if(!inView(f.x,f.y,f.reach,vw,vh))continue;
+  if(f.kind==='islet'&&off<0)fillPts(fPts(f,profInv(-off,f.L,f.D),36));
+  else if(f.kind==='bar'&&f.top+off<=0){fillPts(fPts(f,(-off-f.top)*f.D,36));ctx.globalAlpha=.5;ctx.fillStyle=SH.on?'#8d7f63':'#f3d27a';fillPts(fPts(f,-Math.min(f.rx,f.ry)*.3,32));ctx.globalAlpha=1;ctx.fillStyle=wet;}}
+ if(SH.on&&off<0)for(const I of ISLES){if(!inView(I.x,I.y,Math.max(I.rx,I.ry)*1.4,vw,vh))continue;const n=Math.max(48,Math.round((I.rx+I.ry)/12)),p=[];for(let i=0;i<n;i++){const t=i/n*6.2832,R=isleR(I,t),[L,D]=isleShelf(I,t),o=profInv(-off,L,D),ex=Math.cos(t)*I.rx*R,ey=Math.sin(t)*I.ry*R,el=Math.hypot(ex,ey)||1;p.push([I.x+ex*(1+o/el),I.y+ey*(1+o/el)]);}fillPts(p);}}
 /* islet land, drawn over the bands */
 function drawIsletLand(){const vw=W/Z/2+80,vh=H/Z/2+80;for(const f of SH.on?SHFEAT:KFEAT){if(f.kind!=='islet'||!inView(f.x,f.y,f.reach,vw,vh))continue;sketch(fPts(f,0,36),true,7100+(f.seed*10|0),2.5,SH.on?'#7a6f58':'#f3d27a',INK,3);sketch(fPts(f,-Math.min(f.rx,f.ry)*.32,30),true,7200+(f.seed*10|0),2.5,SH.on?'#3a4a33':'#86c25e',INK,2.2);}}
 /* a small sea palm for the Key's islets */

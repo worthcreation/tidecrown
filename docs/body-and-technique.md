@@ -1,5 +1,5 @@
 # Body and technique
-Agreed with Ross, 16 Oct 2026. Not built yet. Read before touching any skill's timing, combat, swimming, fishing, storms or health.
+Agreed with Ross, 16 Oct 2026. Health is built (build 43, 34-health); the rest is not built yet. Read before touching any skill's timing, combat, swimming, fishing, storms or health.
 
 ## The rule: no stamina game
 There is no stamina bar and nothing to manage. Ordinary play never tires you and never asks you to stop, rest or eat to carry on. How far you can push is decided by your skill against the conditions, not by a resource. Push past your level and it goes wrong in a way you can read in the world: swept away, the line snaps, the fish throws the hook, you are knocked down.
@@ -17,7 +17,7 @@ There is no stamina bar and nothing to manage. Ordinary play never tires you and
 - Only harm drains it: a lunge, drowning, a storm battering. Effort never does.
 - It refills on its own once you are out of danger. Food, warmth and shelter make that faster; none is required.
 - It grows slowly with the knocks you survive (the pool that grows with certain actions; harder knocks grow it more).
-- Shown only when you are hurt, on the body and as a small indicator that fades when you are well. Empty: you collapse (on land) or drown (in water). See Death in design-rules.
+- Shown only when you are hurt: on the body (slower, stooped) and by the screen's edges dimming as it gets low; no meter (Ross, 16 Oct 2026). Empty: you collapse (on land) or drown (in water). See Death in design-rules.
 
 ## Technique: skills live in motions
 Every physical action is one of a few motions. A motion's quality comes from the skills that really train it, and transfers only where the motion is the same. Quality sets the width of timing windows, how much each action achieves, and how much risk you can carry. XP still goes to the skill you are doing (chopping: Woodcutting; slicing a creature: Strife).
@@ -51,5 +51,4 @@ On by default, used only in specific places. For now: setting the hook (flick th
 
 ## Open
 - What trains Haul.
-- How health appears when hurt (body only, or a small ring by the minimap that fades when well).
 - Underwater breath: a separate short timer, or part of drowning risk read against Swimming.

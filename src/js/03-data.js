@@ -66,6 +66,7 @@ const JOURNAL={
  bonfire:['Bonfire','Wobblewood and driftwood stacked high. Burns twice as long and lights half the island.'],
  charcoal:['Charcoal','A black lump left in the ash of a driftwood fire. Hotter than anything I’ve burned.'],
  seasalt:['Sea salt','White crystals a wave leaves on rock or piling, or what is left where kelp burned down. Brimble would have opinions.'],
+ wreck:['Where I went down','What I carry stays where I fall. Floating things wash ashore in a few hours, the rest sinks. Crabs and gulls help themselves; the gulls take theirs to the Gull Post.'],
  gullbank:['Mortimer Gull','A seagull in a banker’s visor runs the Gull Post. Gulls steal everything, so naturally they’re the only ones trusted to keep it safe.'],
  sunstone:['Sunstone','A stone left behind by a long, white-hot fire. Warm all the way through. It remembers being part of the sun.'],
  pearl:['Ember pearl','A warm bead that formed in the heart of a wobblewood fire. It hums when I hold it.'],

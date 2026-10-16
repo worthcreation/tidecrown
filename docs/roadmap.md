@@ -19,6 +19,7 @@ Milestones in two groups: what can be built now (designed enough to start), then
 - Fixes and scale (build 28): the Key 67% larger with a summit about seven characters up, more trees and palms, dawn moon shadows gone, tighter tap areas, no-hatchet taps walk, bubbles lifted, see-through and paged, long lines shortened, a hearth ring for Brimble, outcrop behind the tripod, softer ground colour edges.
 - Fixes (build 29): real sun path (no noon flip), longer bubbles (three lines a page), slower clouds, world-fixed fog wisps, summit cap sized to the island, wash-ups kept to the beach (old ones moved down), curved vegetation edges.
 - Taps show only new lines, a quest log with tracking and map marks, a rounded summit with a cairn (build 30).
+- Health, death and wrecks (build 43): jelly stings with a beat to catch, drowning, collapse, waking ashore, wrecks that float, sink and get scavenged, the Gull Post's finder's fee. Same build: the tide on every shore, and the minimap covering the whole sea with live tide.
 - World memory, first part (build 42): deeds, witnesses, gossip, regard that changes only by deeds, the style picture, the registry and its graph check; Mortimer, Gubbins and Brimble react.
 - 6b Weather, tropical (build 36): daily showers, rare monsoons with floods, fish and heavier wash-ups ashore, windfall, Brimble's warning, sky reading by Survival level.
 

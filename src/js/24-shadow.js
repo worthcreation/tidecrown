@@ -102,7 +102,7 @@ function shUpdate(dt){if(!SW.on&&!P.path.length&&!shWalkable(P.x,P.y)&&shDepth(P
   if(m.st==='down'){if(m.t>(lv('strife')>=10?14:9)){m.st='still';m.t=0;m.dazed=2;}}
   else if(m.st==='calm'){if(m.t>(lv('accord')>=10?20:12)){m.st='still';m.t=0;m.dazed=3;}}
   else if(m.st==='still'&&d<80&&!(m.dazed>0)){m.st='creak';m.t=0;sfx('creak');hap([10,30,10]);}
-  else if(m.st==='creak'&&m.t>.9){m.st='lunge';m.t=0;discover('hollowmaw');if(d<110&&!SW.on){sfx('lunge');const dx=P.x-m.x,dy=P.y-m.y,n=Math.hypot(dx,dy)||1;const c=shClamp(P.x+dx/n*70,P.y+dy/n*70);P.x=c[0];P.y=c[1];P.path=[];P.task=null;think(pick(['It lunged. The bark smells of rot.','It wants warmth, not me. I think.']));}}
+  else if(m.st==='creak'&&m.t>.9){m.st='lunge';m.t=0;discover('hollowmaw');if(d<110&&!SW.on){sfx('lunge');harm(LUNGE,'lunge');const dx=P.x-m.x,dy=P.y-m.y,n=Math.hypot(dx,dy)||1;const c=shClamp(P.x+dx/n*70,P.y+dy/n*70);P.x=c[0];P.y=c[1];P.path=[];P.task=null;think(pick(['It lunged. The bark smells of rot.','It wants warmth, not me. I think.']));}}
   else if(m.st==='lunge'&&m.t>.6){m.st='open';m.t=0;}
   else if(m.st==='open'&&m.t>4&&d>120){m.st='still';m.t=0;}}
  for(const d of DEAD){d.creak-=dt;if(d.creak<=0){d.creak=18+Math.random()*40;if(Math.hypot(P.x-d.x,P.y-d.y)<160){d.st='creak';d.t=0;sfx('creak',.4);}}if(d.st==='creak'){d.t+=dt;if(d.t>.5)d.st='still';}}
@@ -169,7 +169,7 @@ function shWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
  
  const d=[];for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;d.push([t.y,()=>drawShTree(t),t.x]);}
  const near=o=>Math.abs(o.x-cam.x)<vw&&Math.abs(o.y-cam.y)<vh;
- MAWS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});DEAD.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});PLANTED.forEach(p=>{if(near(p))d.push([p.y,()=>drawPlanted(p),p.x]);});MOSS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMoss(m),m.x]);});LAPPERS.forEach(l=>{if(near(l))d.push([l.y,()=>drawLapper(l),l.x]);});d.push([HOLLOW.y+40,drawHollow,HOLLOW.x],[P.y,drawSwimmer,P.x]);
+ wreckDraws(d);MAWS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});DEAD.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});PLANTED.forEach(p=>{if(near(p))d.push([p.y,()=>drawPlanted(p),p.x]);});MOSS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMoss(m),m.x]);});LAPPERS.forEach(l=>{if(near(l))d.push([l.y,()=>drawLapper(l),l.x]);});d.push([HOLLOW.y+40,drawHollow,HOLLOW.x],[P.y,drawSwimmer,P.x]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  /* canopies last, over everything under them: the forest hides what it covers */
  for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;const under=Math.hypot(t.x-P.x,t.y-(P.y+30))<30*t.s;ctx.globalAlpha=under?.8:1;const L=liftAt(t.x,t.y);ctx.save();ctx.translate(0,-L);drawShCanopy(t);ctx.restore();}ctx.globalAlpha=1;drawFlies(vw,vh);}

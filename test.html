@@ -436,6 +436,7 @@ const JOURNAL={
  bonfire:['Bonfire','Wobblewood and driftwood stacked high. Burns twice as long and lights half the island.'],
  charcoal:['Charcoal','A black lump left in the ash of a driftwood fire. Hotter than anything I’ve burned.'],
  seasalt:['Sea salt','White crystals a wave leaves on rock or piling, or what is left where kelp burned down. Brimble would have opinions.'],
+ wreck:['Where I went down','What I carry stays where I fall. Floating things wash ashore in a few hours, the rest sinks. Crabs and gulls help themselves; the gulls take theirs to the Gull Post.'],
  gullbank:['Mortimer Gull','A seagull in a banker’s visor runs the Gull Post. Gulls steal everything, so naturally they’re the only ones trusted to keep it safe.'],
  sunstone:['Sunstone','A stone left behind by a long, white-hot fire. Warm all the way through. It remembers being part of the sun.'],
  pearl:['Ember pearl','A warm bead that formed in the heart of a wobblewood fire. It hums when I hold it.'],
@@ -558,7 +559,7 @@ for(const k of ['xp','hx','sx','hearth','shipwright'])delete S[k];
 /* build 4: Hearth became Cooking (and Firemaking), Shipwright became Woodcutting (and Tinkering, unlocked by the hatchet) */
 if(S.sk.hearth){S.sk.cooking=S.sk.hearth;S.sk.firemaking={xp:0};delete S.sk.hearth;}
 if(S.sk.shipwright){S.sk.woodcutting=S.sk.shipwright;S.sk.tinkering={xp:30};delete S.sk.shipwright;}
-S.st=S.st||{};/* build 41: no scarf; a hatchet made earlier becomes the longaxe, a little worn */if(!S.axe&&(S.owned&&S.owned.hatchet||S.eq&&S.eq.weapon==='hatchet'||(S.inv||[]).some(i=>i.id==='hatchet')))S.axe={h:{w:.2,g:0},f:{k:'drift',w:.15,s:0,cr:0},l:{w:.3}};if(S.eq&&S.eq.weapon&&S.eq.weapon!=='hatchet')S.eq.weapon=null;S.wx=S.wx||{r:{},b:{}};/* build 42: world memory */S.wm=S.wm||{n:0,d:[],k:{},r:{}};S.wf=S.wf||{};S.st.fires=Math.max(S.st.fires||0,(S.fires||[]).length,S.journal&&S.journal.firstfire?1:0);
+S.st=S.st||{};/* build 41: no scarf; a hatchet made earlier becomes the longaxe, a little worn */if(!S.axe&&(S.owned&&S.owned.hatchet||S.eq&&S.eq.weapon==='hatchet'||(S.inv||[]).some(i=>i.id==='hatchet')))S.axe={h:{w:.2,g:0},f:{k:'drift',w:.15,s:0,cr:0},l:{w:.3}};if(S.eq&&S.eq.weapon&&S.eq.weapon!=='hatchet')S.eq.weapon=null;S.wx=S.wx||{r:{},b:{}};/* build 42: world memory */S.wm=S.wm||{n:0,d:[],k:{},r:{}};/* build 43: health, wrecks */S.hp=S.hp||{v:10,max:10,low:1};S.wrecks=S.wrecks||[];S.gheld=S.gheld||[];S.deaths=S.deaths||[];S.wf=S.wf||{};S.st.fires=Math.max(S.st.fires||0,(S.fires||[]).length,S.journal&&S.journal.firstfire?1:0);
 /* k may be a skill (gathering) or a subskill (fishing). A skill is unlocked when any subskill is. A skill's XP is 5% of its subskills' XP plus 50 per achievement, on its own 10-level scale (PXP), so it always trails the subskills: 10 comes when they are deep in the 60s and 70s. */
 function hasSkill(k){return SKILLS[k]?SKILLS[k].subs.some(s=>!!S.sk[s]):!!S.sk[k];}
 function unlockSkill(k){if(!S.sk[k])S.sk[k]={xp:0};}
@@ -677,7 +678,7 @@ function saluteCrab(){discover('crab');CRAB.hop=.5;S.salutes=(S.salutes||0)+1;
  think(S.salutes>1?pick(['Sir Thimble salutes again. Crisper this time.','We salute. He clicks approvingly.','He salutes with both claws. Showing off.']):'A crab wearing a thimble for a helmet. He salutes. I salute back. Friends now.');}
 
 let objT=-1,objC=null;
-function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;youObject(o);if(SH.on){o.push(...shObjects());return o;}
+function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;youObject(o);wreckObjects(o);if(SH.on){o.push(...shObjects());return o;}
  spots.forEach(sp=>{if(sp.type==='moon'&&dark<.15)return;if(sp.al<.4||sp.st==='out')return;o.push({x:sp.x,y:sp.y,r:42,name:{shallow:'Bubbling water',deep:'Wild water',moon:'Glowing pool'}[sp.type],act:'Fish',onAct:()=>goFish(sp),
   onExamine:()=>think({shallow:'Little fish, busy with little fish business.',deep:'Something heavy is thrashing down there.',moon:'Pale shapes circling slowly. Waiting for something.'}[sp.type])});});
  o.push({x:G.x,y:G.y-20,r:30,name:'Gubbins',key:'gubbins',act:'Talk',onAct:()=>routeTo(G.x-36,6,talkG),onExamine:()=>think('A bucket with opinions.')});
@@ -753,12 +754,12 @@ cv.addEventListener('pointerdown',goFull,{capture:true});
 document.addEventListener('pointerdown',()=>{if(SND.on){sndInit();if(AC&&AC.state!=='running')AC.resume();}},{capture:true});
 if(/iPhone|iPad/.test(navigator.userAgent)&&!standalone)setTimeout(()=>{if(!S.st.homeHint&&!ccOn){S.st.homeHint=1;save();toast('Add to Home Screen to play full screen');}},75000);
 cv.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;
- const cur={x:e.clientX,y:e.clientY,t:performance.now(),id:e.pointerId,moved:false,lp:false,edge:e.clientX>W-30?'r':(e.clientX<30?'l':null)};pd=cur;
+ const mm=mmHit(e.clientX,e.clientY),cur={x:e.clientX,y:e.clientY,t:performance.now(),id:e.pointerId,moved:false,lp:false,mm,edge:mm?null:e.clientX>W-30?'r':(e.clientX<30?'l':null)};pd=cur;
  cur.timer=setTimeout(()=>{if(pd===cur&&!cur.moved){cur.lp=true;longPress(cur.x,cur.y);}},430);});
 cv.addEventListener('pointermove',e=>{if(!pd||e.pointerId!==pd.id)return;const dx=e.clientX-pd.x,dy=e.clientY-pd.y;
- if(Math.hypot(dx,dy)>14){pd.moved=true;clearTimeout(pd.timer);}
+ if(Math.hypot(dx,dy)>(pd.mm?5:14)){pd.moved=true;clearTimeout(pd.timer);}
  if(pd.edge==='r'&&dx<-45){clearTimeout(pd.timer);pd=null;openPanel('pack');}else if(pd&&pd.edge==='l'&&dx>45){clearTimeout(pd.timer);pd=null;openPanel('journal');}});
-cv.addEventListener('pointerup',e=>{if(!pd||e.pointerId!==pd.id)return;clearTimeout(pd.timer);const p=pd;pd=null;if(!p.moved&&!p.lp)tap(p.x,p.y);else if(p.moved&&!p.lp)swipe(p.x,p.y,e.clientX,e.clientY,performance.now()-p.t);});
+cv.addEventListener('pointerup',e=>{if(!pd||e.pointerId!==pd.id)return;clearTimeout(pd.timer);const p=pd;pd=null;if(!p.moved&&!p.lp)tap(p.x,p.y);else if(p.moved&&!p.lp)(p.mm?mmSwipe:swipe)(p.x,p.y,e.clientX,e.clientY,performance.now()-p.t);});
 cv.addEventListener('pointercancel',()=>{if(pd){clearTimeout(pd.timer);pd=null;}});
 cv.addEventListener('contextmenu',e=>{e.preventDefault();if(pd){clearTimeout(pd.timer);pd=null;}longPress(e.clientX,e.clientY);});
 dlg.addEventListener('click',e=>{if(e.target===dlg||e.target.classList.contains('say')){if(dlg.querySelectorAll('.opt').length===1)closeDlg();}});
@@ -994,7 +995,7 @@ function update(dt){
    bright for most of an hour before the sun rose, and the setting moon threw the only shadows, the wrong way.) */
  const sunUp=Math.cos((S.day-.5)*6.2832)*Math.cos(LAT);dark=Math.min(1,Math.max(0,(.06-sunUp)/.2))*.62;dark=Math.min(.75,dark+.18*WX.rain);/* the sky alone sets the light: no fixed floor anywhere, no dimming for distance */
  if(intro!=null){intro+=dt;if(intro>3.2)intro=null;}
- if(!SW.on&&P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const wd=inSea(P.x,P.y)?seaDepth(P.x,P.y):0;const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),_hd=d>1?(P.hd=Math.atan2(dy,dx)):0,sk=wd>0?1:slopeK(P.x,P.y,dx/(d||1),dy/(d||1))*(SH.on?1:stormWalkK(P.x,P.y,dx/(d||1),dy/(d||1)));P.spk=P.spk==null?sk:P.spk+(sk-P.spk)*Math.min(1,dt*4);/* the pace eases into a change of ground over a quarter second */const sp=175*dt*(1-.68*Math.min(1,wd))*P.spk;if(wd<=0&&d>0)walkFeel(dx/d,dy/d,dt);
+ if(!SW.on&&P.path.length){P.pathT+=dt;const [tx,ty]=P.path[0];const wd=inSea(P.x,P.y)?seaDepth(P.x,P.y):0;const dx=tx-P.x,dy=ty-P.y,d=Math.hypot(dx,dy),_hd=d>1?(P.hd=Math.atan2(dy,dx)):0,sk=wd>0?1:slopeK(P.x,P.y,dx/(d||1),dy/(d||1))*(SH.on?1:stormWalkK(P.x,P.y,dx/(d||1),dy/(d||1)));P.spk=P.spk==null?sk:P.spk+(sk-P.spk)*Math.min(1,dt*4);/* the pace eases into a change of ground over a quarter second */const sp=175*dt*(1-.68*Math.min(1,wd))*P.spk*hpSpeed();if(wd<=0&&d>0)walkFeel(dx/d,dy/d,dt);
   /* wading: the deeper, the slower; the first time past the knee, a word */
   if(wd>.45&&!S.st.wadeHint){S.st.wadeHint=1;discover('shallows');hint('The deeper it gets, the slower you go. Past your depth, slide to swim.',7000);}
   if(Math.abs(dx)>1)P.face=dx>0?1:-1;
@@ -1135,7 +1136,7 @@ function drawGubbins(){const R=wmPeek('gubbins'),fe=Math.max(0,R.f),wa=Math.max(
  ln([[x-13,y-12],[x+13,y-12]],103,2,'rgba(42,33,64,.35)',.6);
  const lx=fe>.25?-Math.sign(P.x-x||1)*2:Math.max(-2,Math.min(2,(P.x-x)/40));blob(x-6,y-22-sq,5,5.5,104,'#fff',2,.4);blob(x+6,y-22-sq,5,5.5,105,'#fff',2,.4);dot(x-6+lx,y-21-sq,2);dot(x+6+lx,y-21-sq,2);
  if(G.talk)blob(x,y-12,4,2+Math.abs(Math.sin(now*12))*3,106,INK,0);else if(wa>.25&&wa>=fe)ln([[x-5,y-13],[x,y-10],[x+5,y-13]],107,2,INK,.3);else ln([[x-4,y-12],[x+4,y-13]],107,2,INK,.3);}
-function drawPlayer(){const ln0=leanNow(fdt);ctx.save();if(ln0){ctx.translate(P.x,P.y);ctx.rotate(P.face*ln0);ctx.translate(-P.x,-P.y);}drawChar(S.char||DEFAULT_LOOK,S.eq,P.x,P.y,P.face,P.moving,!!P.task&&!P.task.chop);ctx.restore();if(P.task&&P.task.chop){const f=P.face,a=-1.1+(P.task.swing>0?(1-P.task.swing/.22)*2.2:0),hx=P.x+f*8,hy=P.y-20;ctx.save();ctx.translate(hx,hy);ctx.scale(f,1);ctx.rotate(a);ln([[0,0],[0,-20]],950,5,INK,.3);ln([[0,0],[0,-20]],950,2.6,'#d9cdb5',.3);sketch([[-2,-24],[8,-22],[6,-14],[0,-17]],true,951,.3,'#8a8494',INK,1.8);ctx.restore();}if(buffOn()){const ph=(now*.5)%1;ctx.globalAlpha=(1-ph)*.7;ln([[P.x+4,P.y-62-ph*24],[P.x+9,P.y-70-ph*24],[P.x+4,P.y-78-ph*24]],890,2.2,'#fff',.4);ctx.globalAlpha=1;}}
+function drawPlayer(){const ln0=leanNow(fdt)+hpHunch();ctx.save();if(ln0){ctx.translate(P.x,P.y);ctx.rotate(P.face*ln0);ctx.translate(-P.x,-P.y);}drawChar(S.char||DEFAULT_LOOK,S.eq,P.x,P.y,P.face,P.moving,!!P.task&&!P.task.chop);ctx.restore();if(P.task&&P.task.chop){const f=P.face,a=-1.1+(P.task.swing>0?(1-P.task.swing/.22)*2.2:0),hx=P.x+f*8,hy=P.y-20;ctx.save();ctx.translate(hx,hy);ctx.scale(f,1);ctx.rotate(a);ln([[0,0],[0,-20]],950,5,INK,.3);ln([[0,0],[0,-20]],950,2.6,'#d9cdb5',.3);sketch([[-2,-24],[8,-22],[6,-14],[0,-17]],true,951,.3,'#8a8494',INK,1.8);ctx.restore();}if(buffOn()){const ph=(now*.5)%1;ctx.globalAlpha=(1-ph)*.7;ln([[P.x+4,P.y-62-ph*24],[P.x+9,P.y-70-ph*24],[P.x+4,P.y-78-ph*24]],890,2.2,'#fff',.4);ctx.globalAlpha=1;}}
 function drawChar(a,eq,x,y,f,mv,fishing){
  const K=KIN[a.kin]||KIN.human,skin=K.tones[a.tone]||K.tones[0],sh=SHAPES[a.shape]||SHAPES.bean,rx=sh[0],ry=sh[1],acc=ACCS[a.acc]||ACCS[0],hc=HAIRC[a.hc]||HAIRC[0];
  const b=mv?Math.abs(Math.sin(now*12))*3:Math.sin(now*2);shadow(x,y+2,rx,5);
@@ -1207,7 +1208,7 @@ function render(){skyLights();
  drawPickups();drawKit();
  if(mark){const k=mark.t/.6;ctx.globalAlpha=1-k;sketch(ell(mark.x,mark.y-liftAt(mark.x,mark.y),10*(1-k*.5),5*(1-k*.5),10),true,140,1,null,INK,2.5);ctx.globalAlpha=1;}
  const d=[];trees.forEach(t=>{const g=treeGrow(t);if(g>0)d.push([t.y,()=>drawTree(t,g),t.x]);});for(const w of wfLying())d.push([w.tr.y+Math.sin(w.ang)*w.len*.35,()=>drawWindfall(w)]);rocks.forEach(k=>d.push([k.y,()=>drawRock(k),k.x]));d.push([DOCK.y1+40,drawSurf]);
- (S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[HILL.y,drawCairn,HILL.x],[FIRE.y+16,drawHearthFront,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
+ wreckDraws(d);(S.shore||[]).forEach(it=>d.push([it.y,()=>drawShore(it),it.x]));d.push([BOLLARD.y+4,drawBollard,BOLLARD.x],[FIRE.y-20,drawHome,FIRE.x],[HILL.y,drawCairn,HILL.x],[FIRE.y+16,drawHearthFront,FIRE.x],[POOL.y-40,drawPool,POOL.x],[GULL.y,drawGull,GULL.x],[SIGN.y,drawSign,SIGN.x],[HEAD.y,drawHead,HEAD.x],[CRAB.y,drawCrab,CRAB.x],[G.y,drawGubbins,G.x],[P.y,drawSwimmer,P.x]);for(const f of KFEAT){if(f.kind!=='islet'||!f.trees.length||Math.abs(f.x-cam.x)>vw+100||Math.abs(f.y-cam.y)>vh+100)continue;f.trees.forEach(t=>d.push([t.y,()=>drawPalm(t),t.x]));}allFires().forEach(fr=>d.push([fr.y,()=>drawFireAt(fr),fr.x]));if(KW.active)d.push([KW.y,drawKindle,KW.x]);for(const t of KPALMS)if(Math.abs(t.x-cam.x)<vw+60&&Math.abs(t.y-cam.y)<vh+80)d.push([t.y,()=>drawPalm(t),t.x]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f0=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1],f=x[1]===drawSwimmer||x[2]==null||!floodK()?f0:()=>{f0();floodSkirt(x[2],x[0]);};if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  }
  drawFly();{const L=liftAt(P.x,P.y);ctx.save();ctx.translate(0,-L);drawScarfFX();drawChopFX();drawGrind();ctx.restore();}if(C){ctx.save();ctx.translate(0,-liftAt(C.fr.x,C.fr.y));drawCook();ctx.restore();}
@@ -1228,7 +1229,7 @@ function render(){skyLights();
   sketch(rrPts(bx,by,w,h,12),true,152,2,'#fffaf0',INK,2.6);ctx.globalAlpha=fa;ctx.fillStyle=INK;ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,P.x,by+9+i*lh));if(pages>1){ctx.globalAlpha=.5*fa;ctx.font="13px 'Patrick Hand','Comic Sans MS',cursive";ctx.fillText((pg+1)+'/'+pages,bx+w-14,by+h-15);}ctx.globalAlpha=1;}
  ctx.restore();
  {const bk=Math.max(SW.on?SW.blk:0,SW.fade);if(bk>0){const g=ctx.createRadialGradient(W/2,H/2,Math.max(20,(1-bk)*W*.5),W/2,H/2,W*.75);g.addColorStop(0,`rgba(5,8,20,${Math.min(1,bk*bk*1.1)})`);g.addColorStop(1,`rgba(5,8,20,${Math.min(1,.4+bk)})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}}
- drawOrbsHUD();drawMinimap(fdt);
+ hpScreen();drawOrbsHUD();drawMinimap(fdt);
  if(cele){const k=cele.t,sc=k<.25?k/.25*1.1:k<.4?1.1-(k-.25)/.15*.1:1,a=k>2.7?1-(k-2.7)/.5:1;ctx.save();ctx.globalAlpha=Math.max(0,a);ctx.translate(W/2,Math.max(120,H*.24));ctx.scale(sc,sc);
   const pts=[];for(let i=0;i<22;i++){const r=i%2?60:86,t=i/22*6.2832+k*.35;pts.push([Math.cos(t)*r*1.45,Math.sin(t)*r*.72]);}sketch(pts,true,77,5,'#ffcf3a',INK,4);
   otext((cele.name||'Fishing')+' '+cele.l,0,-6,40,'#fff');otext(cele.msg,0,74,19,'#fff');ctx.restore();}
@@ -1436,7 +1437,7 @@ function drawGull(){if(mortShooed()){drawGullAloft();return;}const {y}=GULL,x0=G
  blob(x,gy,13,10,1006,'#fbfbff',2.6,.8);sketch([[x-11,gy-3],[x-1,gy-2],[x-6,gy+6]],true,1007,.4,'#c9c3d6',INK,2);
  blob(x+8,gy-11,7,6.5,1008,'#fbfbff',2.4,.4);dot(x+10,gy-12,1.5);sketch([[x+13,gy-11],[x+21,gy-9+(talk?Math.abs(Math.sin(now*14))*2:0)],[x+13,gy-8]],true,1009,.2,'#ffcf3a',INK,1.8);
  sketch([[x+2,gy-15],[x+15,gy-15],[x+17,gy-12],[x+4,gy-13]],true,1010,.3,'#5fae6a',INK,1.8);ctx.restore();}
-function talkGull(){if(mortShooed())return;discover('gullbank');const mo=[{l:'Open the bank',f:()=>{closeDlg();openBank();}}];if(wmMood('mortimer')==='warm')mo.push({l:'Any news?',f:()=>say('Mortimer Gull',mortimerNews(),[{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'See you',f:closeDlg}])});
+function talkGull(){if(mortShooed())return;discover('gullbank');const mo=[{l:'Open the bank',f:()=>{closeDlg();openBank();}}];gheldOpt(mo);if(wmMood('mortimer')==='warm')mo.push({l:'Any news?',f:()=>say('Mortimer Gull',mortimerNews(),[{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'See you',f:closeDlg}])});
  {const hl=S.metGull&&wmHeard('mortimer');if(hl){say('Mortimer Gull',hl,mo.concat([{l:'See you',f:closeDlg}]));return;}}
  say('Mortimer Gull',S.metGull?pick(['SQUAWK. Ahem. Still here. Still counting.','Your things are safe. We already stole them once, no need to do it twice.','The Gull Post never closes. We tried closing once. Someone stole the door.']):'SQUAWK. Ahem. Mortimer Gull, the Gull Post. Leave anything with us and it’s safe. Gulls steal everything, so nobody steals from gulls. Very secure.',
  mo.concat([{l:'Can you come to me?',f:()=>say('Mortimer Gull','Gulls don’t make house calls. Unless there’s something crunchy in it for us. Find me something truly crunchy and we’ll talk.',[{l:'Open the bank',f:()=>{closeDlg();openBank();}},{l:'See you',f:closeDlg}])},{l:'See you',f:closeDlg}]));S.metGull=1;}
@@ -2009,7 +2010,7 @@ function shUpdate(dt){if(!SW.on&&!P.path.length&&!shWalkable(P.x,P.y)&&shDepth(P
   if(m.st==='down'){if(m.t>(lv('strife')>=10?14:9)){m.st='still';m.t=0;m.dazed=2;}}
   else if(m.st==='calm'){if(m.t>(lv('accord')>=10?20:12)){m.st='still';m.t=0;m.dazed=3;}}
   else if(m.st==='still'&&d<80&&!(m.dazed>0)){m.st='creak';m.t=0;sfx('creak');hap([10,30,10]);}
-  else if(m.st==='creak'&&m.t>.9){m.st='lunge';m.t=0;discover('hollowmaw');if(d<110&&!SW.on){sfx('lunge');const dx=P.x-m.x,dy=P.y-m.y,n=Math.hypot(dx,dy)||1;const c=shClamp(P.x+dx/n*70,P.y+dy/n*70);P.x=c[0];P.y=c[1];P.path=[];P.task=null;think(pick(['It lunged. The bark smells of rot.','It wants warmth, not me. I think.']));}}
+  else if(m.st==='creak'&&m.t>.9){m.st='lunge';m.t=0;discover('hollowmaw');if(d<110&&!SW.on){sfx('lunge');harm(LUNGE,'lunge');const dx=P.x-m.x,dy=P.y-m.y,n=Math.hypot(dx,dy)||1;const c=shClamp(P.x+dx/n*70,P.y+dy/n*70);P.x=c[0];P.y=c[1];P.path=[];P.task=null;think(pick(['It lunged. The bark smells of rot.','It wants warmth, not me. I think.']));}}
   else if(m.st==='lunge'&&m.t>.6){m.st='open';m.t=0;}
   else if(m.st==='open'&&m.t>4&&d>120){m.st='still';m.t=0;}}
  for(const d of DEAD){d.creak-=dt;if(d.creak<=0){d.creak=18+Math.random()*40;if(Math.hypot(P.x-d.x,P.y-d.y)<160){d.st='creak';d.t=0;sfx('creak',.4);}}if(d.st==='creak'){d.t+=dt;if(d.t>.5)d.st='still';}}
@@ -2076,7 +2077,7 @@ function shWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;
  
  const d=[];for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;d.push([t.y,()=>drawShTree(t),t.x]);}
  const near=o=>Math.abs(o.x-cam.x)<vw&&Math.abs(o.y-cam.y)<vh;
- MAWS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});DEAD.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});PLANTED.forEach(p=>{if(near(p))d.push([p.y,()=>drawPlanted(p),p.x]);});MOSS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMoss(m),m.x]);});LAPPERS.forEach(l=>{if(near(l))d.push([l.y,()=>drawLapper(l),l.x]);});d.push([HOLLOW.y+40,drawHollow,HOLLOW.x],[P.y,drawSwimmer,P.x]);
+ wreckDraws(d);MAWS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});DEAD.forEach(m=>{if(near(m))d.push([m.y,()=>drawMaw(m),m.x]);});PLANTED.forEach(p=>{if(near(p))d.push([p.y,()=>drawPlanted(p),p.x]);});MOSS.forEach(m=>{if(near(m))d.push([m.y,()=>drawMoss(m),m.x]);});LAPPERS.forEach(l=>{if(near(l))d.push([l.y,()=>drawLapper(l),l.x]);});d.push([HOLLOW.y+40,drawHollow,HOLLOW.x],[P.y,drawSwimmer,P.x]);
  d.sort((a,b)=>a[0]-b[0]).forEach(x=>{const f=x[1]===drawSwimmer?()=>{drawSwimmer();if(!SW.on)drawLine();}:x[1];if(x[2]!=null)drawOcc(x[2],x[0],f,softFn(x[1]));else f();});
  /* canopies last, over everything under them: the forest hides what it covers */
  for(const t of shTrees){if(Math.abs(t.x-cam.x)>vw||Math.abs(t.y-cam.y)>vh)continue;const under=Math.hypot(t.x-P.x,t.y-(P.y+30))<30*t.s;ctx.globalAlpha=under?.8:1;const L=liftAt(t.x,t.y);ctx.save();ctx.translate(0,-L);drawShCanopy(t);ctx.restore();}ctx.globalAlpha=1;drawFlies(vw,vh);}
@@ -2085,6 +2086,8 @@ function shLights(){const L=S.char&&S.char.kin==='ember'?[[P.x,P.y-20,60]]:[];MA
 /* Water depth. Every point of sea has a depth in body units: 0 at the waterline, about .5 at the waist, 1 where you can no longer stand, capped at 3 for the open deep. Around every shore the bottom shelves out and then drops; how long the shelf runs and how steep the drop is changes as you go round, so one stretch is a long gentle wade and the next falls away in a few steps. Out at sea there are sandbars, reefs and tiny islands, some with trees. The shallowest thing at a point wins. The water's colour is drawn from the same numbers as contour bands, so a gentle slope reads as wide bands and a drop-off as tight ones. */
 const SEA_R=()=>iR(0)+4600,FAR_X=()=>iR(0)+3600,SH_WEST=-3600,SH_IN=[-3150,380];
 const STAND=1,SWIMD=.55,DLEVELS=[2.4,1.6,1,.7,.45,.25,.1];
+/* the tide reaches every shore (build 43): the Key's by its moving waterline (wetR), every bar, reef, islet and dark island by the water rising and falling TAMP body units over a tide, so bars bare at low tide, islets grow a wet beach and reefs nearly break the surface */
+const TAMP=.4;function tideOff(){return (tideLevel()-.5)*TAMP;}
 function nz(s,t){return Math.max(0,Math.min(1,.5+.5*(.6*Math.sin(2*t+s)+.3*Math.sin(5*t+s*1.7)+.12*Math.sin(11*t+s*2.9))));}
 /* a shore profile: a shelf down to the waist over L, then a drop of one body height per D */
 function prof(s,L,D){return s<=0?0:s<=L?.5*s/L:.5+(s-L)/D;}
@@ -2121,8 +2124,8 @@ function onIsletS(x,y){if(!SHFEAT)return null;for(const f of SHFEAT)if(f.kind===
 function isleShelf(I,t){return [20+180*Math.pow(nz(I.seed*1.3,t),1.5),20+220*nz(I.seed*2.1+1,t)];}
 function isleDepth(I,x,y){if(Math.abs(x-I.x)>I.rx*1.3+700||Math.abs(y-I.y)>I.ry*1.3+700)return 9;const u=(x-I.x)/I.rx,v=(y-I.y)/I.ry,t=Math.atan2(v,u),R=isleR(I,t),s=Math.hypot(x-I.x,y-I.y)-Math.hypot(Math.cos(t)*I.rx*R,Math.sin(t)*I.ry*R);if(s<=0)return 0;const [L,D]=isleShelf(I,t);return prof(s,L,D);}
 /* ---- the one call everything uses ---- */
-function depthAt(x,y){let d;if(SH.on){if(shIsle(x,y))return 0;d=3;for(const I of ISLES)d=Math.min(d,isleDepth(I,x,y));for(const f of SHFEAT)d=Math.min(d,fDepth(f,x,y));}
- else{if(onDock(x,y)||onIsland(x,y)||onIsletK(x,y))return 0;d=Math.min(3,keyDepth(x,y));for(const f of KFEAT)d=Math.min(d,fDepth(f,x,y));}
+function depthAt(x,y){let d;const off=tideOff();if(SH.on){if(shIsle(x,y))return 0;d=3;for(const I of ISLES)d=Math.min(d,isleDepth(I,x,y));for(const f of SHFEAT)d=Math.min(d,fDepth(f,x,y));if(d>=0)d+=off;}
+ else{if(onDock(x,y)||onIsland(x,y)||onIsletK(x,y))return 0;let e=9;for(const f of KFEAT)e=Math.min(e,fDepth(f,x,y));d=Math.min(3,keyDepth(x,y),e<0?e:e+off);}
  return Math.max(0,Math.min(3,d));}
 /* nearest dry land to a point in this scene, for washing up */
 function nearestIslet(x,y,within){const L=SH.on?SHFEAT:KFEAT;let best=null,bd=within;for(const f of L){if(f.kind!=='islet')continue;const s=fLocal(f,x,y);if(s<bd){bd=s;best=f;}}return best;}
@@ -2135,12 +2138,19 @@ function inView(x,y,r,vw,vh){return Math.abs(x-cam.x)<vw+r&&Math.abs(y-cam.y)<vh
 /* contour bands, deepest first; each band covers where the water is at most that deep */
 function drawDepthBands(){const vw=W/Z/2+80,vh=H/Z/2+80;
  for(const v of DLEVELS){ctx.fillStyle=waterCol(v);
-  if(SH.on){for(const I of ISLES){const ext=Math.max(I.rx,I.ry)*1.3+profInv(v,200,240);if(!inView(I.x,I.y,ext,vw,vh))continue;const n=Math.max(48,Math.round((I.rx+I.ry)/12)),p=[];for(let i=0;i<n;i++){const t=i/n*6.2832,R=isleR(I,t),[L,D]=isleShelf(I,t),o=profInv(v,L,D),ex=Math.cos(t)*I.rx*R,ey=Math.sin(t)*I.ry*R,el=Math.hypot(ex,ey)||1;p.push([I.x+ex*(1+o/el),I.y+ey*(1+o/el)]);}fillPts(p);}}
+  const off=tideOff(),vt=v-off;if(SH.on){for(const I of ISLES){const ext=Math.max(I.rx,I.ry)*1.3+profInv(Math.max(0,vt),200,240);if(!inView(I.x,I.y,ext,vw,vh))continue;const n=Math.max(48,Math.round((I.rx+I.ry)/12)),p=[];for(let i=0;i<n;i++){const t=i/n*6.2832,R=isleR(I,t),[L,D]=isleShelf(I,t),o=vt>0?profInv(vt,L,D):0,ex=Math.cos(t)*I.rx*R,ey=Math.sin(t)*I.ry*R,el=Math.hypot(ex,ey)||1;p.push([I.x+ex*(1+o/el),I.y+ey*(1+o/el)]);}fillPts(p);}}
   else{const p=[];for(let i=0;i<NP;i++){const a=i/NP*6.2832,o=profInv(v,KSH[i][0],KSH[i][1]),r=wetR(a)+o;p.push([Math.cos(a)*r,Math.sin(a)*r]);}fillPts(p);}
-  for(const f of SH.on?SHFEAT:KFEAT){if(!inView(f.x,f.y,f.reach,vw,vh))continue;const o=fOffset(f,v);if(o==null)continue;fillPts(fPts(f,o,40));}}
+  for(const f of SH.on?SHFEAT:KFEAT){if(!inView(f.x,f.y,f.reach,vw,vh))continue;const o=fOffset(f,vt);if(o==null)continue;fillPts(fPts(f,o,40));}}
+ drawTideFlats(vw,vh);
  /* reefs show their tops; bars their pale sand where they nearly break the surface */
  for(const f of SH.on?SHFEAT:KFEAT){if(!inView(f.x,f.y,f.reach,vw,vh))continue;if(f.kind==='reef'){const r=mulberry(Math.floor(f.seed*100));ctx.globalAlpha=.55;for(let i=0;i<9;i++){const a=r()*6.28,d=Math.sqrt(r())*.8,x=f.x+Math.cos(a)*f.rx*d,y=f.y+Math.sin(a)*f.ry*d;blob(x,y,4+r()*5,3+r()*3,7000+i,SH.on?'#6a5a6e':'#e98a7a',1.4,.4);}ctx.globalAlpha=1;}
-  else if(f.kind==='bar'&&f.top<.22){ctx.globalAlpha=.35*(1-f.top/.22);ctx.fillStyle=SH.on?'#8d7f63':'#f3d27a';fillPts(fPts(f,-Math.min(f.rx,f.ry)*.35,32));ctx.globalAlpha=1;}}}
+  else if(f.kind==='bar'&&f.top+tideOff()<.22&&f.top+tideOff()>0){ctx.globalAlpha=.35*(1-(f.top+tideOff())/.22);ctx.fillStyle=SH.on?'#8d7f63':'#f3d27a';fillPts(fPts(f,-Math.min(f.rx,f.ry)*.35,32));ctx.globalAlpha=1;}}}
+/* what the low tide bares: wet sand round islets and dark islands, and whole bars */
+function drawTideFlats(vw,vh){const off=tideOff();if(off>=0&&!(SH.on?SHFEAT:KFEAT).some(f=>f.kind==='bar'&&f.top+off<=0))return;const wet=SH.on?'#6d6550':'#e2c98e';ctx.fillStyle=wet;
+ for(const f of SH.on?SHFEAT:KFEAT){if(!inView(f.x,f.y,f.reach,vw,vh))continue;
+  if(f.kind==='islet'&&off<0)fillPts(fPts(f,profInv(-off,f.L,f.D),36));
+  else if(f.kind==='bar'&&f.top+off<=0){fillPts(fPts(f,(-off-f.top)*f.D,36));ctx.globalAlpha=.5;ctx.fillStyle=SH.on?'#8d7f63':'#f3d27a';fillPts(fPts(f,-Math.min(f.rx,f.ry)*.3,32));ctx.globalAlpha=1;ctx.fillStyle=wet;}}
+ if(SH.on&&off<0)for(const I of ISLES){if(!inView(I.x,I.y,Math.max(I.rx,I.ry)*1.4,vw,vh))continue;const n=Math.max(48,Math.round((I.rx+I.ry)/12)),p=[];for(let i=0;i<n;i++){const t=i/n*6.2832,R=isleR(I,t),[L,D]=isleShelf(I,t),o=profInv(-off,L,D),ex=Math.cos(t)*I.rx*R,ey=Math.sin(t)*I.ry*R,el=Math.hypot(ex,ey)||1;p.push([I.x+ex*(1+o/el),I.y+ey*(1+o/el)]);}fillPts(p);}}
 /* islet land, drawn over the bands */
 function drawIsletLand(){const vw=W/Z/2+80,vh=H/Z/2+80;for(const f of SH.on?SHFEAT:KFEAT){if(f.kind!=='islet'||!inView(f.x,f.y,f.reach,vw,vh))continue;sketch(fPts(f,0,36),true,7100+(f.seed*10|0),2.5,SH.on?'#7a6f58':'#f3d27a',INK,3);sketch(fPts(f,-Math.min(f.rx,f.ry)*.32,30),true,7200+(f.seed*10|0),2.5,SH.on?'#3a4a33':'#86c25e',INK,2.2);}}
 /* a small sea palm for the Key's islets */
@@ -2234,11 +2244,11 @@ function swimTo(wx,wy){if(SW.on){tread();return;}
  P.swimTo=[wx,wy];walkStraight(wx,wy,()=>{P.swimTo=null;});}
 /* tread water: a tap keeps you up and holds your place; on the beat it costs nothing and builds the streak */
 function tread(){if(SW.stun>0)return;const ph=SW.beat/swimBeat(),e=Math.min(ph,1-ph)*swimBeat(),win=.13+Math.min(.07,lv('swimming')*.004),good=e<win;
- SW.idle=0;SW.sink=Math.max(0,SW.sink-.35);SW.vx*=.7;SW.vy*=.7;SW.tx=P.x;SW.ty=P.y;splashAt(P.x,P.y+6,good?4:2);SW.beat=0;sfx(good?'strokeGood':'stroke',.6);hap(good?8:4);
+ if(!stingStroke(good))return;SW.idle=0;SW.sink=Math.max(0,SW.sink-.35);SW.vx*=.7;SW.vy*=.7;SW.tx=P.x;SW.ty=P.y;splashAt(P.x,P.y+6,good?4:2);SW.beat=0;sfx(good?'strokeGood':'stroke',.6);hap(good?8:4);
  if(good){SW.breath=Math.min(1,SW.breath+.08);streak('swim',true,'swimming','In the groove',2,[P.x,P.y-40]);}else{SW.breath=Math.min(1,SW.breath+.03);streak('swim',false);}}
 /* a stroke: the slide's direction is the heading, its length and speed the push */
 function swimStroke(sc){sc=sc||1;if(SW.stun>0)return;const ph=SW.beat/swimBeat(),e=Math.min(ph,1-ph)*swimBeat(),win=.13+Math.min(.07,lv('swimming')*.004),good=e<win;
- SW.idle=0;SW.sink=Math.max(0,SW.sink-.45);const dx=SW.tx-P.x,dy=SW.ty-P.y,d=Math.hypot(dx,dy)||1,pw=(good?210:110)*sc*strokeLen();SW.vx+=dx/d*pw;SW.vy+=dy/d*pw;if(dx)P.face=dx>0?1:-1;
+ if(!stingStroke(good))return;SW.idle=0;SW.sink=Math.max(0,SW.sink-.45);const dx=SW.tx-P.x,dy=SW.ty-P.y,d=Math.hypot(dx,dy)||1,pw=(good?210:110)*sc*strokeLen();SW.vx+=dx/d*pw;SW.vy+=dy/d*pw;if(dx)P.face=dx>0?1:-1;
  splashAt(P.x,P.y+6,good?6:3);SW.beat=0;sfx(good?'strokeGood':'stroke');hap(good?10:5);
  if(good){SW.breath=Math.min(1,SW.breath+.1);streak('swim',true,'swimming','In the groove',2,[P.x,P.y-40]);addXP('swimming',1,'normal',[P.x,P.y-20]);}
  else{SW.breath=Math.min(1,SW.breath+.04);streak('swim',false);}}
@@ -2249,17 +2259,17 @@ function seaSpawn(){const a=Math.atan2(P.y,P.x)+(Math.random()-.5)*1.2,r=Math.hy
  if(Math.random()<.55){const id=pick(['shells','shells','kelp','kelp','bait','bottle']);floaters.push({x,y,id,seed:Math.random()*99,t:0});}
  else jellies.push({x,y,seed:Math.random()*99,vx:(Math.random()-.5)*8,vy:(Math.random()-.5)*8,t:0});}
 let seaT=1;
-function swimUpdate(dt){
+function swimUpdate(dt){hpTick(dt);
  seaT-=dt;if(seaT<=0&&SW.on){seaT=1.4+Math.random();if(floaters.length+jellies.length<14)seaSpawn();}
  floaters=floaters.filter(f=>(f.t+=dt)<60&&Math.hypot(f.x-P.x,f.y-P.y)<700);jellies=jellies.filter(j=>(j.t+=dt)<90&&Math.hypot(j.x-P.x,j.y-P.y)<800);
  for(const j of jellies){j.x+=j.vx*dt;j.y+=j.vy*dt;}
  splashes2=splashes2.filter(p=>(p.t+=dt)<.6);bubbles=bubbles.filter(b=>(b.t+=dt)<1.6);if(SW.fade>0)SW.fade=Math.max(0,SW.fade-dt*.9);
- if(!SW.on)return;
+ wadeSting();if(!SW.on)return;
  SW.t+=dt;SW.beat+=dt;if(SW.beat>=swimBeat())SW.beat-=swimBeat();
  /* no clock: breath only drains while you sink, and you only sink when you stop attending */
  SW.idle+=dt;const dHere=seaDepth(P.x,P.y);if(SW.idle>.9&&dHere<.85&&SW.sink<.3){swimEnd(false);addXP('swimming',Math.max(1,Math.round(SW.dist/40)),'normal',[P.x,P.y-20]);SW.dist=0;return;}
  if(SW.idle>1.1&&dHere>=.85)SW.sink=Math.min(1,SW.sink+dt*sinkRate());if(SW.t-Math.floor(SW.t)<dt)noteShore();
- if(SW.stun>0)SW.stun-=dt;
+ if(SW.stun>0)SW.stun-=dt;stingTick(dt);
  const drag=Math.exp(-dt*1.6);SW.vx*=drag;SW.vy*=drag;
  /* play: past the outer reefs a strong outgoing current sets west, back toward the Key, and stronger the farther you go; you cannot out-swim it, and it says so once */
  {const c=curK(P.x,P.y);if(c>0){SW.vx-=c*420*dt;if(c>=1&&SW.vx>0)SW.vx*=Math.exp(-dt*6);if(c>.25&&!S.st.curHint){S.st.curHint=1;think('The sea is pulling the wrong way out here.');}}}SW.vx+=Math.sin(now*.55)*14*dt;SW.vy+=Math.cos(now*.4)*10*dt;
@@ -2274,10 +2284,9 @@ function swimUpdate(dt){
  for(let i=floaters.length-1;i>=0;i--){const f=floaters[i];if(Math.hypot(f.x-P.x,f.y-P.y)<22){floaters.splice(i,1);
   if(f.id==='bottle'){S.inv.push({id:'bottle',msg:S.bottles});S.bottles++;}else if(!addItem(f.id,f.id==='shells'?2:1)){think('No room in my pack.');continue;}
   flies.push({id:'misc',img:itemIcon({id:f.id}),x0:f.x,y0:f.y,t:0});addXP('swimming',4,'normal',[f.x,f.y-20]);S.st.swum=(S.st.swum||0)+1;}}
- for(const j of jellies){if(SW.stun<=0&&Math.hypot(j.x-P.x,j.y-P.y)<24){SW.stun=1.4;SW.breath-=.18;sfx('zap');const ax=P.x-j.x,ay=P.y-j.y,n=Math.hypot(ax,ay)||1;SW.vx=ax/n*160;SW.vy=ay/n*160;streak('swim',false);pop('*zap*',P.x,P.y-50,'#fff',19);discover('jelly');think(pick(['Stung. Everything tingles.','A lantern jelly. It did not like me.']));}}
- if(SW.breath<=0){SW.breath=1;const s=SW.shore;if(s&&s.sh!==(SH.on?1:0)){if(s.sh)shEnter();else shLeave();}
-  if(s){const c=SH.on?shClamp(s.x,s.y):walkable(s.x,s.y)?[s.x,s.y]:clampLand(s.x,s.y);P.x=c[0];P.y=c[1];}else if(SH.on){const c=shClamp(P.x,P.y);P.x=c[0];P.y=c[1];}else{const a=Math.atan2(P.y,P.x),e=polar(a,wetR(a)-14);P.x=e[0];P.y=e[1];}
-  cam.x=P.x;cam.y=P.y;SW.blk=0;SW.fade=1;bubbles=[];swimEnd(false);sfx('splash');think(s?'I went under. The sea carried me back to '+(s.name==='Driftwood Key'?'the Key':s.name)+'.':pick(['The sea spat me out. Breathe.','I went under. The shore found me.']));save();return;}
+ for(const j of jellies){if(SW.stun<=0&&!SW.cramp&&Math.hypot(j.x-P.x,j.y-P.y)<24){stingHit(j);if(!SW.on)return;break;}}
+ /* drowning: out of breath and under, health drains; stroke up on the beat and it stops */
+ if(SW.breath<=0){SW.breath=0;SW.blk=.35+.5*(1-hpFrac());if(SW.sink>.3){harm(DROWN*dt,'drown');if(!SW.on)return;}}
  if(!SH.on&&P.x>FAR_X()){if(MODE==='test')seaCross(true);else P.x=FAR_X();}else if(SH.on&&P.x<SH_WEST){seaCross(false);}}
 /* crossing between the Key's water and the forest's: the scene changes under you, still swimming, far out; the islands are approached, never arrived at */
 function seaCross(toShadow){const dx=SW.tx-P.x,dy=SW.ty-P.y;if(toShadow){SH.on=true;S.isle='shadow';P.x=SH_IN[0];P.y=SH_IN[1];hintEl.classList.remove('on');if(!S.journal.swamfar){discover('swamfar');think('The water has gone dark and cold. Land ahead, if I keep going.');}}
@@ -2293,8 +2302,8 @@ function drawCurrent(){if(MODE!=='play'||SH.on)return;const vw=W/Z/2+60,vh=H/Z/2
 function drawSwimWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;drawCurrent();
  for(const f of floaters){if(Math.abs(f.x-cam.x)>vw||Math.abs(f.y-cam.y)>vh)continue;const b=Math.sin(now*1.8+f.seed)*2;ctx.globalAlpha=.4;sketch(ell(f.x,f.y+6,14,5,10),true,900+(f.seed*7|0),1,null,'#fff',1.5);ctx.globalAlpha=1;ctx.drawImage(iconImg(itemIcon({id:f.id})),f.x-11,f.y-14+b,22,22);}
  for(const j of jellies){if(Math.abs(j.x-cam.x)>vw||Math.abs(j.y-cam.y)>vh)continue;const b=Math.sin(now*2.2+j.seed)*2,gl=.5+.5*Math.sin(now*3+j.seed);
-  ctx.globalAlpha=.25+dark*.4;dot(j.x,j.y-6+b,22,'#ffd9a8');ctx.globalAlpha=.85;blob(j.x,j.y-6+b,13,10,920+(j.seed*5|0),'#ffe7c2',2,.5);for(let k=0;k<4;k++)ln([[j.x-8+k*5,j.y+2+b],[j.x-9+k*5+Math.sin(now*4+k+j.seed)*3,j.y+16+b]],930+k,1.8,'#ffc98a',.8);
-  ctx.globalAlpha=gl*.9;dot(j.x-3,j.y-8+b,2,'#ff8a3d');dot(j.x+4,j.y-7+b,2,'#ff8a3d');ctx.globalAlpha=1;}
+  const jv=jellyVis();ctx.globalAlpha=(.25+dark*.4)*jv;dot(j.x,j.y-6+b,22,'#ffd9a8');ctx.globalAlpha=.85*jv;blob(j.x,j.y-6+b,13,10,920+(j.seed*5|0),'#ffe7c2',2,.5);for(let k=0;k<4;k++)ln([[j.x-8+k*5,j.y+2+b],[j.x-9+k*5+Math.sin(now*4+k+j.seed)*3,j.y+16+b]],930+k,1.8,'#ffc98a',.8);
+  ctx.globalAlpha=gl*.9*jv;dot(j.x-3,j.y-8+b,2,'#ff8a3d');dot(j.x+4,j.y-7+b,2,'#ff8a3d');ctx.globalAlpha=1;}
  for(const p of splashes2){const k=p.t/.6;ctx.globalAlpha=1-k;dot(p.x+p.vx*p.t,p.y+p.vy*p.t+140*p.t*p.t,3-k*2,'#fff');}
  for(const b of bubbles){const k=b.t/1.6,x=b.x+b.vx*b.t+Math.sin(b.t*9+b.r)*2,y=b.y-k*34;ctx.globalAlpha=.85*(1-k*k);sketch(ell(x,y,b.r,b.r*.9,8),true,960+(b.r*10|0),.3,'rgba(255,255,255,.35)','#fffaf0',1.2);}ctx.globalAlpha=1;}
 /* the player in water: only the submerged part of the body changes colour (drawn through an offscreen canvas so the tint lands on the player alone), a transparent layer flows over it, and the waves move you. */
@@ -2599,7 +2608,7 @@ function sfx(k,v){if(!AC||!SND.on||AC.state!=='running')return;v=v==null?1:v;con
 /* ---------- test build only: a Test tab to dial things in ----------
    Levels per subskill, gear straight into a slot, any item at any count, time of day and tide, a wipe.
    The play build never shows it. The map's island taps (warps) live in the map. */
-const TSEC={skills:1,gear:0,items:0,world:0,memory:0};
+const TSEC={skills:1,gear:0,items:0,world:0,memory:0,body:0};
 function testHTML(){const sec=(k,t,body)=>`<div class="tsec"><button class="tsh" data-ts="${k}">${TSEC[k]?'\u25be':'\u25b8'} ${t}</button>${TSEC[k]?body:''}</div>`;let h='<div class="tbody">';
  h+=sec('skills','Skills',Object.keys(SUBS).filter(k=>SUBS[k].icon).map(k=>`<div class="trow"><span>${SUBS[k].name} <b>${hasSkill(k)?lv(k):'-'}</b></span><span>${[-10,-1,1,10,99].map(d=>`<button data-tl="${k}:${d}">${d===99?'99':d>0?'+'+d:d}</button>`).join('')}</span></div>`).join(''));
  h+=sec('gear','Gear (tap to wear, again to take off)',`<div class="tgrid">${Object.keys(EQUIP).map(id=>`<button data-tg="${id}" class="${S.eq[EQUIP[id].slot]===id?'on':''}"><img src="${icon(id)}" alt="">${EQUIP[id].name}</button>`).join('')}</div>`);
@@ -2614,7 +2623,7 @@ function testHTML(){const sec=(k,t,body)=>`<div class="tsec"><button class="tsh"
   <div class="trow"><span>Wind ${Math.round(((WX.wa*180/Math.PI)%360+360)%360)}°</span><span><button data-tw="wt:1">turn 45°</button><button data-tw="wt:0">reset</button></span></div>
   <div class="trow"><span>Frame meter ${PMON?'on':'off'}</span><span><button data-tw="pm:1">on</button><button data-tw="pm:0">off</button></span></div>
   <div class="trow"><span>Test save</span><span><button data-tw="wipe">Wipe and restart</button></span></div>`);
- h+=sec('memory','World memory',wmTestHTML());
+ h+=sec('body','Body (health, wrecks)',hpTestHTML());h+=sec('memory','World memory',wmTestHTML());
  return h+'</div>';}
 /* frame meter: median and slow frames over the last 240, the resolution in use and frames per second, so a phone's real numbers can be read off */
 let PMON=null;function perfMeter(on){if(PMON){clearInterval(PMON.t);PMON.el.remove();PMON=null;}if(!on)return;const el=document.createElement('div');el.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:4px;z-index:99;font:12px monospace;background:rgba(0,0,0,.6);color:#fff;padding:2px 6px;border-radius:6px;pointer-events:none';document.body.appendChild(el);
@@ -2626,7 +2635,7 @@ if(MODE==='test'){
  pbody.addEventListener('input',e=>{if(tab!=='test'||!e.target.dataset||!e.target.dataset.twd)return;WXT.force='dial';WXT.dv=+e.target.value/100;const b=document.getElementById('twdv');if(b)b.textContent=e.target.value;});
 pbody.addEventListener('click',e=>{if(tab!=='test')return;const t=e.target.closest('button');if(!t)return;const D=t.dataset;
   if(D.ts){TSEC[D.ts]=TSEC[D.ts]?0:1;}
-  else if(D.tm)wmTestAct(D.tm);
+  else if(D.tm)wmTestAct(D.tm);else if(D.th)hpTestAct(D.th);
   else if(D.tl){const [k,d]=D.tl.split(':');testSetLevel(k,+d);}
   else if(D.tg){const sl=EQUIP[D.tg].slot;S.eq[sl]=S.eq[sl]===D.tg?null:D.tg;}
   else if(D.ti){const [id,n]=D.ti.split(':');if(+n===0)takeItem(id,cnt(id));else if(!addItem(id,+n))toast('No room in the pack');}
@@ -3227,7 +3236,7 @@ function drawHills(vw,vh){if(SH.on)return;if(!HL.done){hillBuild();if(!HL.done)r
  ctx.restore();}
 /* ---------- the minimap (build 41) ----------
    A small round map in the top-right corner, north up like the camera, about 600 world px across its radius. It shows
-   the ground (a low-resolution top-down image of the realm, built once), you as an arrow, and only what you have met
+   the ground and the sea (a low-resolution top-down image of the whole reachable realm, depth bands following the tide), you as an arrow, and only what you have met
    or been told: dwellers you know, things lying on the ground, your lit fires, the tracked quest's next spot (an arrow
    on the rim when it is off the map). Where you have not been is dark: exploring is what draws the map, and what you
    have seen is saved (S.mm, a run-length string per realm). Tap it to walk there; tap the sea to walk to the nearest
@@ -3238,23 +3247,45 @@ function mmSize(){MMR=MMSZ[(S.opt&&S.opt.mmSz)||'m']||45;MMK=45/600;document.doc
 /* the phone's safe area, measured once from a probe */let MMSAFE=null;function mmSafe(){if(MMSAFE)return MMSAFE;const d=document.createElement('div');d.style.cssText='position:fixed;top:0;right:0;padding-top:env(safe-area-inset-top,0px);padding-right:env(safe-area-inset-right,0px);visibility:hidden';document.body.appendChild(d);const cs=getComputedStyle(d);MMSAFE={t:parseFloat(cs.paddingTop)||0,r:parseFloat(cs.paddingRight)||0};d.remove();return MMSAFE;}
 const MM={img:{},fog:{},seen:{},t:0,dirty:true};
 function mmRealm(){return SH.on?'sh':'key';}
-function mmBox(r){if(r==='key')return {x0:-1250,y0:-1250,x1:1250,y1:1250};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const I of ISLES){x0=Math.min(x0,I.x-I.rx*1.3);x1=Math.max(x1,I.x+I.rx*1.3);y0=Math.min(y0,I.y-I.ry*1.3);y1=Math.max(y1,I.y+I.ry*1.3);}return {x0,y0,x1,y1};}
+/* the realm's box: the whole sea you can reach, not just the land (build 43) */
+const MMB={};function mmBox(r){if(MMB[r])return MMB[r];let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const add=(x,y,m)=>{x0=Math.min(x0,x-m);x1=Math.max(x1,x+m);y0=Math.min(y0,y-m);y1=Math.max(y1,y+m);};
+ if(r==='key'){let R=0;for(let a=0;a<6.28;a+=.1)R=Math.max(R,iR(a));add(0,0,R+TIDE_REACH+700);for(const f of KFEAT)add(f.x,f.y,f.reach+120);x1=Math.min(x1,FAR_X()+300);}
+ else{for(const I of ISLES)add(I.x,I.y,Math.max(I.rx,I.ry)*1.3+500);for(const f of SHFEAT)add(f.x,f.y,f.reach+120);x0=Math.min(x0,SH_WEST-300);}
+ return MMB[r]={x0:Math.floor(x0),y0:Math.floor(y0),x1:Math.ceil(x1),y1:Math.ceil(y1)};}
+/* the boxes before build 43, to carry explored ground over */
+function mmOldBox(r){if(r==='key')return {x0:-1250,y0:-1250,x1:1250,y1:1250};let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const I of ISLES){x0=Math.min(x0,I.x-I.rx*1.3);x1=Math.max(x1,I.x+I.rx*1.3);y0=Math.min(y0,I.y-I.ry*1.3);y1=Math.max(y1,I.y+I.ry*1.3);}return {x0,y0,x1,y1};}
 function mmPos(){const sa=mmSafe();return {cx:W-MMR-14-sa.r,cy:MMR+14+sa.t};}
 function mmShown(){return !(S.opt&&S.opt.mmOff)&&!ccOn&&intro==null&&!C;}
-/* the ground, top down: sea by depth, then each kind of ground in its colour, with the shore inked */
-function mmImage(r){if(MM.img[r])return MM.img[r];const B=mmBox(r),st=8,w=Math.ceil((B.x1-B.x0)/st),h=Math.ceil((B.y1-B.y0)/st),c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d'),im=g.createImageData(w,h),D=im.data;
- const COL={1:[243,210,122],2:[132,196,96],3:[170,186,96],4:[96,150,84],5:[168,160,170]};
- for(let j=0;j<h;j++)for(let i=0;i<w;i++){const x=B.x0+i*st,y=B.y0+j*st,o=(j*w+i)*4;let c3;
-  if(r==='key'){const hh=hKey(x,y);if(hh>0||onIsland(x,y)){const m=keyMat(x,y,hh);c3=COL[m]||COL[2];const f=m===1?1:1+Math.min(1,hh/100)*.18;c3=c3.map(v=>Math.min(255,v*f));}else{const d=seaDepth(x,y);c3=d<.35?[150,214,214]:d<.7?[96,178,196]:[58,132,170];}}
-  else c3=shWalkable(x,y)?[110,120,92]:[40,52,70];
-  D[o]=c3[0];D[o+1]=c3[1];D[o+2]=c3[2];D[o+3]=255;}
- g.putImageData(im,0,0);return MM.img[r]={c,B,st};}
+/* the ground and the sea, top down. The base (what each pixel is, and the sea's depth at mid tide) is worked out a few
+   rows a frame and kept; the picture is recoloured from it as the tide moves, so bars bare and islets grow a beach at
+   low tide on the map as they do in the world. Sea is drawn in the same depth bands as the world, reefs show coral. */
+const MMST=10,MMCOL={1:[243,210,122],2:[132,196,96],3:[170,186,96],4:[96,150,84],5:[168,160,170],6:[243,210,122],7:[134,194,94],8:[110,120,92],9:[122,111,88],10:[58,74,51]};
+function mmPal(r){const far=r==='sh'?1:0,dp=DEEP0.map((c,i)=>c+(DEEP1[i]-c)*far),sh=SHAL0.map((c,i)=>c+(SHAL1[i]-c)*far);return [...DLEVELS].reverse().concat([3]).map(v=>{const t=Math.pow(Math.max(0,1-v/2.7),1.4);return dp.map((c,i)=>Math.round(c+(sh[i]-c)*t));});}
+function mmImage(r){let M=MM.img[r];if(!M){const B=mmBox(r),w=Math.ceil((B.x1-B.x0)/MMST),h=Math.ceil((B.y1-B.y0)/MMST),c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
+  M=MM.img[r]={c,g,B,st:MMST,w,h,row:0,kind:new Uint8Array(w*h),d0:new Float32Array(w*h),reef:new Uint8Array(w*h),hl:new Float32Array(w*h),id:g.createImageData(w,h),off:null,pal:mmPal(r)};}
+ if(M.row<M.h){const t0=performance.now(),keep=tideF;tideF=.5;const B=M.B,FT=r==='key'?KFEAT:SHFEAT;
+  while(M.row<M.h&&performance.now()-t0<3){const j=M.row++;for(let i=0;i<M.w;i++){const x=B.x0+i*MMST,y=B.y0+j*MMST,k=j*M.w+i;
+   const isl=r==='key'?onIsletK(x,y):onIsletS(x,y);if(isl){M.kind[k]=fLocal(isl,x,y)<-Math.min(isl.rx,isl.ry)*.32?(r==='key'?7:10):(r==='key'?6:9);continue;}
+   if(r==='key'){const hh=hKey(x,y);if(hh>0||onIsland(x,y)||onDock(x,y)){M.kind[k]=onDock(x,y)?5:keyMat(x,y,hh);M.hl[k]=hh;continue;}}
+   else if(shWalkable(x,y)||shIsle(x,y)){M.kind[k]=8;continue;}
+   M.d0[k]=depthAt(x,y);for(const f of FT)if(f.kind==='reef'&&Math.abs(x-f.x)<f.rx*1.4&&Math.abs(y-f.y)<f.rx*1.4&&fLocal(f,x,y)<=0){M.reef[k]=1;break;}}}
+  tideF=keep;if(M.row>=M.h||now-(M.rct||0)>.3){M.rct=now;M.off=null;}}
+ const off=tideOff();if(M.off==null||Math.abs(off-M.off)>.01){M.off=off;const D=M.id.data,P=M.pal,wet=r==='key'?[226,201,142]:[109,101,80],n=M.row*M.w;
+  for(let k=0;k<n;k++){const o=k*4,kd=M.kind[k];let c3;if(kd){c3=MMCOL[kd]||MMCOL[2];if(r==='key'&&kd!==1&&kd<5){const f=1+Math.min(1,M.hl[k]/100)*.18;c3=c3.map(v=>Math.min(255,v*f));}}
+   else{const d=M.d0[k]+off;if(d<=0)c3=wet;else{let b=P.length-1;for(let q=0;q<DLEVELS.length;q++){if(d<=DLEVELS[DLEVELS.length-1-q]){b=q;break;}}c3=P[b];if(M.reef[k])c3=[Math.round(c3[0]*.6+233*.4),Math.round(c3[1]*.6+138*.4),Math.round(c3[2]*.6+122*.4)];}}
+   D[o]=c3[0];D[o+1]=c3[1];D[o+2]=c3[2];D[o+3]=255;}
+  M.g.putImageData(M.id,0,0);}
+ return M;}
 /* explored cells, saved as a run-length string */
 function mmGrid(r){if(MM.seen[r])return MM.seen[r];const B=mmBox(r),w=Math.ceil((B.x1-B.x0)/MMC),h=Math.ceil((B.y1-B.y0)/MMC),a=new Uint8Array(w*h);S.mm=S.mm||{};const s=S.mm[r];
- if(s){let k=0,v=0;for(const part of s.split('.')){const n=parseInt(part,36)||0;a.fill(v,k,Math.min(a.length,k+n));k+=n;v=1-v;}}return MM.seen[r]={a,w,h,B};}
+ S.mmv=S.mmv||{};const dec=(str,arr)=>{let k=0,v=0;for(const part of str.split('.')){const n=parseInt(part,36)||0;arr.fill(v,k,Math.min(arr.length,k+n));k+=n;v=1-v;}};
+ if(s&&S.mmv[r]===2)dec(s,a);
+ else if(s){/* build 43 widened the box to the whole sea: carry old explored cells over */const O=mmOldBox(r),ow=Math.ceil((O.x1-O.x0)/MMC),oh=Math.ceil((O.y1-O.y0)/MMC),oa=new Uint8Array(ow*oh);dec(s,oa);
+  for(let j=0;j<oh;j++)for(let i=0;i<ow;i++){if(!oa[j*ow+i])continue;const x=O.x0+(i+.5)*MMC,y=O.y0+(j+.5)*MMC,ni=Math.floor((x-B.x0)/MMC),nj=Math.floor((y-B.y0)/MMC);if(ni>=0&&nj>=0&&ni<w&&nj<h)a[nj*w+ni]=1;}}
+ MM.seen[r]={a,w,h,B};if(s&&S.mmv[r]!==2){S.mmv[r]=2;mmSave(r);}else S.mmv[r]=2;return MM.seen[r];}
 function mmSave(r){const G=MM.seen[r];if(!G)return;const out=[];let v=0,n=0;for(let k=0;k<G.a.length;k++){if(G.a[k]===v)n++;else{out.push(n.toString(36));v=1-v;n=1;}}out.push(n.toString(36));S.mm=S.mm||{};S.mm[r]=out.join('.');}
 /* what you can see from where you stand: about a screen's half-width round you */
-function mmTick(dt){if((MM.t-=dt)>0)return;MM.t=.5;const r=mmRealm(),G=mmGrid(r),R=280,ci=Math.floor((P.x-G.B.x0)/MMC),cj=Math.floor((P.y-G.B.y0)/MMC),n=Math.ceil(R/MMC);let ch=0;
+function mmTick(dt){if((MM.t-=dt)>0)return;MM.t=.5;const r=mmRealm(),G=mmGrid(r),R=(SW.on||(SH.on?!shIsle(P.x,P.y)&&!shWalkable(P.x,P.y):inSea(P.x,P.y)))?420:280,ci=Math.floor((P.x-G.B.x0)/MMC),cj=Math.floor((P.y-G.B.y0)/MMC),n=Math.ceil(R/MMC);let ch=0;
  for(let j=cj-n;j<=cj+n;j++)for(let i=ci-n;i<=ci+n;i++){if(i<0||j<0||i>=G.w||j>=G.h)continue;if((i-ci)**2+(j-cj)**2>n*n)continue;const k=j*G.w+i;if(!G.a[k]){G.a[k]=1;ch=1;}}
  if(ch){MM.dirty=true;mmSave(r);}}
 function mmFog(r){if(MM.fog[r]&&!MM.dirty)return MM.fog[r];const G=mmGrid(r);const c=MM.fog[r]&&MM.fog[r].c||document.createElement('canvas');c.width=G.w;c.height=G.h;const g=c.getContext('2d'),im=g.createImageData(G.w,G.h);
@@ -3262,8 +3293,8 @@ function mmFog(r){if(MM.fog[r]&&!MM.dirty)return MM.fog[r];const G=mmGrid(r);con
 /* what you know about, as [x,y,colour,size] */
 function mmMarks(){const m=[],j=S.journal||{};if(SH.on){for(const f of PLANTED)m.push([f.x,f.y,'#6fbf4a',2.5]);}
  else{if(S.metWick)m.push([FIRE.x,FIRE.y,'#ffcf3a',3]);if(S.metG)m.push([G.x,G.y,'#ffcf3a',3]);if(j.crab||j.thimble||j.thimblekit)m.push([CRAB.x,CRAB.y,'#ffcf3a',3]);if(j.bollard)m.push([BOLLARD.x,BOLLARD.y,'#ffcf3a',2.5]);if(j.gullbank)m.push([GULL.x,GULL.y,'#ffcf3a',2.5]);
-  for(const f of S.fires||[])if(fireLit(f)&&!f.main)m.push([f.x,f.y,'#ff8a3d',2.5]);}
- for(const g of S.ground||[])m.push([g.x,g.y,'#ff5a4a',2]);for(const it of S.shore||[])m.push([it.x,it.y,'#ff5a4a',1.6]);return m;}
+  for(const f of S.fires||[])if(fireLit(f)&&!f.main)m.push([f.x,f.y,'#ff8a3d',2.5]);if(j.clam)for(const c of clams())m.push([c.x,c.y,'#e98a7a',2.2]);}
+ wreckMarks(m);for(const g of S.ground||[])m.push([g.x,g.y,'#ff5a4a',2]);for(const it of S.shore||[])m.push([it.x,it.y,'#ff5a4a',1.6]);return m;}
 function drawMinimap(dt){mmSize();if(!mmShown())return;mmTick(dt);const r=mmRealm(),{cx,cy}=mmPos(),I=mmImage(r),F=mmFog(r),k=MMK;
  ctx.save();ctx.beginPath();ctx.arc(cx,cy,MMR,0,6.2832);ctx.fillStyle='#1e1834';ctx.fill();ctx.clip();
  const px=cx-(P.x-I.B.x0)*k,py=cy-(P.y-I.B.y0)*k;ctx.imageSmoothingEnabled=true;ctx.drawImage(I.c,px,py,I.c.width*I.st*k,I.c.height*I.st*k);
@@ -3275,6 +3306,10 @@ function drawMinimap(dt){mmSize();if(!mmShown())return;mmTick(dt);const r=mmReal
  const q=typeof questMarks==='function'?questMarks():[];if(q.length&&!SH.on){let best=null,bd=1e9;for(const s of q){const d=Math.hypot(s[0]-P.x,s[1]-P.y);if(d<bd){bd=d;best=s;}}const dx=best[0]-P.x,dy=best[1]-P.y,d=Math.hypot(dx,dy)*k;
   if(d<MMR-4){star(cx+dx*k,cy+dy*k,4.5,'#ffcf3a');}else{const an=Math.atan2(dy,dx);ctx.save();ctx.translate(cx+Math.cos(an)*(MMR-1),cy+Math.sin(an)*(MMR-1));ctx.rotate(an);ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(-4,5);ctx.lineTo(-4,-5);ctx.closePath();ctx.fillStyle='#ffcf3a';ctx.fill();ctx.strokeStyle=INK;ctx.lineWidth=1.4;ctx.stroke();ctx.restore();}}
  /* the rim, hand-inked, and a small N */sketch(ell(cx,cy,MMR,MMR,28),true,1201,.6,null,INK,3);otext('N',cx,cy-MMR+9,11,'#fff');}
+/* a drag that starts on the minimap strokes at the map's scale: a short drag there pushes like a full slide on the main screen (build 43) */
+const MMDRAG=4.7;function mmSwipe(x0,y0,x1,y1,ms){if(C||ccOn||dlgOn)return;const dx=x1-x0,dy=y1-y0,d=Math.hypot(dx,dy);if(d<5)return;
+ if(!SW.on&&inSea(P.x,P.y)&&seaDepth(P.x,P.y)>=SWIMD)swimStart(P.x,P.y);if(!SW.on)return;
+ const D=d*MMDRAG,sp=D/Math.max(60,ms),pw=Math.max(.5,Math.min(2.4,(D/140)*(.5+Math.min(1.5,sp))));SW.tx=P.x+dx/d*(160+140*pw);SW.ty=P.y+dy/d*(160+140*pw);swimStroke(pw);}
 function mmHit(sx,sy){if(!mmShown())return false;const {cx,cy}=mmPos();return Math.hypot(sx-cx,sy-cy)<=MMR+4;}
 /* tap: walk (or swim) to that spot */
 function mmTap(sx,sy){const {cx,cy}=mmPos(),wx=P.x+(sx-cx)/MMK,wy=P.y+(sy-cy)/MMK;
@@ -3297,17 +3332,20 @@ const WREG={
  who:{
   mortimer:{name:'Mortimer Gull',kind:'dweller',sees:['key'],talks:[['gubbins',1,.85],['gulls',2,.8]],care:{mossbacks:.4},
    hear:{mosskind:['SQUAWK. The flock says you fed a mossback. Generous. Unprofitable, but generous.','The flock says someone was kind to a mossback. Flock can’t count, mind.'],
-         mosscruel:['The flock saw you scatter a mossback. Noted. The ledger is open, friend.','Rumour on the wing: somebody’s been rough with the mossbacks. Just rumour. For now.']}},
+         mosscruel:['The flock saw you scatter a mossback. Noted. The ledger is open, friend.','Rumour on the wing: somebody’s been rough with the mossbacks. Just rumour. For now.'],
+         down:['SQUAWK. The flock says you went under. Your account remains open. Out of respect, mostly.','Rumour on the wing: someone went under. The Gull Post extends its condolences, provisionally.']}},
   gubbins:{name:'Gubbins',kind:'dweller',sees:['key'],talks:[['mortimer',1,.85]],care:{mortimer:.8,mossbacks:.3},
    hear:{mortkind:['Saw you bring Mortimer a golden fish. Golden! He’s been preening all day. Nice of you, though.','Mortimer’s telling everyone someone brought him a fancy fish. Reckon that was you?'],
          mortcruel:['I saw that. Swatting Mortimer off his own post. He’s a banker, friend, not a fly.','Word is somebody knocked Mortimer off his post. Don’t suppose you know anything.'],
          mosskind:['Gulls say you’ve been kind to some mossy thing out east. Soft, you are. I like it.','Gulls are going on about a mossy creature and someone being nice to it. Gulls exaggerate.'],
-         mosscruel:['Gulls say you’ve been kicking mossy little things about out east. That true?','Something about you and a mossy creature out east. Gulls tell it worse every time.']}},
+         mosscruel:['Gulls say you’ve been kicking mossy little things about out east. That true?','Something about you and a mossy creature out east. Gulls tell it worse every time.'],
+         down:['Heard you went under. Bucket’s honest opinion? Swim less, fish more.','Gulls say somebody went under out past the reef. Not you, I hope. Who’d sell me fish?']}},
   brimble:{name:'Brimble',kind:'dweller',sees:['key'],talks:[],care:{mortimer:.5,mossbacks:.8},
    hear:{mortkind:['The gulls tell me you fed Mortimer a golden fish. Golden both sides, I hope. Someone listens to me.','A golden fish for that featherbrained banker, the gulls say? If it was you, I approve.'],
          mortcruel:['You chased Mortimer off his post. I’m a flame. I know what it is to be swatted at. Don’t.','The gulls are screaming about someone knocking Mortimer about. Gulls scream about everything. Was it you?'],
          mosskind:['Word from the gulls: you warmed some starving mossy thing. Good. Cold is the worst of it. Ask any fire.','The gulls say somebody’s been kind to the mossy things out east. I hope it was you.'],
-         mosscruel:['The gulls saw you scatter those mossy creatures. Hungry, cold, and now kicked. Hm.','Something’s been scaring the mossy creatures out east, the gulls say. Not you, surely.']}},
+         mosscruel:['The gulls saw you scatter those mossy creatures. Hungry, cold, and now kicked. Hm.','Something’s been scaring the mossy creatures out east, the gulls say. Not you, surely.'],
+         down:['There you are. You came to at my hearth, grey as ash. Sit. Warm up. Don’t do that again.','The gulls say someone went under out there. I do hope it wasn’t you.']}},
   gulls:{name:'the gulls',kind:'flock',sees:['key','forest'],talks:[['mortimer',1,.7],['brimble',3,.7]]},
   mossbacks:{name:'the Mossbacks',kind:'creature'}
  },
@@ -3317,7 +3355,9 @@ const WREG={
   moss_feed:{to:'mossbacks',hand:'accord',where:['forest'],line:'mosskind',tags:['generous'],fx:{t:.1,f:-.05,w:.35},say:'fed a Mossback'},
   moss_warm:{to:'mossbacks',hand:'accord',where:['forest'],line:'mosskind',tags:['patient'],fx:{t:.1,w:.3},say:'warmed a shivering Mossback'},
   moss_bind:{to:'mossbacks',hand:'accord',where:['forest'],line:'mosskind',tags:[],fx:{t:.2,w:.4},say:'kept a Mossback'},
-  moss_drive:{to:'mossbacks',hand:'strife',where:['forest'],line:'mosscruel',tags:['rough'],fx:{t:-.15,f:.3,w:-.3},say:'drove off a Mossback'}
+  moss_drive:{to:'mossbacks',hand:'strife',where:['forest'],line:'mosscruel',tags:['rough'],fx:{t:-.15,f:.3,w:-.3},say:'drove off a Mossback'},
+  /* to 'you' with hand 'none': something that happened to you, seen and talked about, moving no one's regard (yet) */
+  went_down:{to:'you',hand:'none',where:['key','forest'],line:'down',tags:['reckless'],fx:{},say:'went under (drowned or collapsed)'}
  },
  /* fear gets you labour and goods; warmth gets you knowledge (the standing principle, agreed 16 Oct 2026) */
  events:{
@@ -3364,7 +3404,7 @@ function wmSees(who,x,y,realm,seq){const W=WREG.who[who];if(!W||!W.sees||!W.sees
 function wmDeed(id,x,y){const D=WREG.deeds[id];if(!D)return;const m=wmS(),seq=++m.n,t=gNow(),realm=SH.on?1:0;
  m.d.push([seq,id,t,Math.round(x),Math.round(y),realm]);
  while(m.d.length>WM_CAP){const old=m.d.shift();for(const w in m.k)delete m.k[w][old[0]];}
- if(WREG.who[D.to].kind==='dweller')wmLearn(D.to,seq,1,t,1);
+ if(WREG.who[D.to]&&WREG.who[D.to].kind==='dweller')wmLearn(D.to,seq,1,t,1);
  for(const w in WREG.who)if(w!==D.to&&wmSees(w,x,y,realm,seq))wmLearn(w,seq,1,t,0);
  wmTick();save();}
 function wmFind(seq){const d=S.wm.d;for(let i=d.length-1;i>=0;i--)if(d[i][0]===seq)return d[i];return null;}
@@ -3392,8 +3432,8 @@ function wmMood(who){let best=null,bm=0;for(const k in WREG.events){const E=WREG
 function wmLine(who,o){for(const k in WREG.events){const E=WREG.events[k];if(E.who===who&&E.outcomes[o])return E.outcomes[o].line;}return '';}
 /* the style picture: the last 40 deeds, each axis -1..1, null where nothing has fed it yet */
 function wmStyle(){const d=(S.wm&&S.wm.d||[]).slice(-40),st={};if(!d.length)return st;let h=0,r=0;const tg={};
- for(const x of d){const D=WREG.deeds[x[1]];h+=D.hand==='accord'?1:-1;r+=x[5]?1:-1;for(const t of D.tags)tg[t]=(tg[t]||0)+1;}
- st.hand=h/d.length;st.roam=r/d.length;for(const k of ['pace','care']){const [a,b]=WREG.style[k].tags,n=(tg[a]||0)+(tg[b]||0);st[k]=n?((tg[b]||0)-(tg[a]||0))/n:null;}return st;}
+ let nh=0;for(const x of d){const D=WREG.deeds[x[1]];if(D.hand!=='none'){nh++;h+=D.hand==='accord'?1:-1;}r+=x[5]?1:-1;for(const t of D.tags)tg[t]=(tg[t]||0)+1;}
+ st.hand=nh?h/nh:null;st.roam=r/d.length;for(const k of ['pace','care']){const [a,b]=WREG.style[k].tags,n=(tg[a]||0)+(tg[b]||0);st[k]=n?((tg[b]||0)-(tg[a]||0))/n:null;}return st;}
 
 /* ---- gifts: what each outcome gives (the registry's GIFTS) ---- */
 function gubbinsTip(){let b=null,bd=1e9;for(const s of spots){if(s.type==='moon'||s.st!=='on')continue;const d=Math.hypot(s.x-P.x,s.y-P.y);if(d<bd){bd=d;b=s;}}
@@ -3427,7 +3467,102 @@ function drawGullAloft(){const {x,y}=GULL;shadow(x,y+3,14,4);ln([[x,y],[x,y-26]]
  const a=now*1.6,gx=x+Math.cos(a)*46,gy=y-110+Math.sin(a)*14,fl=Math.sin(now*14)*7,f=Math.cos(a+1.57)>0?1:-1;
  blob(gx,gy,9,6,1012,'#fbfbff',2.2,.6);ln([[gx-2,gy-2],[gx-13,gy-8-fl],[gx-22,gy-4-fl*.6]],1013,2,INK,.4);ln([[gx+2,gy-2],[gx+13,gy-8-fl],[gx+22,gy-4-fl*.6]],1014,2,INK,.4);
  dot(gx+f*6,gy-3,1.2);sketch([[gx+f*8,gy-2],[gx+f*13,gy-1],[gx+f*8,gy+1]],true,1015,.2,'#ffcf3a',INK,1.2);}
-const BUILD=42;
+/* Health, death and wrecks (build 43). docs/body-and-technique.md (Health) and design-rules (Death).
+   S.hp {v, max, low}: the only pool. Only harm drains it (a jelly sting, drowning, a Hollowmaw's lunge); effort never does.
+   It refills on its own once you are out of danger, faster by a lit fire or with a cooked-fish buff, and the pool grows a
+   little each time you come back from a hard knock. Shown on the body (slower, hunched) and as dimming screen edges.
+   Empty: you collapse (land) or drown (water). You wake at the nearest shore (Brimble's fire on the Key, the last island
+   you stood on in the forest) with little health. Your pack stays where you fell as a wreck: on land a heap that crabs
+   and gulls pick at; at sea the floating things drift ashore over a few hours (some the tide keeps), salt and ash
+   dissolve, the rest sinks where you went down, reachable by wading if it is in standing depth (low tide helps).
+   What the gulls take turns up at the Gull Post (S.gheld). S.deaths keeps each death for the thief (build 44).
+   S.wrecks [{id, x, y, r realm, sea, items, st last scavenged, due drift landing time (0: there now)}]. */
+const HP0=10,HPCAP=20,HP_REGEN=120,STING=3,LUNGE=3,DROWN=.8;
+const FLOATS=new Set(['wood','kelp','wobble','charcoal','driftlog','crate','plank','net','timber','pole','rootwood','fatwood','burl','blackwood','twistwood','deadwood','bottle','hatchet','twine','coat',
+ 'br_blackwood','br_twistwood','br_ironbark','br_wobble','lb_blackwood','lb_twistwood']);
+const DISSOLVE=new Set(['seasalt','ash','bait']);
+const CRAB_EATS=it=>it.id==='cook'||!!FISH[it.id]||it.id==='bait';
+const GULL_TAKES=it=>it.id==='cook'||!!FISH[it.id]||['bottle','pearl','sunstone','shellblade','axehead'].includes(it.id);
+function hpS(){const h=S.hp=S.hp||{};if(!(h.max>0))h.max=HP0;if(!(h.v>=0))h.v=h.max;if(h.low==null)h.low=1;return h;}
+function hpFrac(){const h=hpS();return Math.max(0,Math.min(1,h.v/h.max));}
+let HPT={hurt:0,dead:false,wade:0};
+function harm(n,cause){if(HPT.dead)return;const h=hpS();h.v=Math.max(0,h.v-n);HPT.hurt=Date.now();h.low=Math.min(h.low,h.v/h.max);hap(n>=2?[40,30,40]:20);if(h.v<=0)hpDie(cause);}
+function hpDanger(){return Date.now()-HPT.hurt<6000||(SW.on&&(SW.sink>.3||SW.stun>0||SW.breath<.5));}
+function hpTick(dt){const h=hpS();if(HPT.dead)return;
+ if(h.v<h.max&&!hpDanger()){let k=1;for(const f of [MAINFIRE].concat(S.fires||[]))if(fireLit(f)&&!SH.on&&Math.hypot(f.x-P.x,f.y-P.y)<150){k=2;break;}if(S.buff&&S.buff.until>Date.now())k*=1.5;
+  h.v=Math.min(h.max,h.v+h.max/HP_REGEN*k*dt);
+  if(h.v>=h.max&&h.low<.6){const g=Math.round((1-h.low)*.5*100)/100;h.max=Math.min(HPCAP,h.max+g);h.v=h.max;h.low=1;if(g>0)think('That one taught me something. I’m a little tougher for it.');save();}}
+ else if(h.v>=h.max)h.low=1;}
+function hpSpeed(){const f=hpFrac();return f<.5?.65+.7*f:1;}
+function hpHunch(){const f=hpFrac();return f<.5?(.5-f)*.3:0;}
+/* dimming edges when hurt: faint at half, close at the end */
+function hpScreen(){const f=hpFrac();if(f>=.5||HPT.dead)return;const k=(.5-f)*2,p=.85+.15*Math.sin(now*(2+k*4));const g=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*(.55-k*.25),W/2,H/2,Math.max(W,H)*.75);
+ g.addColorStop(0,'rgba(60,8,20,0)');g.addColorStop(1,`rgba(70,6,18,${(.35+.5*k)*p})`);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+/* ---- death ---- */
+function hpDie(cause){if(HPT.dead)return;HPT.dead=true;const r=SH.on?1:0,x=P.x,y=P.y,atSea=SW.on||inSea(x,y);
+ S.deaths=S.deaths||[];S.deaths.push({t:gNow(),c:cause,r});if(S.deaths.length>50)S.deaths.shift();
+ wmDeed('went_down',x,y);makeWreck(x,y,r,atSea);
+ /* wake: Brimble's fire on the Key, the last island you stood on in the forest */
+ const s=SW.shore;swimEnd(false);SW.breath=1;SW.sink=0;SW.stun=0;SW.rec=0;SW.cramp=0;SW.stung=false;SW.blk=0;bubbles=[];P.path=[];P.task=null;P.then=null;
+ if(r){const c=s&&s.sh?shClamp(s.x,s.y):shClamp(x,y);P.x=c[0];P.y=c[1];}
+ else{const c=clampLand(FIRE.x+46,FIRE.y+30);P.x=c[0];P.y=c[1];P.face=-1;const dd=S.wm.d[S.wm.d.length-1];if(dd)wmLearn('brimble',dd[0],1,gNow(),0);}
+ cam.x=P.x;cam.y=P.y;SW.fade=1.8;const h=hpS();h.v=h.max*.3;h.low=1;/* dying is not a knock survived: no growth from it */HPT.hurt=Date.now();
+ discover('wreck');HPT.dead=false;
+ think(r?'I came to on the shore. My pack is gone. My things are where I went down.':(atSea?'Warmth. Brimble’s fire. The sea let me go, but it kept my pack.':'I woke by Brimble’s fire. My pack is back where I fell.'));save();}
+function makeWreck(x,y,r,sea){const inv=S.inv.splice(0);if(!inv.length)return;S.wrecks=S.wrecks||[];const T=gNow(),id=(S.st.wreckN=(S.st.wreckN||0)+1);
+ if(!sea){S.wrecks.push({id,x:Math.round(x),y:Math.round(y),r,sea:0,items:inv,st:T,due:0});return;}
+ const sink=[],fl=[];for(const it of inv){if(DISSOLVE.has(it.id))continue;if(FLOATS.has(it.id)){if(hash1(id*7.1+fl.length*3.3)<.75)fl.push(it);}else sink.push(it);}
+ if(sink.length)S.wrecks.push({id,x:Math.round(x),y:Math.round(y),r,sea:1,items:sink,st:T,due:0});
+ if(fl.length){let lx,ly;if(r){const c=shClamp(x,y);lx=c[0];ly=c[1];}else{const a=Math.atan2(y,x)+(hash1(id*2.9)-.5)*.5,e=polar(a,iR(a)-14),c=clampLand(e[0],e[1]);lx=c[0];ly=c[1];}
+  S.wrecks.push({id:id+.5,x:Math.round(lx),y:Math.round(ly),r,sea:0,items:fl,st:T,due:T+(1+hash1(id*5.3)*4)*HOUR,drift:1});}}
+/* scavengers, by the game hour: crabs eat food on a heap, gulls take food and shiny things by day (to the Gull Post) */
+function wreckTick(){const T=gNow();let ch=false;for(const w of S.wrecks||[]){if(w.due&&T<w.due){w.st=T;continue;}
+ let n=0;while(T-w.st>=HOUR&&n<48){w.st+=HOUR;n++;if(w.sea)continue;const day=((w.st/DAY_PERIOD)%1),light=day>.27&&day<.75;
+  for(let i=w.items.length-1;i>=0;i--){const it=w.items[i],h=hash1(w.id*9.7+w.st/HOUR*1.3+i);
+   if(CRAB_EATS(it)&&h<.12){w.items.splice(i,1);ch=true;}
+   else if(light&&GULL_TAKES(it)&&h>.86){w.items.splice(i,1);(S.gheld=S.gheld||[]).push(it);ch=true;}}}
+ if(n)ch=true;}
+ if(S.wrecks)S.wrecks=S.wrecks.filter(w=>w.items.length);if(ch)save();}
+setInterval(()=>{try{wreckTick();}catch(e){}},2000);
+function wreckHere(w){return w.r===(SH.on?1:0)&&!(w.due&&gNow()<w.due);}
+function wreckReach(w){return !w.sea||depthAt(w.x,w.y)<STAND;}
+function wreckTake(w){let took=0;for(let i=w.items.length-1;i>=0;i--){const it=w.items[i],n=it.n||1;
+ if(stackOf(it.id)){const g=addItem(it.id,n);took+=g?1:0;if(g>=n)w.items.splice(i,1);else if(g)it.n=n-g;}
+ else if(S.inv.length<PACK){const c=Object.assign({},it);delete c.c;S.inv.push(c);w.items.splice(i,1);took++;}}
+ if(took){sfx('grab');addXP('foraging',2+took,'normal',[w.x,w.y-30]);}
+ S.wrecks=(S.wrecks||[]).filter(x=>x.items.length);
+ think(!took?'No room in my pack.':w.items.length?'My pack’s full. The rest is still here.':pick(['Got it all back. Mostly.','My things. A bit salty, but mine.']));save();}
+function wreckObjects(o){for(const w of S.wrecks||[]){if(!wreckHere(w))continue;const reach=wreckReach(w),go=w.sea?()=>walkStraight(w.x,w.y-4,()=>wreckTake(w)):()=>{const c=clampLand(w.x-16,w.y+6);routeTo(c[0],c[1],()=>wreckTake(w));};
+ o.push({x:w.x,y:w.y-8,r:24,name:w.drift?'My things, washed up':'My things',key:'wreck',act:reach?'Gather':null,onAct:reach?go:null,
+  onExamine:()=>think(w.drift?'Bits of my pack the sea brought back. '+w.items.length+' thing'+(w.items.length>1?'s':'')+'.':w.sea?(reach?'My things, on the bottom. Shallow enough to reach.':'My things, down on the bottom, out of my depth. At low tide, maybe.'):'Where I fell. '+w.items.length+' thing'+(w.items.length>1?'s':'')+' left. The crabs have been at it.')});}}
+function wreckDraws(d){for(const w of S.wrecks||[])if(wreckHere(w))d.push([w.y,()=>drawWreckOne(w),w.x]);}
+function drawWreckOne(w){const {x,y}=w;if(w.sea){ctx.globalAlpha=depthAt(x,y)<STAND?.75:.4;}else shadow(x,y+2,16,5);
+ for(let i=0;i<Math.min(4,w.items.length);i++){const a=i*2.1+w.id,ox=Math.cos(a)*9,oy=Math.sin(a)*4;ctx.drawImage(iconImg(itemIcon(w.items[i])),x+ox-11,y+oy-18+(w.sea?Math.sin(now*1.5+i)*1.2:0),22,22);}
+ if(!w.sea)ln([[x-14,y+1],[x-4,y-3],[x+6,y],[x+14,y-2]],1101+(w.id|0),1.6,INK,.5);ctx.globalAlpha=1;}
+function wreckMarks(m){for(const w of S.wrecks||[])if(wreckHere(w))m.push([w.x,w.y,'#c08a3a',2.6]);}
+/* the Gull Post: what the gulls took, back for a fee that reads Mortimer's regard */
+function gheldOpt(mo){const g=S.gheld||[];if(!g.length)return;mo.push({l:'The gulls took my things ('+g.length+')',f:gheldTalk});}
+function gheldTalk(){const g=S.gheld||[],md=wmMood('mortimer'),fee=md?0:2*g.length;
+ const back=()=>{let n=0;for(let i=g.length-1;i>=0;i--){const it=g[i];if(stackOf(it.id)){const k=it.n||1,got=addItem(it.id,k);if(got>=k){g.splice(i,1);n++;}else if(got)it.n=k-got;}else if(S.inv.length<PACK){const c=Object.assign({},it);delete c.c;S.inv.push(c);g.splice(i,1);n++;}}return n;};
+ const bye=[{l:'See you',f:closeDlg}];
+ if(!fee){const n=back();save();say('Mortimer Gull',(md==='warm'?'For a friend of the Post? No charge. The flock brought these in. Sorry about the beak marks.':'No... no fee. Take them. The flock didn’t know they were yours. Honestly.')+(g.length?' Your pack’s full, the rest waits here.':''),bye);return;}
+ say('Mortimer Gull','The flock brought these in off a heap on the sand. Finder’s fee, '+fee+' shells. Rules of the Post.',[{l:'Pay '+fee+' shells',f:()=>{if(S.shells<fee){say('Mortimer Gull','You have '+S.shells+'. The Post can wait. The Post is very patient.',bye);return;}S.shells-=fee;sfx('shells');const n=back();save();say('Mortimer Gull','Pleasure doing business. '+(g.length?'Pack’s full; the rest waits here.':'All yours.'),bye);}},{l:'Not now',f:closeDlg}]);}
+/* ---- stings: harm, a freeze, then a beat to catch or you go under ---- */
+function stingHit(j){harm(STING,'sting');if(HPT.dead||!SW.on)return;SW.stun=1.4;SW.stung=true;SW.rec=0;SW.sink=Math.max(SW.sink,.5);SW.breath=Math.max(0,SW.breath-.18);sfx('zap');
+ const ax=P.x-j.x,ay=P.y-j.y,n=Math.hypot(ax,ay)||1;SW.vx=ax/n*160;SW.vy=ay/n*160;streak('swim',false);pop('*zap*',P.x,P.y-50,'#fff',19);discover('jelly');
+ think(pick(['Stung. I can’t move my arms.','A lantern jelly. Everything’s gone stiff.']));}
+function recWin(){return .9+Math.min(.6,lv('swimming')*.02);}
+function stingTick(dt){if(SW.stung&&SW.stun<=0&&SW.rec<=0&&!SW.cramp){SW.rec=recWin();pop('*gasp*',P.x,P.y-56,'#fff',18);hap(15);}
+ if(SW.rec>0){SW.rec-=dt;if(SW.rec<=0&&SW.stung){SW.stung=false;SW.rec=0;SW.cramp=4;SW.sink=1;think('I missed it. I’m going under.');}}
+ if(SW.cramp>0){SW.cramp=Math.max(0,SW.cramp-dt);SW.sink=Math.min(1,SW.sink+dt*.6);}}
+/* called from a stroke or tread with whether it was on the beat; returns false if the stroke does nothing */
+function stingStroke(good){if(SW.rec>0&&SW.stung){if(good){SW.stung=false;SW.rec=0;SW.sink=0;SW.breath=Math.min(1,SW.breath+.15);burst('swimming','Shook it off',8,[P.x,P.y-60]);think('Up. Breathe. Arms back.');}return true;}
+ if(SW.cramp>0){if(!good)return false;SW.cramp=Math.max(0,SW.cramp-1.5);if(!SW.cramp)think('Up again. Barely.');}return true;}
+/* wading: a sting hurts but you keep your feet */
+function wadeSting(){if(SW.on||HPT.dead||!inSea(P.x,P.y)||Date.now()-HPT.wade<2000)return;for(const j of jellies)if(Math.hypot(j.x-P.x,j.y-P.y)<24){HPT.wade=Date.now();harm(2,'sting');sfx('zap');pop('*zap*',P.x,P.y-50,'#fff',19);discover('jelly');think('Stung, but I kept my feet.');return;}}
+/* lantern jellies: a shimmer by day, a glow by night */
+function jellyVis(){return .25+.75*Math.min(1,dark/.4);}
+const BUILD=43;
 let last=performance.now(),fdt=1/60;
 function frame(t){const dt=Math.min(.05,(t-last)/1000);fdt=dt;last=t;now=t/1000;boil=RM?0:Math.floor(now*3.5)%3;if(!(HC&&HC.done))hcBuild(ccOn||intro!=null?14:8);else if(!DUNE.done)duneBuild(ccOn||intro!=null?12:5);else if(!LS.done)lsBuild(ccOn||intro!=null?12:5);perfTick(dt);if(ccOn)renderPreview();else{update(dt);render();}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
@@ -3444,7 +3579,13 @@ function wmTestHTML(){const m=wmS(),f=v=>(v>=0?'+':'')+(+v).toFixed(2),st=wmStyl
  h+=`<div class="trow"><span>${m.d.length} deeds kept${mortShooed()?', Mortimer aloft':''}</span><span><button data-tm="gossip">pass gossip</button><button data-tm="land">land Mortimer</button><button data-tm="reset">reset memory</button></span></div>`;
  return h;}
 function wmTestAct(k){if(k==='gossip')wmTick();else if(k==='land'){if(S.wm)S.wm.shoo=0;}else if(k==='reset'){S.wm={n:0,d:[],k:{},r:{}};}save();}
-if(MODE==='test')Object.assign(window.DK,{WREG,wmS,wmR,wmPeek,wmDeed,wmTick,wmHeard,wmMood,wmStyle,wmSees,mortGift,mortShoo,mortShooed,mortTithe,gubbinsTip,brimbleForecast,brimbleCooks,mortimerNews,wmFlame,G,GULL,FIRE,spots,talkG,talkWick,valOf,wickOpts,gOpts});
+if(MODE==='test')Object.assign(window.DK,{WREG,wmS,wmR,wmPeek,wmDeed,wmTick,wmHeard,wmMood,wmStyle,wmSees,mortGift,mortShoo,mortShooed,mortTithe,gubbinsTip,brimbleForecast,brimbleCooks,mortimerNews,wmFlame,G,GULL,FIRE,spots,talkG,talkWick,valOf,wickOpts,gOpts,MMI:MM,mmBox,tideOff});
+/* test build only: the Body section of the Test tab (health, deaths, wrecks) and DK hooks */
+function hpTestHTML(){const h=hpS(),T=gNow();return `<div class="trow"><span>Health <b>${h.v.toFixed(1)} / ${h.max.toFixed(2)}</b> deaths ${(S.deaths||[]).length}</span><span><button data-th="hurt">hurt 3</button><button data-th="low">to 10%</button><button data-th="full">full</button><button data-th="die">die</button></span></div>
+ <div class="trow"><span>Wrecks: ${(S.wrecks||[]).map(w=>(w.drift?'drift':w.sea?'sea':'land')+' '+w.items.length+(w.due&&T<w.due?' in '+Math.round((w.due-T)/HOUR)+'h':'')).join(', ')||'none'}; gulls hold ${(S.gheld||[]).length}</span><span><button data-th="jelly">jelly here</button><button data-th="clear">clear wrecks</button></span></div>`;}
+function hpTestAct(k){const h=hpS();if(k==='hurt')harm(3,'test');else if(k==='low'){h.v=h.max*.1;h.low=Math.min(h.low,.1);HPT.hurt=Date.now();}else if(k==='full'){h.v=h.max;}else if(k==='die')harm(999,'test');
+ else if(k==='jelly')jellies.push({x:P.x+30,y:P.y,seed:1,vx:-20,vy:0,t:0});else if(k==='clear'){S.wrecks=[];S.gheld=[];}save();}
+if(MODE==='test')Object.assign(window.DK,{hpS,hpFrac,harm,hpDie,hpTick,makeWreck,wreckTick,wreckTake,wreckObjects,wreckReach,stingHit,stingStroke,recWin,gheldTalk,HPT,FLOATS,swimStart,hpScreen,tread:()=>tread(),pushJelly:j=>jellies.push(j)});
 })();
 </script>
 </body>

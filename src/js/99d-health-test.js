@@ -1,0 +1,6 @@
+/* test build only: the Body section of the Test tab (health, deaths, wrecks) and DK hooks */
+function hpTestHTML(){const h=hpS(),T=gNow();return `<div class="trow"><span>Health <b>${h.v.toFixed(1)} / ${h.max.toFixed(2)}</b> deaths ${(S.deaths||[]).length}</span><span><button data-th="hurt">hurt 3</button><button data-th="low">to 10%</button><button data-th="full">full</button><button data-th="die">die</button></span></div>
+ <div class="trow"><span>Wrecks: ${(S.wrecks||[]).map(w=>(w.drift?'drift':w.sea?'sea':'land')+' '+w.items.length+(w.due&&T<w.due?' in '+Math.round((w.due-T)/HOUR)+'h':'')).join(', ')||'none'}; gulls hold ${(S.gheld||[]).length}</span><span><button data-th="jelly">jelly here</button><button data-th="clear">clear wrecks</button></span></div>`;}
+function hpTestAct(k){const h=hpS();if(k==='hurt')harm(3,'test');else if(k==='low'){h.v=h.max*.1;h.low=Math.min(h.low,.1);HPT.hurt=Date.now();}else if(k==='full'){h.v=h.max;}else if(k==='die')harm(999,'test');
+ else if(k==='jelly')jellies.push({x:P.x+30,y:P.y,seed:1,vx:-20,vy:0,t:0});else if(k==='clear'){S.wrecks=[];S.gheld=[];}save();}
+if(MODE==='test')Object.assign(window.DK,{hpS,hpFrac,harm,hpDie,hpTick,makeWreck,wreckTick,wreckTake,wreckObjects,wreckReach,stingHit,stingStroke,recWin,gheldTalk,HPT,FLOATS,swimStart,hpScreen,tread:()=>tread(),pushJelly:j=>jellies.push(j)});

@@ -21,7 +21,7 @@ function wmSees(who,x,y,realm,seq){const W=WREG.who[who];if(!W||!W.sees||!W.sees
 function wmDeed(id,x,y){const D=WREG.deeds[id];if(!D)return;const m=wmS(),seq=++m.n,t=gNow(),realm=SH.on?1:0;
  m.d.push([seq,id,t,Math.round(x),Math.round(y),realm]);
  while(m.d.length>WM_CAP){const old=m.d.shift();for(const w in m.k)delete m.k[w][old[0]];}
- if(WREG.who[D.to].kind==='dweller')wmLearn(D.to,seq,1,t,1);
+ if(WREG.who[D.to]&&WREG.who[D.to].kind==='dweller')wmLearn(D.to,seq,1,t,1);
  for(const w in WREG.who)if(w!==D.to&&wmSees(w,x,y,realm,seq))wmLearn(w,seq,1,t,0);
  wmTick();save();}
 function wmFind(seq){const d=S.wm.d;for(let i=d.length-1;i>=0;i--)if(d[i][0]===seq)return d[i];return null;}
@@ -49,8 +49,8 @@ function wmMood(who){let best=null,bm=0;for(const k in WREG.events){const E=WREG
 function wmLine(who,o){for(const k in WREG.events){const E=WREG.events[k];if(E.who===who&&E.outcomes[o])return E.outcomes[o].line;}return '';}
 /* the style picture: the last 40 deeds, each axis -1..1, null where nothing has fed it yet */
 function wmStyle(){const d=(S.wm&&S.wm.d||[]).slice(-40),st={};if(!d.length)return st;let h=0,r=0;const tg={};
- for(const x of d){const D=WREG.deeds[x[1]];h+=D.hand==='accord'?1:-1;r+=x[5]?1:-1;for(const t of D.tags)tg[t]=(tg[t]||0)+1;}
- st.hand=h/d.length;st.roam=r/d.length;for(const k of ['pace','care']){const [a,b]=WREG.style[k].tags,n=(tg[a]||0)+(tg[b]||0);st[k]=n?((tg[b]||0)-(tg[a]||0))/n:null;}return st;}
+ let nh=0;for(const x of d){const D=WREG.deeds[x[1]];if(D.hand!=='none'){nh++;h+=D.hand==='accord'?1:-1;}r+=x[5]?1:-1;for(const t of D.tags)tg[t]=(tg[t]||0)+1;}
+ st.hand=nh?h/nh:null;st.roam=r/d.length;for(const k of ['pace','care']){const [a,b]=WREG.style[k].tags,n=(tg[a]||0)+(tg[b]||0);st[k]=n?((tg[b]||0)-(tg[a]||0))/n:null;}return st;}
 
 /* ---- gifts: what each outcome gives (the registry's GIFTS) ---- */
 function gubbinsTip(){let b=null,bd=1e9;for(const s of spots){if(s.type==='moon'||s.st!=='on')continue;const d=Math.hypot(s.x-P.x,s.y-P.y);if(d<bd){bd=d;b=s;}}

@@ -3,7 +3,7 @@
 // Errors: unknown names; a deed nobody who reacts can ever learn of (orphan deed); a dweller or flock that never
 // reacts and passes nothing on (orphan witness); a creature no deed is done to; an event with fewer than two outcomes;
 // an outcome with no gift or no line, or a gift the registry does not define (dead end); a hearer with no line for a
-// deed it can learn of. Style axes with no source are listed as waiting, not errors.
+// deed it can learn of. A deed 'to: you' with hand 'none' is something that happens to you (it is talked about). Style axes with no source are listed as waiting, not errors.
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..');
 
@@ -21,10 +21,11 @@ function check(R) {
   const learners = {};
   for (const d in deeds) {
     const D = deeds[d];
-    if (!who[D.to]) { err.push(`deed ${d}: unknown subject ${D.to}`); continue; }
-    if (!['strife', 'accord'].includes(D.hand)) err.push(`deed ${d}: hand must be strife or accord`);
+    const self = D.to === 'you';
+    if (!self && !who[D.to]) { err.push(`deed ${d}: unknown subject ${D.to}`); continue; }
+    if (!['strife', 'accord'].concat(self ? ['none'] : []).includes(D.hand)) err.push(`deed ${d}: hand must be strife or accord (or none, for something that happens to you)`);
     const L = new Set(), q = [];
-    if (who[D.to].kind === 'dweller') q.push(D.to);
+    if (!self && who[D.to].kind === 'dweller') q.push(D.to);
     for (const w of W) if (who[w].sees && who[w].sees.some(p => D.where.includes(p))) q.push(w);
     while (q.length) { const w = q.shift(); if (L.has(w)) continue; L.add(w); for (const [to] of (who[w].talks || [])) q.push(to); }
     learners[d] = L;
