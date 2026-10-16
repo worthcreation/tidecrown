@@ -150,7 +150,7 @@ function tileFor(ti,tj){const scn=SH.on?'s':'k',k=scn+ti+','+tj;let T=TTILES[k];
   if(!sand)v+=Math.max(-1,Math.min(1,h0/40))*.04;
   const o=(j*TN+i)*4;if(v<0){D[o]=42;D[o+1]=33;D[o+2]=64;D[o+3]=Math.min(.34,-v)*255;}else{D[o]=255;D[o+1]=244;D[o+2]=210;D[o+3]=Math.min(.2,v)*255;}}
  g.putImageData(im,0,0);return T;}
-let tMiss=0;var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;/* one tile of new light a frame; more while some visible tile has none yet */tBudget=tMiss?3:1;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
+let tMiss=0;var TDBG=0;function drawTerrain(vw,vh){if(TDBG&1)return;/* the Key's ground is flat colour since build 41; its shade is traced (30c). The dark islands still shade here. */if(!SH.on)return;/* one tile of new light a frame; more while some visible tile has none yet */tBudget=tMiss?3:1;ctx.imageSmoothingEnabled=true;const vis=[],sk=sunKey();
  for(let tj=Math.floor((cam.y-vh)/TT);tj<=Math.floor((cam.y+vh+maxLift())/TT);tj++)for(let ti=Math.floor((cam.x-vw)/TT);ti<=Math.floor((cam.x+vw)/TT);ti++){const T=tileFor(ti,tj);if(T.any)vis.push(T);}
  tMiss=vis.some(T=>!T.cv&&!T.nv)?1:0;
  /* swap when every visible tile has the new light (or has never had any) */

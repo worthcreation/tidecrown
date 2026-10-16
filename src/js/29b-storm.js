@@ -25,9 +25,9 @@ function lastStorm(t){const n=Math.floor(t/DAY_PERIOD);for(let k=n;k>n-40;k--){c
 function stormsSince(t0,t1){const out=[];for(let k=Math.floor(t0/DAY_PERIOD)-1;k<=Math.floor(t1/DAY_PERIOD);k++){const st=stormOf(k);if(st&&st.s<=t1&&st.e>=t0)out.push(st);}return out;}
 /* strength through a storm: builds over the first quarter, holds through the middle half, eases off in the last quarter */
 function monK(st,t){const p=(t-st.s)/(st.e-st.s);if(p<0||p>1)return 0;return p<.25?sm01(p/.25)**1.5:p<.75?1:sm01((1-p)/.25);}
-function monNow(){if(WXT.force==='monsoon')return 1;if(WXT.force)return 0;const t=gNow(),st=stormAt(t);return st?monK(st,t):0;}
+function monNow(){if(WXT.force==='monsoon')return 1;if(WXT.force==='dial')return Math.max(0,((WXT.dv||0)-.6)/.4);if(WXT.force)return 0;const t=gNow(),st=stormAt(t);return st?monK(st,t):0;}
 /* the swell and high cloud arrive ahead of a storm: 1 at its start, 0 six hours before */
-function preStorm(){if(WXT.force)return WXT.force==='monsoon'?1:0;const t=gNow(),st=nextStorm(t);return st?sm01(1-(st.s-t)/(6*HOUR)):0;}
+function preStorm(){if(WXT.force)return WXT.force==='monsoon'?1:WXT.force==='dial'?Math.max(0,((WXT.dv||0)-.5)/.5):0;const t=gNow(),st=nextStorm(t);return st?sm01(1-(st.s-t)/(6*HOUR)):0;}
 /* the wind backs as the system passes: up to about 70 degrees either side of the trade wind */
 function stormVeer(st,t){const p=sm01((t-st.s)/(st.e-st.s));return (p-.5)*2.4;}
 
@@ -53,15 +53,16 @@ setTimeout(()=>{try{floodGrid();}catch(e){}},5000);
 function floodK(){if(WXT.force==='monsoon')return 1;const t=gNow(),st=lastStorm(t);if(!st)return 0;const d=st.e-st.s,p=(t-st.s)/d;
  if(p<.3)return 0;if(p<.6)return (p-.3)/.3;if(t<st.e)return 1;return sm01(1-(t-st.e)/(6*HOUR));}
 function floodAt(x,y){const k=floodK();if(k<=0||SH.on)return 0;const G=floodGrid(),i=Math.round((x-G.x0)/FLC),j=Math.round((y-G.x0)/FLC);if(i<0||j<0||i>=G.nx||j>=G.nx)return 0;const c=j*G.nx+i,b=G.bas[c];if(b<0||G.bmax[b]<.6)return 0;return Math.max(0,G.dep[c]-(1-k)*G.bmax[b]);}
-/* the water is an image with one pixel per grid cell, scaled up with smoothing, so its edge comes out soft and
-   round instead of a row of circles. Rebuilt only when the level moves. Swales sit low, so one lift fits them. */
-let FLIM=null,FLIMK=-1,FLLIFT=0;
-function drawFlood(vw,vh){const k=floodK();if(k<=0)return;const G=floodGrid();
- if(!FLIM||Math.abs(k-FLIMK)>.02){FLIMK=k;FLIM=FLIM||document.createElement('canvas');FLIM.width=FLIM.height=G.nx;const f=FLIM.getContext('2d'),im=f.createImageData(G.nx,G.nx);let L=0,n=0;
-  for(const c of G.cells){const d=G.dep[c]-(1-k)*G.bmax[G.bas[c]];if(d<=0)continue;const a=sm01(d/.7),dp=sm01(d/2.2),o=c*4;im.data[o]=118-40*dp;im.data[o+1]=170-35*dp;im.data[o+2]=190-15*dp;im.data[o+3]=255*(.15+.5*a);
-   if(n<60){const i=c%G.nx,j=(c-i)/G.nx;L+=liftAt(G.x0+i*FLC,G.x0+j*FLC);n++;}}
-  f.putImageData(im,0,0);FLLIFT=n?L/n:0;}
- ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(FLIM,G.x0-FLC/2,G.x0-FLC/2-FLLIFT,G.nx*FLC,G.nx*FLC);ctx.restore();
+/* the water's edge (build 42): traced from the depth grid as smooth shapes, like the dunes and the hill's shade: flat
+   water in two tones (shallow, deeper) with a thin light line where it meets the sand. Re-traced as the level moves. */
+let FLSH=null,FLK=-1;
+function floodShapes(k){if(FLSH&&Math.abs(k-FLK)<.03)return FLSH;const G=floodGrid(),n=G.nx,v=new Float32Array(n*n).fill(-1);
+ for(const c of G.cells)v[c]=G.dep[c]-(1-k)*G.bmax[G.bas[c]];FLK=k;return FLSH={edge:contourTrace(v,n,.25,FLC,G.x0,10),deep:contourTrace(v,n,1.2,FLC,G.x0,10)};}
+function drawFlood(vw,vh){const k=floodK();if(k<=0||SH.on)return;const F=floodShapes(k),inV=D=>D.closed&&D.b[2]>cam.x-vw&&D.b[0]<cam.x+vw&&D.b[3]>cam.y-vh&&D.b[1]<cam.y+vh;
+ const path=l=>{ctx.beginPath();let n=0;for(const D of l){if(!inV(D))continue;const p=D.p;ctx.moveTo(p[0][0],p[0][1]);for(let i=1;i<p.length;i++)ctx.lineTo(p[i][0],p[i][1]);ctx.closePath();n++;}return n;};
+ if(!path(F.edge))return;ctx.save();ctx.fillStyle='rgba(122,174,192,.72)';ctx.fill('evenodd');ctx.strokeStyle='rgba(238,248,251,.85)';ctx.lineWidth=1.5;ctx.lineJoin='round';ctx.stroke();
+ if(path(F.deep)){ctx.fillStyle='rgba(88,142,170,.45)';ctx.fill('evenodd');}ctx.restore();
+ const G=floodGrid();
  /* rain on standing water: rings */
  if(WX.rain>.2){ctx.strokeStyle='rgba(235,245,250,.6)';ctx.lineWidth=1;ctx.beginPath();for(let q=0;q<G.cells.length;q+=3){const c=G.cells[q],i=c%G.nx,j=(c-i)/G.nx,x=G.x0+i*FLC,y=G.x0+j*FLC;if(Math.abs(x-cam.x)>vw||Math.abs(y-cam.y)>vh)continue;if(floodAt(x,y)<.6)continue;const ph=(now*1.3+hash1(c))%1,r=2+ph*7,yl=y-liftAt(x,y)+(hash1(c*3)-.5)*12,xx=x+(hash1(c*7)-.5)*14;ctx.moveTo(xx+r,yl);ctx.ellipse(xx,yl,r,r*.5,0,0,6.2832);}ctx.globalAlpha=.6*WX.rain;ctx.stroke();ctx.globalAlpha=1;}}
 
@@ -159,3 +160,7 @@ function stormTick(dt){wxRead(dt);if(!SH.on){brimbleWarn();stormFish(dt);}}
 let climbSaid=0;
 function stormWalkK(x,y,ux,uy){let k=1;const m=monNow();if(m>.2){const d=ux*Math.cos(WX.wa)+uy*Math.sin(WX.wa);if(d<0)k*=1+.38*m*d;}
  const f=floodAt(x,y);if(f>.3)k*=1-Math.min(.5,f*.1);const w=wfBlock(x,y);if(w){k*=.35;if(!climbSaid){climbSaid=1;think('Over the trunk. Not gracefully.');}}return k;}
+
+/* anything standing in flood water gets a waterline at its base: a patch of water over the foot and a light ring */
+function floodSkirt(x,y){const f=floodAt(x,y);if(f<.25)return;const r=9+Math.min(6,f*3);ctx.save();ctx.fillStyle='rgba(122,174,192,.9)';ctx.beginPath();ctx.ellipse(x,y+1,r,r*.38,0,0,6.2832);ctx.fill();
+ ctx.strokeStyle='rgba(238,248,251,.8)';ctx.lineWidth=1.3;ctx.beginPath();ctx.ellipse(x,y+1,r,r*.38,0,Math.PI*1.05,Math.PI*1.95);ctx.stroke();ctx.restore();}

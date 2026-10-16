@@ -59,4 +59,4 @@ Judged against the rules: equippables earned behind a task; bought things never 
 - Ash Mustache: Brimble makes it from ash you bring; passes.
 - Thimble Helm: now a quest reward; passes (build 16).
 - Charcoal comes from ash; the fire ladder's real clamp replaces it.
-- The scarf at creation is the allowed bootstrap; the first tool is the shell blade, made by hand.
+- Nothing is given: the player washes up bare-handed and makes the longaxe (build 41). The scarf is shelved.

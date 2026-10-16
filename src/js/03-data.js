@@ -72,8 +72,8 @@ const JOURNAL={
  kindleseen:['The runaway log','A piece of driftwood on the beach blinked at me, then ran off on tiny legs. Logs are not supposed to do that.'],
  kindle:['Kindle','A wild little log who moved into my woodpile after three nights of firelight and ash. When a fire is about to die he leaps in. He runs on ash, the weirdo.'],
  gull:['The Grinning Gull','Brimble’s old ship. Her captain wrote letters and tossed them overboard, signed only with a C.'],
- strife:['Strife','The scarf. Everyone out here wears one; mine is a weapon now. Tap to slap, slide at a thing to trip it. Slap to provoke, read the tell, trip on the tell to break it.'],
- accord:['Accord','The scarf, the other way. Slide from a thing to me to wrap it, slide back again to bind it. Mirror the tell and what I win stays won.'],
+ strife:['Strife','The longaxe, the hard way. Tap to slice with the blade, slide across a thing to knock it with the haft. Provoke it, read the tell, knock it on the tell to break it.'],
+ accord:['Accord','The longaxe, the gentle way: slide straight at a thing to prod it with the haft. Prod it on the tell and it calms; prod a calm thing again and what I win stays won.'],
  bollard:['Old Bollard','An iron mooring post at the root of the pier, with a face. The Grinning Gull tied up to him once. A hundred years of ropes and he misses every one. Happy to be walloped, happier to be tied.'],
  deadwood:['Dead wood','A grey limb that came off a Hollowmaw when a trip put it down. It burns, sulkily. Brimble says it tastes of sulking too.'],
  planted:['Planted','A Hollowmaw, held calm and bound, took an ember pearl into its hollow and put roots down. It is a tree again, with a little warm light in it. A little light got in.'],
@@ -157,8 +157,9 @@ const ITEMS={
  fid:{name:'Bone fid',desc:'A tapered spike of polished bone, for opening up rope and stiff canvas. Sir Thimble will want it.'},
  twine:{name:'Waxed twine',desc:'A coil of sail twine, waxed against the wet. Still good. Sir Thimble will want it.'},
  clamshell:{name:'Giant clam shell',desc:'Heavy, ribbed, long empty. The hinge is thick enough to grind an edge on. The north rocks and some wet sand would do it.'},
- shellblade:{name:'Shell blade',desc:'Ground from a clam hinge. Lashed to a stick with something stringy, it would make a fine hatchet.'},
- hatchet:{name:'Shell hatchet',desc:'A shell blade, driftwood and kelp twine. Wobble trees eye it nervously.'},
+ shellblade:{name:'Shell blade',desc:'Ground from a clam hinge. Lashed to a long stick with something stringy, it would make an axe.'},
+ hatchet:{name:'Longaxe',desc:'A shell edge on a long haft, lashed with kelp. Wobble trees eye it nervously.'},
+ axehead:{name:'Axe head',desc:'The longaxe’s shell edge, come off its haft. Fit it back with fresh kelp.'},
  bottle:{name:'Message in a bottle',desc:'Cork still in. Something rolled up inside.',key:it=>'bottle:'+it.msg},
  cook:{name:it=>QN[it.q]+' '+FISH[it.f].name,desc:it=>QD[it.q],icon:it=>'ck_'+it.f+'_'+it.q,val:it=>Math.ceil(FISH[it.f].val*QV[it.q]),key:it=>'cook:'+it.f+':'+it.q}};
 for(const k in FISH)ITEMS[k]={name:FISH[k].name,desc:FISH[k].desc,val:FISH[k].val};

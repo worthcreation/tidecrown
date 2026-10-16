@@ -13,7 +13,8 @@ function ksColumn(i){const R=KS.res,x=KS.x0+i*R+R/2,W2=KS.w,D=KS.im.data;let pre
   const L=liftAt(x,y),m=keyMat(x,y,L/LKs()),s=y-L,row=(s-KS.y0)/R,pr=prev===null?row:prev,py=prev===null?y:y-1;prev=row;
   /* fill every image row between the last sample and this one, with the ground y interpolated across them */
   const r0=Math.min(pr,row),r1=Math.max(pr,row);
-  for(let j=Math.max(0,Math.floor(r0));j<=Math.min(KS.h-1,Math.ceil(r1));j++){const k=j*W2+i,t=r1>r0?(j+.5-pr)/(row-pr):1;KS.fy[k]=Math.max(py,Math.min(y,py+(y-py)*t));KS.mat[k]=m;const o=k*4,c=KCOL[m];D[o]=c[0];D[o+1]=c[1];D[o+2]=c[2];D[o+3]=255;}}}
+  for(let j=Math.max(0,Math.floor(r0));j<=Math.min(KS.h-1,Math.ceil(r1));j++){const k=j*W2+i,t=r1>r0?(j+.5-pr)/(row-pr):1;KS.fy[k]=Math.max(py,Math.min(y,py+(y-py)*t));KS.mat[k]=m;const o=k*4,c=KCOL[m],f=m===1?1:1+.07*Math.min(1,L/LKs()/90)-.03;D[o]=Math.min(255,c[0]*f);D[o+1]=Math.min(255,c[1]*f);D[o+2]=Math.min(255,c[2]*f);D[o+3]=255;}}}
+/* a faint tint by height on grass and rock (higher a touch lighter), baked into the ground once, so the hill reads as rising even at noon */
 /* sand, grass, scrub, cloud-forest floor, summit rock */
 const KCOL=[null,[243,210,122],[134,194,94],[168,182,102],[96,148,94],[184,177,156]];
 function ksBuild(budgetMs){if(!KS.fy)ksInit();if(KS.done>=KS.w)return true;const t0=performance.now();

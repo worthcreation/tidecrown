@@ -10,8 +10,7 @@ const PICKS=[
  ['hair','Hair',()=>Object.keys(HAIRS),v=>HAIRS[v]],
  ['hc','Hair color',()=>HAIRC.map((c,i)=>i),v=>HAIRCN[v],v=>HAIRC[v]],
  ['mark','Mark',()=>Object.keys(MARKS),v=>MARKS[v]],
- ['col','Outfit',()=>COLS.map((c,i)=>i),v=>COLN[v],v=>COLS[v]],
- ['acc','Scarf',()=>ACCS.map((c,i)=>i),v=>ACCN[v],v=>ACCS[v]]];
+ ['col','Outfit',()=>COLS.map((c,i)=>i),v=>COLN[v],v=>COLS[v]]];
 function isLocked(k,v){const L=LOCKS[k]&&LOCKS[k][v];return L&&!S.journal[L[0]]?L[1]:null;}
 function rName(){return pick(NAME1)+' '+pick(NAME2);}
 function randomLook(){const o={name:rName()};PICKS.forEach(([k,,opts])=>{o[k]=pick(opts().filter(x=>!isLocked(k,x)));});return o;}
@@ -25,7 +24,7 @@ function renderCC(){ccEl.classList.add('on');const m=ccMode==='mirror';
    `<button class="dice" id="ccrand">Surprise me</button></div></div><div id="ccrows" class="pgrid">${rowsHTML()}</div><div class="lockhint" id="cclock">${KIN[draft.kin].blurb}</div>`;
   ccGo.textContent=m?'Step back':'Next: how you got here';ccGo.disabled=false;}
  else{ccT.textContent='How did you get here?';const sel=ccOrigin?EQUIP[ORIGINS[ccOrigin].keep]:null;
-  ccBody.innerHTML=`<div class="cctop otop"><canvas id="pv" aria-label="Your character"></canvas><div class="odetail">${sel?'<b>'+sel.name+'.</b> '+sel.desc:'<b>'+esc(draft.name)+'</b> washed up with nothing but a scarf. Pick a past. Each comes with a keepsake.'}</div></div><div class="origins">`+Object.keys(ORIGINS).map(k=>{const O=ORIGINS[k];return `<button class="org sk${ccOrigin===k?' on':''}" data-o="${k}"><b>${O.name}</b><span>${O.line}</span><span class="keep">Keepsake: ${EQUIP[O.keep].name}</span></button>`;}).join('')+
+  ccBody.innerHTML=`<div class="cctop otop"><canvas id="pv" aria-label="Your character"></canvas><div class="odetail">${sel?'<b>'+sel.name+'.</b> '+sel.desc:'<b>'+esc(draft.name)+'</b> washed up with nothing at all. Pick a past. Each comes with a keepsake.'}</div></div><div class="origins">`+Object.keys(ORIGINS).map(k=>{const O=ORIGINS[k];return `<button class="org sk${ccOrigin===k?' on':''}" data-o="${k}"><b>${O.name}</b><span>${O.line}</span><span class="keep">Keepsake: ${EQUIP[O.keep].name}</span></button>`;}).join('')+
    `</div><button class="back" id="ccback">Back to looks</button>`;
   ccGo.textContent='Wash ashore';ccGo.disabled=!ccOrigin;}}
 ccBody.addEventListener('click',e=>{const b=e.target.closest('[data-k]');

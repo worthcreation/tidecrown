@@ -64,7 +64,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;yo
  spots.forEach(sp=>{if(sp.type==='moon'&&dark<.15)return;if(sp.al<.4||sp.st==='out')return;o.push({x:sp.x,y:sp.y,r:42,name:{shallow:'Bubbling water',deep:'Wild water',moon:'Glowing pool'}[sp.type],act:'Fish',onAct:()=>goFish(sp),
   onExamine:()=>think({shallow:'Little fish, busy with little fish business.',deep:'Something heavy is thrashing down there.',moon:'Pale shapes circling slowly. Waiting for something.'}[sp.type])});});
  o.push({x:G.x,y:G.y-20,r:30,name:'Gubbins',key:'gubbins',act:'Talk',onAct:()=>routeTo(G.x-36,6,talkG),onExamine:()=>think('A bucket with opinions.')});
- o.push({x:BOLLARD.x,y:BOLLARD.y-16,r:22,name:'Old Bollard',key:'bollard',act:'Walk up',onAct:()=>routeTo(BOLLARD.x-38,BOLLARD.y+8),onExamine:()=>{discover('bollard');think(pick(['An iron mooring post with a face. It is looking at my scarf.','Rope marks a hundred years deep. He looks like he misses them.']));}});
+ o.push({x:BOLLARD.x,y:BOLLARD.y-16,r:22,name:'Old Bollard',key:'bollard',act:'Walk up',onAct:()=>routeTo(BOLLARD.x-38,BOLLARD.y+8),onExamine:()=>{discover('bollard');think(pick(['An iron mooring post with a face. It is eyeing me like I owe it rope.','Rope marks a hundred years deep. He looks like he misses them.']));}});
  o.push({x:SIGN.x,y:SIGN.y-30,r:30,name:'Sign',key:'sign',act:'Read',onAct:()=>{discover('sign');say('Sign','DRIFTWOOD KEY. Population: one bucket. Two now, probably.');},onExamine:()=>think('A crooked sign. Someone wrote on it with a burnt stick.')});
  o.push({x:FIRE.x,y:FIRE.y-14,r:30,name:S.metWick?'Brimble':'Campfire',key:S.metWick?'wick':'fire',act:S.metWick?(hasSkill('hearth')&&rawCount()?'Cook':'Talk'):'Poke',onAct:()=>tapFire(MAINFIRE),more:S.metWick&&hasSkill('hearth')&&rawCount()?[{l:'Talk',f:()=>routeTo(FIRE.x-34,FIRE.y+26,talkWick)}]:null,onExamine:()=>{discover('fire');think(S.metWick?'Brimble, crackling to himself.':'A little campfire. Wait. Did it just snore?');}});
  (S.fires||[]).forEach(fr=>{if(!fireLit(fr))return;/* every fuel you carry */const more=[{l:'Add driftwood',f:()=>feedFire(fr,'wood')}];for(const k in FUELSEC)if(k!=='wood'&&k!=='kelp'&&cnt(k)>0)more.push({l:'Add '+fuelName(k),f:()=>feedFire(fr,k)});
@@ -82,7 +82,7 @@ function objects(){if(objT===now&&objC)return objC;const o=[];objT=now;objC=o;yo
  windfallObjects(o);
  for(const it of (S.shore||[]))if(!underFoam(it))o.push({x:it.x,y:it.y-6,r:20,name:itemName({id:it.id}),key:it.id==='wood'?'driftwood':it.id==='kelp'?'kelp':'wash',act:'Grab',onAct:()=>routeTo(it.x,it.y+4,()=>grabShore(it)),onExamine:()=>think(pick(['The sea dropped it. It wants it back.','Grab it before the next wave does.']))});
  for(const s of SURF)if(s.pile&&s.st==='sparkle')o.push({x:s.x,y:s.y-4,r:14,name:s.name,key:'piling',act:'Scrape salt',onAct:()=>scrapeSalt(s),onExamine:()=>think('Barnacled and briny. Between waves, it sparkles.')});
- rocks.forEach(k=>{const sf=SURF.find(s=>s.x===k.x&&s.y===k.y),sp=sf&&sf.st==='sparkle',ga=grindAct(k);o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',key:'rocks',act:sp?'Scrape salt':ga,onAct:sp?()=>scrapeSalt(sf):ga?()=>startGrind(k):null,more:sp&&ga?[{l:ga,f:()=>startGrind(k)}]:null,onExamine:()=>{discover('rocks');think(k.camp?'A shoulder of rock between the camp and the wind. Brimble picked his spot well.':'Barnacled rocks. The water past them churns like it’s hiding something big.');}})});
+ rocks.forEach(k=>{const sf=SURF.find(s=>s.x===k.x&&s.y===k.y),sp=sf&&sf.st==='sparkle',ga=grindAct(k),gx=axeGrindAct();const rm=[];if(sp&&ga)rm.push({l:ga,f:()=>startGrind(k)});if(gx&&(sp||ga))rm.push({l:gx,f:()=>startAxeGrind(k)});o.push({x:k.x,y:k.y,r:k.rx+4,name:'Rocks',key:'rocks',act:sp?'Scrape salt':ga||gx,onAct:sp?()=>scrapeSalt(sf):ga?()=>startGrind(k):gx?()=>startAxeGrind(k):null,more:rm.length?rm:null,onExamine:()=>{discover('rocks');think(k.camp?'A shoulder of rock between the camp and the wind. Brimble picked his spot well.':'Barnacled rocks. The water past them churns like it’s hiding something big.');}})});
  o.push({x:POOL.x,y:POOL.y,r:44,name:'Still pool',key:'pool',act:'Look in',onAct:()=>routeTo(POOL.x,POOL.y+32,()=>{discover('pool');openCreator('mirror');}),onExamine:()=>{discover('pool');think('A pond so still it looks like glass. My reflection keeps trying on new faces.');}});
  /* Brimble's teapot on its tripod: he cooks in it */
  o.push({x:FIRE.x+52,y:FIRE.y-14,r:16,name:'Teapot',key:'teapot',act:S.metWick&&hasSkill('hearth')&&rawCount()?'Cook':null,onAct:S.metWick&&hasSkill('hearth')&&rawCount()?()=>tapFire(MAINFIRE):null,onExamine:()=>{discover('teapot');think(pick(['Brimble’s teapot. He cooks everything in it. It has never once made tea.','A blue teapot on a driftwood tripod, dented in three places. Brimble calls it the kitchen.']));}});
@@ -100,6 +100,7 @@ function w2s(x,y){return[(x-cam.x)*Z+W/2,(y-liftAt(x,y)-cam.y)*Z+H/2];}
 function tap(sx,sy){
  if(ctxOpen){closeCtx();return;}
  if(dlgOn){closeDlg();return;}
+ if(mmHit(sx,sy)&&!SW.blk){mmTap(sx,sy);return;}
  if(intro!=null&&intro<2.2)intro=2.2;
  if(C){cookTap(sx,sy);return;}
  if(GRD){const [px,py]=w2s(P.x,P.y-20);if(Math.hypot(sx-px,sy-py)<160*Z){grindStroke();return;}GRD=null;}
@@ -113,14 +114,14 @@ function tap(sx,sy){
  if(o){if(o.onAct)quietly(o.onAct);else{const c=clampLand(o.x,o.y+20);routeTo(c[0],c[1]);quietly(o.onExamine);}return;}
  if(inSea(wx,wy)){P.swimTo=null;walkStraight(wx,wy);return;}
  const c=clampLand(wx,wy);routeTo(c[0],c[1]);}
-/* a slide: direction and speed. Swimming uses it now; the scarf and projectiles will. */
+/* a slide: direction and speed. Swimming and the longaxe use it; projectiles will. */
 function swipe(x0,y0,x1,y1,ms){if(C||ccOn||dlgOn)return;const dx=x1-x0,dy=y1-y0,d=Math.hypot(dx,dy);if(d<18)return;const sp=d/Math.max(60,ms);
  if(!SW.on&&!C&&inSea(P.x,P.y)&&seaDepth(P.x,P.y)>=SWIMD){swimStart(P.x,P.y);}
  if(SW.on){const pw=Math.max(.5,Math.min(2.4,(d/140)*(.5+Math.min(1.5,sp))));SW.tx=P.x+dx/d*(160+140*pw);SW.ty=P.y+dy/d*(160+140*pw);swimStroke(pw);return;}
  scarfSlide(s2w(x0,y0),s2w(x1,y1));}
-function longPress(sx,sy){if(C||SW.on)return;const [wx,wy]=s2w(sx,sy);const o=objAt(wx,wy);const items=[];let title;
+function longPress(sx,sy){if(mmHit(sx,sy)){openPanel('map');return;}if(C||SW.on)return;const [wx,wy]=s2w(sx,sy);const o=objAt(wx,wy);const items=[];let title;
  hap(12);sfx('open',.6);
- if(o){title=o.name;if(o.act)items.push({l:o.act,f:o.onAct});if(o.more)o.more.forEach(m=>items.push(m));const tg=scarfAt(wx,wy);if(tg&&tg.kind!=='dead')items.push({l:'Slap',f:()=>scarfMove('slap',tg)},{l:'Trip',f:()=>scarfMove('trip',tg)},{l:'Wrap',f:()=>scarfMove('wrap',tg)});items.push({l:'Walk here',f:()=>inSea(wx,wy)?walkStraight(wx,wy):routeTo(wx,wy)});items.push({l:'Examine',f:o.onExamine});}
+ if(o){title=o.name;if(o.act)items.push({l:o.act,f:o.onAct});if(o.more)o.more.forEach(m=>items.push(m));const tg=scarfAt(wx,wy);if(tg&&tg.kind!=='dead')items.push({l:'Slice',f:()=>scarfMove('slice',tg)},{l:'Knock',f:()=>scarfMove('blunt',tg)},{l:'Prod',f:()=>scarfMove('prod',tg)});items.push({l:'Walk here',f:()=>inSea(wx,wy)?walkStraight(wx,wy):routeTo(wx,wy)});items.push({l:'Examine',f:o.onExamine});}
  else if(walkable(wx,wy)){title=groundName(wx,wy);items.push({l:'Walk here',f:()=>routeTo(wx,wy)});if(lv('survival')>=3){items.push({l:'Build a campfire (3 driftwood)',f:()=>buildFire(wx,wy,false)});if((S.wobble||0)>=2)items.push({l:'Build a bonfire (2 wobblewood, 2 driftwood)',f:()=>buildFire(wx,wy,true)});}items.push({l:'Examine',f:()=>think(groundLine(wx,wy))});}
  else{title=seaName(wx,wy);if(S.eq.trinket==='spyglass')items.push({l:'Look through spyglass',f:spyglass});items.push({l:'Walk here',f:()=>walkStraight(wx,wy)});items.push({l:'Walk to shore',f:()=>{const c=clampLand(wx,wy);routeTo(c[0],c[1]);}});items.push({l:'Examine',f:()=>think(seaLine(wx,wy))});}
  showCtx(sx,sy,title,items);if(S.hint===3)advanceHint(4);}

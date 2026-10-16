@@ -20,9 +20,11 @@ function pryClam(c){if(!clamHere(c))return;if(Math.hypot(P.x-c.x,P.y-c.y)>60){th
  think(pick(['The stick bends, the reef gives, and it is mine. Heavy.','Out it comes. That hinge could take an edge.']));save();}
 /* grinding: walk up to a rock with a shell in the pack, then tap near yourself, steady strokes */
 function grindAct(k){return cnt('clamshell')>0?'Grind a shell':null;}
+/* regrinding the longaxe's edge: the same rock, a dozen strokes */
+function startAxeGrind(k){const c=clampLand(k.x+(SH.on?36:0)-(SH.on?0:Math.sign(k.x)*22),k.y+(SH.on?10:8));routeTo(c[0],c[1],()=>{if(!axeGrindAct())return;GRD={k,last:0,rock:0,mode:'axe',n:0};P.face=k.x>P.x?1:-1;think('Wet sand on the rock, the edge flat to it. Steady strokes.');});}
 function startGrind(k){const c=clampLand(k.x+(SH.on?36:0)-(SH.on?0:Math.sign(k.x)*22),k.y+(SH.on?10:8));routeTo(c[0],c[1],()=>{if(!(cnt('clamshell')>0))return;GRD={k,last:0,rock:0};P.face=k.x>P.x?1:-1;
  if(!S.st.grindHint){S.st.grindHint=1;hint('Tap near yourself to grind. Wet sand on the rock does the cutting. You can stop and come back.',7000);}think((S.grind||0)>0?'Back to it. The edge is where I left it.':'Wet sand, a flat rock, and patience.');});}
-function grindStroke(){if(!GRD)return;if(now-GRD.last<.2)return;GRD.last=now;GRD.rock=1;if(!(cnt('clamshell')>0)){GRD=null;return;}
+function grindStroke(){if(!GRD)return;if(now-GRD.last<.2)return;GRD.last=now;GRD.rock=1;if(GRD.mode==='axe'){GRD.n++;sfx('scrape',.7);hap(4);for(let i=0;i<3;i++)grindDust.push({x:GRD.k.x+(Math.random()-.5)*14,y:GRD.k.y-6,vx:(Math.random()-.5)*40,vy:-20-Math.random()*30,t:0});if(GRD.n>=12){GRD=null;axeGrindDone();}return;}if(!(cnt('clamshell')>0)){GRD=null;return;}
  S.grind=(S.grind||0)+1;sfx('scrape',.7);hap(4);for(let i=0;i<3;i++)grindDust.push({x:GRD.k.x+(Math.random()-.5)*14,y:GRD.k.y-6,vx:(Math.random()-.5)*40,vy:-20-Math.random()*30,t:0});
  const g=S.grind;if(g===12)think('A pale line where the hinge is wearing through.');else if(g===24)think('Halfway. My arms know it.');else if(g===36)think('It is starting to look like an edge.');
  if(g>=GRIND_N){S.grind=0;takeItem('clamshell');addItem('shellblade');flies.push({id:'misc',img:'shellblade',x0:GRD.k.x,y0:GRD.k.y,t:0});discover('shellblade');sfx('burst');GRD=null;think('A blade. Ground out of a shell, by hand. Now something to hold it.');}

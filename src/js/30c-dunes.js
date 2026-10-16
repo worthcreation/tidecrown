@@ -16,9 +16,10 @@ function duneBuild(ms){if(DUNE.done)return true;const n=DUNE.n||(DUNE.n=Math.cei
  DUNE.act=duneActive(v,n);DUNE.done=true;return true;}
 function duneLift(pts){return pts.map(([x,y])=>[x,y-liftAt(x,y)]);}
 /* marching squares, chained into polylines; saddles split by the centre value; two passes of corner cutting smooth them */
-function duneTrace(v,n,L){const P={},segs=[],pt=(id,x0,y0,x1,y1,a,b)=>{if(!P[id]){const t=(L-a)/(b-a);P[id]=[x0+(x1-x0)*t,y0+(y1-y0)*t];}return id;};
+function duneTrace(v,n,L){return contourTrace(v,n,L,DNG,-DNR,14);}
+function contourTrace(v,n,L,G,O,minSz){const P={},segs=[],pt=(id,x0,y0,x1,y1,a,b)=>{if(!P[id]){const t=(L-a)/(b-a);P[id]=[x0+(x1-x0)*t,y0+(y1-y0)*t];}return id;};
  for(let j=0;j<n-1;j++)for(let i=0;i<n-1;i++){const tl=v[j*n+i],tr=v[j*n+i+1],br=v[(j+1)*n+i+1],bl=v[(j+1)*n+i];const c=(tl>L?8:0)|(tr>L?4:0)|(br>L?2:0)|(bl>L?1:0);if(c===0||c===15)continue;
-  const X=-DNR+i*DNG,Y=-DNR+j*DNG,T=()=>pt('h'+(j*n+i),X,Y,X+DNG,Y,tl,tr),R=()=>pt('v'+(j*n+i+1),X+DNG,Y,X+DNG,Y+DNG,tr,br),B=()=>pt('h'+((j+1)*n+i),X,Y+DNG,X+DNG,Y+DNG,bl,br),Lf=()=>pt('v'+(j*n+i),X,Y,X,Y+DNG,tl,bl);
+  const X=O+i*G,Y=O+j*G,T=()=>pt('h'+(j*n+i),X,Y,X+G,Y,tl,tr),R=()=>pt('v'+(j*n+i+1),X+G,Y,X+G,Y+G,tr,br),B=()=>pt('h'+((j+1)*n+i),X,Y+G,X+G,Y+G,bl,br),Lf=()=>pt('v'+(j*n+i),X,Y,X,Y+G,tl,bl);
   const mid=(tl+tr+br+bl)/4>L,s=(a,b)=>segs.push([a(),b()]);
   switch(c){case 1:case 14:s(Lf,B);break;case 2:case 13:s(B,R);break;case 3:case 12:s(Lf,R);break;case 4:case 11:s(T,R);break;case 6:case 9:s(T,B);break;case 7:case 8:s(T,Lf);break;
    case 5:if(mid){s(T,Lf);s(B,R);}else{s(T,R);s(Lf,B);}break;case 10:if(mid){s(T,R);s(Lf,B);}else{s(T,Lf);s(B,R);}break;}}
@@ -27,7 +28,7 @@ function duneTrace(v,n,L){const P={},segs=[],pt=(id,x0,y0,x1,y1,a,b)=>{if(!P[id]
   for(let dir=0;dir<2;dir++){for(;;){const e=dir?ch[0]:ch[ch.length-1],nx=(at[e]||[]).find(q=>!used[q]);if(nx==null)break;used[nx]=1;const o=segs[nx][0]===e?segs[nx][1]:segs[nx][0];if(dir)ch.unshift(o);else ch.push(o);}}
   if(ch.length<5)continue;const closed=ch[0]===ch[ch.length-1];let p=ch.map(e=>P[e]);if(closed)p.pop();
   for(let it=0;it<2;it++){const q=[],m=p.length;for(let a=0;a<(closed?m:m-1);a++){const A=p[a],Bq=p[(a+1)%m];q.push([A[0]*.75+Bq[0]*.25,A[1]*.75+Bq[1]*.25],[A[0]*.25+Bq[0]*.75,A[1]*.25+Bq[1]*.75]);}p=q;}
-  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const lp=duneLift(p);for(const [x,y] of lp){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}/* too small to read as a dune: no outline or shade (a hummock keeps its tuft) */if(closed&&Math.max(x1-x0,y1-y0)<14)continue;out.push({p:lp,closed,b:[x0,y0,x1,y1]});}
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const lp=duneLift(p);for(const [x,y] of lp){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}/* too small to read as a dune: no outline or shade (a hummock keeps its tuft) */if(closed&&Math.max(x1-x0,y1-y0)<minSz)continue;out.push({p:lp,closed,b:[x0,y0,x1,y1]});}
  return out;}
 /* cells on or near a dune (within 80px), the only ones the light needs to look at */
 function duneActive(v,n){const R=10,out=[],mark=new Uint8Array(n*n);for(let j=0;j<n;j++)for(let i=0;i<n;i++){if(v[j*n+i]<.3)continue;for(let b=Math.max(0,j-R);b<=Math.min(n-1,j+R);b++)for(let a=Math.max(0,i-R);a<=Math.min(n-1,i+R);a++){const c=b*n+a;if(!mark[c]){mark[c]=1;out.push(c);}}}return out;}
@@ -37,11 +38,11 @@ function duneActive(v,n){const R=10,out=[],mark=new Uint8Array(n*n);for(let j=0;
    sun the test is capped so the steepest faces always keep a sliver: a dune reads at any hour. Re-traced when the
    sun has moved, a few ms a frame. */
 function duneShadeTick(){const sun=SKY.sun;if(!sun||SH.on){DUNE.sh=null;DUNE.shKey=null;DUNE.shJob=null;return;}
- const key=Math.round(Math.atan2(sun.dy,sun.dx)*30)+':'+Math.round(Math.min(5,sun.k)*12);
+ const key=Math.round(Math.atan2(sun.dy,sun.dx)*15)+':'+Math.round(Math.min(5,sun.k)*6);
  if(!DUNE.shJob&&key!==DUNE.shKey)DUNE.shJob={key,dx:sun.dx,dy:sun.dy,tn:Math.min(1.1,1/Math.max(.2,sun.k)),k:sun.k,g:new Float32Array(DUNE.n*DUNE.n).fill(-9),i:0};
  const J=DUNE.shJob;if(!J)return;const v=DUNE.v,n=DUNE.n,act=DUNE.act,t0=performance.now(),dS=DNG,H=(x,y)=>{const fx=x/DNG,fy=y/DNG,i=fx|0,j=fy|0;if(i<0||j<0||i>=n-1||j>=n-1)return 0;const u=fx-i,w=fy-j,k=j*n+i;return(v[k]*(1-u)+v[k+1]*u)*(1-w)+(v[k+n]*(1-u)+v[k+n+1]*u)*w;};
  const tnC=1/Math.max(.2,J.k);/* the true elevation for cast shadows */
- while(J.i<act.length&&performance.now()-t0<3){for(let e=0;e<400&&J.i<act.length;e++,J.i++){const c=act[J.i],i=c%n,j=(c-i)/n;if(i<1||j<1||i>=n-1||j>=n-1)continue;const h0=v[c];
+ while(J.i<act.length&&performance.now()-t0<2){for(let e=0;e<400&&J.i<act.length;e++,J.i++){const c=act[J.i],i=c%n,j=(c-i)/n;if(i<1||j<1||i>=n-1||j>=n-1)continue;const h0=v[c];
   let g=-9;if(h0>2.4){const gx=(v[c+1]-v[c-1])/(2*dS),gy=(v[c+n]-v[c-n])/(2*dS),down=-(gx*J.dx+gy*J.dy)*2.4;g=down-J.tn;}
   /* cast: march toward the sun */if(tnC<1.4){const x=i*DNG,y=j*DNG;for(let s=8;s<=72;s+=8){const o=H(x-J.dx*s,y-J.dy*s)-(h0+s*tnC/2.4);if(o>.6){g=Math.max(g,.2);break;}}}
   J.g[c]=g;}}
@@ -58,8 +59,7 @@ function drawDunes(vw,vh){if(SH.on||!DUNE.done)return;duneShadeTick();const inVi
  ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
  /* a whisper of warmer sand, so the form has a body even at noon */
  path(lo);ctx.fillStyle='rgba(214,170,82,.12)';ctx.fill('evenodd');
- /* the shade, one flat tone like every shadow */
- if(sh.length&&sa>0){path(sh);ctx.fillStyle=`rgba(42,33,64,${(.17*sa).toFixed(3)})`;ctx.fill('evenodd');}
+ /* the shade goes into the sun's shadow layer (sunPolys), so it unions with every other sun shadow and clouds cut it */
  /* the sunlit crest */
  if(sun&&sa>.2){const b=edgeBuckets(hi);ctx.strokeStyle=`rgba(255,248,225,${(.75*sa).toFixed(3)})`;ctx.lineWidth=1.6;ctx.beginPath();for(let k=0;k<b[2].length;k+=2){ctx.moveTo(b[2][k][0],b[2][k][1]);ctx.lineTo(b[2][k+1][0],b[2][k+1][1]);}ctx.stroke();}
  /* the outline, found on the shade side and the base, lost toward the sun */
@@ -68,3 +68,51 @@ function drawDunes(vw,vh){if(SH.on||!DUNE.done)return;duneShadeTick();const inVi
  ctx.strokeStyle='rgba(150,112,50,.45)';ctx.lineWidth=1.2;ctx.beginPath();for(const r of DUNE.rip){if(Math.abs(r[1][0]-cam.x)>vw||Math.abs(r[1][1]-cam.y)>vh)continue;ctx.moveTo(r[0][0],r[0][1]);ctx.quadraticCurveTo(r[1][0],r[1][1],r[2][0],r[2][1]);}ctx.stroke();
  ctx.restore();
  for(const [x,y] of DUNE.tuft){if(Math.abs(x-cam.x)>vw||Math.abs(y-cam.y)>vh)continue;ln([[x-6,y-7],[x-1,y],[x+1,y-9],[x+2,y],[x+7,y-6]],(x*7|0)&1023,2,'#5a9a3f',.6);}}
+
+/* ---------- the land's own shade (build 41) ----------
+   The same method as the dunes, for the hill: the land without its dunes is sampled on a 12px grid once (after the
+   height cache), and as the sun moves the side turned from it and the shadow it throws are traced as smooth shapes.
+   Both the land's and the dunes' shade are handed to the sun's shadow layer, so all sun shadow is one flat tone with
+   no stacking, and a cloud over the sun takes the hill's shadow away too. The ground itself is flat colour. */
+const LSG=12,LSR=1160,LS={n:0,v:null,row:0,done:false,act:null,sh:null,key:null,job:null,max:0};
+function lsBuild(ms){if(LS.done)return true;const n=LS.n||(LS.n=Math.ceil(2*LSR/LSG)+1);if(!LS.v)LS.v=new Float32Array(n*n);const t0=performance.now(),v=LS.v;
+ while(LS.row<n&&performance.now()-t0<ms){const j=LS.row,y=-LSR+j*LSG;for(let i=0;i<n;i++){const x=-LSR+i*LSG,h=hKey(x,y);v[j*n+i]=h>0?Math.max(0,h-duneAt(x,y)):-1;}LS.row++;}
+ if(LS.row<n)return false;const act=[];let mx=0;for(let c=0;c<n*n;c++)if(v[c]>=0){act.push(c);mx=Math.max(mx,v[c]);}LS.act=act;LS.max=mx;LS.done=true;return true;}
+function lsShadeTick(){const sun=SKY.sun;if(!sun||SH.on||!LS.done){if(!sun){LS.sh=null;LS.key=null;LS.job=null;}return;}
+ const key=Math.round(Math.atan2(sun.dy,sun.dx)*15)+':'+Math.round(Math.min(5,sun.k)*6);
+ if(!LS.job&&key!==LS.key)LS.job={key,dx:sun.dx,dy:sun.dy,tn:1/Math.max(.2,sun.k),g:new Float32Array(LS.n*LS.n).fill(-9),i:0};
+ const J=LS.job;if(!J)return;const v=LS.v,n=LS.n,act=LS.act,t0=performance.now(),G=LSG,H=(x,y)=>{const fx=x/G,fy=y/G,i=fx|0,j=fy|0;if(i<0||j<0||i>=n-1||j>=n-1)return 0;const u=fx-i,w=fy-j,k=j*n+i;return Math.max(0,(v[k]*(1-u)+v[k+1]*u)*(1-w)+(v[k+n]*(1-u)+v[k+n+1]*u)*w);};
+ while(J.i<act.length&&performance.now()-t0<2){for(let e=0;e<300&&J.i<act.length;e++,J.i++){const c=act[J.i],i=c%n,j=(c-i)/n;if(i<1||j<1||i>=n-1||j>=n-1)continue;const h0=Math.max(0,v[c]);
+  const gx=(Math.max(0,v[c+1])-Math.max(0,v[c-1]))/(2*G),gy=(Math.max(0,v[c+n])-Math.max(0,v[c-n]))/(2*G);let g=-(gx*J.dx+gy*J.dy)*2.4-J.tn;
+  /* cast: march toward the sun until the ray clears the highest land */
+  if(g<0){const x=i*G,y=j*G;for(let s=G;;s+=G){const ray=h0+s*J.tn/2.4;if(ray>LS.max+1)break;if(H(x-J.dx*s,y-J.dy*s)-ray>1.5){g=.3;break;}}}
+  J.g[c]=g;}}
+ if(J.i<act.length)return;LS.sh=contourTrace(J.g,n,0,G,-LSR,24);LS.key=J.key;LS.job=null;}
+/* the sun's shadow layer asks for these: land and dune shade in view, as closed lifted shapes */
+function sunPolys(){if(SH.on)return [];lsShadeTick();const vw=W/(2*Z)+60,vh=H/(2*Z)+160,inView=b=>b[2]>cam.x-vw&&b[0]<cam.x+vw&&b[3]>cam.y-vh&&b[1]<cam.y+vh;
+ return [...(LS.sh||[]),...(DUNE.sh||[])].filter(D=>D.closed&&inView(D.b));}
+
+/* ---------- the hill, readable at any hour (build 42) ----------
+   Traced once from the land grid (LS): the land in steps at six heights, each step a flat touch lighter going up, so
+   the hill reads like an illustrated map even at noon with no shade; each step's edge is found where it faces you
+   (a faint darker green) and lost round the back. Short form strokes follow the curve of the ground where it is steep,
+   closer together where steeper, none on gentle ground. Drawn under the dunes and every shadow. */
+const HL={done:false,bands:null,strokes:null};
+function hillBuild(){if(HL.done||!LS.done)return;const v=LS.v,n=LS.n,G=LSG,mx=LS.max;
+ HL.bands=[.15,.3,.45,.6,.75,.9].map(f=>contourTrace(v,n,mx*f,G,-LSR,30));
+ const st=[];for(let j=2;j<n-2;j++)for(let i=2;i<n-2;i++){const c=j*n+i;if(v[c]<4)continue;const gx=(v[c+1]-v[c-1])/(2*G),gy=(v[c+n]-v[c-n])/(2*G),sl=Math.hypot(gx,gy)*2.4;
+  if(sl<.35||hash1(c*1.7+3)>Math.min(.6,(sl-.35)*.9))continue;const x=-LSR+i*G+(hash1(c)-.5)*8,y=-LSR+j*G+(hash1(c*3)-.5)*8;if(keyMat(x,y,hKey(x,y))===1)continue;
+  const tx=-gy/Math.hypot(gx,gy),ty=gx/Math.hypot(gx,gy),k=6+Math.min(5,sl*2),bx=-gx/Math.hypot(gx,gy)*2.5,by=-gy/Math.hypot(gx,gy)*2.5;
+  st.push(duneLift([[x-tx*k,y-ty*k],[x+bx,y+by],[x+tx*k,y+ty*k]]));}
+ HL.strokes=st;HL.done=true;}
+function drawHills(vw,vh){if(SH.on)return;if(!HL.done){hillBuild();if(!HL.done)return;}const inV=D=>D.b[2]>cam.x-vw&&D.b[0]<cam.x+vw&&D.b[3]>cam.y-vh&&D.b[1]<cam.y+vh;
+ ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+ for(const band of HL.bands){const l=band.filter(D=>D.closed&&inV(D));if(!l.length)continue;ctx.beginPath();for(const D of l){const p=D.p;ctx.moveTo(p[0][0],p[0][1]);for(let k=1;k<p.length;k++)ctx.lineTo(p[k][0],p[k][1]);ctx.closePath();}
+  ctx.fillStyle='rgba(255,252,220,.1)';ctx.fill('evenodd');
+  /* the step's edge, found where it faces the viewer */
+  ctx.strokeStyle='rgba(52,92,40,.4)';ctx.lineWidth=1.6;ctx.beginPath();
+  for(const D of l){const p=D.p,m=p.length;let A=0;for(let k=0;k<m;k++){const a=p[k],b=p[(k+1)%m];A+=a[0]*b[1]-b[0]*a[1];}const sg=A>0?1:-1;
+   for(let k=0;k<m;k++){const a=p[k],b=p[(k+1)%m],el=Math.hypot(b[0]-a[0],b[1]-a[1])||1,ny=-(b[0]-a[0])/el*sg;if(ny>.25){ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}}}
+  ctx.stroke();}
+ ctx.strokeStyle='rgba(52,92,40,.32)';ctx.lineWidth=1.3;ctx.beginPath();for(const r of HL.strokes){if(Math.abs(r[1][0]-cam.x)>vw||Math.abs(r[1][1]-cam.y)>vh)continue;ctx.moveTo(r[0][0],r[0][1]);ctx.quadraticCurveTo(r[1][0],r[1][1],r[2][0],r[2][1]);}ctx.stroke();
+ ctx.restore();}

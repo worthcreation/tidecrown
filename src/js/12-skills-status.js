@@ -14,8 +14,8 @@ const SKILLS={
  invention:{name:'Invention',icon:'hatchet',col:'#a8d07e',clue:'Something sharp, something to hold, something to tie them.',desc:'Fit what you gathered into tools, then fit tools into grander things. No clock, just the right parts in the right order.',subs:['tinkering','shipwright'],
   unl:{8:'Brimble has a project in mind for your wood'}},
  exploration:{name:'Exploration',icon:'spyglass',col:'#c9a7ff',clue:'Past the last lighthouse, and under your feet.',desc:'The known edge, and what lies past it. Across the water, down into the ground, out over the sea.',subs:['swimming','delving','sailing']},
- dominion:{name:'Dominion',icon:'crown',col:'#ff8aa8',clue:'Not everything out there is friendly. Yet.',desc:'When something faces you, read its tell and commit. Break it, or win it over. The scarf is the first way; there are others.',subs:['strife','accord'],
-  unl:{3:'Your scarf reaches a little farther',6:'Your scarf reaches farther still',10:'Beasts show their tells sooner'}}};
+ dominion:{name:'Dominion',icon:'crown',col:'#ff8aa8',clue:'Not everything out there is friendly. Yet.',desc:'When something faces you, read its tell and commit. Break it, or win it over. The longaxe is the first way; there are others.',subs:['strife','accord'],
+  unl:{3:'You reach a little farther',6:'You reach farther still',10:'Beasts show their tells sooner'}}};
 const SUBS={
  fishing:{p:'gathering',name:'Fishing',icon:'rod',col:'#6fd6ff',desc:'Patience and a quick hand. The Lantern Sea feeds those who wait, and every catch pulls you a little further out.',
   unl:{5:'Pebble Perch are biting now',10:'The wild water by the north rocks is yours',15:'Something sweet wriggles in the deep',20:'The moon is tugging at your line'}},
@@ -39,14 +39,13 @@ const SUBS={
  accord:{p:'dominion',name:'Accord',icon:'wrap',col:'#ffb3c6',clue:'Mirror the tell.',desc:'Mirror the tell, and keep what you win. The won come willingly, mostly.',
   unl:{5:'Warmth lingers longer in the wrap',10:'A wrap holds long enough to bind at leisure'}}};
 function skd(k){return SKILLS[k]||SUBS[k];}
-/* ways: a third level under a subskill. Strife and Accord are not just the scarf; each way has its own moves, counts and bursts, and hidden ways show a clue. */
+/* ways: a third level under a subskill. Strife and Accord are not just the axe; each way has its own moves, counts and bursts, and hidden ways show a clue. */
 const METHODS={
- strife:{scarf:{name:'Scarf',icon:'slap',desc:'The one everybody wears. Short reach that grows with Dominion level.',found:()=>true,moves:[['Slap','Tap a thing in reach. Wakes a still beast; on the tell, it counters.','slaps'],['Trip','Slide at it. On the tell, it goes down and drops what it carries.','trips'],['Flurry','Three slaps in rhythm.']],bursts:['Flurry','Countered','Driven off','Rung']},
-  hatchet:{name:'Hatchet',icon:'hatchet',desc:'Taken in hand from the pack. Wide and heavy. No gentle side.',found:()=>!!S.owned.hatchet,clue:'Something sharp, taken in hand.',moves:[['Hew','Tap a thing in reach. Hits everything on that side.','hews'],['Sweep','Slide at it. Low, wide, trips on the tell.','sweeps'],['Swirl','Three sweeps in rhythm. Everything round you.','swirls']],bursts:['Cleave','Swirl','Countered','Driven off','Rung']},
+ strife:{axe:{name:'Longaxe',icon:'hatchet',desc:'Made, not given. The blade slices; the haft knocks things down. It wears as it works.',found:()=>!!S.owned.hatchet,clue:'Something sharp, on something long.',moves:[['Slice','Tap a thing in reach. Hits everything on that side.','hews'],['Knock','Slide across it with the haft. On the tell, it goes down.','sweeps'],['Swirl','Three knocks in rhythm. Everything round you.','swirls']],bursts:['Cleave','Swirl','Countered','Driven off','Rung']},
   thrown:{name:'Thrown things',clue:'Something to pick up and let fly.',found:()=>false}},
- accord:{scarf:{name:'Scarf',icon:'wrap',desc:'The one everybody wears, the other way round.',found:()=>true,moves:[['Wrap','Slide from a thing to you. On the tell, it mirrors.','wraps'],['Bind','Slide back again while it is wrapped. Keeps what you won.','binds']],bursts:['Mirrored','Kept','Planted']},
-  food:{name:'Feeding',icon:'pan',desc:'A cooked fish offered to something starving. The first crew that is not a person came this way.',found:()=>!!S.journal.mossback,clue:'Something out there is hungrier than you.',moves:[['Feed','Hold on a hungry thing and offer a cooked fish.']],bursts:[]},
-  ember:{name:'Ember pearl',icon:'pearl',desc:'A warm thing for a cold hollow to hold. Bind a calm Hollowmaw with one in your pack and it plants.',found:()=>!!S.journal.planted,clue:'Something warm, for a hollow to hold.',moves:[['Plant','Wrap a Hollowmaw on the creak, then bind it with an ember pearl in your pack.']],bursts:['Planted']},
+ accord:{haft:{name:'The haft, gently',icon:'hatchet',desc:'The long end of the axe, used softly. The gentle way, for now.',found:()=>!!S.owned.hatchet,clue:'Something long, used softly.',moves:[['Prod','Slide straight at a thing. On the tell, it calms. Prod a calm thing again to keep what you won.','prods']],bursts:['Mirrored','Kept','Planted']},
+ food:{name:'Feeding',icon:'pan',desc:'A cooked fish offered to something starving. The first crew that is not a person came this way.',found:()=>!!S.journal.mossback,clue:'Something out there is hungrier than you.',moves:[['Feed','Hold on a hungry thing and offer a cooked fish.']],bursts:[]},
+  ember:{name:'Ember pearl',icon:'pearl',desc:'A warm thing for a cold hollow to hold. Prod a calm Hollowmaw with one in your pack and it plants.',found:()=>!!S.journal.planted,clue:'Something warm, for a hollow to hold.',moves:[['Plant','Prod a Hollowmaw on the creak to calm it, then prod it again with an ember pearl in your pack.']],bursts:['Planted']},
   light:{name:'Firelight',clue:'The Moonlappers drink light because the forest has none.',found:()=>false}}};
 const ACH={
  fishing:[['First bite','Catch your first fish',()=>S.catches>=1],['Steady hand','Land 10 perfect catches',()=>(S.st.perf||0)>=10],['Wild water','Catch a Grumpfish',()=>!!S.journal.fish_grump],['Letters from C.','Find a message in a bottle',()=>S.bottles>=1],['Moonlit','Catch a Moonkoi',()=>!!S.journal.fish_koi]],
@@ -57,8 +56,8 @@ const ACH={
  foraging:[['Beachcomber','Grab your first wash-up',()=>(S.st.washes||0)>=1],['Salt of the sea','Scrape salt off wet rock',()=>(S.st.pinches||0)>=1],['Quick hands','Grab 25 wash-ups before the backwash',()=>(S.st.washes||0)>=25],['Springy','Catch a wobblewood log on the tide',()=>!!(S.st.found&&S.st.found.wobble)]],
  swimming:[['First dip','Wade in and swim',()=>hasSkill('swimming')],['Beachcomber at sea','Swim through 10 floating things',()=>(S.st.swum||0)>=10],['Stung','Meet a lantern jelly',()=>!!S.journal.jelly],['Far shore','Swim all the way to the dark islands',()=>!!S.journal.swamfar]],
  tinkering:[['Sharp idea','Lash together a hatchet',()=>hasSkill('tinkering')]],
- strife:[['First slap','Slap something',()=>(S.st.slaps||0)>=1],['Countered','Break a tell with a slap or a trip',()=>!!S.st.countered],['Rung','Ring Old Bollard on the lean',()=>(S.st.rings||0)>=1],['Driven off','Put a Hollowmaw down',()=>!!S.journal.deadwood]],
- accord:[['First wrap','Wrap something',()=>(S.st.wraps||0)>=1],['Mirrored','Mirror a tell with a wrap',()=>!!S.st.mirrored],['Warm welcome','Warm a shivering Mossback',()=>!!S.st.mosswarm],['Planted','Plant a Hollowmaw',()=>!!S.journal.planted]]};
+ strife:[['First cut','Slice something with the longaxe',()=>(S.st.slaps||0)>=1],['Countered','Break a tell with a slice or a knock',()=>!!S.st.countered],['Rung','Ring Old Bollard on the lean',()=>(S.st.rings||0)>=1],['Driven off','Put a Hollowmaw down',()=>!!S.journal.deadwood]],
+ accord:[['First prod','Prod something gently with the haft',()=>(S.st.wraps||0)>=1||(S.st.prods||0)>=1],['Mirrored','Mirror a tell with a prod',()=>!!S.st.mirrored],['Warm welcome','Warm a shivering Mossback',()=>!!S.st.mosswarm],['Planted','Plant a Hollowmaw',()=>!!S.journal.planted]]};
 function rawCount(){return S.inv.filter(i=>FISH[i.id]).length;}
 function buffOn(){return S.buff&&S.buff.until>Date.now()?S.buff:null;}
 

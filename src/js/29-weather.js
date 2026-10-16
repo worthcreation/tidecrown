@@ -17,7 +17,8 @@ function wxUpdate(){const t=Date.now()/1000,sm=x=>Math.max(0,Math.min(1,x));
  let seaFog=sm(.35+.3*Math.sin(t/1500+2)+.5*fog);
  let wa=Math.PI+.55*Math.sin(t/1900+1)*(1-m)+.25*Math.sin(t/640)+(stA?stormVeer(stA,gt)*m:0),ws=sm(.32+.22*Math.sin(t/1300)+.12*Math.sin(t/410+2)+rain*.3+pre*.15+m*.5+m*.12*Math.sin(t*1.7));
  const F=WXT.force;if(F==='clear'){cover=.05;rain=0;fog=0;seaFog=0;}else if(F==='cloudy'){cover=.85;rain=0;}else if(F==='fog'){fog=1;seaFog=1;}else if(F==='shower'){rain=.45;cover=.8;}else if(F==='monsoon'){rain=1;cover=1;ws=.98;}
- wa+=WXT.turn;WX={wa,ws,cover,rain,fog,seaFog,mon:F==='monsoon'?1:m,pre};}
+ /* test dial: one slider from clear (0) through cloud and a shower (.5) to a monsoon's peak (1) */else if(F==='dial'){const v=WXT.dv||0;rain=v<.3?0:v<.6?.45*(v-.3)/.3:.45+.55*(v-.6)/.4;cover=Math.min(1,.05+v*1.3);ws=.3+.68*v;fog=0;seaFog=0;}
+ wa+=WXT.turn;WX={wa,ws,cover,rain,fog,seaFog,mon:F==='monsoon'?1:F==='dial'?monNow():m,pre};}
 /* how much fog sits at a place, 0 to 1 */
 /* valleys hold fog, high ground sheds it */
 function fogAt(x,y){const cap=capAt(x,y)*.85,th=terrH(x,y),tk=(1+Math.min(1,Math.max(0,-th/30))*.6)*(1-Math.min(1,Math.max(0,th/80))*.5);return Math.min(1,Math.max(cap,fogAt0(x,y)*tk));}

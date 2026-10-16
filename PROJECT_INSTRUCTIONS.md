@@ -4,7 +4,7 @@
 Tidecrown: Isles Unclaimed is a mobile-first skilling RPG set in the Lantern Sea. The player washes up on Driftwood Key and grows outward island by island.
 Pillars: explore, discover, take dominion. Dominion means the open hand or the closed fist (Accord, the keeping hand; Strife, the taking hand), and neither sits on top; what the player builds, lights, tends or takes leaves a mark that fades without upkeep.
 Influences, always checked against all three: Runescape (skills, gathering and processing loops, banking), One Piece (sea adventure, crew, dreams, lost ships and lore), Adventure Time (sentient objects, gentle weirdness, humor with melancholy underneath). All characters, names, and art are original. Everything has its place; every feature connects to existing systems, lore, or characters.
-Core rules, in short: nothing that acts on the world is ever given, it comes from a skill chain (the one exception is the bootstrap first scarf and tool); material things follow real-world processes, with fantasy limited to a named list; every problem has two or more solutions; some tasks are long and dreaded with a big payoff; everything reverts without upkeep.
+Core rules, in short: nothing that acts on the world is ever given, it comes from a skill chain (no exceptions: the player washes up bare-handed and makes the first tool); material things follow real-world processes, with fantasy limited to a named list; every problem has two or more solutions; some tasks are long and dreaded with a big payoff; everything reverts without upkeep.
 Full design rules and the story so far: docs/design-rules.md. Read it before any change the player will see or read.
 
 ## Repo and workflow (same as Quest)

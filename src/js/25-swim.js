@@ -89,12 +89,16 @@ function drawSwimWorld(){const vw=W/Z/2+80,vh=H/Z/2+80;drawCurrent();
  for(const b of bubbles){const k=b.t/1.6,x=b.x+b.vx*b.t+Math.sin(b.t*9+b.r)*2,y=b.y-k*34;ctx.globalAlpha=.85*(1-k*k);sketch(ell(x,y,b.r,b.r*.9,8),true,960+(b.r*10|0),.3,'rgba(255,255,255,.35)','#fffaf0',1.2);}ctx.globalAlpha=1;}
 /* the player in water: only the submerged part of the body changes colour (drawn through an offscreen canvas so the tint lands on the player alone), a transparent layer flows over it, and the waves move you. */
 const pcv=document.createElement('canvas'),pctx=pcv.getContext('2d');
-function drawTinted(x,y,dy,rot,wl){const sc=Math.round(Z*DPR*12)/10,w=200,h=240;/* resizing a canvas reallocates it, so only when the scale changed */if(pcv.width!==Math.round(w*sc)||pcv.height!==Math.round(h*sc)){pcv.width=Math.round(w*sc);pcv.height=Math.round(h*sc);}const k=ctx;ctx=pctx;ctx.setTransform(sc,0,0,sc,w/2*sc,(h-40)*sc);ctx.clearRect(-w/2,-(h-40),w,h);
+function drawTinted(x,y,dy,rot,wl,col){const sc=Math.round(Z*DPR*12)/10,w=200,h=240;/* resizing a canvas reallocates it, so only when the scale changed */if(pcv.width!==Math.round(w*sc)||pcv.height!==Math.round(h*sc)){pcv.width=Math.round(w*sc);pcv.height=Math.round(h*sc);}const k=ctx;ctx=pctx;ctx.setTransform(sc,0,0,sc,w/2*sc,(h-40)*sc);ctx.clearRect(-w/2,-(h-40),w,h);
  if(rot){ctx.translate(0,-4);ctx.rotate(rot);ctx.translate(0,4);}drawChar(S.char||DEFAULT_LOOK,S.eq,0,dy,P.face,true,false);
  if(rot){ctx.setTransform(sc,0,0,sc,w/2*sc,(h-40)*sc);}
- ctx.globalCompositeOperation='source-atop';ctx.beginPath();const rel=wl-y;ctx.moveTo(-w/2,rel+Math.sin(now*5)*1.6);for(let i=1;i<=20;i++)ctx.lineTo(-w/2+i*(w/20),rel+Math.sin(now*5+i*.9)*1.6);ctx.lineTo(w/2,h);ctx.lineTo(-w/2,h);ctx.closePath();ctx.fillStyle='rgba(20,60,110,.62)';ctx.fill();ctx.globalCompositeOperation='source-over';
+ ctx.globalCompositeOperation='source-atop';ctx.beginPath();const rel=wl-y;ctx.moveTo(-w/2,rel+Math.sin(now*5)*1.6);for(let i=1;i<=20;i++)ctx.lineTo(-w/2+i*(w/20),rel+Math.sin(now*5+i*.9)*1.6);ctx.lineTo(w/2,h);ctx.lineTo(-w/2,h);ctx.closePath();ctx.fillStyle=col||'rgba(20,60,110,.62)';ctx.fill();ctx.globalCompositeOperation='source-over';
  ctx=k;ctx.drawImage(pcv,x-w/2,y-(h-40),w,h);}
-function drawSwimmer(){const depth=SW.on?0:seaDepth(P.x,P.y);if(!SW.on&&depth<=0){drawPlayer();return;}
+function drawSwimmer(){const depth=SW.on?0:seaDepth(P.x,P.y);
+ /* standing water on land (a flooded slack): the body sinks below a waterline by depth, ankle at the edge to mid-shin
+    at the deepest (flood depth is in height units; a body is about 17), with a ring that ripples as you walk */
+ if(!SW.on&&depth<=0){const fd=SH.on?0:floodAt(P.x,P.y);if(fd<.2){drawPlayer();return;}const k=Math.min(.32,.06+fd*.14),wl=P.y+2;drawTinted(P.x,P.y,k*30,0,wl,'rgba(70,120,140,.55)');waterFlow(P.x,wl,12+k*14);
+  const ph=(now*(P.moving?1.6:.6))%1;ctx.globalAlpha=(1-ph)*(P.moving?.6:.3);sketch(ell(P.x,wl+2,12+ph*16,(12+ph*16)*.42,14),true,943,1,null,'#eef8fb',1.6);ctx.globalAlpha=1;return;}
  const x=P.x,y=P.y,bob=Math.sin(now*1.7)*2,wl=y+2+bob*.5;
  if(!SW.on){const k=Math.min(1,depth);drawTinted(x,y,k*30+bob*.4*k,0,wl);waterFlow(x,wl,14+k*12);return;}
  ctx.globalAlpha=.4;sketch(ell(x,y+4,26+Math.hypot(SW.vx,SW.vy)*.05,8,12),true,940,1,null,'#fff',2);ctx.globalAlpha=1;

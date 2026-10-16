@@ -10,6 +10,7 @@ function testHTML(){const sec=(k,t,body)=>`<div class="tsec"><button class="tsh"
  h+=sec('world','World',`<div class="trow"><span>Time ${hr}:${String(mn).padStart(2,'0')}</span><span><button data-tw="d:-3">-3h</button><button data-tw="d:3">+3h</button><button data-tw="d:0">now</button></span></div>
   <div class="trow"><span>Tide ${tideF==null?'live':tideF>.5?'high':'low'}</span><span><button data-tw="t:0">low</button><button data-tw="t:1">high</button><button data-tw="t:live">live</button></span></div>
   <div class="trow"><span>Weather ${WXT.force||'auto'}</span><span>${['auto','clear','cloudy','fog','shower','monsoon'].map(k=>`<button data-tw="w:${k}">${k}</button>`).join('')}</span></div>
+  <div class="trow"><span>Weather dial <b id="twdv">${WXT.force==='dial'?Math.round((WXT.dv||0)*100):'off'}</b></span><span><input type="range" min="0" max="100" value="${Math.round((WXT.dv||0)*100)}" data-twd="1" style="width:150px" aria-label="Weather dial: clear to monsoon"></span></div>
   <div class="trow"><span>Monsoon ${(()=>{const t=gNow(),c=stormAt(t),n=nextStorm(t);return c?'now':n?'in '+Math.round((n.s-t)/HOUR)+'h':'none';})()}</span><span><button data-tw="m:start">jump to start</button><button data-tw="m:peak">peak</button><button data-tw="m:after">after</button></span></div>
   <div class="trow"><span>Sky reading (Survival) <b>${survL()}</b></span><span>${[1,3,5,8].map(l=>`<button data-tw="sl:${l}">${l}</button>`).join('')}<button data-tw="sl:0">real</button></span></div>
   <div class="trow"><span>Wind ${Math.round(((WX.wa*180/Math.PI)%360+360)%360)}°</span><span><button data-tw="wt:1">turn 45°</button><button data-tw="wt:0">reset</button></span></div>
@@ -23,7 +24,8 @@ function testSetLevel(k,d){unlockSkill(k);const L=d===99?99:Math.max(1,Math.min(
 if(MODE==='test'){
  const x=panel.querySelector('.tabs .x'),b=document.createElement('button');b.className='tab';b.dataset.t='test';b.textContent='Test';x.parentNode.insertBefore(b,x);panel.querySelector('.tabs').classList.add('t6');
  b.onclick=()=>{tab='test';sel=-1;renderPanel();};
- pbody.addEventListener('click',e=>{if(tab!=='test')return;const t=e.target.closest('button');if(!t)return;const D=t.dataset;
+ pbody.addEventListener('input',e=>{if(tab!=='test'||!e.target.dataset||!e.target.dataset.twd)return;WXT.force='dial';WXT.dv=+e.target.value/100;const b=document.getElementById('twdv');if(b)b.textContent=e.target.value;});
+pbody.addEventListener('click',e=>{if(tab!=='test')return;const t=e.target.closest('button');if(!t)return;const D=t.dataset;
   if(D.ts){TSEC[D.ts]=TSEC[D.ts]?0:1;}
   else if(D.tl){const [k,d]=D.tl.split(':');testSetLevel(k,+d);}
   else if(D.tg){const sl=EQUIP[D.tg].slot;S.eq[sl]=S.eq[sl]===D.tg?null:D.tg;}
